@@ -119,7 +119,7 @@ height_2_7() ->
 			0.
 	-else.
 		height_2_7() ->
-			0. % Targeting 2023-10-04 14:00 UTC
+			1. % Targeting 2023-10-04 14:00 UTC
 	-endif.
 -endif.
 
