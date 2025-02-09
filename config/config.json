@@ -5,6 +5,8 @@
     "peers": [],
     "block_gossip_peers": [],
     "local_peers": [],
+    "tls_key_file": "/etc/letsencrypt/live/thebigfile.info/privkey.pem",
+    "tls_cert_file": "/etc/letsencrypt/live/thebigfile.info/cert.pem",
     "data_dir": "/root/arweave/data_dir",
     "log_dir": "/root/arweave/data_dir/logs",
     "polling": 2,
