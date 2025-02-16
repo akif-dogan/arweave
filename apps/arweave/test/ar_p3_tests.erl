@@ -50,7 +50,7 @@ test_valid_request() ->
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
 		PubKey,
-		?ARWEAVE_AR
+		?BIGFILE_BIG
 	),
 	{ok, _} = ar_p3_db:post_deposit(
 		Address,
@@ -90,7 +90,7 @@ test_zero_rate() ->
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
 		PubKey,
-		?ARWEAVE_AR
+		?BIGFILE_BIG
 	),
 	ZeroRateConfig = sample_p3_config(crypto:strong_rand_bytes(32), 0, 2, 0),
 	{_, {_, Transaction1}, _} = Result1 = ar_p3:handle_call({allow_request, 
@@ -123,7 +123,7 @@ test_checksum_request() ->
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
 		PubKey,
-		?ARWEAVE_AR
+		?BIGFILE_BIG
 	),
 	Config = sample_p3_config(),
 	?assertEqual(
@@ -152,7 +152,7 @@ test_bad_headers() ->
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
 		PubKey,
-		?ARWEAVE_AR
+		?BIGFILE_BIG
 	),
 	Wallet2 = {PrivKey2, PubKey2} = ar_wallet:new(),
 	Address2 = ar_wallet:to_address(Wallet2),
@@ -160,7 +160,7 @@ test_bad_headers() ->
 	{ok, _Account2} = ar_p3_db:get_or_create_account(
 		Address2,
 		PubKey2,
-		?ARWEAVE_AR
+		?BIGFILE_BIG
 	),
 	Config = sample_p3_config(),
 	?assertEqual(
@@ -317,7 +317,7 @@ test_bad_config() ->
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
 		PubKey,
-		?ARWEAVE_AR
+		?BIGFILE_BIG
 	),
 	Config = sample_p3_config(),
 
@@ -391,7 +391,7 @@ test_balance_endpoint() ->
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
 		PubKey,
-		?ARWEAVE_AR
+		?BIGFILE_BIG
 	),
 
 	BadAddress = crypto:strong_rand_bytes(8),
@@ -426,11 +426,11 @@ test_reverse_charge() ->
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
-			?ARWEAVE_AR),
+			?BIGFILE_BIG),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address2,
 			PubKey2,
-			?ARWEAVE_AR),
+			?BIGFILE_BIG),
 
 	Request = raw_request(<<"GET">>, <<"/price/1000">>),
 	{ok, Charge1} = ar_p3_db:post_charge(

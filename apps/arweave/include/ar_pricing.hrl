@@ -168,13 +168,13 @@ end).
 	end
 end).
 
-%% The original USD to AR conversion rate, defined as a fraction. Set up at fork 2.4.
+%% The original USD to BIG conversion rate, defined as a fraction. Set up at fork 2.4.
 %% Used until the fork 2.5.
 -define(INITIAL_USD_TO_BIG_PRE_FORK_2_5, {1, 5}).
 
-%% The network difficulty at the time when the USD to AR exchange rate was
-%% ?INITIAL_USD_TO_AR(Height). Used to account for the change in the network
-%% difficulty when estimating the new USD to AR rate.
+%% The network difficulty at the time when the USD to BIG exchange rate was
+%% ?INITIAL_USD_TO_BIG(Height). Used to account for the change in the network
+%% difficulty when estimating the new USD to BIG rate.
 -define(INITIAL_USD_TO_BIG_DIFF(Height), fun() ->
 	Forks = {
 		ar_fork:height_1_9(),
@@ -193,9 +193,9 @@ end).
 	end
 end).
 
-%% The network height at the time when the USD to AR exchange rate was
-%% ?INITIAL_USD_TO_AR(Height). Used to account for the change in inflation
-%% rewards when estimating the new USD to AR rate.
+%% The network height at the time when the USD to BIG exchange rate was
+%% ?INITIAL_USD_TO_BIG(Height). Used to account for the change in inflation
+%% rewards when estimating the new USD to BIG rate.
 -define(INITIAL_USD_TO_BIG_HEIGHT(Height), fun() ->
 	Forks = {
 		ar_fork:height_1_9(),
