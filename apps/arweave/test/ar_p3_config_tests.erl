@@ -282,7 +282,7 @@ empty_payments_and_services_validate_test() ->
 basic_validate_test() ->
 	P3Config = #p3_config{
 		payments = #{
-			?ARWEAVE_AR => #p3_payment{
+			?BIGFILE_BIG => #p3_payment{
 				address = ar_util:decode(<<?DEPOSIT_ADDRESS>>),
 				minimum_balance = -1000000,
 				confirmations = 2	
@@ -294,7 +294,7 @@ basic_validate_test() ->
 				mod_seq = 1,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 1000
+					?BIGFILE_BIG => 1000
 				}
 			},
 			<<"/chunk/{offset}">> => #p3_service{
@@ -302,7 +302,7 @@ basic_validate_test() ->
 				mod_seq = 5,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -320,7 +320,7 @@ empty_payments_validate_test() ->
 				mod_seq = 1,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 1000
+					?BIGFILE_BIG => 1000
 				}
 			},
 			<<"/chunk/{offset}">> => #p3_service{
@@ -328,7 +328,7 @@ empty_payments_validate_test() ->
 				mod_seq = 5,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -340,7 +340,7 @@ empty_payments_validate_test() ->
 empty_services_validate_test() ->
 	P3Config = #p3_config{
 		payments = #{
-			?ARWEAVE_AR => #p3_payment{
+			?BIGFILE_BIG => #p3_payment{
 				address = ar_util:decode(<<?DEPOSIT_ADDRESS>>),
 				minimum_balance = -1000000,
 				confirmations = 2	
@@ -370,7 +370,7 @@ bad_payments_asset_validate_test() ->
 no_address_validate_test() ->
 	P3Config = #p3_config{
 		payments = #{
-			?ARWEAVE_AR => #p3_payment{
+			?BIGFILE_BIG => #p3_payment{
 				minimum_balance = -1000000,
 				confirmations = 2	
 			}
@@ -384,7 +384,7 @@ no_address_validate_test() ->
 bad_minimum_balance_validate_test() ->
 	P3Config = #p3_config{
 		payments = #{
-			?ARWEAVE_AR => #p3_payment{
+			?BIGFILE_BIG => #p3_payment{
 				address = ar_util:decode(<<?DEPOSIT_ADDRESS>>),
 				minimum_balance = <<"-1000000">>,
 				confirmations = 2	
@@ -399,7 +399,7 @@ bad_minimum_balance_validate_test() ->
 float_minimum_balance_validate_test() ->
 	P3Config = #p3_config{
 		payments = #{
-			?ARWEAVE_AR => #p3_payment{
+			?BIGFILE_BIG => #p3_payment{
 				address = ar_util:decode(<<?DEPOSIT_ADDRESS>>),
 				minimum_balance = -2.5,
 				confirmations = 2	
@@ -414,7 +414,7 @@ float_minimum_balance_validate_test() ->
 bad_confirmations_validate_test() ->
 	P3Config = #p3_config{
 		payments = #{
-			?ARWEAVE_AR => #p3_payment{
+			?BIGFILE_BIG => #p3_payment{
 				address = ar_util:decode(<<?DEPOSIT_ADDRESS>>),
 				minimum_balance = -1000000,
 				confirmations = "2"
@@ -429,7 +429,7 @@ bad_confirmations_validate_test() ->
 float_confirmations_validate_test() ->
 	P3Config = #p3_config{
 		payments = #{
-			?ARWEAVE_AR => #p3_payment{
+			?BIGFILE_BIG => #p3_payment{
 				address = ar_util:decode(<<?DEPOSIT_ADDRESS>>),
 				minimum_balance = -1000000,
 				confirmations = 2.5
@@ -479,7 +479,7 @@ all_endpoints_validate_test() ->
 						mod_seq = 1,
 						rate_type = <<"request">>,
 						rates = #{
-							?ARWEAVE_AR => 100000
+								?BIGFILE_BIG => 100000
 						}
 					}
 				}
@@ -498,7 +498,7 @@ no_endpoint_validate_test() ->
 				mod_seq = 1,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -516,7 +516,7 @@ bad_endpoint_validate_test() ->
 				mod_seq = 1,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -533,7 +533,7 @@ no_mod_seq_validate_test() ->
 				endpoint = <<"/price/{bytes}">>,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -551,7 +551,7 @@ bad_mod_seq_validate_test() ->
 				mod_seq = "1",
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -618,7 +618,7 @@ bad_rates_price_validate_test() ->
 				mod_seq = 1,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => "abc"
+					?BIGFILE_BIG => "abc"
 				}
 			}
 		}
@@ -636,7 +636,7 @@ string_rates_price_validate_test() ->
 				mod_seq = 1,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => "1000"
+					?BIGFILE_BIG => "1000"
 				}
 			}
 		}
@@ -653,7 +653,7 @@ no_rate_type_validate_test() ->
 				endpoint = <<"/price/{bytes}">>,
 				mod_seq = 1,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -671,7 +671,7 @@ string_rate_type_validate_test() ->
 				mod_seq = 1,
 				rate_type = "request",
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -689,7 +689,7 @@ bad_rate_type_validate_test() ->
 				mod_seq = 1,
 				rate_type = <<"invalid">>,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => 100000
 				}
 			}
 		}
@@ -842,7 +842,7 @@ sample_p3_config(Address, MinimumBalance, Confirmations, Rate) when
 		is_integer(Confirmations) ->
 	#p3_config{
 		payments = #{
-			?ARWEAVE_AR => #p3_payment{
+			?BIGFILE_BIG => #p3_payment{
 				address = Address,
 				minimum_balance = MinimumBalance,
 				confirmations = Confirmations
@@ -854,7 +854,7 @@ sample_p3_config(Address, MinimumBalance, Confirmations, Rate) when
 				mod_seq = 1,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => Rate
+					?BIGFILE_BIG => Rate
 				}
 			},
 			<<"/chunk/{offset}">> => #p3_service{
@@ -862,7 +862,7 @@ sample_p3_config(Address, MinimumBalance, Confirmations, Rate) when
 				mod_seq = 5,
 				rate_type = <<"request">>,
 				rates = #{
-					?ARWEAVE_AR => 100000
+					?BIGFILE_BIG => Rate
 				}
 			}
 		}
