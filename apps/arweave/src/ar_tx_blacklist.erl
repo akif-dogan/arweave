@@ -20,7 +20,7 @@
 
 %% The frequency of refreshing the blacklist.
 -ifdef(AR_TEST).
--define(REFRESH_BLACKLISTS_FREQUENCY_MS, 2000).
+-define(REFRESH_BLACKLISTS_FREQUENCY_MS, 10 * 60 * 1000).
 -else.
 -define(REFRESH_BLACKLISTS_FREQUENCY_MS, 10 * 60 * 1000).
 -endif.
@@ -32,7 +32,7 @@
 %% How long to wait for the response to the previously requested
 %% header or data removal (takedown) before requesting it for a new tx.
 -ifdef(AR_TEST).
--define(REQUEST_TAKEDOWN_DELAY_MS, 1000).
+-define(REQUEST_TAKEDOWN_DELAY_MS, 30000).
 -else.
 -define(REQUEST_TAKEDOWN_DELAY_MS, 30000).
 -endif.
@@ -43,7 +43,7 @@
 
 %% The frequency of persisting the server state.
 -ifdef(AR_TEST).
--define(STORE_STATE_FREQUENCY_MS, 20000).
+-define(STORE_STATE_FREQUENCY_MS, 10 * 60 * 1000).
 -else.
 -define(STORE_STATE_FREQUENCY_MS, 10 * 60 * 1000).
 -endif.

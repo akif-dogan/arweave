@@ -29,7 +29,7 @@
 %% the moment we join the network only once and then keep polling
 %% for transactions more frequently.
 -ifdef(AR_TEST).
--define(CHECK_INTERVAL_MS, 5_000).
+-define(CHECK_INTERVAL_MS, 30_000).
 -else.
 -define(CHECK_INTERVAL_MS, 30_000).
 -endif.
@@ -37,7 +37,7 @@
 %% Poll interval in milliseconds - how long we wait before downloading a new
 %% transaction or polling the mempools for new transactions.
 -ifdef(AR_TEST).
--define(POLL_INTERVAL_MS, 500).
+-define(POLL_INTERVAL_MS, 200).
 -else.
 -define(POLL_INTERVAL_MS, 200).
 -endif.

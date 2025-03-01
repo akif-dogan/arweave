@@ -25,7 +25,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -ifdef(AR_TEST).
--define(PROCESS_TASK_QUEUE_FREQUENCY_MS, 10).
+-define(PROCESS_TASK_QUEUE_FREQUENCY_MS, 200).
 -else.
 -define(PROCESS_TASK_QUEUE_FREQUENCY_MS, 200).
 -endif.
@@ -49,7 +49,7 @@
 
 %% How frequently (in seconds) to recompute the mining difficulty at the retarget blocks.
 -ifdef(AR_TEST).
--define(COMPUTE_MINING_DIFFICULTY_INTERVAL, 1).
+-define(COMPUTE_MINING_DIFFICULTY_INTERVAL, 10).
 -else.
 -define(COMPUTE_MINING_DIFFICULTY_INTERVAL, 10).
 -endif.

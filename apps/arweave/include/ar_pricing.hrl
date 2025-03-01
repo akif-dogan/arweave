@@ -109,7 +109,7 @@ end).
 %% we open the latch (and will increase the fees again when/if the endowment is empty).
 %% The value is redenominated according the denomination used at the time.
 -ifdef(AR_TEST).
--define(RESET_KRYDER_PLUS_LATCH_THRESHOLD, 100_000_000_000).
+-define(RESET_KRYDER_PLUS_LATCH_THRESHOLD, 10_000_000_000_000_000).
 -else.
 -define(RESET_KRYDER_PLUS_LATCH_THRESHOLD, 10_000_000_000_000_000).
 -endif.
@@ -135,7 +135,7 @@ end).
 %% Re-denominate AR (multiply by 1000) when the available supply falls below this
 %% number of units.
 -ifdef(AR_TEST).
--define(REDENOMINATION_THRESHOLD, 1350000000000).
+-define(REDENOMINATION_THRESHOLD, 1000_000_000_000_000_000).
 -else.
 -define(REDENOMINATION_THRESHOLD, 1000_000_000_000_000_000).
 -endif.
@@ -146,7 +146,7 @@ end).
 %% an attack where a post-redenomination transaction is included in a pre-redenomination
 %% block, potentially charging the user a thousand times the intended fee or transfer amount.
 -ifdef(AR_TEST).
--define(REDENOMINATION_DELAY_BLOCKS, 2).
+-define(REDENOMINATION_DELAY_BLOCKS, 100).
 -else.
 -define(REDENOMINATION_DELAY_BLOCKS, 100).
 -endif.

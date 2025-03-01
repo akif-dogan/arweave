@@ -30,13 +30,13 @@
 -include("../include/ar_sync_buckets.hrl").
 
 -ifdef(AR_TEST).
--define(COLLECT_SYNC_INTERVALS_FREQUENCY_MS, 5_000).
+-define(COLLECT_SYNC_INTERVALS_FREQUENCY_MS, 300_000).
 -else.
 -define(COLLECT_SYNC_INTERVALS_FREQUENCY_MS, 300_000).
 -endif.
 
 -ifdef(AR_TEST).
--define(DEVICE_LOCK_WAIT, 100).
+-define(DEVICE_LOCK_WAIT, 5_000).
 -else.
 -define(DEVICE_LOCK_WAIT, 5_000).
 -endif.

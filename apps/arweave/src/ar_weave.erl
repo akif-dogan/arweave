@@ -111,7 +111,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 
 -ifdef(AR_TEST).
 get_initial_block_time_history() ->
-	[{1, 1, 1}].
+	[{120, 1, 1}].
 -else.
 get_initial_block_time_history() ->
 	[{120, 1, 1}].

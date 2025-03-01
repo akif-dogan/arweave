@@ -4,7 +4,7 @@
 %% If the serialized buckets do not fit in ?MAX_SYNC_BUCKETS_SIZE, the bucket
 %% size is doubled until they fit.
 -ifdef(AR_TEST).
--define(DEFAULT_SYNC_BUCKET_SIZE, 10_000_000_000).
+-define(DEFAULT_SYNC_BUCKET_SIZE, 10_000_000_000). % 10 GB
 -else.
 -define(DEFAULT_SYNC_BUCKET_SIZE, 10_000_000_000). % 10 GB
 -endif.

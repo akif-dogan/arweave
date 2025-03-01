@@ -68,7 +68,7 @@
 %% Let at least this many chunks stack up, per storage module, then write them on disk in the
 %% ascending order, to reduce out-of-order disk writes causing fragmentation.
 -ifdef(AR_TEST).
--define(STORE_CHUNK_QUEUE_FLUSH_SIZE_THRESHOLD, 100).
+-define(STORE_CHUNK_QUEUE_FLUSH_SIZE_THRESHOLD, 100). % ~ 25 MB worth of chunks.
 -else.
 -define(STORE_CHUNK_QUEUE_FLUSH_SIZE_THRESHOLD, 100). % ~ 25 MB worth of chunks.
 -endif.
@@ -76,7 +76,7 @@
 %% If a chunk spends longer than this in the store queue, write it on disk without waiting
 %% for ?STORE_CHUNK_QUEUE_FLUSH_SIZE_THRESHOLD chunks to stack up.
 -ifdef(AR_TEST).
--define(STORE_CHUNK_QUEUE_FLUSH_TIME_THRESHOLD, 2_000).
+-define(STORE_CHUNK_QUEUE_FLUSH_TIME_THRESHOLD, 2_000). % 2 seconds.
 -else.
 -define(STORE_CHUNK_QUEUE_FLUSH_TIME_THRESHOLD, 2_000). % 2 seconds.
 -endif.

@@ -22,7 +22,7 @@
 
 %% The frequency of choosing the peers to poll.
 -ifdef(AR_TEST).
--define(COLLECT_PEERS_FREQUENCY_MS, 2000).
+-define(COLLECT_PEERS_FREQUENCY_MS, 1000 * 15).
 -else.
 -define(COLLECT_PEERS_FREQUENCY_MS, 1000 * 15).
 -endif.

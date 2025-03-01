@@ -231,7 +231,7 @@
 %% the base delay, the time the transaction spends in the priority
 %% queue, and the time it takes to propagate the transaction to peers.
 -ifdef(AR_TEST).
--define(TX_PROPAGATION_BITS_PER_SECOND, 3000000).
+-define(TX_PROPAGATION_BITS_PER_SECOND, 3000000). % 3 mbps
 -else.
 -define(TX_PROPAGATION_BITS_PER_SECOND, 3000000). % 3 mbps
 -endif.
@@ -342,7 +342,7 @@
 
 %% Disk cache size in MB
 -ifdef(AR_TEST).
--define(DISK_CACHE_SIZE, 1).
+-define(DISK_CACHE_SIZE, 5120).
 -define(DISK_CACHE_CLEAN_PERCENT_MAX, 20).
 -else.
 -define(DISK_CACHE_SIZE, 5120).
@@ -351,7 +351,7 @@
 
 %% The speed in chunks/s of moving the fork 2.5 packing threshold.
 -ifdef(AR_TEST).
--define(PACKING_2_5_THRESHOLD_CHUNKS_PER_SECOND, 1).
+-define(PACKING_2_5_THRESHOLD_CHUNKS_PER_SECOND, 10).
 -else.
 -define(PACKING_2_5_THRESHOLD_CHUNKS_PER_SECOND, 10).
 -endif.

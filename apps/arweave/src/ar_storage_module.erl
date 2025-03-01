@@ -21,7 +21,7 @@
 -endif.
 
 -ifdef(AR_TEST).
--define(REPLICA_2_9_OVERLAP, 262144).
+-define(REPLICA_2_9_OVERLAP, (262144 * 10)).
 -else.
 -define(REPLICA_2_9_OVERLAP, (262144 * 10)).
 -endif.

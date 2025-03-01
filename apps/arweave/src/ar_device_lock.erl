@@ -22,7 +22,7 @@
 -type device_mode() :: prepare | sync | repack.
 
 -ifdef(AR_TEST).
--define(DEVICE_LOCK_LOG_INTERVAL_MS, 10_000). %% 10 seconds
+-define(DEVICE_LOCK_LOG_INTERVAL_MS, 600_000). %% 10 minutes
 -else.
 -define(DEVICE_LOCK_LOG_INTERVAL_MS, 600_000). %% 10 minutes
 -endif.

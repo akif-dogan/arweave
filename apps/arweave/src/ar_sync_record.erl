@@ -23,7 +23,7 @@
 
 %% The frequency of dumping sync records on disk.
 -ifdef(AR_TEST).
--define(STORE_SYNC_RECORD_FREQUENCY_MS, 1000).
+-define(STORE_SYNC_RECORD_FREQUENCY_MS, 60 * 1000).
 -else.
 -define(STORE_SYNC_RECORD_FREQUENCY_MS, 60 * 1000).
 -endif.

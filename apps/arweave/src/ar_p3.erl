@@ -10,7 +10,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
 -ifdef(AR_TEST).
--define(MAX_BLOCK_SCAN, 4).
+-define(MAX_BLOCK_SCAN, 200).
 -else.
 -define(MAX_BLOCK_SCAN, 200).
 -endif.

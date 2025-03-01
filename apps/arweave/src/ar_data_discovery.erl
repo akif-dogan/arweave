@@ -18,7 +18,7 @@
 
 %% The frequency of asking peers about their data.
 -ifdef(AR_TEST).
--define(DATA_DISCOVERY_COLLECT_PEERS_FREQUENCY_MS, 2 * 1000).
+-define(DATA_DISCOVERY_COLLECT_PEERS_FREQUENCY_MS, 4 * 60 * 1000).
 -else.
 -define(DATA_DISCOVERY_COLLECT_PEERS_FREQUENCY_MS, 4 * 60 * 1000).
 -endif.

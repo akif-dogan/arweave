@@ -12,7 +12,7 @@
 
 %% The frequency in seconds of updating serialized sync buckets.
 -ifdef(AR_TEST).
--define(UPDATE_SERIALIZED_SYNC_BUCKETS_FREQUENCY_S, 2).
+-define(UPDATE_SERIALIZED_SYNC_BUCKETS_FREQUENCY_S, 300).
 -else.
 -define(UPDATE_SERIALIZED_SYNC_BUCKETS_FREQUENCY_S, 300).
 -endif.

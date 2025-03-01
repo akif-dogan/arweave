@@ -26,7 +26,7 @@
 }).
 
 -ifdef(AR_TEST).
--define(DEVICE_LOCK_WAIT, 100).
+-define(DEVICE_LOCK_WAIT, 5_000).
 -else.
 -define(DEVICE_LOCK_WAIT, 5_000).
 -endif.

@@ -27,14 +27,14 @@
 
 %% The frequency in milliseconds of ranking the known peers.
 -ifdef(AR_TEST).
--define(RANK_PEERS_FREQUENCY_MS, 2 * 1000).
+-define(RANK_PEERS_FREQUENCY_MS, 2 * 60 * 1000).
 -else.
 -define(RANK_PEERS_FREQUENCY_MS, 2 * 60 * 1000).
 -endif.
 
 %% The frequency in milliseconds of asking some peers for their peers.
 -ifdef(AR_TEST).
--define(GET_MORE_PEERS_FREQUENCY_MS, 5000).
+-define(GET_MORE_PEERS_FREQUENCY_MS, 240 * 1000).
 -else.
 -define(GET_MORE_PEERS_FREQUENCY_MS, 240 * 1000).
 -endif.
