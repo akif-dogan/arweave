@@ -109,14 +109,14 @@
 %% How far into the past or future the block can be in order to be accepted for
 %% processing.
 -ifdef(AR_TEST).
--define(STORE_BLOCKS_BEHIND_CURRENT, 10).
+-define(STORE_BLOCKS_BEHIND_CURRENT, 50).
 -else.
 -define(STORE_BLOCKS_BEHIND_CURRENT, 50).
 -endif.
 
 %% The maximum lag when fork recovery (chain reorganisation) is performed.
 -ifdef(AR_TEST).
--define(CHECKPOINT_DEPTH, 4).
+-define(CHECKPOINT_DEPTH, 18).
 -else.
 -define(CHECKPOINT_DEPTH, 18).
 -endif.
@@ -124,14 +124,14 @@
 %% The recommended depth of the block to use as an anchor for transactions.
 %% The corresponding block hash is returned by the GET /tx_anchor endpoint.
 -ifdef(AR_TEST).
--define(SUGGESTED_TX_ANCHOR_DEPTH, 5).
+-define(SUGGESTED_TX_ANCHOR_DEPTH, 6).
 -else.
 -define(SUGGESTED_TX_ANCHOR_DEPTH, 6).
 -endif.
 
 %% The number of blocks returned in the /info 'recent' field
 -ifdef(AR_TEST).
--define(RECENT_BLOCKS_WITHOUT_TIMESTAMP, 2).
+-define(RECENT_BLOCKS_WITHOUT_TIMESTAMP, 5).
 -else.
 -define(RECENT_BLOCKS_WITHOUT_TIMESTAMP, 5).
 -endif.
@@ -155,7 +155,7 @@
 
 %% The maximum number of transactions (both format=1 and format=2) in a block.
 -ifdef(AR_TEST).
--define(BLOCK_TX_COUNT_LIMIT, 10).
+-define(BLOCK_TX_COUNT_LIMIT, 1000).
 -else.
 -define(BLOCK_TX_COUNT_LIMIT, 1000).
 -endif.
@@ -179,7 +179,7 @@
 %% The data field of a format=1 transaction is considered to belong to
 %% its headers.
 -ifdef(AR_TEST).
--define(MEMPOOL_HEADER_SIZE_LIMIT, 50 * 1024 * 1024).
+-define(MEMPOOL_HEADER_SIZE_LIMIT, 250 * 1024 * 1024).
 -else.
 -define(MEMPOOL_HEADER_SIZE_LIMIT, 250 * 1024 * 1024).
 -endif.
@@ -188,7 +188,7 @@
 %% The format=1 transactions are not counted as their data is considered
 %% to be part of the header.
 -ifdef(AR_TEST).
--define(MEMPOOL_DATA_SIZE_LIMIT, 50 * 1024 * 1024).
+-define(MEMPOOL_DATA_SIZE_LIMIT, 500 * 1024 * 1024).
 -else.
 -define(MEMPOOL_DATA_SIZE_LIMIT, 500 * 1024 * 1024).
 -endif.
@@ -231,7 +231,7 @@
 %% the base delay, the time the transaction spends in the priority
 %% queue, and the time it takes to propagate the transaction to peers.
 -ifdef(AR_TEST).
--define(TX_PROPAGATION_BITS_PER_SECOND, 1000000000).
+-define(TX_PROPAGATION_BITS_PER_SECOND, 3000000).
 -else.
 -define(TX_PROPAGATION_BITS_PER_SECOND, 3000000). % 3 mbps
 -endif.

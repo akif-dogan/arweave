@@ -32,7 +32,7 @@ end).
 %% ?DOUBLE_SIGNING_PROVER_REWARD_SHARE of the minimum reward among the preceding
 %% ?DOUBLE_SIGNING_REWARD_SAMPLE_SIZE blocks.
 -ifdef(AR_TEST).
--define(DOUBLE_SIGNING_REWARD_SAMPLE_SIZE, 2).
+-define(DOUBLE_SIGNING_REWARD_SAMPLE_SIZE, 100).
 -else.
 -define(DOUBLE_SIGNING_REWARD_SAMPLE_SIZE, 100).
 -endif.
@@ -245,7 +245,7 @@ end).
 
 %% Reduce the USD to AR fraction if both the dividend and the devisor become bigger than this.
 -ifdef(AR_TEST).
--define(USD_TO_AR_FRACTION_REDUCTION_LIMIT, 100).
+-define(USD_TO_AR_FRACTION_REDUCTION_LIMIT, 1000000).
 -else.
 -define(USD_TO_AR_FRACTION_REDUCTION_LIMIT, 1000000).
 -endif.
@@ -254,7 +254,7 @@ end).
 %% where X is the amount sent to the endowment pool.
 %% Used until the transition to the new fee calculation method is complete.
 -ifdef(AR_TEST).
--define(MINING_REWARD_MULTIPLIER, {2, 10000}).
+-define(MINING_REWARD_MULTIPLIER, {2, 10}).
 -else.
 -define(MINING_REWARD_MULTIPLIER, {2, 10}).
 -endif.

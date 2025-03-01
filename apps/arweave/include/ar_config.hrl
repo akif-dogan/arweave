@@ -22,7 +22,7 @@
 %% The number of data sync jobs to run. Each job periodically picks a range
 %% and downloads it from peers.
 -ifdef(AR_TEST).
--define(DEFAULT_SYNC_JOBS, 10).
+-define(DEFAULT_SYNC_JOBS, 100).
 -else.
 -define(DEFAULT_SYNC_JOBS, 100).
 -endif.
@@ -41,14 +41,14 @@
 
 %% The default size limit for unconfirmed and seeded chunks, per data root.
 -ifdef(AR_TEST).
--define(DEFAULT_MAX_DISK_POOL_DATA_ROOT_BUFFER_MB, 50).
+-define(DEFAULT_MAX_DISK_POOL_DATA_ROOT_BUFFER_MB, 10000).
 -else.
 -define(DEFAULT_MAX_DISK_POOL_DATA_ROOT_BUFFER_MB, 10000).
 -endif.
 
 %% The default total size limit for unconfirmed and seeded chunks.
 -ifdef(AR_TEST).
--define(DEFAULT_MAX_DISK_POOL_BUFFER_MB, 100).
+-define(DEFAULT_MAX_DISK_POOL_BUFFER_MB, 100000).
 -else.
 -define(DEFAULT_MAX_DISK_POOL_BUFFER_MB, 100000).
 -endif.
@@ -87,14 +87,14 @@
 
 %% Accept a block from the given IP only once in so many milliseconds.
 -ifdef(AR_TEST).
--define(DEFAULT_BLOCK_THROTTLE_BY_IP_INTERVAL_MS, 10).
+-define(DEFAULT_BLOCK_THROTTLE_BY_IP_INTERVAL_MS, 1000).
 -else.
 -define(DEFAULT_BLOCK_THROTTLE_BY_IP_INTERVAL_MS, 1000).
 -endif.
 
 %% Accept a block with the given solution hash only once in so many milliseconds.
 -ifdef(AR_TEST).
--define(DEFAULT_BLOCK_THROTTLE_BY_SOLUTION_INTERVAL_MS, 10).
+-define(DEFAULT_BLOCK_THROTTLE_BY_SOLUTION_INTERVAL_MS, 2000).
 -else.
 -define(DEFAULT_BLOCK_THROTTLE_BY_SOLUTION_INTERVAL_MS, 2000).
 -endif.
@@ -106,7 +106,7 @@
 
 %% The default number of chunks fetched from disk at a time during in-place repacking.
 -ifdef(AR_TEST).
--define(DEFAULT_REPACK_BATCH_SIZE, 2).
+-define(DEFAULT_REPACK_BATCH_SIZE, 100).
 -else.
 -define(DEFAULT_REPACK_BATCH_SIZE, 100).
 -endif.
@@ -121,7 +121,7 @@
 
 %% The number of 2.9 storage modules allowed to prepare the storage at a time.
 -ifdef(AR_TEST).
--define(DEFAULT_REPLICA_2_9_WORKERS, 2).
+-define(DEFAULT_REPLICA_2_9_WORKERS, 8).
 -else.
 -define(DEFAULT_REPLICA_2_9_WORKERS, 8).
 -endif.

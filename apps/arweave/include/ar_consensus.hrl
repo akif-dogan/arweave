@@ -137,7 +137,7 @@
 %% Recall bytes are only picked from the subspace up to the size
 %% of the weave at the block of the depth defined by this constant.
 -ifdef(AR_TEST).
--define(SEARCH_SPACE_UPPER_BOUND_DEPTH, 3).
+-define(SEARCH_SPACE_UPPER_BOUND_DEPTH, 50).
 -else.
 -define(SEARCH_SPACE_UPPER_BOUND_DEPTH, 50).
 -endif.
