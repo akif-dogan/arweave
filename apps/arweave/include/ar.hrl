@@ -10,24 +10,24 @@
 %% The mainnet name. Does not change at the hard forks.
 -ifndef(NETWORK_NAME).
 	-ifdef(AR_TEST).
-		-define(NETWORK_NAME, "arweave.localtest").
+		-define(NETWORK_NAME, "bigfile.localtest").
 	-else.
-		-define(NETWORK_NAME, "arweave.N.1").
+		-define(NETWORK_NAME, "bigfile.N.1").
 	-endif.
 -endif.
 
 %% When a request is received without specifing the X-Network header, this network name
 %% is assumed.
 -ifndef(DEFAULT_NETWORK_NAME).
-	-define(DEFAULT_NETWORK_NAME, "arweave.N.1").
+	-define(DEFAULT_NETWORK_NAME, "bigfile.N.1").
 -endif.
 
 %% The current release number of the arweave client software.
 %% @deprecated Not used apart from being included in the /info response.
--define(CLIENT_VERSION, 5).
+-define(CLIENT_VERSION, 1).
 
 %% The current build number -- incremented for every release.
--define(RELEASE_NUMBER, 80).
+-define(RELEASE_NUMBER, 1).
 
 -define(DEFAULT_REQUEST_HEADERS,
 	[
