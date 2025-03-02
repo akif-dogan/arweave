@@ -278,8 +278,8 @@ let
         -noshell \
         -config config/sys.config \
         -name stopper@127.0.0.1 \
-        -setcookie arweave \
-        -s ar shutdown arweave@127.0.0.1 -s init stop
+        -setcookie bigfile \
+        -s ar shutdown bigfile@127.0.0.1 -s init stop
     '';
   };
 
