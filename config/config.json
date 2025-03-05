@@ -9,17 +9,11 @@
     "log_dir": "/root/arweave/data_dir/logs",
     "storage_modules": [
       "0,unpacked",
-      "2,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM",
-      "2,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.1",
-      "2,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.32",
+      "2,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.replica.2.9",
       "100,unpacked",
-      "1,unpacked,repack_in_place,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM",
-      "1,unpacked,repack_in_place,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.2",
+      "1,unpacked,repack_in_place,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.replica.2.9",
       "0,1,unpacked",
-      "14,1000000000000,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM",
-      "1,1,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM,repack_in_place,unpacked",
-      "1,1,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.1,repack_in_place,unpacked",
-      "0,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.replica.2.9"
+      "14,1000000000000,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.replica.2.9"
     ],
     "repack_batch_size": 200,
     "polling": 10,
@@ -85,10 +79,10 @@
     "defragmentation_trigger_threshold": 1000,
     "defragment_modules": [
       "0,unpacked",
-      "2,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM",
+      "2,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.replica.2.9",
       "100,unpacked",
       "0,1,unpacked",
-      "14,1000000000000,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM"
+      "14,1000000000000,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.replica.2.9"
     ],
     "block_throttle_by_ip_interval": 5000,
     "block_throttle_by_solution_interval": 12000
