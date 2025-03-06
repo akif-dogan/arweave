@@ -27,8 +27,7 @@
     "0,1,unpacked",
     "14,300000,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM",
     "1,1,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM,repack_in_place,unpacked",
-    "1,1,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.1,repack_in_place,unpacked",
-    "0,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.replica.2.9"
+    "1,1,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.1,repack_in_place,unpacked"
   ],
   "max_disk_pool_buffer_mb": 1,
   "semaphores": {
