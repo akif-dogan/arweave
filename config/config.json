@@ -25,7 +25,9 @@
   "requests_per_minute_limit": 2500,
   "mining_addr": "D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM",
   "storage_modules": [
-    "0,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM"
+    "0,unpacked",
+    "2,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM",
+    "2,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM.1"
   ],
   "max_disk_pool_buffer_mb": 100000,
   "max_connections": 512,
