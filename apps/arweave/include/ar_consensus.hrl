@@ -75,7 +75,7 @@
 -ifdef(AR_TEST).
 %% 2_097_152 / 24_576 = 85.33333333333333
 %% (85 + 11) = 96 the nearest multiple of 32
--define(REPLICA_2_9_ENTROPY_COUNT, 96).
+-define(REPLICA_2_9_ENTROPY_COUNT, 429_184).
 -else.
 -define(REPLICA_2_9_ENTROPY_COUNT, 429_184).
 -endif.
