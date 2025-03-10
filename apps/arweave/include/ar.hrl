@@ -12,14 +12,14 @@
 	-ifdef(AR_TEST).
 		-define(NETWORK_NAME, "bigfile.localtest").
 	-else.
-		-define(NETWORK_NAME, "bigfile.N.1").
+		-define(NETWORK_NAME, "bigfile.V.1").
 	-endif.
 -endif.
 
 %% When a request is received without specifing the X-Network header, this network name
 %% is assumed.
 -ifndef(DEFAULT_NETWORK_NAME).
-	-define(DEFAULT_NETWORK_NAME, "bigfile.N.1").
+	-define(DEFAULT_NETWORK_NAME, "bigfile.V.1").
 -endif.
 
 %% The current release number of the arweave client software.
@@ -96,7 +96,7 @@
 -define(CLOCK_DRIFT_MAX, 5).
 
 %% The total supply of tokens in the Genesis block.
--define(GENESIS_TOKENS, 55000000).
+-define(GENESIS_TOKENS, 200000000).
 
 %% Winstons per AR.
 -define(WINSTON_PER_BIG, 1000000000000).

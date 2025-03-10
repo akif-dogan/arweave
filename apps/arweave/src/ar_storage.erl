@@ -255,7 +255,7 @@ store_block_time_history_part2([{H, El} | History]) ->
 			{error, not_found}
 	end.
 
--if(?NETWORK_NAME == "bigfile.N.1").
+-if(?NETWORK_NAME == "bigfile.V.1").
 write_full_block(#block{ height = 0 } = BShadow, TXs) ->
 	%% Genesis transactions are stored in data/genesis_txs; they are part of the repository.
 	write_full_block2(BShadow, TXs);
