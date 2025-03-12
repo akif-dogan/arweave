@@ -26,12 +26,12 @@
   "max_emitters": 4,
   "mining_addr": "D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM",
   "storage_modules": [
-    "0,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM,unpacked"
+    "0,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM"
   ],
   "max_disk_pool_buffer_mb": 100000,
   "max_connections": 512,
   "max_gateway_connections": 64,
-  "replica_2_9_workers": 16,
+  "replica_2_9_workers": 8,
   "packing_workers": 25,
   "disk_pool_data_root_expiration_time": 10000,
   "max_disk_pool_data_root_buffer_mb": 100000000,
