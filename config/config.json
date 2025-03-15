@@ -35,8 +35,6 @@
   "packing_workers": 25,
   "disk_pool_data_root_expiration_time": 10000,
   "max_disk_pool_data_root_buffer_mb": 100000000,
-  "block_throttle_by_ip_interval": 5000,
-  "block_throttle_by_solution_interval": 12000,
   "disk_cache_size_mb": 1024,
   "requests_per_minute_limit": 2500,
   "requests_per_minute_limit_by_ip": {
@@ -56,5 +54,12 @@
     "get_wallet_list": 2,
     "arql": 3,
     "gateway_arql": 3
-  }
+  },
+  "run_defragmentation": true,
+  "defragmentation_trigger_threshold": 1000,
+  "defragment_modules": [
+    "0,D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM"
+  ],
+  "block_throttle_by_ip_interval": 5000,
+  "block_throttle_by_solution_interval": 12000
 }
