@@ -115,7 +115,7 @@ parse_payments([], PaymentsConfig) ->
 parse_payments(BadToken, _PaymentsConfig) ->
 	erlang:error(
 		"'payments' object must be a map of assets to 'payment' objects. " ++
-		"Currently only 'arweave/AR' is supported.",
+		"Currently only 'bigfile/BIG' is supported.",
 		BadToken).
 
 parse_payment([{?P3_ADDRESS_HEADER, Address} | Rest], PaymentConfig) ->
@@ -199,7 +199,7 @@ parse_rates([], RatesConfig) ->
 
 parse_rates(BadToken, _RatesConfig) ->
 	erlang:error(
-		"Unexpected 'rates' token. Only 'arweave/AR' is currenty supported.",
+		"Unexpected 'rates' token. Only 'bigfile/BIG' is currenty supported.",
 		BadToken).
 
 %% -------------------------------------------------------------------

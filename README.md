@@ -135,7 +135,7 @@ storage_module 0,<your-mining-addr> mine
 ```
 
 The given address (if none is specified, one will be generated for you) will be assigned
-`1_000_000_000_000` AR in the new weave.
+`1_000_000_000_000` BIG in the new weave.
 
 The network name will be `bigfile.localnet`. You can not start the same node again with the
 init option unless you clean the data directory - you need to either restart with the
@@ -215,4 +215,4 @@ Arweave core team has initiated an Arweave bug bounty program, with a maximum bo
 
 The Arweave core team puts security as its top priority and has dedicated resources to ensure high incentives to attract the community at large to evaluate and safeguard the ecosystem. Whilst building Arweave, the team has engaged with industry-leading cybersecurity audit firms specializing in Blockchain Security to help secure the codebase of Arweave protocol.
 
-We encourage developers, whitehat hackers to participate, evaluate the code base and hunt for bugs, especially on issues that could potentially put users’ funds or data at risk. In exchange for a responsibly disclosed bug, the bug bounty program will reward up to USD `1,000,000` (paid in `$AR` tokens) based on the vulnerability severity level, at the discretion of the Arweave team. Please email us at team@arweave.org to get in touch.
+We encourage developers, whitehat hackers to participate, evaluate the code base and hunt for bugs, especially on issues that could potentially put users’ funds or data at risk. In exchange for a responsibly disclosed bug, the bug bounty program will reward up to USD `1,000,000` (paid in `$BIG` tokens) based on the vulnerability severity level, at the discretion of the Arweave team. Please email us at team@arweave.org to get in touch.

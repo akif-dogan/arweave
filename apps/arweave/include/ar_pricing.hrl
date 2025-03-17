@@ -47,7 +47,7 @@ end).
 %% where X is the amount sent to the endowment pool.
 -define(MINER_MINIMUM_ENDOWMENT_CONTRIBUTION_SHARE, {1, 20}).
 
-%% The fixed USD to AR rate used after the fork 2.6 until the automatic transition to the new
+%% The fixed USD to BIG rate used after the fork 2.6 until the automatic transition to the new
 %% pricing scheme is complete. We fix the rate because the network difficulty is expected
 %% fluctuate a lot around the fork.
 -define(FORK_2_6_PRE_TRANSITION_USD_TO_BIG_RATE, {1, 10}).
@@ -132,7 +132,7 @@ end).
 	-endif.
 -endif.
 
-%% Re-denominate AR (multiply by 1000) when the available supply falls below this
+%% Re-denominate BIG (multiply by 1000) when the available supply falls below this
 %% number of units.
 -ifdef(AR_TEST).
 -define(REDENOMINATION_THRESHOLD, 1000_000_000_000_000_000).
@@ -151,9 +151,9 @@ end).
 -define(REDENOMINATION_DELAY_BLOCKS, 100).
 -endif.
 
-%% USD to AR exchange rates by height defined together with INITIAL_USD_TO_BIG_HEIGHT
+%% USD to BIG exchange rates by height defined together with INITIAL_USD_TO_BIG_HEIGHT
 %% and INITIAL_USD_TO_BIG_DIFF. The protocol uses these constants to estimate the
-%% USD to AR rate at any block based on the change in the network difficulty and inflation
+%% USD to BIG rate at any block based on the change in the network difficulty and inflation
 %% rewards.
 -define(INITIAL_USD_TO_BIG(Height), fun() ->
 	Forks = {
@@ -172,9 +172,9 @@ end).
 %% Used until the fork 2.5.
 -define(INITIAL_USD_TO_BIG_PRE_FORK_2_5, {1, 5}).
 
-%% The network difficulty at the time when the USD to AR exchange rate was
+%% The network difficulty at the time when the USD to BIG exchange rate was
 %% ?INITIAL_USD_TO_BIG(Height). Used to account for the change in the network
-%% difficulty when estimating the new USD to AR rate.
+%% difficulty when estimating the new USD to BIG rate.
 -define(INITIAL_USD_TO_BIG_DIFF(Height), fun() ->
 	Forks = {
 		ar_fork:height_1_9(),
@@ -193,9 +193,9 @@ end).
 	end
 end).
 
-%% The network height at the time when the USD to AR exchange rate was
+%% The network height at the time when the USD to BIG exchange rate was
 %% ?INITIAL_USD_TO_BIG(Height). Used to account for the change in inflation
-%% rewards when estimating the new USD to AR rate.
+%% rewards when estimating the new USD to BIG rate.
 -define(INITIAL_USD_TO_BIG_HEIGHT(Height), fun() ->
 	Forks = {
 		ar_fork:height_1_9(),
@@ -221,7 +221,7 @@ end).
 end).
 
 %% The base wallet generation fee in USD, defined as a fraction.
-%% The amount in AR depends on the current difficulty and height.
+%% The amount in BIG depends on the current difficulty and height.
 %% Used until the transition to the new fee calculation method is complete.
 -define(WALLET_GEN_FEE_USD, {1, 10}).
 
@@ -237,13 +237,13 @@ end).
 
 -define(STATIC_2_6_8_FEE_WINSTON, 858_000_000_000).
 
-%% The largest possible multiplier for a one-step increase of the USD to AR Rate.
+%% The largest possible multiplier for a one-step increase of the USD to BIG Rate.
 -define(USD_TO_BIG_MAX_ADJUSTMENT_UP_MULTIPLIER, {1005, 1000}).
 
-%% The largest possible multiplier for a one-step decrease of the USD to AR Rate.
+%% The largest possible multiplier for a one-step decrease of the USD to BIG Rate.
 -define(USD_TO_BIG_MAX_ADJUSTMENT_DOWN_MULTIPLIER, {995, 1000}).
 
-%% Reduce the USD to AR fraction if both the dividend and the devisor become bigger than this.
+%% Reduce the USD to BIG fraction if both the dividend and the devisor become bigger than this.
 -ifdef(AR_TEST).
 -define(USD_TO_BIG_FRACTION_REDUCTION_LIMIT, 1000000).
 -else.
@@ -259,10 +259,10 @@ end).
 -define(MINING_REWARD_MULTIPLIER, {2, 10}).
 -endif.
 
-%% The USD to AR exchange rate for a new chain, e.g. a testnet.
+%% The USD to BIG exchange rate for a new chain, e.g. a testnet.
 -define(NEW_WEAVE_USD_TO_BIG_RATE, ?INITIAL_USD_TO_BIG_PRE_FORK_2_5).
 
-%% Initial $/AR exchange rate. Used until the fork 2.4.
+%% Initial $/BIG exchange rate. Used until the fork 2.4.
 -define(INITIAL_USD_PER_BIG(Height), fun() ->
 	Forks = {
 		ar_fork:height_1_9(),

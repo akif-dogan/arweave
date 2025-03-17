@@ -48,8 +48,8 @@ basic_parse_test() ->
 	Config = <<"{
 		\"p3\": {
 			\"payments\": {
-				\"arweave/AR\": {
-					\"address\": \"BHAWuomQUIL18WON2LjqjDF4YuRDcmhme7wvFW2BDiU\",
+				\"bigfile/BIG\": {
+					\"address\": \"D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM\",
 					\"minimum_balance\": \"-1000000\",
 					\"confirmations\": 2
 				}
@@ -60,7 +60,7 @@ basic_parse_test() ->
 					\"mod_seq\": 1,
 					\"rate_type\": \"request\",
 					\"rates\": {
-						\"arweave/AR\": 1000
+						\"bigfile/BIG\": 1000
 					}
 				},
 				{
@@ -68,7 +68,7 @@ basic_parse_test() ->
 					\"mod_seq\": \"5\",
 					\"rate_type\": \"request\",
 					\"rates\": {					
-						\"arweave/AR\": \"100000\"
+						\"bigfile/BIG\": \"100000\"
 					}
 				}
 			]
@@ -82,8 +82,8 @@ checksum_parse_test() ->
 	Config = <<"{
 		\"p3\": {
 			\"payments\": {
-				\"arweave/AR\": {
-					\"address\": \"BHAWuomQUIL18WON2LjqjDF4YuRDcmhme7wvFW2BDiU:ToOiTg\",
+				\"bigfile/BIG\": {
+					\"address\": \"D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM:ToOiTg\",
 					\"minimum_balance\": \"-1000000\",
 					\"confirmations\": 2
 				}
@@ -94,7 +94,7 @@ checksum_parse_test() ->
 					\"mod_seq\": 1,
 					\"rate_type\": \"request\",
 					\"rates\": {
-						\"arweave/AR\": 1000
+						\"bigfile/BIG\": 1000
 					}
 				},
 				{
@@ -102,7 +102,7 @@ checksum_parse_test() ->
 					\"mod_seq\": \"5\",
 					\"rate_type\": \"request\",
 					\"rates\": {					
-						\"arweave/AR\": \"100000\"
+						\"bigfile/BIG\": \"100000\"
 					}
 				}
 			]
@@ -117,7 +117,7 @@ unsupported_payments_asset_parse_error_test() ->
 		\"p3\": {
 			\"payments\": {
 				\"bitcoin/BTC\": {
-					\"address\": \"BHAWuomQUIL18WON2LjqjDF4YuRDcmhme7wvFW2BDiU\",
+					\"address\": \"D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM\",
 					\"minimum_balance\": \"-1000000\",
 					\"confirmations\": 2
 				}
@@ -132,8 +132,8 @@ bad_address_parse_error_test() ->
 	Config = <<"{
 		\"p3\": {
 			\"payments\": {
-				\"arweave/AR\": {
-					\"address\": \"BHAWuomQUIL18WON2LjqjDF4YuRDcmhme7wvFW2BDiU:BAD_CHECKSUM\",
+				\"bigfile/BIG\": {
+					\"address\": \"D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM:BAD_CHECKSUM\",
 					\"minimum_balance\": \"-1000000\",
 					\"confirmations\": 2
 				}
@@ -148,8 +148,8 @@ bad_minimum_balance_parse_error_test() ->
 	Config = <<"{
 		\"p3\": {
 			\"payments\": {
-				\"arweave/AR\": {
-					\"address\": \"BHAWuomQUIL18WON2LjqjDF4YuRDcmhme7wvFW2BDiU\",
+				\"bigfile/BIG\": {
+					\"address\": \"D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM\",
 					\"minimum_balance\": \"5.5\",
 					\"confirmations\": 2
 				}
@@ -164,8 +164,8 @@ bad_confirmations_parse_error_test() ->
 	Config = <<"{
 		\"p3\": {
 			\"payments\": {
-				\"arweave/AR\": {
-					\"address\": \"BHAWuomQUIL18WON2LjqjDF4YuRDcmhme7wvFW2BDiU\",
+				\"bigfile/BIG\": {
+					\"address\": \"D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM\",
 					\"minimum_balance\": \"-1000000\",
 					\"confirmations\": \"abc\"
 				}
@@ -180,8 +180,8 @@ bad_payments_token_error_test() ->
 	Config = <<"{
 		\"p3\": {
 			\"payments\": {
-				\"arweave/AR\": {
-					\"address\": \"BHAWuomQUIL18WON2LjqjDF4YuRDcmhme7wvFW2BDiU\",
+				\"bigfile/BIG\": {
+					\"address\": \"D2z8wfCSpkcP3pw23l6p-Yw6GMuwlZUM0i2dSCpZIrM\",
 					\"minimum_balance\": \"-1000000\",
 					\"confirmations\": 2,
 					\"invalid\": \"field\"
@@ -201,7 +201,7 @@ no_service_list_parse_error_test() ->
 				\"mod_seq\": 1,
 				\"rate_type\": \"request\",
 				\"rates\": {
-					\"arweave/AR\": \"1000\"
+					\"bigfile/BIG\": \"1000\"
 				}
 			}
 		}
@@ -218,7 +218,7 @@ bad_service_token_parse_error_test() ->
 				\"invalid\": \"value\",
 				\"rate_type\": \"request\",
 				\"rates\": {
-					\"arweave/AR\": \"1000\"
+					\"bigfile/BIG\": \"1000\"
 				}
 			}]
 		}
@@ -234,7 +234,7 @@ modseq_not_integer_parse_error_test() ->
 				\"mod_seq\": \"a\",
 				\"rate_type\": \"request\",
 				\"rates\": {
-					\"arweave/AR\": \"1000\"
+					\"bigfile/BIG\": \"1000\"
 				}
 			}]
 		}
@@ -250,7 +250,7 @@ bad_rates_token_parse_error_test() ->
 				\"mod_seq\": 1,
 				\"rate_type\": \"request\",
 				\"rates\": {
-					\"arweave/AR\": \"1000\",
+					\"bigfile/BIG\": \"1000\",
 					\"invalid\": \"value\"
 				}
 			}]
@@ -775,8 +775,8 @@ test_rates_endpoint() ->
 		?assertEqual(
 			#{
 				<<"payment_methods">> => #{
-					<<"arweave">> => #{
-						<<"AR">> => #{
+					<<"bigfile">> => #{
+						<<"BIG">> => #{
 							<<"minimum_balance">> => -100,
 							<<"confirmations">> => 3,
 							<<"address">> => EncodedDepositAddress
@@ -787,8 +787,8 @@ test_rates_endpoint() ->
 					#{
 						<<"rates">> => #{
 							<<"description">> => <<"Price per request">>,
-							<<"arweave">> => #{
-								<<"AR">> => #{
+							<<"bigfile">> => #{
+								<<"BIG">> => #{
 									<<"price">> => 1000,
 									<<"address">> => EncodedDepositAddress
 								}
@@ -800,8 +800,8 @@ test_rates_endpoint() ->
 					#{
 						<<"rates">> => #{
 							<<"description">> => <<"Price per request">>,
-							<<"arweave">> => #{
-								<<"AR">> => #{
+							<<"bigfile">> => #{
+								<<"BIG">> => #{
 									<<"price">> => 100000,
 									<<"address">> => EncodedDepositAddress
 								}

@@ -398,21 +398,21 @@ test_balance_endpoint() ->
 	BadChecksum = crypto:strong_rand_bytes(6),
 	?assertEqual(
 		{<<"400">>, <<"Invalid address.">>},
-		get_balance(BadAddress, BadChecksum, <<"arweave">>, <<"AR">>)),
+		get_balance(BadAddress, BadChecksum, <<"bigfile">>, <<"BIG">>)),
 
 	?assertEqual(
 		{<<"200">>, <<"0">>},
-		get_balance(crypto:strong_rand_bytes(32), <<"arweave">>, <<"AR">>)),
+		get_balance(crypto:strong_rand_bytes(32), <<"bigfile">>, <<"BIG">>)),
 
 	TXID = crypto:strong_rand_bytes(32),
 	{ok, _} = ar_p3_db:post_deposit(Address, 10, TXID),
 	?assertEqual(
 		{<<"200">>, <<"10">>},
-		get_balance(Address, <<"arweave">>, <<"AR">>)),
+		get_balance(Address, <<"bigfile">>, <<"BIG">>)),
 
 	?assertEqual(
 		{<<"200">>, <<"10">>},
-		get_balance(Address, Checksum, <<"arweave">>, <<"AR">>)),
+		get_balance(Address, Checksum, <<"bigfile">>, <<"BIG">>)),
 
 	?assertEqual(
 		{<<"200">>, <<"0">>},
@@ -965,7 +965,7 @@ concat(Elements) ->
     lists:concat(NonBinaryElements).
 
 get_balance(Address) ->
-	get_balance(Address, <<"arweave">>, <<"AR">>).
+	get_balance(Address, <<"bigfile">>, <<"BIG">>).
 
 get_balance(Address, Checksum, Network, Token) ->
 	EncodedAddress = list_to_binary([ar_util:encode(Address), ":", ar_util:encode(Checksum)]),

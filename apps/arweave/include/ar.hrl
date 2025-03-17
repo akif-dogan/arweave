@@ -98,7 +98,7 @@
 %% The total supply of tokens in the Genesis block.
 -define(GENESIS_TOKENS, 200000000).
 
-%% Winstons per AR.
+%% Winstons per BIG.
 -define(WINSTON_PER_BIG, 1000000000000).
 
 %% The number of bytes in a gibibyte.
@@ -529,11 +529,11 @@
 	size_tagged_txs = unset,
 	%% The first proof of access.
 	poa = #poa{},
-	%% The estimated USD to AR conversion rate used in the pricing calculations.
+	%% The estimated USD to BIG conversion rate used in the pricing calculations.
 	%% A tuple {Dividend, Divisor}.
 	%% Used until the transition to the new fee calculation method is complete.
 	usd_to_big_rate,
-	%% The estimated USD to AR conversion rate scheduled to be used a bit later, used to
+	%% The estimated USD to BIG conversion rate scheduled to be used a bit later, used to
 	%% compute the necessary fee for the currently signed txs. A tuple {Dividend, Divisor}.
 	%% Used until the transition to the new fee calculation method is complete.
 	scheduled_usd_to_big_rate,
@@ -612,7 +612,7 @@
 	%% ?RESET_KRYDER_PLUS_LATCH_THRESHOLD (redenominated according to the denomination
 	%% used at the time).
 	kryder_plus_rate_multiplier_latch = 0,
-	%% The code for the denomination of AR in base units.
+	%% The code for the denomination of BIG in base units.
 	%% 1 is the default which corresponds to the original denomination of 1^12 base units.
 	%% Every time the available supply falls below ?REDENOMINATION_THRESHOLD,
 	%% the denomination is multiplied by 1000, the code is incremented.
@@ -729,7 +729,7 @@
 	%% The fee in Winstons.
 	reward = 0,
 
-	%% The code for the denomination of AR in base units.
+	%% The code for the denomination of BIG in base units.
 	%%
 	%% 1 corresponds to the original denomination of 1^12 base units.
 	%% Every time the available supply falls below ?REDENOMINATION_THRESHOLD,
@@ -753,7 +753,7 @@
 	signature_type = ?DEFAULT_KEY_TYPE
 }).
 
-%% A macro to convert AR into Winstons.
+%% A macro to convert BIG into Winstons.
 -define(BIG(BIG), (?WINSTON_PER_BIG * BIG)).
 
 %% A macro to return whether a term is a block record.

@@ -454,7 +454,7 @@ get_miner_reward_and_endowment_pool(Args) ->
 			{BaseReward + Take, Pool2 - Take}
 	end.
 
-%% @doc Return the effective USD to AR rate corresponding to the given block
+%% @doc Return the effective USD to BIG rate corresponding to the given block
 %% considering its previous block.
 usd_to_big_rate(#block{ height = PrevHeight } = PrevB) ->
 	Height_2_5 = ar_fork:height_2_5(),
@@ -466,7 +466,7 @@ usd_to_big_rate(#block{ height = PrevHeight } = PrevB) ->
 			PrevB#block.usd_to_big_rate
 	end.
 
-%% @doc Return the amount of AR the given number of USD is worth.
+%% @doc Return the amount of BIG the given number of USD is worth.
 usd_to_big(USD, Rate, Height) when is_number(USD) ->
 	usd_to_big({USD, 1}, Rate, Height);
 usd_to_big({Dividend, Divisor}, Rate, Height) ->
@@ -501,7 +501,7 @@ recalculate_usd_to_big_rate(#block{ height = PrevHeight } = B) ->
 
 %% @doc Return an estimation for the minimum required decline rate making the given
 %% Amount (in Winston) sufficient to subsidize storage for Period seconds starting from
-%% Timestamp and assuming the given USD to AR rate.
+%% Timestamp and assuming the given USD to BIG rate.
 %% When computing the exponent, the function accounts for the first 16 summands in
 %% the Taylor series. The fraction is reduced to the 1/1000000 precision.
 get_expected_min_decline_rate(Timestamp, Period, Amount, Size, Rate, Height) ->
