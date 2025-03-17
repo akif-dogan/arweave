@@ -454,7 +454,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 	ar_events:send(node_state, {initialized, B}),
 	ar_events:send(node_state, {checkpoint_block, 
 		ar_block_cache:get_checkpoint_block(RecentBI)}),
-	ar:console("Joined the Arweave network successfully at the block ~s, height ~B.~n",
+	ar:console("Joined the BigFile network successfully at the block ~s, height ~B.~n",
 			[ar_util:encode(Current), Height]),
 	?LOG_INFO([{event, joined_the_network}, {block, ar_util:encode(Current)},
 			{height, Height}]),
@@ -1545,15 +1545,15 @@ record_economic_metrics2(B, PrevB) ->
 	end,
 	%% 2.5 metrics:
 	prometheus_gauge:set(network_burden, Burden),
-	Burden_10_USD_AR = ar_pricing:get_storage_cost(B#block.weave_size, B#block.timestamp,
+	Burden_10_USD_BIG = ar_pricing:get_storage_cost(B#block.weave_size, B#block.timestamp,
 			{1, 10}, B#block.height),
-	prometheus_gauge:set(network_burden_10_usd_ar, Burden_10_USD_AR),
+	prometheus_gauge:set(network_burden_10_usd_big, Burden_10_USD_BIG),
 	Burden_200_Years = Burden - ar_pricing:get_storage_cost(B#block.weave_size,
 			B#block.timestamp + Period_200_Years, B#block.usd_to_big_rate, B#block.height),
 	prometheus_gauge:set(network_burden_200_years, Burden_200_Years),
-	Burden_200_Years_10_USD_AR = Burden_10_USD_AR - ar_pricing:get_storage_cost(
+	Burden_200_Years_10_USD_BIG = Burden_10_USD_BIG - ar_pricing:get_storage_cost(
 			B#block.weave_size, B#block.timestamp + Period_200_Years, {1, 10}, B#block.height),
-	prometheus_gauge:set(network_burden_200_years_10_usd_ar, Burden_200_Years_10_USD_AR),
+	prometheus_gauge:set(network_burden_200_years_10_usd_big, Burden_200_Years_10_USD_BIG),
 	case catch ar_pricing:get_expected_min_decline_rate(B#block.timestamp,
 			Period_200_Years, B#block.reward_pool, B#block.weave_size, B#block.usd_to_big_rate,
 			B#block.height) of
@@ -1570,7 +1570,7 @@ record_economic_metrics2(B, PrevB) ->
 			?LOG_ERROR([{event, failed_to_compute_expected_min_decline_rate2}]);
 		{RateDivisor2, RateDividend2} ->
 			prometheus_gauge:set(
-					expected_minimum_200_years_storage_costs_decline_rate_10_usd_ar,
+					expected_minimum_200_years_storage_costs_decline_rate_10_usd_big,
 					ar_util:safe_divide(RateDivisor2, RateDividend2))
 	end.
 
