@@ -60,7 +60,7 @@ name(StoreID) ->
 	list_to_atom("ar_chunk_storage_" ++ ar_storage_module:label_by_id(StoreID)).
 
 register_workers() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	ConfiguredWorkers = lists:map(
 		fun(StorageModule) ->
 			StoreID = ar_storage_module:id(StorageModule),
@@ -271,7 +271,7 @@ delete(PaddedOffset, StoreID) ->
 
 %% @doc Run defragmentation of chunk files if enabled
 run_defragmentation() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case Config#config.run_defragmentation of
 		false ->
 			ok;
@@ -334,7 +334,7 @@ read_offset(PaddedOffset, StoreID) ->
 init({"default" = StoreID, _}) ->
 	%% Trap exit to avoid corrupting any open files on quit..
 	process_flag(trap_exit, true),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	DataDir = Config#config.data_dir,
 	Dir = get_storage_module_path(DataDir, StoreID),
 	ok = filelib:ensure_dir(Dir ++ "/"),
@@ -355,7 +355,7 @@ init({"default" = StoreID, _}) ->
 init({StoreID, RepackInPlacePacking}) ->
 	%% Trap exit to avoid corrupting any open files on quit..
 	process_flag(trap_exit, true),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	DataDir = Config#config.data_dir,
 	Dir = get_storage_module_path(DataDir, StoreID),
 	ok = filelib:ensure_dir(Dir ++ "/"),
@@ -619,11 +619,11 @@ maybe_log_repacking_complete(State) ->
 	end.
 
 get_chunk_group_size() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Config#config.chunk_storage_file_size.
 
 get_filepath(Name, StoreID) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	DataDir = Config#config.data_dir,
 	ChunkDir = get_chunk_storage_path(DataDir, StoreID),
 	filename:join([ChunkDir, Name]).
@@ -955,7 +955,7 @@ defrag_files([Filepath | Rest]) ->
 	defrag_files(Rest).
 
 update_sizes_file([], Sizes) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	SizesFile = filename:join(Config#config.data_dir, "chunks_sizes"),
 	case file:open(SizesFile, [write, raw]) of
 		{error, Reason} ->

@@ -280,7 +280,7 @@ test_single_regossip(_) ->
 	).
 
 test_node_blacklisting_get_spammer() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	{RequestFun, ErrorResponse} = get_fun_msg_pair(get_info),
 	node_blacklisting_test_frame(
 		RequestFun,
@@ -290,7 +290,7 @@ test_node_blacklisting_get_spammer() ->
 	).
 
 test_node_blacklisting_post_spammer() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	{RequestFun, ErrorResponse} = get_fun_msg_pair(send_tx_binary),
 	NErrors = 11,
 	NRequests = Config#config.requests_per_minute_limit div 2 + NErrors,
@@ -780,9 +780,9 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet"
 		}),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	try
-		application:set_env(arweave, config,
+		application:set_env(bigfile, config,
 				Config#config{ internal_api_secret = <<"correct_secret">> }),
 		{ok, {{<<"421">>, _}, _, _, _, _}} =
 			ar_http:req(#{
@@ -798,7 +798,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				path => "/wallet",
 				headers => [{<<"X-Internal-Api-Secret">>, <<"correct_secret">>}]
 			}),
-		application:set_env(arweave, config, Config#config{ internal_api_secret = not_set }),
+		application:set_env(bigfile, config, Config#config{ internal_api_secret = not_set }),
 		{CreateWalletRes} = ar_serialize:dejsonify(CreateWalletBody),
 		[WalletAccessCode] = proplists:get_all_values(<<"wallet_access_code">>, CreateWalletRes),
 		[Address] = proplists:get_all_values(<<"wallet_address">>, CreateWalletRes),
@@ -837,7 +837,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				path => "/unsigned_tx",
 				body => ar_serialize:jsonify({UnsignedTXProps})
 			}),
-		application:set_env(arweave, config,
+		application:set_env(bigfile, config,
 				Config#config{ internal_api_secret = <<"correct_secret">> }),
 		{ok, {{<<"421">>, _}, _, _, _, _}} =
 			ar_http:req(#{
@@ -855,7 +855,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				headers => [{<<"X-Internal-Api-Secret">>, <<"correct_secret">>}],
 				body => ar_serialize:jsonify({UnsignedTXProps})
 			}),
-		application:set_env(arweave, config, Config#config{ internal_api_secret = not_set }),
+		application:set_env(bigfile, config, Config#config{ internal_api_secret = not_set }),
 		{Res} = ar_serialize:dejsonify(Body),
 		TXID = proplists:get_value(<<"id">>, Res),
 		timer:sleep(200),
@@ -876,7 +876,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 			maps:from_list(GetTXRes)
 		)
 	after
-		ok = application:set_env(arweave, config, Config)
+		ok = application:set_env(bigfile, config, Config)
 	end.
 
 %% @doc Ensure the HTTP client stops fetching data from an endpoint when its data size

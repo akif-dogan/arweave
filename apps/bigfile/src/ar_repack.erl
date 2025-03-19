@@ -367,7 +367,7 @@ read_chunk_and_data_path(StoreID, ChunkDataKey, AbsoluteOffset, MaybeChunk) ->
 %% @doc By default we repack `repack_batch_size` chunks at a time. However we don't want
 %% a single repack batch to cross a sector boundary.
 get_repack_interval_size(Cursor, RangeStart) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	SectorSize = ar_replica_2_9:get_sector_size(),
 	RepackBatchSize = ?DATA_CHUNK_SIZE * Config#config.repack_batch_size,
 	RangeStart2 = ar_chunk_storage:get_chunk_bucket_start(RangeStart + 1),

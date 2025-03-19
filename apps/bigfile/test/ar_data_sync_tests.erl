@@ -13,7 +13,7 @@ recovers_from_corruption_test_() ->
 
 test_recovers_from_corruption() ->
 	ar_test_data_sync:setup_nodes(),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	StoreID = ar_storage_module:id(hd(ar_storage_module:get_all(262144 * 3))),
 	?debugFmt("Corrupting ~s...", [StoreID]),
 	[ar_chunk_storage:write_chunk(PaddedEndOffset, << 0:(262144*8) >>, #{}, StoreID)
@@ -159,7 +159,7 @@ test_mines_off_only_last_chunks() ->
 					%% bound based on the nonce limiter entropy reset, but ar_data_sync waits
 					%% for ?SEARCH_SPACE_UPPER_BOUND_DEPTH confirmations before packing the
 					%% chunks.
-					{ok, Config} = application:get_env(arweave, config),
+					{ok, Config} = application:get_env(bigfile, config),
 					lists:foreach(
 						fun(O) ->
 							[ar_chunk_storage:delete(O, ar_storage_module:id(Module))
@@ -209,7 +209,7 @@ test_mines_off_only_second_last_chunks() ->
 					%% bound based on the nonce limiter entropy reset, but ar_data_sync waits
 					%% for ?SEARCH_SPACE_UPPER_BOUND_DEPTH confirmations before packing the
 					%% chunks.
-					{ok, Config} = application:get_env(arweave, config),
+					{ok, Config} = application:get_env(bigfile, config),
 					lists:foreach(
 						fun(O) ->
 							[ar_chunk_storage:delete(O, ar_storage_module:id(Module))

@@ -52,7 +52,7 @@ init([]) ->
 		true ->
 			gen_server:cast(?MODULE, pull)
 	end,
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Now =  erlang:system_time(millisecond),
 	RawPeersWithTimestamp = queue:from_list([{RawPeer, Now-?PULL_THROTTLE_MS}
 			|| RawPeer <- Config#config.nonce_limiter_server_trusted_peers]),

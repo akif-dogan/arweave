@@ -19,7 +19,7 @@ get_labeling(ApexDomain, CustomDomains, Hostname) ->
 	end.
 
 lookup_arweave_txt_record(Domain) ->
-	case inet_res:lookup("_arweave." ++ binary_to_list(Domain), in, txt) of
+	case inet_res:lookup("_bigfile." ++ binary_to_list(Domain), in, txt) of
 		[] ->
 			not_found;
 		[RecordChunks|_] ->

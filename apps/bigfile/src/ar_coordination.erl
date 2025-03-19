@@ -104,14 +104,14 @@ garbage_collect() ->
 
 %% Return true if we are an exit peer in the coordinated mining setup.
 is_exit_peer() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Config#config.coordinated_mining == true andalso
 			Config#config.cm_exit_peer == not_set.
 
 %% Return true if we are a CM miner in the coordinated mining setup.
 %% A CM miner may be but does not have to be an exit node.
 is_coordinated_miner() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Config#config.coordinated_mining == true.
 
 %% @doc Return a list of unique partitions including local partitions and all of
@@ -162,7 +162,7 @@ get_cluster_partitions_list() ->
 %%%===================================================================
 
 init([]) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	
 	ar_util:cast_after(?BATCH_POLL_INTERVAL_MS, ?MODULE, check_batches),
 	State = #state{
@@ -270,7 +270,7 @@ handle_cast({computed_h2_for_peer, Candidate}, State) ->
 	{noreply, State};
 
 handle_cast(refetch_peer_partitions, State) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Peers = Config#config.cm_peers,
 	Peers2 =
 		case Config#config.cm_exit_peer == not_set

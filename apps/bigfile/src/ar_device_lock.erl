@@ -101,7 +101,7 @@ start_link() ->
 
 init([]) ->
 	gen_server:cast(self(), initialize_state),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	?LOG_INFO([{event, starting_device_lock_server},
 		{num_replica_2_9_workers, Config#config.replica_2_9_workers}]),
 	{ok, #state{num_replica_2_9_workers = Config#config.replica_2_9_workers}}.
@@ -158,7 +158,7 @@ handle_info(Message, State) ->
 %%%===================================================================
 
 initialize_state(State) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	StorageModules = Config#config.storage_modules,
 	RepackInPlaceModules = [element(1, El)
 			|| El <- Config#config.repack_in_place_storage_modules],
@@ -184,7 +184,7 @@ initialize_state(State) ->
 	State2.
 
 get_system_device(StorageModule) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	StoreID = ar_storage_module:id(StorageModule),
 	Path = ar_chunk_storage:get_chunk_storage_path(Config#config.data_dir, StoreID),
 	Device = ar_util:get_system_device(Path),

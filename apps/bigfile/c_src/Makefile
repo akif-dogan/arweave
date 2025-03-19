@@ -68,10 +68,10 @@ CXXFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR) -I ../l
 LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -L /usr/local/lib -lei -lssl -lcrypto
 
 
-RX512_OUTPUT ?= $(CURDIR)/../priv/rx512_arweave.so
-RX4096_OUTPUT ?= $(CURDIR)/../priv/rx4096_arweave.so
-RXSQUARED_OUTPUT ?= $(CURDIR)/../priv/rxsquared_arweave.so
-VDF_OUTPUT ?= $(CURDIR)/../priv/vdf_arweave.so
+RX512_OUTPUT ?= $(CURDIR)/../priv/rx512_bigfile.so
+RX4096_OUTPUT ?= $(CURDIR)/../priv/rx4096_bigfile.so
+RXSQUARED_OUTPUT ?= $(CURDIR)/../priv/rxsquared_bigfile.so
+VDF_OUTPUT ?= $(CURDIR)/../priv/vdf_bigfile.so
 
 COMMON_RANDOMX_SOURCES = $(wildcard $(C_SRC_DIR)/randomx/*.c $(C_SRC_DIR)/randomx/*.cpp)
 RX512_SOURCES = $(COMMON_RANDOMX_SOURCES) $(wildcard $(C_SRC_DIR)/*.c $(C_SRC_DIR)/randomx/rx512/*.c)
@@ -119,7 +119,7 @@ SECP256K1_SOURCES = $(wildcard $(C_SRC_DIR)/*.c $(C_SRC_DIR)/secp256k1/*.c)
 SECP256K1_OBJECTS = $(addsuffix .o, $(basename $(SECP256K1_SOURCES)))
 SECP256K1_CFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR) -I /usr/local/include -I $(CURDIR)/../lib/secp256k1/src -I $(CURDIR)/../lib/secp256k1/include -I $(C_SRC_DIR)
 SECP256K1_LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -L /usr/local/lib -lssl -lcrypto
-SECP256K1_OUTPUT ?= $(CURDIR)/../priv/secp256k1_arweave.so
+SECP256K1_OUTPUT ?= $(CURDIR)/../priv/secp256k1_bigfile.so
 
 $(SECP256K1_OUTPUT): $(SECP256K1_OBJECTS)
 	@mkdir -p $(BASEDIR)/priv/

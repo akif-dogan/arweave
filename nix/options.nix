@@ -1,11 +1,11 @@
-{ lib, defaultArweaveConfigFile ? null, defaultArweavePackage ? null }:
+{ lib, defaultBigfileConfigFile ? null, defaultBigfilePackage ? null }:
 let
   inherit (lib) mkEnableOption literalExpression mkOption mkOptionals mkForce mkForceOption types;
 in
 {
 
   enable = mkEnableOption ''
-    Enable arweave node as systemd service
+    Enable bigfile node as systemd service
   '';
 
   peer = mkOption {
@@ -37,25 +37,25 @@ in
 
   package = mkOption {
     type = types.package;
-    default = defaultArweavePackage;
-    defaultText = literalExpression "pkgs.arweave";
-    example = literalExpression "pkgs.arweave";
+    default = defaultBigfilePackage;
+    defaultText = literalExpression "pkgs.bigfile";
+    example = literalExpression "pkgs.bigfile";
     description = ''
-      The Arweave expression to use
+      The Bigfile expression to use
     '';
   };
 
   dataDir = mkOption {
     type = types.path;
-    default = "/arweave-data";
+    default = "/bigfile-data";
     description = ''
-      Data directory path for arweave node.
+      Data directory path for bigfile node.
     '';
   };
 
   logDir = mkOption {
     type = types.path;
-    default = "/var/lib/arweave/logs";
+    default = "/var/lib/bigfile/logs";
     description = ''
       Logging directory path.
     '';
@@ -63,7 +63,7 @@ in
 
   crashDumpsDir = mkOption {
     type = types.path;
-    default = "/var/lib/arweave/dumps";
+    default = "/var/lib/bigfile/dumps";
     description = ''
       Crash dumps directory path.
     '';
@@ -100,14 +100,14 @@ in
 
   user = mkOption {
     type = types.str;
-    default = "arweave";
-    description = "Run Arweave Node under this user.";
+    default = "bigfile";
+    description = "Run Bigfile Node under this user.";
   };
 
   group = mkOption {
     type = types.str;
     default = "users";
-    description = "Run Arweave Node under this group.";
+    description = "Run Bigfile Node under this group.";
   };
 
   transactionBlacklists = mkOption {

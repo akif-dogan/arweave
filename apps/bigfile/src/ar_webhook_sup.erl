@@ -28,7 +28,7 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Children = lists:map(
 		fun
 			(Hook) when is_record(Hook, config_webhook) ->

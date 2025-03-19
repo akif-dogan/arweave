@@ -26,8 +26,8 @@ rxsquared_hash_nif(_State, _Data, _JIT, _LargePages, _HardwareAES) ->
 	erlang:nif_error(nif_not_loaded).
 
 init_nif() ->
-	PrivDir = code:priv_dir(arweave),
-	ok = erlang:load_nif(filename:join([PrivDir, "rxsquared_arweave"]), 0).
+	PrivDir = code:priv_dir(bigfile),
+	ok = erlang:load_nif(filename:join([PrivDir, "rxsquared_bigfile"]), 0).
 
 %%%===================================================================
 %%% Randomx square packing

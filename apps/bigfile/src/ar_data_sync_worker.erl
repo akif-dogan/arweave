@@ -37,7 +37,7 @@ start_link(Name) ->
 %%%===================================================================
 
 init(Name) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	{ok, #state{
 		name = Name,
 		request_packed_chunks = Config#config.data_sync_request_packed_chunks

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
 SCRIPT_DIR=$(dirname ${0})
-ARWEAVE=${SCRIPT_DIR}/bigfile
-${ARWEAVE} wallet create rsa ${*}
+BIGFILE=${SCRIPT_DIR}/bigfile
+${BIGFILE} wallet create rsa ${*}

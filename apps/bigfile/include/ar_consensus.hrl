@@ -206,7 +206,7 @@ end()).
 -define(SPORA_SEARCH_SPACE_SUBSPACES_COUNT, 1024).
 
 %% The key to initialize the RandomX state from, for RandomX packing.
--define(RANDOMX_PACKING_KEY, <<"default arweave 2.5 pack key">>).
+-define(RANDOMX_PACKING_KEY, <<"default bigfile 2.5 pack key">>).
 
 -define(RANDOMX_HASHING_MODE_FAST, 0).
 -define(RANDOMX_HASHING_MODE_LIGHT, 1).

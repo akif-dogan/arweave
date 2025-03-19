@@ -40,7 +40,7 @@ webhooks_test_() ->
 test_webhooks() ->
 	{_, Pub} = Wallet = ar_wallet:new(),
 	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	try
 		Port = ar_test_node:get_unused_port(),
 		PortBinary = integer_to_binary(Port),
@@ -192,7 +192,7 @@ test_webhooks() ->
 		assert_transaction_data_synced(V2TXID),
 		cowboy:stop_listener(ar_webhook_test_listener)
 	after
-		application:set_env(arweave, config, Config#config{ webhooks = [] })
+		application:set_env(bigfile, config, Config#config{ webhooks = [] })
 	end.
 
 create_v2_tx(Wallet) ->
@@ -240,7 +240,7 @@ upload_chunks([Proof | Proofs]) ->
 	upload_chunks(Proofs).
 
 random_tx_blacklist_filename() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	filename:join(Config#config.data_dir,
 		"ar-webhook-tests-transaction-blacklist-"
 		++

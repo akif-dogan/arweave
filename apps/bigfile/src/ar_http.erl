@@ -39,7 +39,7 @@ unblock_peer_connections() ->
 req(#{ peer := {_, _} } = Args) ->
 	req(Args, false);
 req(#{ peer := Peer } = Args) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case Config#config.port == element(5, Peer) of
 		true ->
 			%% Do not block requests to self.
@@ -389,7 +389,7 @@ await_response( #{ pid := PID, stream_ref := Ref, timeout := Timeout
 	end.
 
 log(Type, Event, #{method := Method, peer := Peer, path := Path}, Reason) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case lists:member(http_logging, Config#config.enable) of
 		true when Type == warn ->
 			?LOG_WARNING([

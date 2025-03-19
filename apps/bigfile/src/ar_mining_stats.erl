@@ -972,7 +972,7 @@ test_data_size_stats() ->
 		do_test_data_size_stats({composite, <<"MINING">>, 1}, {composite, <<"PACKING">>, 1}),
 		do_test_data_size_stats({composite, <<"MINING">>, 2}, {composite, <<"PACKING">>, 2})
 	after
-		application:set_env(arweave, config, Config)
+		application:set_env(bigfile, config, Config)
 	end.
 
 do_test_data_size_stats(Mining, Packing) ->
@@ -1282,7 +1282,7 @@ test_report_poa1_multiple_2() ->
 	test_report({composite, <<"MINING">>, 2}, {composite, <<"PACKING">>, 2}, 2).
 
 test_report(Mining, Packing, PoA1Multiplier) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	MiningAddress = case Mining of
 		{spora_2_6, Addr} ->
 			Addr;
@@ -1324,7 +1324,7 @@ test_report(Mining, Packing, PoA1Multiplier) ->
 	],
 	
 	try	
-		application:set_env(arweave, config,
+		application:set_env(bigfile, config,
 			Config#config{
 				storage_modules = StorageModules,
 				mining_addr = MiningAddress
@@ -1496,5 +1496,5 @@ test_report(Mining, Packing, PoA1Multiplier) ->
 		},
 		Report2)
 	after
-		application:set_env(arweave, config, Config)
+		application:set_env(bigfile, config, Config)
 	end.

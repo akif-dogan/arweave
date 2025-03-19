@@ -93,7 +93,7 @@ init([]) ->
 	%% Read persisted mempool.
 	ar_mempool:load_from_disk(),
 	%% Join the network.
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	validate_trusted_peers(Config),
 	StartFromLocalState = Config#config.start_from_latest_state orelse
 			Config#config.start_from_block /= undefined,
@@ -125,7 +125,7 @@ init([]) ->
 			end;
 		{false, true, _} ->
 			Config2 = Config#config{ init = false },
-			application:set_env(arweave, config, Config2),
+			application:set_env(bigfile, config, Config2),
 			InitialBalance = ?BIG(?LOCALNET_BALANCE),
 			[B0] = ar_weave:init([{Config#config.mining_addr, InitialBalance, <<>>}],
 					ar_retarget:switch_to_linear_diff(Config#config.diff)),
@@ -217,7 +217,7 @@ validate_trusted_peers(Config) ->
 			timer:sleep(2000),
 			erlang:halt();
 		_ ->
-			application:set_env(arweave, config, Config#config{ peers = ValidPeers }),
+			application:set_env(bigfile, config, Config#config{ peers = ValidPeers }),
 			case lists:member(time_syncing, Config#config.disable) of
 				false ->
 					validate_clock_sync(ValidPeers);
@@ -824,7 +824,7 @@ maybe_rebase(#{ pending_rebase := {PrevH, H} } = State) ->
 maybe_rebase(State) ->
 	[{_, H}] = ets:lookup(node_state, current),
 	B = ar_block_cache:get(block_cache, H),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case B#block.reward_addr == Config#config.mining_addr of
 		false ->
 			{noreply, State};

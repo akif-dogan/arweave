@@ -22,8 +22,8 @@ block_to_binary_test_() ->
 
 test_block_to_binary() ->
 	{ok, Cwd} = file:get_cwd(),
-	BlockFixtureDir = filename:join(Cwd, "./apps/arweave/test/fixtures/blocks"),
-	TXFixtureDir = filename:join(Cwd, "./apps/arweave/test/fixtures/txs"),
+	BlockFixtureDir = filename:join(Cwd, "./apps/bigfile/test/fixtures/blocks"),
+	TXFixtureDir = filename:join(Cwd, "./apps/bigfile/test/fixtures/txs"),
 	{ok, BlockFixtures} = file:list_dir(BlockFixtureDir),
 	test_block_to_binary([filename:join(BlockFixtureDir, Name)
 			|| Name <- BlockFixtures], TXFixtureDir).

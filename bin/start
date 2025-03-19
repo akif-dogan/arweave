@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -e
 SCRIPT_DIR=$(dirname ${0})
-ARWEAVE=${SCRIPT_DIR}/bigfile
+BIGFILE=${SCRIPT_DIR}/bigfile
 
 while true; do
     echo Launching Erlang Virtual Machine...
-    if ${ARWEAVE} foreground ${*}
+    if ${BIGFILE} foreground ${*}
     then
         echo "BigFile Heartbeat: Server terminated safely."
         exit 0

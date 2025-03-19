@@ -7,7 +7,7 @@
 -define(SigDiv, binary:decode_unsigned(<<16#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141:256>>)).
 
 init() ->
-	PrivDir = code:priv_dir(arweave),
+	PrivDir = code:priv_dir(bigfile),
 	ok = erlang:load_nif(filename:join([PrivDir, "secp256k1_arweave"]), 0).
 
 sign_recoverable(_Digest, _PrivateBytes) ->

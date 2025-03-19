@@ -45,7 +45,7 @@ name(StoreID) ->
 
 
 register_workers(Module) ->
-    {ok, Config} = application:get_env(arweave, config),
+    {ok, Config} = application:get_env(bigfile , config),
     ConfiguredWorkers = lists:filtermap(
         fun(StorageModule) ->
             StoreID = ar_storage_module:id(StorageModule),

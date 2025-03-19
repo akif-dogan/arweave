@@ -27,7 +27,7 @@ help() ->
 	ar:console("                  any data busses that are shared across disks.~n"), 
 	ar:console("~n"), 
 	ar:console("Example:~n"), 
-	ar:console("data-doctor bench 60 /mnt/arweave-data 0,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
+	ar:console("data-doctor bench 60 /mnt/bigfile-data 0,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
 	ar:console("    1,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
 	ar:console("    2,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
 	ar:console("    3,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI~n"),

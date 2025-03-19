@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
 SCRIPT_DIR=$(dirname ${0})
-ARWEAVE=${SCRIPT_DIR}/bigfile
-${ARWEAVE} remote_console ${*}
+BIGFILE=${SCRIPT_DIR}/bigfile
+${BIGFILE} remote_console ${*}

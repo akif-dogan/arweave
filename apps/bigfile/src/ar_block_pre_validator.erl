@@ -66,7 +66,7 @@ pre_validate(B, Peer, ReceiveTimestamp) ->
 init([]) ->
 	gen_server:cast(?MODULE, pre_validate),
 	ok = ar_events:subscribe(block),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	ThrottleBySolutionInterval = Config#config.block_throttle_by_solution_interval,
 	ThrottleByIPInterval = Config#config.block_throttle_by_ip_interval,
 	{ok, #state{ throttle_by_ip_interval = ThrottleByIPInterval,
@@ -794,7 +794,7 @@ compute_hash(B, PrevCDiff) ->
 	end.
 
 post_block_reject_warn_and_error_dump(B, Step, Peer) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	ID = binary_to_list(ar_util:encode(crypto:strong_rand_bytes(16))),
 	File = filename:join(Config#config.data_dir, "invalid_block_dump_" ++ ID),
 	file:write_file(File, term_to_binary(B)),

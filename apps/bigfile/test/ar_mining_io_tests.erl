@@ -14,7 +14,7 @@ chunks_read(_Worker, WhichChunk, Candidate, RangeStart, ChunkOffsets) ->
 setup_all() ->
 	[B0] = ar_weave:init([], 1, ?WEAVE_SIZE),
 	RewardAddr = ar_wallet:to_address(ar_wallet:new_keyfile()),
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	StorageModules = lists:flatten(
 		[[{?PARTITION_SIZE, N, {spora_2_6, RewardAddr}}] || N <- lists:seq(0, 8)]),
 	ar_test_node:start(B0, RewardAddr, Config, StorageModules),
@@ -133,7 +133,7 @@ test_partitions() ->
 		ar_mining_io:get_partitions(trunc(5 * ?PARTITION_SIZE))).
 
 default_candidate() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	MiningAddr = Config#config.mining_addr,
 	#mining_candidate{
 		mining_address = MiningAddr
