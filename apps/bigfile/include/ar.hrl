@@ -1,9 +1,9 @@
-
+-ifndef(AR_HRL).
 -define(AR_HRL, true).
 
-%%% A collection of record structures used throughout the Bigfile server.
+%%% A collection of record structures used throughout the Arweave server.
 
-%% True if bigfile was launched with -setcookie=test
+%% True if arweave	 was launched with -setcookie=test
 %% (e.g. bin/test or bin/shell)
 -define(IS_TEST, erlang:get_cookie() == test).
 
@@ -22,7 +22,7 @@
 	-define(DEFAULT_NETWORK_NAME, "bigfile.V.1").
 -endif.
 
-%% The current release number of the bigfile client software.
+%% The current release number of the arweave client software.
 %% @deprecated Not used apart from being included in the /info response.
 -define(CLIENT_VERSION, 1).
 
