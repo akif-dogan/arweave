@@ -9,7 +9,7 @@
 execute(Req, Env) ->
 	case cowboy_req:header(<<"x-network">>, Req, <<?DEFAULT_NETWORK_NAME>>) of
 		<<?NETWORK_NAME>> ->
-			maybe_add_peer(ar_http_util:arweave_peer(Req), Req),
+			maybe_add_peer(ar_http_util:bigfile_peer(Req), Req),
 			{ok, Req, Env};
 		_ ->
 			case cowboy_req:method(Req) of

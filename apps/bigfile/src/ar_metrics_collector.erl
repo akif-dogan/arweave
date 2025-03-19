@@ -67,3 +67,5 @@ get_process_memory(Name) ->
 			{memory, Memory} = erlang:process_info(PID, memory),
 			Memory
 	end.
+
+{ok, Config} = application:get_env(bigfile, config),

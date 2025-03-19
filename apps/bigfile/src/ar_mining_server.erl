@@ -458,7 +458,7 @@ calculate_cache_limits(NumActivePartitions, PackingDifficulty) ->
 			div ?MiB
 	),
 
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	OverallCacheLimitMiB = case Config#config.mining_cache_size_mb of
 		undefined ->
 			MinimumCacheLimitMiB;
@@ -909,7 +909,7 @@ post_solution(error, _State) ->
 	?LOG_WARNING([{event, found_solution_but_could_not_build_a_block}]),
 	error;
 post_solution(Solution, State) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	post_solution(Config#config.cm_exit_peer, Solution, State).
 
 post_solution(not_set, Solution, #state{ is_pool_client = true }) ->
@@ -1105,7 +1105,7 @@ read_poa(RecallByte, ChunkOrSubChunk, Packing, Nonce) ->
 	end.
 
 dump_invalid_solution_data(Data) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	ID = binary_to_list(ar_util:encode(crypto:strong_rand_bytes(16))),
 	File = filename:join(Config#config.data_dir, "invalid_solution_data_dump_" ++ ID),
 	file:write_file(File, term_to_binary(Data)).
@@ -1261,11 +1261,11 @@ pause() ->
 	gen_server:cast(?MODULE, pause).
 
 setup() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Config.
 
 cleanup(Config) ->
-	application:set_env(arweave, config, Config).
+	application:set_env(bigfile, config, Config).
 
 calculate_cache_limits_test_() ->
 	{setup, fun setup/0, fun cleanup/1,
@@ -1277,8 +1277,8 @@ calculate_cache_limits_test_() ->
 	}.
 
 test_calculate_cache_limits_default() ->
-	{ok, Config} = application:get_env(arweave, config),
-	application:set_env(arweave, config, Config#config{
+	{ok, Config} = application:get_env(bigfile, config),
+	application:set_env(bigfile, config, Config#config{
 		mining_cache_size_mb = undefined
 	}),
 	?assertEqual(
@@ -1331,8 +1331,8 @@ test_calculate_cache_limits_default() ->
 	).
 
 test_calculate_cache_limits_custom_low() ->
-	{ok, Config} = application:get_env(arweave, config),
-	application:set_env(arweave, config, Config#config{
+	{ok, Config} = application:get_env(bigfile, config),
+	application:set_env(bigfile, config, Config#config{
 		mining_cache_size_mb = 1
 	}),
 	?assertEqual(
@@ -1385,8 +1385,8 @@ test_calculate_cache_limits_custom_low() ->
 	).
 
 test_calculate_cache_limits_custom_high() ->
-	{ok, Config} = application:get_env(arweave, config),
-	application:set_env(arweave, config, Config#config{
+	{ok, Config} = application:get_env(bigfile, config),
+	application:set_env(bigfile, config, Config#config{
 		mining_cache_size_mb = 500_000
 	}),
 	?assertEqual(

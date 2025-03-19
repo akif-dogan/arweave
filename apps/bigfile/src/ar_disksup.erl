@@ -47,7 +47,7 @@ start_link() ->
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 get_disk_space_check_frequency() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Config#config.disk_space_check_frequency.
 
 get_disk_data() ->
@@ -402,7 +402,7 @@ skip_to_eol([_ | T]) ->
 	skip_to_eol(T).
 
 get_storage_modules_paths() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	DataDir = Config#config.data_dir,
 	SMDirs = lists:map(
 		fun(StorageModule) ->

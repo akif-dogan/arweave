@@ -22,7 +22,7 @@ fetch(Start, End, StoreID, AllPeersIntervals) ->
 			UnsyncedIntervals = get_unsynced_intervals(Start, End2, StoreID),
 
 			Bucket = Start div ?NETWORK_DATA_BUCKET_SIZE,
-			{ok, Config} = application:get_env(arweave, config),
+			{ok, Config} = application:get_env(bigfile, config),
 			Peers =
 				case Config#config.sync_from_local_peers_only of
 					true ->

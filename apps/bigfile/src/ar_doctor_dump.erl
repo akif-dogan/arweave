@@ -17,14 +17,14 @@ help() ->
 	ar:console("  data_dir: Full path to your data_dir.~n"),
 	ar:console("  output_dir: Full path to a directory where the dumped data will be written.~n"),
 	ar:console("~nExample:~n"),
-	ar:console("data-doctor dump true ZR7zbobdw55a....pRpUabEkLD0V 100000 /mnt/arweave-data /mnt/output~n").
+	ar:console("data-doctor dump true ZR7zbobdw55a....pRpUabEkLD0V 100000 /mnt/bigfile-data /mnt/output~n").
 
 dump([IncludeTXs, H, MinHeight, DataDir, OutputDir]) ->
 	ok = filelib:ensure_dir(filename:join([OutputDir, "blocks", "dummy"])),
 	ok = filelib:ensure_dir(filename:join([OutputDir, "txs", "dummy"])),
 
 	Config = #config{data_dir = DataDir},
-	application:set_env(arweave, config, Config),
+	application:set_env(bigfile, config, Config),
 	ar_kv_sup:start_link(),
 	ar_storage_sup:start_link(),
 

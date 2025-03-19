@@ -54,7 +54,7 @@ label_req(Req) ->
 
 %% @doc Start the server
 start() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Semaphores = Config#config.semaphores,
 	maps:map(
 		fun(Name, N) ->

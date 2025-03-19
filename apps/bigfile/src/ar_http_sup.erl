@@ -27,4 +27,5 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
+	{ok, Config} = application:get_env(bigfile, config),
 	{ok, {{one_for_one, 5, 10}, [?CHILD(ar_http, worker)]}}.

@@ -77,10 +77,10 @@ init_debug(#config{ debug = true } = Config) ->
 			     },
     LoggerConfig = #{ config => DebugLoggerConfigDisk, level => Level },
     logger:add_handler(disk_debug_log, logger_std_h, LoggerConfig),
-    logger:set_application_level(arweave, Level);
+    logger:set_application_level(bigfile, Level);
 init_debug(_) ->
     Level = info,
-    logger:set_application_level(arweave, Level).
+    logger:set_application_level(bigfile, Level).
 
 %%--------------------------------------------------------------------
 %% @hidden
@@ -88,8 +88,8 @@ init_debug(_) ->
 %% @end
 %%--------------------------------------------------------------------
 log_filename(Opts) ->
-    Prefix = maps:get(prefix, Opts, "arweave"),
+    Prefix = maps:get(prefix, Opts, "bigfile"),
     Level = maps:get(level, Opts, info),
     NodeName = erlang:node(),
-    RawFileName = lists:join("-", ["arweave", NodeName, Level]),
+    RawFileName = lists:join("-", ["bigfile", NodeName, Level]),
     filename:flatten(RawFileName) ++ ".log".

@@ -29,7 +29,7 @@ set_dependent_flags(Config) ->
 	Config2.
 
 use_remote_vdf_server() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case Config#config.nonce_limiter_server_trusted_peers of
 		[] ->
 			false;
@@ -38,11 +38,11 @@ use_remote_vdf_server() ->
 	end.
 
 pull_from_remote_vdf_server() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	not lists:member(vdf_server_pull, Config#config.disable).
 
 compute_own_vdf() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case Config#config.nonce_limiter_server_trusted_peers of
 		[] ->
 			%% Not a VDF client - compute VDF unless explicitly disabled.
@@ -53,7 +53,7 @@ compute_own_vdf() ->
 	end.
 
 is_vdf_server() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case Config#config.nonce_limiter_client_peers of
 		[] ->
 			lists:member(public_vdf_server, Config#config.enable);
@@ -62,7 +62,7 @@ is_vdf_server() ->
 	end.
 
 is_public_vdf_server() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	lists:member(public_vdf_server, Config#config.enable).
 
 parse(Config) when is_binary(Config) ->

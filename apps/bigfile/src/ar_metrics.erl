@@ -8,15 +8,15 @@
 %%% Public interface.
 %%%===================================================================
 
-%% @doc Declare Arweave metrics.
+%% @doc Declare BigFile metrics.
 register() ->
 	%% App info
 	prometheus_gauge:new([
-		{name, arweave_release},
-		{help, "Arweave release number"}
+		{name, bigfile_release},
+		{help, "BigFile release number"}
 	]),
 	%% Release number never changes so just set it here.
-	prometheus_gauge:set(arweave_release, ?RELEASE_NUMBER),
+	prometheus_gauge:set(bigfile_release, ?RELEASE_NUMBER),
 
 	%% Networking.
 	prometheus_counter:new([
@@ -40,7 +40,7 @@ register() ->
 		{labels, [route]}
 	]),
 	prometheus_gauge:new([
-		{name, arweave_peer_count},
+		{name, bigfile_peer_count},
 		{help, "peer count"}
 	]),
 	prometheus_counter:new([
@@ -193,7 +193,7 @@ register() ->
 
 	%% Consensus.
 	prometheus_gauge:new([
-		{name, arweave_block_height},
+		{name, bigfile_block_height},
 		{help, "The block height."}
 	]),
 	prometheus_gauge:new([{name, block_time},
@@ -489,7 +489,7 @@ register() ->
 	%% ---------------------------------------------------------------------------------------
 	prometheus_counter:new([
 		{name, pool_job_request_count},
-		{help, "The number of requests to pool /job from start of arweave node"}
+		{help, "The number of requests to pool /job from start of bigfile node"}
 	]),
 
 	prometheus_counter:new([

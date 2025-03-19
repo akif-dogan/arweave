@@ -47,7 +47,7 @@ read_recall_range(WhichChunk, Worker, Candidate, RecallRangeStart) ->
 			{read_recall_range, WhichChunk, Worker, Candidate, RecallRangeStart}, 60000).
 
 get_packing() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	%% ar_config:validate_storage_modules/1 ensures that we only mine against a single
 	%% packing format. So we can grab it any partition.
 	case Config#config.storage_modules of
@@ -58,7 +58,7 @@ get_packing() ->
 get_partitions(PartitionUpperBound) when PartitionUpperBound =< 0 ->
 	[];
 get_partitions(PartitionUpperBound) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Max = ar_node:get_max_partition_number(PartitionUpperBound),
 	AllPartitions = lists:foldl(
 		fun	(Module, Acc) ->

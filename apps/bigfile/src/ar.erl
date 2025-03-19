@@ -1,5 +1,5 @@
 %%%
-%%% @doc Arweave server entrypoint and basic utilities.
+%%% @doc BigFile server entrypoint and basic utilities.
 %%%
 -module(ar).
 
@@ -38,7 +38,7 @@ main(Args) ->
 	start(parse_config_file(Args, [], #config{})).
 
 show_help() ->
-	io:format("Usage: arweave-server [options]~n"),
+	io:format("Usage: bigfile-server [options]~n"),
 	io:format("Compatible with network: ~s~n", [?NETWORK_NAME]),
 	io:format("Options:~n"),
 	lists:foreach(
@@ -672,7 +672,7 @@ parse_cli_args([Arg | _Rest], _O) ->
 	io:format("~nUnknown argument: ~s.~n", [Arg]),
 	show_help().
 
-%% @doc Start an Arweave node on this BEAM.
+%% @doc Start a BigFile node on this BEAM.
 start() ->
 	start(?DEFAULT_HTTP_IFACE_PORT).
 start(Port) when is_integer(Port) ->
@@ -695,7 +695,7 @@ start(Config) ->
 			erlang:halt()
 	end,
 	Config2 = ar_config:set_dependent_flags(Config),
-	ok = application:set_env(arweave, config, Config2),
+	ok = application:set_env(bigfile, config, Config2),
 	filelib:ensure_dir(Config2#config.log_dir ++ "/"),
 	warn_if_single_scheduler(),
 	case Config2#config.nonce_limiter_server_trusted_peers of
@@ -709,7 +709,7 @@ start(Config) ->
 
 
 start(normal, _Args) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	%% Configure logger
 	ar_logger:init(Config),
 	%% Start the Prometheus metrics subsystem.
@@ -720,7 +720,7 @@ start(normal, _Args) ->
 	%% Start other apps which we depend on.
 	set_mining_address(Config),
 	ar_chunk_storage:run_defragmentation(),
-	%% Start Arweave.
+	%% Start BigFile.
 	ar_sup:start_link().
 
 set_mining_address(#config{ mining_addr = not_set } = C) ->
@@ -734,7 +734,7 @@ set_mining_address(#config{ mining_addr = not_set } = C) ->
 			Addr = ar_wallet:to_address(W),
 			ar:console("~nSetting the mining address to ~s.~n", [ar_util:encode(Addr)]),
 			C2 = C#config{ mining_addr = Addr },
-			application:set_env(arweave, config, C2),
+			application:set_env(bigfile, config, C2),
 			set_mining_address(C2)
 	end;
 set_mining_address(#config{ mine = false }) ->
@@ -747,8 +747,8 @@ set_mining_address(#config{ mining_addr = Addr, cm_exit_peer = CmExitPeer,
 				{not_set, false} ->
 					ar:console("~nThe mining key for the address ~s was not found."
 						" Make sure you placed the file in [data_dir]/~s (the node is looking for"
-						" [data_dir]/~s/[mining_addr].json or "
-						"[data_dir]/~s/arweave_keyfile_[mining_addr].json file)."
+						" [data_dir]/~s/bigfile_keyfile_[mining_addr].json or "
+						"[data_dir]/~s/bigfile_keyfile_[mining_addr].json file)."
 						" Do not specify \"mining_addr\" if you want one to be generated.~n~n",
 						[ar_util:encode(Addr), ?WALLET_DIR, ?WALLET_DIR, ?WALLET_DIR]),
 					erlang:halt();
@@ -777,7 +777,7 @@ create_wallet(DataDir, KeyType) ->
 		false ->
 			create_wallet_fail(KeyType);
 		true ->
-			ok = application:set_env(arweave, config, #config{ data_dir = DataDir }),
+			ok = application:set_env(bigfile, config, #config{ data_dir = DataDir }),
 			case ar_wallet:new_keyfile(KeyType) of
 				{error, Reason} ->
 					ar:console("Failed to create a wallet, reason: ~p.~n~n",
@@ -831,12 +831,12 @@ stop(_State) ->
 	ok.
 
 stop_dependencies() ->
-	{ok, [_Kernel, _Stdlib, _SASL, _OSMon | Deps]} = application:get_key(arweave, applications),
+	{ok, [_Kernel, _Stdlib, _SASL, _OSMon | Deps]} = application:get_key(bigfile, applications),
 	lists:foreach(fun(Dep) -> application:stop(Dep) end, Deps).
 
 start_dependencies() ->
-	{ok, Config} = application:get_env(arweave, config),
-	{ok, _} = application:ensure_all_started(arweave, permanent),
+	{ok, Config} = application:get_env(bigfile, config),
+	{ok, _} = application:ensure_all_started(bigfile, permanent),
 	ar_config:log_config(Config).
 
 %% One scheduler => one dirty scheduler => Calculating a RandomX hash, e.g.
@@ -927,10 +927,10 @@ docs() ->
 	Mods =
 		lists:filter(
 			fun(File) -> filename:extension(File) == ".erl" end,
-			element(2, file:list_dir("apps/arweave/src"))
+			element(2, file:list_dir("apps/bigfile/src"))
 		),
 	edoc:files(
-		["apps/arweave/src/" ++ Mod || Mod <- Mods],
+		["apps/bigfile/src/" ++ Mod || Mod <- Mods],
 		[
 			{dir, "source_code_docs"},
 			{hidden, true},

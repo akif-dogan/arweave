@@ -180,7 +180,7 @@ validate_last_step_checkpoints(#block{
 			PrevOutput2 = ar_nonce_limiter:maybe_add_entropy(
 				PrevOutput, PrevBStepNumber, StepNumber, Seed),
 			PrevStepNumber = StepNumber - 1,
-			{ok, Config} = application:get_env(arweave, config),
+			{ok, Config} = application:get_env(bigfile, config),
 			ThreadCount = Config#config.max_nonce_limiter_last_step_validation_thread_count,
 			case verify_no_reset(PrevStepNumber, PrevOutput2, 1,
 					lists:reverse(LastStepCheckpoints), ThreadCount, VDFDifficulty) of
@@ -320,7 +320,7 @@ request_validation(H, #nonce_limiter_info{ output = Output,
 					end,
 					spawn(fun() ->
 						StartStepNumber2 = StartStepNumber + NumAlreadyComputed,
-						{ok, Config} = application:get_env(arweave, config),
+						{ok, Config} = application:get_env(bigfile, config),
 						ThreadCount = Config#config.max_nonce_limiter_validation_thread_count,
 						Result =
 							case is_integer(EntropyResetPoint) andalso
@@ -765,7 +765,7 @@ send_output(SessionKey, Session) ->
 	ar_events:send(nonce_limiter, {computed_output, {SessionKey, StepNumber, Output, UpperBound}}).
 
 dump_error(Data) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	ErrorID = binary_to_list(ar_util:encode(crypto:strong_rand_bytes(8))),
 	ErrorDumpFile = filename:join(Config#config.data_dir, "error_dump_" ++ ErrorID),
 	file:write_file(ErrorDumpFile, term_to_binary(Data)),
@@ -1311,7 +1311,7 @@ send_events_for_external_update(SessionKey, Session) ->
 		Session#vdf_session{ step_number = StepNumber-1, steps = RemainingSteps }).
 
 debug_double_check(Label, Result, Func, Args) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case lists:member(double_check_nonce_limiter, Config#config.enable) of
 		false ->
 			Result;

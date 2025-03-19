@@ -217,17 +217,17 @@ resolve_peers([RawPeer | Peers]) ->
 	end.
 
 get_trusted_peers() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case Config#config.peers of
 		[] ->
-			ArweavePeers = [],
-			resolve_peers(ArweavePeers);
+			BigFilePeers = [],
+			resolve_peers(BigFilePeers);
 		Peers ->
 			Peers
 	end.
 -else.
 get_trusted_peers() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Config#config.peers.
 -endif.
 
@@ -370,7 +370,7 @@ resolve_and_cache_peer(RawPeer, Type) ->
 %%%===================================================================
 
 init([]) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case Config#config.verify of
 		true ->
 			ok;
@@ -397,7 +397,7 @@ handle_cast({add_peer, Peer, Release}, State) ->
 handle_cast(rank_peers, State) ->
 	LifetimePeers = score_peers(lifetime),
 	CurrentPeers = score_peers(current),
-	prometheus_gauge:set(arweave_peer_count, length(LifetimePeers)),
+	prometheus_gauge:set(bigfile_peer_count, length(LifetimePeers)),
 	set_ranked_peers(lifetime, rank_peers(LifetimePeers)),
 	set_ranked_peers(current, rank_peers(CurrentPeers)),
 	ar_util:cast_after(?RANK_PEERS_FREQUENCY_MS, ?MODULE, rank_peers),
@@ -702,7 +702,7 @@ ping_peers(Peers) ->
 %% Do not filter out loopback IP addresses with custom port in the debug mode
 %% to allow multiple local VMs to peer with each other.
 is_loopback_ip({127, _, _, _, Port}) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Port == Config#config.port;
 is_loopback_ip({_, _, _, _, _}) ->
 	false.
@@ -1166,9 +1166,7 @@ update_rating_test() ->
 
 	%% Failed transfer should impact bytes or latency
 	update_rating(Peer1, 1000, 100, 1, false),
-	assert_performance(#performance{
-			average_success = 0.9312 },
-		get_or_init_performance(Peer1)),
+	assert_performance(#performance{ average_success = 0.9312 }, get_or_init_performance(Peer1)),
 	?assertEqual(0, get_total_rating(lifetime)),
 	?assertEqual(0, get_total_rating(current)),
 

@@ -1390,16 +1390,16 @@ handle_cm_noop_response(Response) ->
 	{error, Response}.
 
 p2p_headers() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	[{<<"x-p2p-port">>, integer_to_binary(Config#config.port)},
 			{<<"x-release">>, integer_to_binary(?RELEASE_NUMBER)}].
 
 cm_p2p_headers() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	add_header(<<"x-cm-api-secret">>, Config#config.cm_api_secret, p2p_headers()).
 
 pool_client_headers() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Headers = add_header(<<"x-pool-api-key">>, Config#config.pool_api_key, p2p_headers()),
 	case Config#config.pool_worker_name of
 		not_set ->

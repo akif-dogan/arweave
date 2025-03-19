@@ -43,11 +43,12 @@ bench_read(Args) ->
 
 	{StorageModules, Address} = parse_storage_modules(StorageModuleConfigs, [], undefined),
 	ar:console("Assuming mining address: ~p~n", [ar_util:safe_encode(Address)]),
-	Config = #config{
+	{ok, Config} = application:get_env(bigfile, config),
+	Config2 = Config#config{
 		data_dir = DataDir,
 		storage_modules = StorageModules,
 		mining_addr = Address},
-	application:set_env(arweave, config, Config),
+	application:set_env(bigfile, config, Config2),
 
 	ar_kv_sup:start_link(),
 	ar_storage_sup:start_link(),

@@ -61,7 +61,7 @@ register_workers() ->
 
 
 register_sync_workers() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	{Workers, WorkerNames} = lists:foldl(
 		fun(Number, {AccWorkers, AccWorkerNames}) ->
 			Name = list_to_atom("ar_data_sync_worker_" ++ integer_to_list(Number)),
@@ -75,7 +75,7 @@ register_sync_workers() ->
 
 %% @doc Returns true if syncing is enabled (i.e. sync_jobs > 0).
 is_syncing_enabled() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	Config#config.sync_jobs > 0.
 
 %% @doc Returns true if we can accept new tasks. Will always return false if syncing is
@@ -628,9 +628,9 @@ test_max_peer_queue() ->
 	?assertEqual(20, max_peer_queue(#performance{ current_rating = 1 }, 100, 10)).
 
 test_cut_peer_queue() ->
-	{ok, OriginalConfig} = application:get_env(arweave, config),
+	{ok, OriginalConfig} = application:get_env(bigfile, config),
 	try
-		ok = application:set_env(arweave, config, OriginalConfig#config{
+		ok = application:set_env(bigfile, config, OriginalConfig#config{
 			sync_jobs = 10
 		}),
 
@@ -663,7 +663,7 @@ test_cut_peer_queue() ->
 		assert_peer_tasks(TaskQueue, 0, 8, PeerTasks4),
 		?assertEqual(100, State4#state.queued_task_count)
 	after
-		application:set_env(arweave, config, OriginalConfig)
+		application:set_env(bigfile, config, OriginalConfig)
 	end.
 
 test_update_active() ->

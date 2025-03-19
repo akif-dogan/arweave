@@ -141,7 +141,7 @@ label_by_id(StoreID) ->
 %% @doc Return the storage module with the given identifier or not_found.
 %% Search across both attached modules and repacked in-place modules.
 get_by_id(ID) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	RepackInPlaceModules = [element(1, El)
 			|| El <- Config#config.repack_in_place_storage_modules],
 	get_by_id(ID, Config#config.storage_modules ++ RepackInPlaceModules).
@@ -157,7 +157,7 @@ get_by_id(ID, [Module | Modules]) ->
 	end.
 
 get_all_module_ranges() ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	RepackInPlaceModulesStoreIDs = [
 			{{BucketSize, Bucket, TargetPacking}, ar_storage_module:id(Module)}
 		|| {{BucketSize, Bucket, _Packing} = Module, TargetPacking} <- Config#config.repack_in_place_storage_modules],
@@ -216,7 +216,7 @@ get_size(ID) ->
 %% @doc Return a configured storage module covering the given Offset, preferably
 %% with the given Packing. Return not_found if none is found.
 get(Offset, Packing) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	get(Offset, Packing, Config#config.storage_modules, not_found).
 
 %% @doc Return a configured storage module with the given Packing covering the given Offset.
@@ -227,7 +227,7 @@ get_strict(Offset, Packing) ->
 
 %% @doc Return the list of all configured storage modules covering the given Offset.
 get_all(Offset) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	get_all(Offset, Config#config.storage_modules, []).
 
 %% @doc Return the list of identifiers of all configured storage modules
@@ -239,17 +239,17 @@ get_all_packed(Offset, Packing) ->
 %% @doc Return the list of configured storage modules whose ranges intersect
 %% the given interval.
 get_all(Start, End) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	get_all(Start, End, Config#config.storage_modules, []).
 
 %% @doc Return true if the given Offset belongs to at least one storage module.
 has_any(Offset) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	has_any(Offset, Config#config.storage_modules).
 
 %% @doc Return true if the given range is covered by the configured storage modules.
 has_range(Start, End) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	case ets:lookup(?MODULE, unique_sorted_intervals) of
 		[] ->
 			Intervals = get_unique_sorted_intervals(Config#config.storage_modules),
@@ -277,7 +277,7 @@ has_range(Start, End) ->
 %% 3. returns [{7, 10, sm1}, {10, 20, sm_2}, {20, 25, sm_3}]
 %% 4. returns [{7, 10, sm1}, {10, 20, sm_4}, {20, 25, sm_3}]
 get_cover(Start, End, MaybeStoreID) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	SortedStorageModules = sort_storage_modules_by_left_bound(
 			Config#config.storage_modules, MaybeStoreID),
 	case get_cover2(Start, End, SortedStorageModules) of

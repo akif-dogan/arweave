@@ -140,3 +140,5 @@ merge_sync_records(
 		end,
 		SrcSyncRecordByIDType, DstSyncRecordByIDType),
 	{UnionSyncRecordByID, UnionRecordByIDType}.
+
+{ok, Config} = application:get_env(bigfile, config),

@@ -21,7 +21,7 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-	{ok, Config} = application:get_env(arweave, config),
+	{ok, Config} = application:get_env(bigfile, config),
 	ServerWorkers = lists:map(
 		fun(Peer) ->
 			Name = list_to_atom("ar_nonce_limiter_server_worker_"

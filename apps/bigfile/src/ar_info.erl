@@ -30,7 +30,7 @@ get_info() ->
                 false -> ar_util:encode(Current)
             end,
         <<"blocks">> => BlockCount,
-        <<"peers">> => prometheus_gauge:value(arweave_peer_count),
+        <<"peers">> => prometheus_gauge:value(bigfile_peer_count),
         <<"queue_length">> =>
             element(
                 2,

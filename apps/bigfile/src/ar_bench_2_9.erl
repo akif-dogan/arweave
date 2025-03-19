@@ -59,7 +59,7 @@ show_help() ->
 	erlang:halt().
 
 run_benchmark({Format, Dirs, Threads, DataMiB}) ->
-	application:set_env(arweave, config, #config{ 
+	application:set_env(bigfile, config, #config{ 
 		disable = [], enable  = [randomx_large_pages] }),
 
 	ThreadDirPairs = assign_threads_to_dirs(Threads, Dirs),

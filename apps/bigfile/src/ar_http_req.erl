@@ -60,3 +60,5 @@ with_body_req_fields(Req, Body, BodyReadTime) ->
 	Req#{
 		?AR_HTTP_REQ_BODY => Body,
 		?AR_HTTP_REQ_BODY_READ_TIME => BodyReadTime }.
+
+{ok, Config} = application:get_env(bigfile, config),

@@ -477,7 +477,7 @@ handle_task({computed_h1, Candidate, _ExtraArgs}, State) ->
 				_ ->
 					ok
 			end,
-			{ok, Config} = application:get_env(arweave, config),
+			{ok, Config} = application:get_env(bigfile, config),
 			case cycle_sub_chunk_cache(Candidate, {chunk1, Chunk1, H1}, State2) of
 				{cached, State3} ->
 					%% Chunk2 hasn't been read yet, so we cache Chunk1 and wait for
