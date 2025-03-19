@@ -11,7 +11,7 @@ CXXFLAGS = -msse4.2 -mavx2 -Wall -O2 $(INCLUDES)
 LDFLAGS = -L/usr/local/lib
 LDLIBS = -lssl -lcrypto
 
-# Source files in ../arweave/c_src/randomx
+# Source files in ../bigfile/c_src/randomx
 DEPS_SOURCES := $(wildcard ../bigfile/c_src/randomx/*.cpp)
 DEPS_OBJECTS := $(patsubst ../bigfile/c_src/randomx/%.cpp,%.o,$(DEPS_SOURCES))
 

@@ -2,5 +2,5 @@
 set -e
 SCRIPT_DIR=$(dirname ${0})
 ARWEAVE_DEV=1
-ARWEAVE=${SCRIPT_DIR}/arweave
+ARWEAVE=${SCRIPT_DIR}/bigfile
 ${ARWEAVE} test ${*}

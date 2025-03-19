@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 SCRIPT_DIR="$(dirname "$0")"
-ARWEAVE=${SCRIPT_DIR}/arweave
-${ARWEAVE}/arweave localnet $*
+ARWEAVE=${SCRIPT_DIR}/bigfile
+${ARWEAVE}/bigfile localnet $*
 
 # while true; do
 #     echo Launching Erlang Virtual Machine...
