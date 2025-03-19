@@ -617,7 +617,7 @@ terminate(Reason, _State) ->
 
 record_metrics() ->
 	[{mempool_size, MempoolSize}] = ets:lookup(node_state, mempool_size),
-	prometheus_gauge:set(arweave_block_height, ar_node:get_height()),
+	prometheus_gauge:set(bigfile_block_height, ar_node:get_height()),
 	record_mempool_size_metrics(MempoolSize),
 	prometheus_gauge:set(weave_size, ar_node:get_weave_size()).
 

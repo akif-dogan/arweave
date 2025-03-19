@@ -83,7 +83,7 @@ loop(TimeoutRef) ->
 	end.
 
 handle(Req, Pid) ->
-	Peer = ar_http_util:arweave_peer(Req),
+	Peer = ar_http_util:bigfile_peer(Req),
 	handle(Peer, Req, Pid).
 
 handle(Peer, Req, Pid) ->
@@ -628,7 +628,7 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 						data_root = DataRoot
 					},
 					SignedTX = ar_tx:sign(Format2TX, KeyPair),
-					Peer = ar_http_util:arweave_peer(Req),
+					Peer = ar_http_util:bigfile_peer(Req),
 					Reply = ar_serialize:jsonify({[{<<"id">>,
 							ar_util:encode(SignedTX#tx.id)}]}),
 					case handle_post_tx(Req2, Peer, SignedTX) of
@@ -655,7 +655,7 @@ handle(<<"GET">>, [<<"peers">>], Req, _Pid) ->
 				list_to_binary(ar_util:format_peer(P))
 			||
 				P <- ar_peers:get_peers(current),
-				P /= ar_http_util:arweave_peer(Req),
+				P /= ar_http_util:bigfile_peer(Req),
 				ar_peers:is_public_peer(P)
 			]
 		),
@@ -1902,7 +1902,7 @@ handle_post_tx({Req, Pid, Encoding}) ->
 						{error, timeout} ->
 							{503, #{}, <<>>, Req};
 						{ok, TX, Req2} ->
-							Peer = ar_http_util:arweave_peer(Req),
+							Peer = ar_http_util:bigfile_peer(Req),
 							case handle_post_tx(Req2, Peer, TX) of
 								ok ->
 									{200, #{}, <<"OK">>, Req2};
@@ -2372,7 +2372,7 @@ collect_missing_tx_indices([Prefix | Prefixes], Indices, N) ->
 	end.
 
 post_block(request, {Req, Pid, Encoding}, ReceiveTimestamp) ->
-	Peer = ar_http_util:arweave_peer(Req),
+	Peer = ar_http_util:bigfile_peer(Req),
 	case ar_blacklist_middleware:is_peer_banned(Peer) of
 		not_banned ->
 			post_block(check_joined, Peer, {Req, Pid, Encoding}, ReceiveTimestamp);
@@ -2620,7 +2620,7 @@ handle_post_pool_cm_jobs(Req, Pid) ->
 	end.
 
 handle_post_pool_cm_jobs2(Req, Pid) ->
-	Peer = ar_http_util:arweave_peer(Req),
+	Peer = ar_http_util:bigfile_peer(Req),
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
 			case catch ar_serialize:json_map_to_pool_cm_jobs(
@@ -3047,7 +3047,7 @@ post_tx_parse_id(verify_id_match, {MaybeTXID, Req, TX}) ->
 	end.
 
 handle_post_vdf(Req, Pid) ->
-	Peer = ar_http_util:arweave_peer(Req),
+	Peer = ar_http_util:bigfile_peer(Req),
 	case ets:member(ar_peers, {vdf_server_peer, Peer}) of
 		false ->
 			{400, #{}, <<>>, Req};
@@ -3106,7 +3106,7 @@ handle_get_vdf(Req, Call, Format) ->
 		true ->
 			handle_get_vdf2(Req, Call, Format);
 		false ->
-			Peer = ar_http_util:arweave_peer(Req),
+			Peer = ar_http_util:bigfile_peer(Req),
 			case ets:lookup(ar_peers, {vdf_client_peer, Peer}) of
 				[] ->
 					{400, #{}, jiffy:encode(#{ error => not_our_vdf_client }), Req};
@@ -3150,21 +3150,21 @@ read_body_chunk(Req, Pid, Size, Timeout) ->
 	Pid ! {read_body_chunk, self(), Req, Size, Timeout},
 	receive
 		{read_body_chunk, {'EXIT', timeout}} ->
-			Peer = ar_http_util:arweave_peer(Req),
+			Peer = ar_http_util:bigfile_peer(Req),
 			?LOG_DEBUG([{event, body_read_cowboy_timeout}, {method, cowboy_req:method(Req)},
 					{path, cowboy_req:path(Req)}, {peer, ar_util:format_peer(Peer)}]),
 			{error, timeout};
 		{read_body_chunk, Term} ->
 			Term
 	after Timeout ->
-		Peer = ar_http_util:arweave_peer(Req),
+		Peer = ar_http_util:bigfile_peer(Req),
 		?LOG_DEBUG([{event, body_read_timeout}, {method, cowboy_req:method(Req)},
 				{path, cowboy_req:path(Req)}, {peer, ar_util:format_peer(Peer)}]),
 		{error, timeout}
 	end.
 
 handle_mining_h1(Req, Pid) ->
-	Peer = ar_http_util:arweave_peer(Req),
+	Peer = ar_http_util:bigfile_peer(Req),
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
 			case ar_serialize:json_decode(Body, [return_maps]) of
@@ -3196,7 +3196,7 @@ handle_mining_h1(Req, Pid) ->
 	end.
 
 handle_mining_h2(Req, Pid) ->
-	Peer = ar_http_util:arweave_peer(Req),
+	Peer = ar_http_util:bigfile_peer(Req),
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
 			case ar_serialize:json_decode(Body, [return_maps]) of
@@ -3231,7 +3231,7 @@ handle_mining_h2(Req, Pid) ->
 	end.
 
 handle_mining_cm_publish(Req, Pid) ->
-	Peer = ar_http_util:arweave_peer(Req),
+	Peer = ar_http_util:bigfile_peer(Req),
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
 			case ar_serialize:json_decode(Body, [return_maps]) of

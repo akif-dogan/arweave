@@ -97,7 +97,7 @@ _error () {
 }
 
 ######################################################################
-# Arweave Section
+# Bigfile Section
 ######################################################################
 
 # Not all systems supports randomx jit
@@ -108,32 +108,32 @@ else
     export RANDOMX_JIT=""
 fi
 
-# This variable is the main own used to start arweave
-ARWEAVE_OPTS="-run ar main ${RANDOM_JIT}"
+# This variable is the main own used to start bigfile
+BIGFILE_OPTS="-run ar main ${RANDOM_JIT}"
 
 ######################################################################
-# Arweave System Check Section
+# Bigfile System Check Section
 ######################################################################
-arweave_check() {
+bigfile_check() {
     case "${1}" in
 	help)
-	    arweave_check_help
+	    bigfile_check_help
 	    ;;
 	*)
-	    arweave_check_nofile
-	    arweave_check_hugepages
+	    bigfile_check_nofile
+	    bigfile_check_hugepages
 	    ;;
     esac
 }
 
-arweave_check_help() {
+bigfile_check_help() {
     echo "Usage: ${REL_NAME} check"
     echo "Check system configuration. Examples:"
     echo "  ${REL_NAME} check"
     exit 1
 }
 
-arweave_check_nofile() {
+bigfile_check_nofile() {
     recommendation="1000000"
     limit="$(ulimit -n)"
 
@@ -152,7 +152,7 @@ arweave_check_nofile() {
     fi
 }
 
-arweave_check_hugepages() {
+bigfile_check_hugepages() {
     # execute this check only on linux
     test ${SYSTEM_NAME} != "Linux" && return 0
     recommendation="3500"
@@ -170,36 +170,36 @@ arweave_check_hugepages() {
 }
 
 ######################################################################
-# Arweave Benchmark Section
+# Bigfile Benchmark Section
 ######################################################################
-arweave_benchmark() {
+bigfile_benchmark() {
     case "${1}"
     in
 	2.9)
 	    shift
-	    arweave_benchmark_2_9 ${*}
+	    bigfile_benchmark_2_9 ${*}
 	    ;;
 	hash)
 	    shift
-	    arweave_benchmark_hash ${*}
+	    bigfile_benchmark_hash ${*}
 	    ;;
 	packing)
 	    shift
-	    arweave_benchmark_packing ${*}
+	    bigfile_benchmark_packing ${*}
 	    ;;
 	vdf)
 	    shift
-	    arweave_benchmark_vdf ${*}
+	    bigfile_benchmark_vdf ${*}
 	    ;;
 	*)
-	    arweave_benchmark_help
+	    bigfile_benchmark_help
 	    ;;
     esac
 }
 
-arweave_benchmark_help() {
+bigfile_benchmark_help() {
     echo "Usage: ${REL_NAME} benchmark [2.9|hash|packing|vdf]"
-    echo "Execute Arweave benchmarks. Examples:"
+    echo "Execute Bigfile benchmarks. Examples:"
     echo "  ${REL_NAME} benchmark 2.9"
     echo "  ${REL_NAME} benchmark hash"
     echo "  ${REL_NAME} benchmark packing"
@@ -207,119 +207,119 @@ arweave_benchmark_help() {
     exit 1
 }
 
-arweave_benchmark_2_9() {
-    ARWEAVE_OPTS="-run ar benchmark_2_9"
+bigfile_benchmark_2_9() {
+    BIGFILE_OPTS="-run ar benchmark_2_9"
     echo ${*}
 }
 
-arweave_benchmark_hash() {
-    ARWEAVE_OPTS="-run ar benchmark_hash"
+bigfile_benchmark_hash() {
+    BIGFILE_OPTS="-run ar benchmark_hash"
     echo ${*}
 }
 
-arweave_benchmark_packing() {
-    ARWEAVE_OPTS="-run ar benchmark_packing"
+bigfile_benchmark_packing() {
+    BIGFILE_OPTS="-run ar benchmark_packing"
     echo ${*}
 }
 
-arweave_benchmark_vdf() {
-    ARWEAVE_OPTS="-run ar benchmark_vdf"
+bigfile_benchmark_vdf() {
+    BIGFILE_OPTS="-run ar benchmark_vdf"
     echo ${*}
 }
 
 ######################################################################
-# Arweave Wallet Management Section
+# Bigfile Wallet Management Section
 ######################################################################
-arweave_wallet() {
+bigfile_wallet() {
     case "${1}" in
 	create)
 	    shift
-	    arweave_wallet_create ${*}
+	    bigfile_wallet_create ${*}
 	    ;;
 	*)
-	    arweave_wallet_help
+	    bigfile_wallet_help
 	    ;;
     esac
 }
 
-arweave_wallet_help() {
+bigfile_wallet_help() {
     echo "Usage: ${REL_NAME} wallet [create]"
-    echo "Manage Arweave wallets. Examples:"
+    echo "Manage Bigfile wallets. Examples:"
     echo "  ${REL_NAME} wallet create rsa"
     echo "  ${REL_NAME} wallet create ecdsa"
     exit 1
 }
 
-arweave_wallet_create() {
+bigfile_wallet_create() {
     case "${1}" in
 	rsa)
 	    shift
-	    arweave_wallet_create_rsa ${*}
+	    bigfile_wallet_create_rsa ${*}
 	    ;;
 	ecdsa)
 	    shift
-	    arweave_wallet_create_ecdsa ${*}
+	    bigfile_wallet_create_ecdsa ${*}
 	    ;;
 	*)
-	    arweave_wallet_create_help
+	    bigfile_wallet_create_help
 	    ;;
     esac
 }
 
-arweave_wallet_create_help() {
+bigfile_wallet_create_help() {
     echo "Usage: ${REL_NAME} wallet create [rsa|ecdsa]"
-    echo "Create Arweave wallet. examples:"
+    echo "Create Bigfile wallet. examples:"
     echo "  ${REL_NAME} wallet create rsa"
     echo "  ${REL_NAME} wallet create ecdsa"
     exit 1
 }
 
-arweave_wallet_create_rsa() {
-    ARWEAVE_OPTS="-run ar create_wallet"
+bigfile_wallet_create_rsa() {
+    BIGFILE_OPTS="-run ar create_wallet"
     echo ${*}
 }
 
-arweave_wallet_create_ecdsa() {
-    ARWEAVE_OPTS="-run ar create_ecdsa_wallet"
+bigfile_wallet_create_ecdsa() {
+    BIGFILE_OPTS="-run ar create_ecdsa_wallet"
     echo ${*}
 }
 
 ######################################################################
-# Arweave Data Doctor Section
+# Bigfile Data Doctor Section
 ######################################################################
-arweave_doctor() {
-    ARWEAVE_OPTS="-run ar_data_doctor main"
+bigfile_doctor() {
+    BIGFILE_OPTS="-run ar_data_doctor main"
     echo ${*}
 }
 
-arweave_doctor_help() {
+bigfile_doctor_help() {
     echo "Usage: ${REL_NAME} doctor"
     echo "Execute data doctor analyzer"
     exit 1
 }
 
 ######################################################################
-# Arweave Developer mode Section
+# Bigfile Developer mode Section
 ######################################################################
-# when ARWEAVE_DEV environment variable is set, the release is rebuild
-arweave_developer_mode() {
+# when BIGFILE_DEV environment variable is set, the release is rebuilt
+bigfile_developer_mode() {
 	(
 	    cd ${PARENT_DIR} \
-		&& ./ar-rebar3 ${ARWEAVE_BUILD_TARGET:-default} release
+		&& ./ar-rebar3 ${BIGFILE_BUILD_TARGET:-default} release
 	)
 }
 
 ######################################################################
-# Arweave Version Section
+# Bigfile Version Section
 ######################################################################
-arweave_version() {
+bigfile_version() {
     case "${1}" in
-	*) arweave_version_light
+	*) bigfile_version_light
 	   ;;
     esac
 }
 
-arweave_version_light() {
+bigfile_version_light() {
     echo "${RELEASE_NAME} ${RELEASE_VSN} (${RELEASE_GIT_REV}) ${RELEASE_DATETIME}"
     echo "   erts ${RELEASE_ERTS}"
     echo "   ${RELEASE_CC}"
@@ -328,16 +328,16 @@ arweave_version_light() {
     exit 0
 }
 
-arweave_version_help() {
+bigfile_version_help() {
     echo "Usage: ${REL_NAME} version"
-    echo "Return Arweave release"
+    echo "Return Bigfile release"
     exit 1
 }
 
 ######################################################################
 # test section
 ######################################################################
-arweave_test() {
+bigfile_test() {
     TEST_CONFIG="./config/sys.config"
     TEST_PROFILE="test"
     TEST_NODE_NAME="${NODE_NAME:-main-localtest}"
@@ -345,15 +345,15 @@ arweave_test() {
     TEST_COOKIE="${COOKIE:-test}"
     TEST_MODULE="tests"
     TEST_LOG="main-localtest.out"
-    arweave_test_run ${*}
+    bigfile_test_run ${*}
 }
 
-arweave_test_help() {
+bigfile_test_help() {
     echo "Usage: ${REL_NAME} test MODULE"
-    echo "Run Arweave Test Suite for module MODULE"
+    echo "Run Bigfile Test Suite for module MODULE"
 }
 
-arweave_e2e() {
+bigfile_e2e() {
     TEST_CONFIG="./config/sys.config"
     TEST_PROFILE="e2e"
     TEST_NODE_NAME="${NODE_NAME:-main-e2e}"
@@ -361,16 +361,16 @@ arweave_e2e() {
     TEST_COOKIE="${COOKIE:-e2e}"
     TEST_MODULE="e2e"
     TEST_LOG="main-e2e.out"
-    arweave_test_run ${*}
+    bigfile_test_run ${*}
 }
 
-arweave_e2e_help() {
+bigfile_e2e_help() {
     echo "Usage: ${REL_NAME} test_e2e MODULE"
-    echo "Run Arweave e2e Test Suite for module MODULE"
+    echo "Run Bigfile e2e Test Suite for module MODULE"
 }
 
 # test and e2e features are sharing the same procedures.
-arweave_test_run() {
+bigfile_test_run() {
     (
 	echo -e "\033[0;32m===> Enter into ${PARENT_DIR}\033[0m"
 	cd ${PARENT_DIR}
@@ -387,7 +387,7 @@ arweave_test_run() {
 	fi
 	
 	TEST_PATH="$(./rebar3 as ${TEST_PROFILE} path)"
-	TEST_PATH_BASE="$(./rebar3 as ${TEST_PROFILE} path --base)/lib/arweave/test"
+	TEST_PATH_BASE="$(./rebar3 as ${TEST_PROFILE} path --base)/lib/bigfile/test"
 	PARAMS="-pa ${TEST_PATH} ${TEST_PATH_BASE} -config ${TEST_CONFIG} -noshell"	
 	ENTRY_POINT="-run ar ${TEST_MODULE} ${*} -s init stop"
 	command="erl ${PARAMS} -name ${TEST_NODE} -setcookie ${TEST_COOKIE} ${ENTRY_POINT}"
@@ -407,30 +407,30 @@ relx_usage() {
 
     case "$command" in
 	benchmark)
-	    arweave_benchmark_help
+	    bigfile_benchmark_help
 	    ;;
 	check)
-	    arweave_check_help
+	    bigfile_check_help
 	    ;;
 	doctor)
-	    arweave_doctor_help
+	    bigfile_doctor_help
 	    ;;
 	version)
-	    arweave_version_help
+	    bigfile_version_help
 	    ;;
 	packing)
-	    arweave_packing_help
+	    bigfile_packing_help
 	    ;;
 	wallet)
-	    arweave_wallet_help
+	    bigfile_wallet_help
 	    ;;
 	daemon)
 	    echo "Usage: ${REL_NAME} daemon"
-	    echo "Start Arweave as daemon (in background)"
+	    echo "Start Bigfile as daemon (in background)"
 	    ;;
 	daemon_attach)
 	    echo "Usage: ${REL_NAME} daemon_attach"
-	    echo "Attach to a running Arweave daemonized process"
+	    echo "Attach to a running Bigfile daemonized process"
 	    ;;
 	rpc)
 	    echo "Usage: $REL_NAME rpc [Mod [Fun [Args]]]]"
@@ -441,8 +441,8 @@ relx_usage() {
 	    ;;
 	escript)
 	    echo "Usage: ${REL_NAME} escript [ESCRIPT]"
-	    echo "Execute an Erlang script in the Arweave release environment."
-	    echo "Note: it will not start Arweave."
+	    echo "Execute an Erlang script in the Bigfile release environment."
+	    echo "Note: it will not start Bigfile."
 	    ;;
 	"eval")
 	    echo "Usage: $REL_NAME eval [Exprs]"
@@ -451,23 +451,23 @@ relx_usage() {
 	    ;;
 	foreground)
 	    echo "Usage: $REL_NAME foreground"
-	    echo "Starts the Arweave release in the foreground, meaning all output"
+	    echo "Starts the Bigfile release in the foreground, meaning all output"
 	    echo "going to stdout but without an interactive shell."
 	    echo "The entry point is set to -run ar main"
 	    ;;
 	foreground_clean)
 	    echo "Usage: $REL_NAME foreground"
-	    echo "Starts the Arweave release in the foreground, meaning all output"
+	    echo "Starts the Bigfile release in the foreground, meaning all output"
 	    echo "going to stdout but without an interactive shell."
 	    echo "No entry point is configured"
 	    ;;
 	console)
 	    echo "Usage: $REL_NAME console"
-	    echo "Starts Arweave with an interactive shell."
+	    echo "Starts Bigfile with an interactive shell."
 	    ;;
 	console_clean)
 	    echo "Usage: ${REL_NAME} console_clean"
-	    echo: "Starts an interactived Erlang shell without Arweave started."
+	    echo: "Starts an interactived Erlang shell without Bigfile started."
 	    ;;
 	remote_console|remote|remsh)
 	    echo "Usage: $REL_NAME remote"
@@ -475,19 +475,19 @@ relx_usage() {
 	    ;;
 	reboot)
 	    echo "Usage: ${REL_NAME} reboot"
-	    echo "Reboot the entire Arweave VM."
+	    echo "Reboot the entire Bigfile VM."
 	    ;;
 	restart)
 	    echo "Usage: ${REL_NAME} restart"
-	    echo "Restart the running applications but not the Arweave VM."
+	    echo "Restart the running applications but not the Bigfile VM."
 	    ;;
 	pid)
 	    echo "Usage: ${REL_NAME} pid"
-	    echo "Returns the system PID of Arweave release (if running)."
+	    echo "Returns the system PID of Bigfile release (if running)."
 	    ;;
 	ping)
 	    echo "Usage: ${REL_NAME} ping"
-	    echo "Checks if the Arweave node is running."
+	    echo "Checks if the Bigfile node is running."
 	    ;;
 	status)
 	    echo "Usage: $REL_NAME status"
@@ -495,13 +495,13 @@ relx_usage() {
 	    ;;
 	stop)
 	    echo "Usage: ${REL_NAME} stop"
-	    echo "Stop the Arweave node."
+	    echo "Stop the Bigfile node."
 	    ;;
 	test)
-	    arweave_test_help
+	    bigfile_test_help
 	    ;;
 	test_e2e)
-	    arweave_e2e_help
+	    bigfile_e2e_help
 	    ;;
 	*)
 	    # check for extension
@@ -513,32 +513,32 @@ relx_usage() {
 		EXTENSIONS=$(echo $EXTENSIONS | sed -e 's/|undefined//g')
 		echo "Usage: ${REL_NAME} [COMMAND] [ARGS]
 
-Arweave Commands:
+Bigfile Commands:
 
-  benchmark               Run Arweave Benchmarks
-  check                   Check system parameters for Arweave
-  console                 Start Arweave with an interactive Erlang shell
-  console_clean           Start an interactive Erlang shell without the Arweave release's applications
-  daemon                  Start Arweave in the background with run_erl (named pipes)
-  daemon_attach           Connect to Arweave node started as daemon with to_erl (named pipes)
-  doctor                  Start Arweave Data Analyzer tool
-  escript                 Run an escript in the same environment as the Arweave release
-  eval [Exprs]            Run Erlang expressions on Arweave node
-  foreground              Start Arweave with output to stdout
-  foreground_clean        Start Arweave VM without any entry-point as arguments
-  pid                     Print the PID of the Arweave OS process
-  ping                    Print pong if the Arweave node is alive
-  reboot                  Reboot the entire Arweave VM
-  reload                  Restart only Arweave application in the VM
-  remote_console          Connect remote shell to the Arweave node
-  restart                 Restart the running applications but not the Arweave VM
-  rpc [Mod [Fun [Args]]]] Run apply(Mod, Fun, Args) on the Arweave node
-  status                  Verify if the Arweave node is running and then run status hook scripts
-  stop                    Stop the Arweave node
-  test                    Run Arweave test Suite
-  test_e2e                Run Arweave e2e Test Suite
-  version                 Print the Arweave version
-  wallet                  Manage Arweave wallets
+  benchmark               Run Bigfile Benchmarks
+  check                   Check system parameters for Bigfile
+  console                 Start Bigfile with an interactive Erlang shell
+  console_clean           Start an interactive Erlang shell without the Bigfile release's applications
+  daemon                  Start Bigfile in the background with run_erl (named pipes)
+  daemon_attach           Connect to Bigfile node started as daemon with to_erl (named pipes)
+  doctor                  Start Bigfile Data Analyzer tool
+  escript                 Run an escript in the same environment as the Bigfile release
+  eval [Exprs]            Run Erlang expressions on Bigfile node
+  foreground              Start Bigfile with output to stdout
+  foreground_clean        Start Bigfile VM without any entry-point as arguments
+  pid                     Print the PID of the Bigfile OS process
+  ping                    Print pong if the Bigfile node is alive
+  reboot                  Reboot the entire Bigfile VM
+  reload                  Restart only Bigfile application in the VM
+  remote_console          Connect remote shell to the Bigfile node
+  restart                 Restart the running applications but not the Bigfile VM
+  rpc [Mod [Fun [Args]]]] Run apply(Mod, Fun, Args) on the Bigfile node
+  status                  Verify if the Bigfile node is running and then run status hook scripts
+  stop                    Stop the Bigfile node
+  test                    Run Bigfile test Suite
+  test_e2e                Run Bigfile e2e Test Suite
+  version                 Print the Bigfile version
+  wallet                  Manage Bigfile wallets
   $EXTENSIONS"
 	    fi
 	    ;;
@@ -942,11 +942,11 @@ process_internal_args() {
     done
 }
 
-# if ARWEAVE_DEV environment is defined, then
+# if BIGFILE_DEV environment is defined, then
 # we start by rebuild a release.
-if test "${ARWEAVE_DEV}"
+if test "${BIGFILE_DEV}"
 then
-    arweave_developer_mode
+    bigfile_developer_mode
 fi
 
 # process internal arguments
@@ -1131,16 +1131,16 @@ cd "$ROOTDIR"
 case "$1" in
     check)
 	shift
-	arweave_check ${*}
+	bigfile_check ${*}
 	;;
 
     version)
 	shift
-	arweave_version ${*}
+	bigfile_version ${*}
 	;;
 
     daemon|daemon_boot)
-	arweave_check
+	bigfile_check
 	case "$1" in
 	    daemon)
 		shift
@@ -1171,7 +1171,7 @@ case "$1" in
 	relx_run_hooks "$PRE_START_HOOKS"
 
 	# check system configuration
-	arweave_check
+	bigfile_check
 
 	"$BINDIR/run_erl" -daemon "$PIPE_DIR" "$RUNNER_LOG_DIR" \
 			  "exec \"$RELEASE_ROOT_DIR/bin/$REL_NAME\" \"$START_OPTION\" ${ARGS}"
@@ -1221,14 +1221,14 @@ case "$1" in
 	;;
 
     reload)
-	## Reload only arweave application in the vm
+	## Reload only bigfile application in the vm
 	RELX_RPC_TIMEOUT=3600
 
-	# first arweave and prometheus application must be stopped
-	if erl_eval '[application:stop(A) || A <- [arweave, prometheus]].'
+	# first bigfile and prometheus application must be stopped
+	if erl_eval '[application:stop(A) || A <- [bigfile, prometheus]].'
 	then
-		# then arweave application can be restarted
-		erl_eval 'application:ensure_all_started(arweave).'
+		# then bigfile application can be restarted
+		erl_eval 'application:ensure_all_started(bigfile).'
 		test $? -ne 0 && exit 1
 		exit $?
 	else
@@ -1314,23 +1314,23 @@ case "$1" in
 		fi
 		FOREGROUNDOPTIONS="-noinput +Bd"
 
-		# all these arweave commands are being executed in
+		# all these bigfile commands are being executed in
 		# foreground mode, ARGS will be modified.
 		case ${subcommand} in
 		    benchmark)
-			arweave_benchmark ${*}
-			ARGS=$(arweave_benchmark ${*})
+			bigfile_benchmark ${*}
+			ARGS=$(bigfile_benchmark ${*})
 			;;
 		    wallet)
-			arweave_wallet ${*}
-			ARGS=$(arweave_wallet ${*})
+			bigfile_wallet ${*}
+			ARGS=$(bigfile_wallet ${*})
 			;;
 		    doctor)
-			arweave_doctor ${*}
-			ARGS=$(arweave_doctor ${*})
+			bigfile_doctor ${*}
+			ARGS=$(bigfile_doctor ${*})
 			;;
 		    foreground_clean)
-			ARWEAVE_OPTS=""
+			BIGFILE_OPTS=""
 			ARGS=${*}
 			;;
 		    *)
@@ -1370,7 +1370,7 @@ case "$1" in
 	    -boot_var SYSTEM_LIB_DIR "$SYSTEM_LIB_DIR" \
 	    -config "$RELX_CONFIG_PATH" \
 	    -args_file "$VMARGS_PATH" \
-	    $EXTRA_DIST_ARGS -- ${ARWEAVE_OPTS} ${ARGS}
+	    $EXTRA_DIST_ARGS -- ${BIGFILE_OPTS} ${ARGS}
 	echo "Root: $ROOTDIR"
 
 	# Log the startup
@@ -1385,7 +1385,7 @@ case "$1" in
 	relx_run_hooks "$PRE_START_HOOKS"
 
 	# check system configuration
-	arweave_check
+	bigfile_check
 
 	# Start the VM
 	# The variabre FOREGROUNDOPTIONS must NOT be quoted.
@@ -1395,7 +1395,7 @@ case "$1" in
 	    -boot_var SYSTEM_LIB_DIR "$SYSTEM_LIB_DIR" \
 	    -config "$RELX_CONFIG_PATH" \
 	    -args_file "$VMARGS_PATH" \
-	    $EXTRA_DIST_ARGS -- ${ARWEAVE_OPTS} ${ARGS}
+	    $EXTRA_DIST_ARGS -- ${BIGFILE_OPTS} ${ARGS}
 	# exec will replace the current image and nothing else gets
 	# executed from this point on, this explains the absence
 	# of the pre start hook
@@ -1430,8 +1430,8 @@ case "$1" in
 	# if epmd is running locally, try to kill it
 	pgrep epmd && pkill epmd
 
-	# fetch the port of the remote arweave node
-	REMOTE_EPMD_PORT=$(ssh ${target} "epmd -names | sed 1d | awk '$2=="^arweave$" {print $NF}'")
+	# fetch the port of the remote bigfile node
+	REMOTE_EPMD_PORT=$(ssh ${target} "epmd -names | sed 1d | awk '$2=="^bigfile$" {print $NF}'")
 
 	# create a local forward tunnel
 	ssh -L ${ERL_EPMD_PORT}:localhost:${ERL_EPMD_PORT} \
@@ -1445,11 +1445,11 @@ case "$1" in
 	;;
     test)
 	shift
-	arweave_test ${*}
+	bigfile_test ${*}
 	;;
     test_e2e)
 	shift
-	arweave_e2e ${*}
+	bigfile_e2e ${*}
 	;;
     help)
 	if [ -z "$2" ]; then

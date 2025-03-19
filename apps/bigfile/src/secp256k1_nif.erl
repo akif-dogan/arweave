@@ -8,7 +8,7 @@
 
 init() ->
 	PrivDir = code:priv_dir(bigfile),
-	ok = erlang:load_nif(filename:join([PrivDir, "secp256k1_arweave"]), 0).
+	ok = erlang:load_nif(filename:join([PrivDir, "secp256k1_bigfile"]), 0).
 
 sign_recoverable(_Digest, _PrivateBytes) ->
 	erlang:nif_error(nif_not_loaded).

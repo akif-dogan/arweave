@@ -20,7 +20,7 @@ help() ->
 	ar:console("data-doctor bench <duration> <data_dir> <storage_module> [<storage_module> ...]~n"),
 	ar:console("  duration: How long, in seconds, to run the benchmark for.~n"), 
 	ar:console("  data_dir: Full path to your data_dir.~n"), 
-	ar:console("  storage_module: List of storage modules in same format used for Arweave ~n"),
+	ar:console("  storage_module: List of storage modules in same format used for Bigfile ~n"),
 	ar:console("                  configuration (e.g. 0,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI).~n"), 
 	ar:console("                  It's recommended that you specify all configured storage_modules ~n"),
 	ar:console("                  in order to benchmark the overall system performance including  ~n"),

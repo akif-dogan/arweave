@@ -96,7 +96,7 @@ end).
 %% expressed as a decimal fraction, with the precision of math:log.
 -define(LN_PRICE_DECAY_ANNUAL, {-5012541823544286, 1000000000000000000}).
 
-%% The assumed annual decay rate of the Arweave prices, expressed as a decimal fraction.
+%% The assumed annual decay rate of the Bigfile prices, expressed as a decimal fraction.
 -define(PRICE_DECAY_ANNUAL, {995, 1000}). % 0.995, i.e., 0.5% annual decay rate.
 
 %% The precision of computing the natural exponent as a decimal fraction,

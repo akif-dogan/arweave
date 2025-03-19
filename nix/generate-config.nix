@@ -1,4 +1,4 @@
-{ arweaveConfig, pkgs, ... }:
+{bigfileConfig, pkgs, ... }:
 
 let
   inherit (pkgs) lib;

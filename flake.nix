@@ -1,5 +1,5 @@
 {
-  description = "The Arweave server and App Developer Toolkit.";
+  description = "The Bigfile server and App Developer Toolkit.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";

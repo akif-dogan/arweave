@@ -353,7 +353,7 @@ let
     '';
   };
 
-  arweaveSources = ../.;
+  bigfileSources = ../.;
   sourcesFilter = src:
     let
       srcIgnored = gitignoreFilterWith {

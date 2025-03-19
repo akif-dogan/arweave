@@ -55,7 +55,7 @@ echo "Executing rebar3 as ${PROFILE} ${COMMAND}"
 ${SCRIPT_DIR}/rebar3 as ${PROFILE} ${COMMAND}
 
 if [ "${COMMAND}" = "release" ]; then
-	RELEASE_PATH=$(${SCRIPT_DIR}/rebar3 as ${ARWEAVE_BUILD_TARGET:-default} path --rel)
+	RELEASE_PATH=$(${SCRIPT_DIR}/rebar3 as ${BIGFILE_BUILD_TARGET:-default} path --rel)
     echo
     echo Copying and linking build artifacts
     set -x

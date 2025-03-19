@@ -86,10 +86,10 @@ export NAMESPACE="${NAMESPACE_FLAG}"
 if test "${MODE}" = "e2e"
 then
 	export ERL_PATH_ADD="$(echo ${PWD}/_build/e2e/lib/*/ebin)"
-	export ERL_PATH_TEST="${PWD}/_build/e2e/lib/arweave/e2e"
+	export ERL_PATH_TEST="${PWD}/_build/e2e/lib/bigfile/e2e"
 else
 	export ERL_PATH_ADD="$(echo ${PWD}/_build/test/lib/*/ebin)"
-	export ERL_PATH_TEST="${PWD}/_build/test/lib/arweave/test"
+	export ERL_PATH_TEST="${PWD}/_build/test/lib/bigfile/test"
 fi
 
 export ERL_PATH_CONF="${PWD}/config/sys.config"

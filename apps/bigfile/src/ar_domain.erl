@@ -1,6 +1,6 @@
 -module(ar_domain).
 
--export([get_labeling/3, lookup_arweave_txt_record/1, derive_tx_label/2]).
+-export([get_labeling/3, lookup_bigfile_txt_record/1, derive_tx_label/2]).
 
 %%%===================================================================
 %%% Public interface.
@@ -18,7 +18,7 @@ get_labeling(ApexDomain, CustomDomains, Hostname) ->
 			get_labeling_1(CustomDomains, Hostname)
 	end.
 
-lookup_arweave_txt_record(Domain) ->
+lookup_bigfile_txt_record(Domain) ->
 	case inet_res:lookup("_bigfile." ++ binary_to_list(Domain), in, txt) of
 		[] ->
 			not_found;

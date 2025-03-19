@@ -320,8 +320,8 @@ in
 
   configFile = mkOption {
     type = types.path;
-    default = defaultArweaveConfigFile;
-    description = "The generated Arweave config file";
+    default = defaultBigfileConfigFile;
+    description = "The generated Bigfile config file";
   };
 
   patches = mkOption {
