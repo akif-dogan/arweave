@@ -1,8 +1,8 @@
 #!/bin/bash
 ######################################################################
-# Arweave partition synchronization script. The goal of this script
+# BigFile partition synchronization script. The goal of this script
 # is to offert a simple and flexible interface to fetch unpacked
-# arweave storage modules partitions.
+# bigfile storage modules partitions.
 #
 # = Usage
 #
@@ -22,7 +22,7 @@
 #
 #   storage_module_${index}_unpacked.index
 #
-# Where ${index} is a positive integer corresponding to an arweave
+# Where ${index} is a positive integer corresponding to an bigfile
 # storage module. This index can be directly downloaded using -I flag
 # from this script.
 #

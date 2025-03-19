@@ -1,5 +1,5 @@
 ######################################################################
-## Default vm arguments templates used by Arweave.
+## Default vm arguments templates used by BigFile.
 ##
 ## Some useful links to configure emulator flags:
 ##   https://www.erlang.org/doc/apps/erts/erl_cmd.html#emulator-flags

@@ -158,7 +158,7 @@ original_split(Data) ->
 	{DataRoot, _} = ar_merkle:generate_tree(SizedChunkIDs),
 	{DataRoot, Chunks}.
 
-%% @doc Split the way v2 transactions are usually split (arweave-js does it
+%% @doc Split the way v2 transactions are usually split (bigfile-js does it
 %% this way as of the time this was written).
 v2_standard_split(Data) ->
 	Chunks = v2_standard_split_get_chunks(Data),
