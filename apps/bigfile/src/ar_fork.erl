@@ -174,5 +174,3 @@ height_2_9() ->
 			1602350. % Targeting 2025-02-03 14:00 UTC
 	-endif.
 -endif.
-
-{ok, Config} = application:get_env(bigfile, config),
