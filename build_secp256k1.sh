@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_DIR="apps/arweave/lib/secp256k1/build"
+BUILD_DIR="apps/bigfile/lib/secp256k1/build"
 CMAKE_OPTIONS="-DSECP256K1_DISABLE_SHARED=ON \
                -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \
                -DBUILD_SHARED_LIBS=OFF \

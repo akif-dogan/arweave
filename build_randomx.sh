@@ -36,6 +36,6 @@ case "$1" in
 esac
 
 # Create the build directory and run cmake with the appropriate options
-mkdir -p "apps/arweave/lib/RandomX/$BUILD_DIR"
-cd "apps/arweave/lib/RandomX/$BUILD_DIR"
+mkdir -p "apps/bigfile/lib/RandomX/$BUILD_DIR"
+cd "apps/bigfile/lib/RandomX/$BUILD_DIR"
 cmake $CMAKE_OPTIONS ..
