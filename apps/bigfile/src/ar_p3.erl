@@ -197,7 +197,7 @@ validate_endpoint(Req, ServiceConfig) ->
 
 validate_address(Req) ->
 	Address = cowboy_req:header(?P3_ADDRESS_HEADER, Req),
-	case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Address) of
+	case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Address) of
 		{ok, DecodedAddress} ->
 			{ok, DecodedAddress};
 		_ ->
@@ -217,7 +217,7 @@ validate_signature(DecodedAddress, DecodedSignature, Req) ->
 		{ok, Account} ->
 			PubKey = Account#p3_account.public_key,
 			Message = build_message(Req),
-			case ar_wallet:verify(PubKey, Message, DecodedSignature) of
+			case big_wallet:verify(PubKey, Message, DecodedSignature) of
 				true ->
 					validate_price(Account, Req);
 				false ->
@@ -238,7 +238,7 @@ get_or_try_to_create_account(DecodedAddress) ->
 	end.
 
 try_to_create_account(DecodedAddress) ->
-	case ar_storage:read_tx(ar_wallets:get_last_tx(DecodedAddress)) of
+	case ar_storage:read_tx(big_wallets:get_last_tx(DecodedAddress)) of
 		unavailable ->
 			{error, not_found};
 		TX ->
@@ -341,7 +341,7 @@ apply_deposits([TX|TXs], DepositAddress) ->
 	apply_deposits(TXs, DepositAddress).
 
 apply_deposit(TX) ->
-	Sender = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+	Sender = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	PublicKey = {TX#tx.signature_type, TX#tx.owner},
 	{ok, _} = ar_p3_db:get_or_create_account(Sender, PublicKey, ?BIGFILE_BIG),
 	{ok, _} = ar_p3_db:post_deposit(Sender, TX#tx.quantity, TX#tx.id),

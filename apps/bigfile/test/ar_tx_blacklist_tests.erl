@@ -50,7 +50,7 @@ test_uses_blacklists() ->
 	} = setup(),
 	WhitelistFile = random_filename(),
 	ok = file:write_file(WhitelistFile, <<>>),
-	RewardAddr = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	RewardAddr = big_wallet:to_address(big_wallet:new_keyfile()),
 	{ok, Config} = application:get_env(bigfile, config),
 	try
 		ar_test_node:start(#{ b0 => B0, addr => RewardAddr,
@@ -213,8 +213,8 @@ setup() ->
 
 setup(Node) ->
 	{ok, Config} = ar_test_node:get_config(Node),
-	Wallet = {_, Pub} = ar_test_node:remote_call(Node, ar_wallet, new_keyfile, []),
-	RewardAddr = ar_wallet:to_address(Pub),
+	Wallet = {_, Pub} = ar_test_node:remote_call(Node, big_wallet, new_keyfile, []),
+	RewardAddr = big_wallet:to_address(Pub),
 	[B0] = ar_weave:init([{RewardAddr, ?BIG(100000000), <<>>}]),
 	ar_test_node:start_peer(Node, B0, RewardAddr, Config#config{
 		enable = [pack_served_chunks | Config#config.enable]

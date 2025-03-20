@@ -13,7 +13,7 @@ chunks_read(_Worker, WhichChunk, Candidate, RangeStart, ChunkOffsets) ->
 
 setup_all() ->
 	[B0] = ar_weave:init([], 1, ?WEAVE_SIZE),
-	RewardAddr = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	RewardAddr = big_wallet:to_address(big_wallet:new_keyfile()),
 	{ok, Config} = application:get_env(bigfile, config),
 	StorageModules = lists:flatten(
 		[[{?PARTITION_SIZE, N, {spora_2_6, RewardAddr}}] || N <- lists:seq(0, 8)]),

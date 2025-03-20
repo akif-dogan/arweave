@@ -34,9 +34,9 @@ init(_WalletList, _Diff, GenesisDataSize) when GenesisDataSize > (4 * ?GiB) ->
 
 %% @doc Create a genesis block with the given accounts and difficulty.
 init(WalletList, Diff, GenesisDataSize) ->
-	{{_, _, _}, {_, _}} = Key = ar_wallet:new_keyfile(),
+	{{_, _, _}, {_, _}} = Key = big_wallet:new_keyfile(),
 	TX = create_genesis_tx(Key, GenesisDataSize),
-	WalletList2 = WalletList ++ [{ar_wallet:to_address(Key), 0, TX#tx.id}],
+	WalletList2 = WalletList ++ [{big_wallet:to_address(Key), 0, TX#tx.id}],
 	TXs = [TX],
 	AccountTree = ar_patricia_tree:from_proplist([{A, {B, LTX}}
 			|| {A, B, LTX} <- WalletList2]),
@@ -69,8 +69,8 @@ init(WalletList, Diff, GenesisDataSize) ->
 	B1 =
 		case ar_fork:height_2_6() > 0 of
 			false ->
-				RewardKey = element(2, ar_wallet:new()),
-				RewardAddr = ar_wallet:to_address(RewardKey),
+				RewardKey = element(2, big_wallet:new()),
+				RewardAddr = big_wallet:to_address(RewardKey),
 				HashRate = ar_difficulty:get_hash_rate_fixed_ratio(B0),
 				RewardHistory = [{RewardAddr, HashRate, 10, 1}],
 				PricePerGiBMinute = ar_pricing:get_price_per_gib_minute(0, 
@@ -184,7 +184,7 @@ add_mainnet_v1_genesis_txs() ->
 create_mainnet_genesis_txs() ->
 	TXs = lists:map(
 		fun({M}) ->
-			{Priv, Pub} = ar_wallet:new(),
+			{Priv, Pub} = big_wallet:new(),
 			LastTx = <<>>,
 			Data = unicode:characters_to_binary(M),
 			TX = ar_tx:new(Data, 0, LastTx),

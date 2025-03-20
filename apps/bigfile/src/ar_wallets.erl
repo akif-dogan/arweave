@@ -2,7 +2,7 @@
 %%% in different blocks. Since wallet lists are huge, only one copy is stored at any time,
 %%% along with the small "diffs", which allow to reconstruct the wallet lists of the previous,
 %%% following, and uncle blocks.
--module(ar_wallets).
+-module(big_wallets).
 
 -export([start_link/1, get/1, get/2, get_chunk/2, get_balance/1, get_balance/2, get_last_tx/1,
 		apply_block/2, add_wallets/4, set_current/3, get_size/0]).
@@ -12,7 +12,7 @@
 -include_lib("bigfile/include/ar.hrl").
 -include_lib("bigfile/include/ar_header_sync.hrl").
 -include_lib("bigfile/include/ar_pricing.hrl").
--include_lib("bigfile/include/ar_wallets.hrl").
+-include_lib("bigfile/include/big_wallets.hrl").
 
 %%%===================================================================
 %%% Public interface.
@@ -24,7 +24,7 @@ start_link(Args) ->
 %% @doc Return the map mapping the given addresses to the corresponding wallets
 %% from the latest wallet tree.
 get(Address) when is_binary(Address) ->
-	ar_wallets:get([Address]);
+	big_wallets:get([Address]);
 get(Addresses) ->
 	gen_server:call(?MODULE, {get, Addresses}, infinity).
 
@@ -319,7 +319,7 @@ apply_block2(B, PrevB, DAG) ->
 			undefined ->
 				Addresses2;
 			Proof ->
-				[ar_wallet:hash_pub_key(element(1, Proof)) | Addresses2]
+				[big_wallet:hash_pub_key(element(1, Proof)) | Addresses2]
 		end,
 	Accounts = get_map(Tree, Addresses3),
 	case ar_node_utils:update_accounts(B, PrevB, Accounts) of

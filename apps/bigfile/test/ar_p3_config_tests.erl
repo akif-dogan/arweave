@@ -710,7 +710,7 @@ rates_endpoint_test_() ->
 	].
 
 test_no_rates_endpoint() ->
-	RewardAddress = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
 	[B0] = ar_weave:init(),
 	{ok, Config} = application:get_env(bigfile, config),
 	ar_test_node:start(B0, RewardAddress, Config),
@@ -723,7 +723,7 @@ test_no_rates_endpoint() ->
 	).
 
 test_empty_rates_endpoint() ->
-	RewardAddress = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
 	[B0] = ar_weave:init(),
 	{ok, BaseConfig} = application:get_env(bigfile, config),
 	try
@@ -741,7 +741,7 @@ test_empty_rates_endpoint() ->
 	end.
 
 test_empty_payments_and_services_rates_endpoint() ->
-	RewardAddress = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
 	[B0] = ar_weave:init(),
 	{ok, BaseConfig} = application:get_env(bigfile, config),
 	try
@@ -760,9 +760,9 @@ test_empty_payments_and_services_rates_endpoint() ->
 	end.
 
 test_rates_endpoint() ->
-	{_, Pub1} = ar_wallet:new(),
-	RewardAddress = ar_wallet:to_address(ar_wallet:new_keyfile()),
-	DepositAddress = ar_wallet:to_address(Pub1),
+	{_, Pub1} = big_wallet:new(),
+	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
+	DepositAddress = big_wallet:to_address(Pub1),
 	EncodedDepositAddress = ar_util:encode(DepositAddress),
 	[B0] = ar_weave:init(),
 	{ok, BaseConfig} = application:get_env(bigfile, config),

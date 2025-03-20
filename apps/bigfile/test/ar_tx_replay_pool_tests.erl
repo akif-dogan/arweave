@@ -9,8 +9,8 @@ verify_block_txs_test_() ->
 	{timeout, 30, fun test_verify_block_txs/0}.
 
 test_verify_block_txs() ->
-	Key1 = ar_wallet:new(),
-	Key2 = ar_wallet:new(),
+	Key1 = big_wallet:new(),
+	Key2 = big_wallet:new(),
 	RandomBlockAnchors =
 		[crypto:strong_rand_bytes(32) || _ <- lists:seq(1, ?MAX_TX_ANCHOR_DEPTH)],
 	BlockAnchorTXAtForkHeight = tx(Key1, fee(ar_fork:height_2_0()), <<"hash">>),
@@ -216,7 +216,7 @@ tx(Key = {_, {_, Owner}}, Reward, Anchor) ->
 	).
 
 wallet({_, Pub}, Balance) ->
-	{ar_wallet:to_address(Pub), Balance, <<>>}.
+	{big_wallet:to_address(Pub), Balance, <<>>}.
 
 fee(Height) ->
 	ar_tx:get_tx_fee({0, 2000, 1, <<>>, #{}, Height + 1}).

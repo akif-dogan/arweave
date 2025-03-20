@@ -1,5 +1,5 @@
 %%% @doc Utilities for manipulating wallets.
--module(ar_wallet).
+-module(big_wallet).
 
 -export([new/0, new_ecdsa/0, new/1, sign/2, verify/3, verify_pre_fork_2_4/3,
 		to_address/1, to_address/2, hash_pub_key/1,
@@ -130,7 +130,7 @@ wallet_filepath2(Wallet) ->
 	filename:join([Config#config.data_dir, ?WALLET_DIR, Filename]).
 
 %% @doc Read the keyfile for the key with the given address from disk.
-%% Return not_found if arweave_keyfile_[addr].json or [addr].json is not found
+%% Return not_found if bigfile_keyfile_[addr].json or [addr].json is not found
 %% in [data_dir]/?WALLET_DIR.
 load_key(Addr) ->
 	Path = wallet_filepath(ar_util:encode(Addr)),
@@ -322,7 +322,7 @@ get_or_create_wallet(Types) ->
 	get_or_create_wallet(Entries, Types).
 
 get_or_create_wallet([], [Type | _]) ->
-	ar_wallet:new_keyfile(Type);
+	big_wallet:new_keyfile(Type);
 get_or_create_wallet([{_LastModified, F} | Entries], Types) ->
 	{{Type, _, _}, _} = W = load_keyfile(F),
 	case lists:member(Type, Types) of

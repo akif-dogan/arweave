@@ -44,11 +44,11 @@ load_wallet_fixture(WalletFixture) ->
 	WalletName = atom_to_list(WalletFixture),
 	FixtureDir = fixture_dir(wallets),
 	FixturePath = filename:join([FixtureDir, WalletName ++ ".json"]),
-	Wallet = ar_wallet:load_keyfile(FixturePath),
-	Address = ar_wallet:to_address(Wallet),
-	WalletPath = ar_wallet:wallet_filepath(ar_util:encode(Address)),
+	Wallet = big_wallet:load_keyfile(FixturePath),
+	Address = big_wallet:to_address(Wallet),
+	WalletPath = big_wallet:wallet_filepath(ar_util:encode(Address)),
 	file:copy(FixturePath, WalletPath),
-	ar_wallet:load_keyfile(WalletPath).
+	big_wallet:load_keyfile(WalletPath).
 
 -spec write_chunk_fixture(binary(), non_neg_integer(), binary()) -> ok.
 write_chunk_fixture(Packing, EndOffset, Chunk) ->
@@ -131,7 +131,7 @@ start_source_node(Node, PackingType, WalletFixture) ->
 	?LOG_INFO("Starting source node ~p with packing type ~p and wallet fixture ~p",
 		[Node, PackingType, WalletFixture]),
 	{Wallet, StorageModules} = source_node_storage_modules(Node, PackingType, WalletFixture),
-	RewardAddr = ar_wallet:to_address(Wallet),
+	RewardAddr = big_wallet:to_address(Wallet),
 	[B0] = ar_weave:init([{RewardAddr, ?BIG(200), <<>>}], 0, ?PARTITION_SIZE),
 
 	{ok, Config} = ar_test_node:remote_call(Node, application, get_env, [bigfile, config]),
@@ -210,7 +210,7 @@ source_node_storage_modules(_Node, unpacked, _WalletFixture) ->
 	{undefined, source_node_storage_modules(unpacked)};
 source_node_storage_modules(Node, PackingType, WalletFixture) ->
 	Wallet = ar_test_node:remote_call(Node, ar_e2e, load_wallet_fixture, [WalletFixture]),
-	RewardAddr = ar_wallet:to_address(Wallet),
+	RewardAddr = big_wallet:to_address(Wallet),
 	SourcePacking = packing_type_to_packing(PackingType, RewardAddr),
 	{Wallet, source_node_storage_modules(SourcePacking)}.
 
@@ -225,7 +225,7 @@ source_node_storage_modules(SourcePacking) ->
 	
 mine_block(Node, Wallet, DataSize, IsTemporary) ->
 	WeaveSize = ar_test_node:remote_call(Node, ar_node, get_current_weave_size, []),
-	Addr = ar_wallet:to_address(Wallet),
+	Addr = big_wallet:to_address(Wallet),
 	{TX, Chunks} = generate_tx(Node, Wallet, WeaveSize, DataSize),
 	B = ar_test_node:post_and_mine(#{ miner => Node, await_on => Node }, [TX]),
 
@@ -517,9 +517,9 @@ write_wallet_fixtures() ->
 	Wallets = [wallet_a, wallet_b, wallet_c, wallet_d],
 	lists:foreach(fun(Wallet) ->
 		WalletName = atom_to_list(Wallet),
-		ar_wallet:new_keyfile(?DEFAULT_KEY_TYPE, WalletName),
+		big_wallet:new_keyfile(?DEFAULT_KEY_TYPE, WalletName),
 		ar_e2e:install_fixture(
-			ar_wallet:wallet_filepath(Wallet), wallets, WalletName ++ ".json")
+			big_wallet:wallet_filepath(Wallet), wallets, WalletName ++ ".json")
 	end, Wallets),
 	ok.
 

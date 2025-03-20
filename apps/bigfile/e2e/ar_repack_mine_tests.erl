@@ -50,7 +50,7 @@ test_repack_mine({FromPackingType, ToPackingType}) ->
 		RepackerNode, ToPackingType, wallet_b),
 	AddrB = case WalletB of
 		undefined -> undefined;
-		_ -> ar_wallet:to_address(WalletB)
+		_ -> big_wallet:to_address(WalletB)
 	end,
 	ToPacking = ar_e2e:packing_type_to_packing(ToPackingType, AddrB),
 	{ok, Config} = ar_test_node:get_config(RepackerNode),
@@ -117,7 +117,7 @@ test_repacking_blocked({FromPackingType, ToPackingType}) ->
 		RepackerNode, ToPackingType, wallet_b),
 	AddrB = case WalletB of
 		undefined -> undefined;
-		_ -> ar_wallet:to_address(WalletB)
+		_ -> big_wallet:to_address(WalletB)
 	end,
 	ToPacking = ar_e2e:packing_type_to_packing(ToPackingType, AddrB),
 	{ok, Config} = ar_test_node:get_config(RepackerNode),

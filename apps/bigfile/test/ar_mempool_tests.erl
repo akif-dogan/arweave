@@ -6,8 +6,8 @@
 
 start_node() ->
 	%% Starting a node is slow so we'll run it once for the whole test module
-	Key = ar_wallet:new(),
-	OtherKey = ar_wallet:new(),
+	Key = big_wallet:new(),
+	OtherKey = big_wallet:new(),
 	LastTXID = crypto:strong_rand_bytes(32), 
 	[B0] = ar_weave:init([
 		wallet(Key, 1000, LastTXID),
@@ -348,7 +348,7 @@ test_mixed_deposit_spend_tx_old_address({
 		{_, {_, OtherOwner}},
 		_B0}) ->
 	BaseID = crypto:strong_rand_bytes(31),
-	Origin = ar_wallet:to_address(Pub),
+	Origin = big_wallet:to_address(Pub),
 
 	Test1 = "Test 1: Unconfirmed deposits from old addresses are not considered for overspend",
 	TX2 = tx(2, OtherOwner, 9, <<>>, <<"d", BaseID/binary>>, <<>>, 500, Origin),
@@ -365,10 +365,10 @@ test_mixed_deposit_spend_tx_old_address({
 test_mixed_deposit_spend_tx_new_address({
 		{_, Pub} = {_, {_, Owner}}, _LastTXID, _OtherKey, _B0}) ->
 	BaseID = crypto:strong_rand_bytes(31),
-	Origin = ar_wallet:to_address(Pub),
+	Origin = big_wallet:to_address(Pub),
 
-	{_, NewPub} = {_, {_, NewOwner}} = ar_wallet:new(),
-	NewAddr = ar_wallet:to_address(NewPub),
+	{_, NewPub} = {_, {_, NewOwner}} = big_wallet:new(),
+	NewAddr = big_wallet:to_address(NewPub),
 
 	Test1 = "Test 1: Unconfirmed deposits from new addresses are not considered for overspend",
 	TX1 = tx(2, Owner, 10, <<>>, <<"e", BaseID/binary>>, <<>>, 400, NewAddr),
@@ -444,7 +444,7 @@ add_transactions(NumTransactions, Format, Owner, DataSize) ->
 	{ExpectedTXIDs, HighestReward, LowestReward}.
 
 wallet({_, Pub}, Balance, LastTXID) ->
-	{ar_wallet:to_address(Pub), Balance, LastTXID}.
+	{big_wallet:to_address(Pub), Balance, LastTXID}.
 
 tx(Format, Owner, Reward, Data) ->
 	tx(Format, Owner, Reward, Data, crypto:strong_rand_bytes(32), <<>>).

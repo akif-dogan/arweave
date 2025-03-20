@@ -229,7 +229,7 @@ disk_pool_rotation_test_() ->
 	{timeout, 120, fun test_disk_pool_rotation/0}.
 
 test_disk_pool_rotation() ->
-	Addr = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	Addr = big_wallet:to_address(big_wallet:new_keyfile()),
 	%% Will store the three genesis chunks.
 	%% The third one falls inside the "overlap" (see ar_storage_module.erl)
 	StorageModules = [{2 * ?DATA_CHUNK_SIZE, 0,

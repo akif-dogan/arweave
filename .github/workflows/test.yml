@@ -296,7 +296,7 @@ jobs:
             ar_unbalanced_merkle,
             ar_util,
             ar_verify_chunks,
-            ar_wallet,
+            big_wallet,
             ar_webhook,
             ar_pool
           ]

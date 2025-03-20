@@ -55,8 +55,8 @@ metrics() ->
 		get_process_memory(ar_node_worker)},
 	 {ar_header_sync_bytes_total, gauge, "ar_header_sync process memory",
 		get_process_memory(ar_header_sync)},
-	 {ar_wallets_bytes_total, gauge, "ar_wallets process memory",
-		get_process_memory(ar_wallets)}
+	 {big_wallets_bytes_total, gauge, "big_wallets process memory",
+		get_process_memory(big_wallets)}
 	].
 
 get_process_memory(Name) ->

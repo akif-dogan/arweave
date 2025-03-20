@@ -10,8 +10,8 @@ polling_test_() ->
 	{timeout, 120, fun test_polling/0}.
 
 test_polling() ->
-	{_, Pub} = Wallet = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
+	{_, Pub} = Wallet = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
 	ar_test_node:disconnect_from(peer1),

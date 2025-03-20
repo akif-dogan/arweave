@@ -365,14 +365,14 @@ handle_cast(Message, #{ task_queue := TaskQueue } = State) ->
 	end.
 
 handle_info({join_from_state, Height, BI, Blocks}, State) ->
-	{ok, _} = ar_wallets:start_link([{blocks, Blocks},
+	{ok, _} = big_wallets:start_link([{blocks, Blocks},
 			{from_state, ?START_FROM_STATE_SEARCH_DEPTH}]),
 	ets:insert(node_state, {join_state, {Height, Blocks, BI}}),
 	{noreply, State};
 
 handle_info({join, Height, BI, Blocks}, State) ->
 	Peers = ar_peers:get_trusted_peers(),
-	{ok, _} = ar_wallets:start_link([{blocks, Blocks}, {from_peers, Peers}]),
+	{ok, _} = big_wallets:start_link([{blocks, Blocks}, {from_peers, Peers}]),
 	ets:insert(node_state, {join_state, {Height, Blocks, BI}}),
 	{noreply, State};
 
@@ -496,7 +496,7 @@ handle_info({tx_ready_for_mining, TX}, State) ->
 handle_info({event, block, {double_signing, Proof}}, State) ->
 	Map = maps:get(double_signing_proofs, State, #{}),
 	Key = element(1, Proof),
-	Addr = ar_wallet:hash_pub_key(Key),
+	Addr = big_wallet:hash_pub_key(Key),
 	case is_map_key(Addr, Map) of
 		true ->
 			{noreply, State};
@@ -689,7 +689,7 @@ handle_task({filter_mempool, Mempool}, State) ->
 					redenomination_height),
 			[{block_anchors, BlockAnchors}] = ets:lookup(node_state, block_anchors),
 			[{recent_txs_map, RecentTXMap}] = ets:lookup(node_state, recent_txs_map),
-			Wallets = ar_wallets:get(WalletList, ar_tx:get_addresses(List)),
+			Wallets = big_wallets:get(WalletList, ar_tx:get_addresses(List)),
 			InvalidTXs =
 				lists:foldl(
 					fun(TX, Acc) ->
@@ -917,7 +917,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 	[{recent_block_index, RecentBI}] = ets:lookup(node_state, recent_block_index),
 	RootHash = PrevB#block.wallet_list,
 	TXs = B#block.txs,
-	Accounts = ar_wallets:get(RootHash, [B#block.reward_addr | ar_tx:get_addresses(TXs)]),
+	Accounts = big_wallets:get(RootHash, [B#block.reward_addr | ar_tx:get_addresses(TXs)]),
 	{Orphans, RecentBI2} = update_block_index(B, PrevBlocks, RecentBI),
 	BlockTXPairs2 = update_block_txs_pairs(B, PrevBlocks, BlockTXPairs),
 	BlockTXPairs3 = tl(BlockTXPairs2),
@@ -1054,7 +1054,7 @@ may_be_get_double_signing_proof2(Iterator, RootHash, LockedRewards, Height) ->
 					may_be_get_double_signing_proof2(Iterator2,
 							RootHash, LockedRewards, Height);
 				true ->
-					Accounts = ar_wallets:get(RootHash, [Addr]),
+					Accounts = big_wallets:get(RootHash, [Addr]),
 					case ar_node_utils:is_account_banned(Addr, Accounts) of
 						true ->
 							may_be_get_double_signing_proof2(Iterator2,
@@ -1109,9 +1109,9 @@ pack_block_with_transactions(B, PrevB) ->
 			undefined ->
 				Addresses2;
 			Proof ->
-				[ar_wallet:hash_pub_key(element(1, Proof)) | Addresses2]
+				[big_wallet:hash_pub_key(element(1, Proof)) | Addresses2]
 		end,
-	Accounts = ar_wallets:get(PrevB#block.wallet_list, Addresses3),
+	Accounts = big_wallets:get(PrevB#block.wallet_list, Addresses3),
 	[{block_txs_pairs, BlockTXPairs}] = ets:lookup(node_state, block_txs_pairs),
 	PrevBlocks = ar_block_cache:get_fork_blocks(block_cache, B),
 	BlockTXPairs2 = update_block_txs_pairs(B, PrevBlocks, BlockTXPairs),
@@ -1138,7 +1138,7 @@ pack_block_with_transactions(B, PrevB) ->
 	Reward2 = ar_pricing:redenominate(Reward, PrevDenomination, Denomination),
 	EndowmentPool2 = ar_pricing:redenominate(EndowmentPool, PrevDenomination, Denomination),
 	DebtSupply2 = ar_pricing:redenominate(DebtSupply, PrevDenomination, Denomination),
-	{ok, RootHash} = ar_wallets:add_wallets(PrevB#block.wallet_list, Accounts2, Height,
+	{ok, RootHash} = big_wallets:add_wallets(PrevB#block.wallet_list, Accounts2, Height,
 			Denomination),
 	RewardHistory2 = ar_rewards:add_element(B2#block{ reward = Reward2 }, RewardHistory),
 	%% Pre-2.8: slice the reward history to compute the hash
@@ -1187,7 +1187,7 @@ block_txs_pair(B) ->
 	{B#block.indep_hash, B#block.size_tagged_txs}.
 
 validate_wallet_list(#block{ indep_hash = H } = B, PrevB) ->
-	case ar_wallets:apply_block(B, PrevB) of
+	case big_wallets:apply_block(B, PrevB) of
 		{error, invalid_denomination} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_denomination}, {h, ar_util:encode(H)}]),
@@ -1378,7 +1378,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 				Wallets = CurrentB#block.wallet_list,
 				%% Use a twice bigger depth than the depth requested on join to serve
 				%% the wallet trees to the joining nodes.
-				ok = ar_wallets:set_current(
+				ok = big_wallets:set_current(
 					Wallets, CurrentB#block.height, ?STORE_BLOCKS_BEHIND_CURRENT * 2),
 				CurrentB
 		end,
@@ -1900,7 +1900,7 @@ handle_found_solution(Args, PrevB, State) ->
 				Now
 		end,
 	IsBanned = ar_node_utils:is_account_banned(MiningAddress,
-			ar_wallets:get(WalletList, MiningAddress)),
+			big_wallets:get(WalletList, MiningAddress)),
 	%% Check the solution is ahead of the previous solution on the timeline.
 	NonceLimiterInfo = #nonce_limiter_info{ global_step_number = StepNumber,
 			output = NonceLimiterOutput,
@@ -1993,7 +1993,7 @@ handle_found_solution(Args, PrevB, State) ->
 				end
 		end,
 
-	RewardKey = case ar_wallet:load_key(MiningAddress) of
+	RewardKey = case big_wallet:load_key(MiningAddress) of
 		not_found ->
 			?LOG_WARNING([{event, mined_block_but_no_mining_key_found}, {node, node()},
 					{mining_address, ar_util:encode(MiningAddress)}]),
@@ -2119,7 +2119,7 @@ handle_found_solution(Args, PrevB, State) ->
 				height = Height,
 				hash = SolutionH,
 				hash_list_merkle = ar_block:compute_hash_list_merkle(PrevB),
-				reward_addr = ar_wallet:to_address(RewardKey),
+				reward_addr = big_wallet:to_address(RewardKey),
 				tags = [],
 				cumulative_diff = CDiff,
 				previous_cumulative_diff = PrevB#block.cumulative_diff,
@@ -2166,7 +2166,7 @@ handle_found_solution(Args, PrevB, State) ->
 			SignaturePreimage = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
 					<< (PrevB#block.hash)/binary, SignedH/binary >>, Height),
 			assert_key_type(RewardKey, Height),
-			Signature = ar_wallet:sign(element(1, RewardKey), SignaturePreimage),
+			Signature = big_wallet:sign(element(1, RewardKey), SignaturePreimage),
 			H = ar_block:indep_hash2(SignedH, Signature),
 			B = UnsignedB2#block{ indep_hash = H, signature = Signature },
 			ar_watchdog:mined_block(H, Height, PrevH),

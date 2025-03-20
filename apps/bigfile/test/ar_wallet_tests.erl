@@ -9,10 +9,10 @@ test_wallet_sign_verify() ->
 	TestWalletSignVerify = fun(KeyTypeEnc) ->
 		fun() ->
 			KeyType = ar_serialize:binary_to_signature_type(KeyTypeEnc),
-			{Priv, Pub} = ar_wallet:new(KeyType),
+			{Priv, Pub} = big_wallet:new(KeyType),
 			TestData = <<"TEST DATA">>,
-			Signature = ar_wallet:sign(Priv, TestData),
-			true = ar_wallet:verify(Pub, TestData, Signature)
+			Signature = big_wallet:sign(Priv, TestData),
+			true = big_wallet:verify(Pub, TestData, Signature)
 		end
 	end,
 	[
@@ -25,10 +25,10 @@ invalid_signature_test_() ->
     TestInvalidSignature = fun(KeyTypeEnc) ->
         fun() ->
 			KeyType = ar_serialize:binary_to_signature_type(KeyTypeEnc),
-			{Priv, Pub} = ar_wallet:new(KeyType),
+			{Priv, Pub} = big_wallet:new(KeyType),
            	TestData = <<"TEST DATA">>,
-			<< _:32, Signature/binary >> = ar_wallet:sign(Priv, TestData),
-			false = ar_wallet:verify(Pub, TestData, << 0:32, Signature/binary >>)
+			<< _:32, Signature/binary >> = big_wallet:sign(Priv, TestData),
+			false = big_wallet:verify(Pub, TestData, << 0:32, Signature/binary >>)
         end
     end,
     [
@@ -42,9 +42,9 @@ generate_keyfile_test_() ->
 	GenerateKeyFile = fun(KeyTypeEnc) ->
 		fun() ->
 			KeyType = ar_serialize:binary_to_signature_type(KeyTypeEnc),
-			{Priv, Pub} = ar_wallet:new_keyfile(KeyType),
-			FileName = ar_wallet:wallet_filepath(ar_util:encode(ar_wallet:to_address(Pub))),
-			{Priv, Pub} = ar_wallet:load_keyfile(FileName)
+			{Priv, Pub} = big_wallet:new_keyfile(KeyType),
+			FileName = big_wallet:wallet_filepath(ar_util:encode(big_wallet:to_address(Pub))),
+			{Priv, Pub} = big_wallet:load_keyfile(FileName)
 		end
 	end,
 	[
@@ -56,11 +56,11 @@ generate_keyfile_test_() ->
 load_keyfile_test_() ->
     TestLoadKeyfile = fun(KeyTypeEnc) ->
         fun() ->
-            {Priv, Pub = {KeyType, _}} = ar_wallet:load_keyfile(wallet_fixture_path(KeyTypeEnc)),
+            {Priv, Pub = {KeyType, _}} = big_wallet:load_keyfile(wallet_fixture_path(KeyTypeEnc)),
             KeyType = ar_serialize:binary_to_signature_type(KeyTypeEnc),
             TestData = <<"TEST DATA">>,
-            Signature = ar_wallet:sign(Priv, TestData),
-            true = ar_wallet:verify(Pub, TestData, Signature)
+            Signature = big_wallet:sign(Priv, TestData),
+            true = big_wallet:verify(Pub, TestData, Signature)
         end
     end,
     [

@@ -58,11 +58,11 @@ tx_db_test_() ->
 	{timeout, 30, fun test_tx_db/0}.
 
 test_tx_db() ->
-	{_, Pub1 = {_, Owner1}} = ar_wallet:new(),
-	{Priv2, Pub2} = ar_wallet:new(),
+	{_, Pub1 = {_, Owner1}} = big_wallet:new(),
+	{Priv2, Pub2} = big_wallet:new(),
 	Wallets = [
-		{ar_wallet:to_address(Pub1), ?BIG(10000), <<>>},
-		{ar_wallet:to_address(Pub2), ?BIG(10000), <<>>}
+		{big_wallet:to_address(Pub1), ?BIG(10000), <<>>},
+		{big_wallet:to_address(Pub2), ?BIG(10000), <<>>}
 	],
 	WL = maps:from_list([{A, {B, LTX}} || {A, B, LTX} <- Wallets]),
 	OrphanedTX1 = ar_tx:new(Pub1, ?BIG(1), ?BIG(5000), <<>>),

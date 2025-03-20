@@ -44,8 +44,8 @@ test_not_found() ->
 			raw_request(<<"GET">>, <<"/invalid_endpoint">>)}, [], Config)).
 
 test_valid_request() ->
-	Wallet = {PrivKey, PubKey} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Wallet),
+	Wallet = {PrivKey, PubKey} = big_wallet:new(),
+	Address = big_wallet:to_address(Wallet),
 	EncodedAddress = ar_util:encode(Address),
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
@@ -84,8 +84,8 @@ test_valid_request() ->
 	?assertEqual(<<"GET /price/1000">>, Transaction2#p3_transaction.description).
 
 test_zero_rate() ->
-	Wallet = {PrivKey, PubKey} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Wallet),
+	Wallet = {PrivKey, PubKey} = big_wallet:new(),
+	Address = big_wallet:to_address(Wallet),
 	EncodedAddress = ar_util:encode(Address),
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
@@ -113,8 +113,8 @@ test_zero_rate() ->
 
 
 test_checksum_request() ->
-	Wallet = {PrivKey, PubKey} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Wallet),
+	Wallet = {PrivKey, PubKey} = big_wallet:new(),
+	Address = big_wallet:to_address(Wallet),
 	Checksum = << (erlang:crc32(Address)):32 >>,
 	EncodedAddress = ar_util:encode(Address),
 	EncodedChecksum = ar_util:encode(Checksum),
@@ -146,16 +146,16 @@ test_checksum_request() ->
 		"Invalid checksum").
 
 test_bad_headers() ->
-	Wallet = {PrivKey, PubKey} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Wallet),
+	Wallet = {PrivKey, PubKey} = big_wallet:new(),
+	Address = big_wallet:to_address(Wallet),
 	EncodedAddress = ar_util:encode(Address),
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
 		PubKey,
 		?BIGFILE_BIG
 	),
-	Wallet2 = {PrivKey2, PubKey2} = ar_wallet:new(),
-	Address2 = ar_wallet:to_address(Wallet2),
+	Wallet2 = {PrivKey2, PubKey2} = big_wallet:new(),
+	Address2 = big_wallet:to_address(Wallet2),
 	EncodedAddress2 = ar_util:encode(Address2),
 	{ok, _Account2} = ar_p3_db:get_or_create_account(
 		Address2,
@@ -311,8 +311,8 @@ test_bad_headers() ->
 		"Decoded 'signature' header").
 
 test_bad_config() ->
-	Wallet = {PrivKey, PubKey} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Wallet),
+	Wallet = {PrivKey, PubKey} = big_wallet:new(),
+	Address = big_wallet:to_address(Wallet),
 	EncodedAddress = ar_util:encode(Address),
 	{ok, _Account} = ar_p3_db:get_or_create_account(
 		Address,
@@ -384,8 +384,8 @@ test_bad_config() ->
 		"Mismatched rate config").
 
 test_balance_endpoint() ->
-	Wallet = {PrivKey, PubKey} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Wallet),
+	Wallet = {PrivKey, PubKey} = big_wallet:new(),
+	Address = big_wallet:to_address(Wallet),
 	Checksum = << (erlang:crc32(Address)):32 >>,
 	EncodedAddress = ar_util:encode(Address),
 	{ok, _Account} = ar_p3_db:get_or_create_account(
@@ -419,10 +419,10 @@ test_balance_endpoint() ->
 		get_balance(Address, <<"bitcoin">>, <<"BTC">>)).
 
 test_reverse_charge() ->
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Wallet2 = {_, PubKey2} = ar_wallet:new(),
-	Address1 = ar_wallet:to_address(Wallet1),
-	Address2 = ar_wallet:to_address(Wallet2),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Wallet2 = {_, PubKey2} = big_wallet:new(),
+	Address1 = big_wallet:to_address(Wallet1),
+	Address2 = big_wallet:to_address(Wallet2),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
@@ -459,17 +459,17 @@ test_timeout() ->
 	?assertEqual({error, timeout}, ar_p3:allow_request(raw_request(<<"GET">>, <<"/price/1000">>))).
 
 e2e_deposit_before_charge() ->
-	Wallet1 = {Priv1, Pub1} = ar_wallet:new(),
-	Wallet2 = {Priv2, Pub2} = ar_wallet:new(),
-	{_, Pub3} = ar_wallet:new(),
-	{_, Pub4} = ar_wallet:new(),
-	RewardAddress = ar_wallet:to_address(ar_wallet:new_keyfile()),
-	Sender1Address = ar_wallet:to_address(Pub1),
+	Wallet1 = {Priv1, Pub1} = big_wallet:new(),
+	Wallet2 = {Priv2, Pub2} = big_wallet:new(),
+	{_, Pub3} = big_wallet:new(),
+	{_, Pub4} = big_wallet:new(),
+	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
+	Sender1Address = big_wallet:to_address(Pub1),
 	EncodedSender1Address = ar_util:encode(Sender1Address),
-	Sender2Address = ar_wallet:to_address(Pub2),
+	Sender2Address = big_wallet:to_address(Pub2),
 	EncodedSender2Address = ar_util:encode(Sender2Address),
-	DepositAddress = ar_wallet:to_address(Pub3),
-	OtherAddress = ar_wallet:to_address(Pub4),
+	DepositAddress = big_wallet:to_address(Pub3),
+	OtherAddress = big_wallet:to_address(Pub4),
 	[B0] = ar_weave:init([
 		{Sender1Address, ?BIG(10000), <<>>},
 		{Sender2Address, ?BIG(10000), <<>>},
@@ -689,15 +689,15 @@ e2e_deposit_before_charge() ->
 	end.
 
 e2e_charge_before_deposit() ->
-	Wallet1 = {Priv1, Pub1} = ar_wallet:new(),
-	Wallet2 = {Priv2, Pub2} = ar_wallet:new(),
-	{_, Pub3} = ar_wallet:new(),
-	{_, Pub4} = ar_wallet:new(),
-	RewardAddress = ar_wallet:to_address(ar_wallet:new_keyfile()),
-	Address1 = ar_wallet:to_address(Pub1),
+	Wallet1 = {Priv1, Pub1} = big_wallet:new(),
+	Wallet2 = {Priv2, Pub2} = big_wallet:new(),
+	{_, Pub3} = big_wallet:new(),
+	{_, Pub4} = big_wallet:new(),
+	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
+	Address1 = big_wallet:to_address(Pub1),
 	EncodedAddress1 = ar_util:encode(Address1),
-	Address2 = ar_wallet:to_address(Pub2),
-	DepositAddress = ar_wallet:to_address(Pub3),
+	Address2 = big_wallet:to_address(Pub2),
+	DepositAddress = big_wallet:to_address(Pub3),
 	[B0] = ar_weave:init([
 		{Address1, ?BIG(10000), <<>>}
 	]),
@@ -780,11 +780,11 @@ e2e_charge_before_deposit() ->
 
 %% @doc Test that nodes correctly scan old blocks that came in while they were offline.
 e2e_restart_p3_service() ->
-	Wallet1 = {_, Pub1} = ar_wallet:new(),
-	{_, Pub3} = ar_wallet:new(),
-	RewardAddress = ar_wallet:to_address(ar_wallet:new_keyfile()),
-	Sender1Address = ar_wallet:to_address(Pub1),
-	DepositAddress = ar_wallet:to_address(Pub3),
+	Wallet1 = {_, Pub1} = big_wallet:new(),
+	{_, Pub3} = big_wallet:new(),
+	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
+	Sender1Address = big_wallet:to_address(Pub1),
+	DepositAddress = big_wallet:to_address(Pub3),
 	[B0] = ar_weave:init([
 		{Sender1Address, ?BIG(10000), <<>>},
 		{DepositAddress, ?BIG(10000), <<>>}
@@ -856,12 +856,12 @@ e2e_restart_p3_service() ->
 %% are gated before they are processed (i.e. if the account does not have sufficient balance,
 %% the request is not processed at all) 
 e2e_concurrent_requests() ->
-	Wallet1 = {Priv1, Pub1} = ar_wallet:new(),
-	{_, Pub3} = ar_wallet:new(),
-	RewardAddress = ar_wallet:to_address(ar_wallet:new_keyfile()),
-	Address1 = ar_wallet:to_address(Pub1),
+	Wallet1 = {Priv1, Pub1} = big_wallet:new(),
+	{_, Pub3} = big_wallet:new(),
+	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
+	Address1 = big_wallet:to_address(Pub1),
 	EncodedAddress1 = ar_util:encode(Address1),
-	DepositAddress = ar_wallet:to_address(Pub3),
+	DepositAddress = big_wallet:to_address(Pub3),
 	[B0] = ar_weave:init([
 		{Address1, ?BIG(10000), <<>>},
 		{DepositAddress, ?BIG(10000), <<>>}
@@ -985,7 +985,7 @@ get_balance2(EncodedAddress, Network, Token) ->
 signed_request(Method, Path, PrivKey, Headers) 
 		when is_map(Headers) ->
 	Message = build_message(Headers),
-	EncodedSignature = ar_util:encode(ar_wallet:sign(PrivKey, Message)),
+	EncodedSignature = ar_util:encode(big_wallet:sign(PrivKey, Message)),
 	raw_request(Method, Path, Headers#{
 		?P3_SIGNATURE_HEADER => EncodedSignature
 	}).

@@ -41,7 +41,7 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 		RepackerNode, ToPackingType, wallet_b),
 	AddrB = case WalletB of
 		undefined -> undefined;
-		_ -> ar_wallet:to_address(WalletB)
+		_ -> big_wallet:to_address(WalletB)
 	end,
 	FinalStorageModules = lists:sublist(SourceStorageModules, 2),
 	ToPacking = ar_e2e:packing_type_to_packing(ToPackingType, AddrB),

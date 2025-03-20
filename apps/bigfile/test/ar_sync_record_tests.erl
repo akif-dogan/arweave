@@ -17,7 +17,7 @@ test_sync_record() ->
 	PartitionStart = ?PARTITION_SIZE - ?DATA_CHUNK_SIZE,
 	WeaveSize = 4 * ?DATA_CHUNK_SIZE,
 	[B0] = ar_weave:init([], 1, WeaveSize),
-	RewardAddr = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	RewardAddr = big_wallet:to_address(big_wallet:new_keyfile()),
 	{ok, Config} = application:get_env(bigfile, config),
 	try
 		Partition = {?PARTITION_SIZE, 0, {composite, RewardAddr, 1}},
@@ -146,7 +146,7 @@ test_sync_record_with_replica_2_9() when ?BLOCK_2_9_SYNCING ->
 	PartitionStart = ?PARTITION_SIZE - ?DATA_CHUNK_SIZE,
 	WeaveSize = 4 * ?DATA_CHUNK_SIZE,
 	[B0] = ar_weave:init([], 1, WeaveSize),
-	RewardAddr = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	RewardAddr = big_wallet:to_address(big_wallet:new_keyfile()),
 	{ok, Config} = application:get_env(bigfile, config),
 	try
 		Partition = {?PARTITION_SIZE, 0, {replica_2_9, RewardAddr}},

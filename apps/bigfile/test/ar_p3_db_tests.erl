@@ -29,8 +29,8 @@ mocked_test_timeout() ->
 		fun test_timeout/0).
 
 test_timeout() ->
-	{_, Pub} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Pub),
+	{_, Pub} = big_wallet:new(),
+	Address = big_wallet:to_address(Pub),
 	?assertEqual({error, timeout}, ar_p3_db:get_or_create_account(
 		Address,
 		Pub,
@@ -39,10 +39,10 @@ test_timeout() ->
 
 test_account() ->
 	TestStart = erlang:system_time(microsecond),
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Wallet2 = {_, PubKey2} = ar_wallet:new(),
-	Address1 = ar_wallet:to_address(Wallet1),
-	Address2 = ar_wallet:to_address(Wallet2),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Wallet2 = {_, PubKey2} = big_wallet:new(),
+	Address1 = big_wallet:to_address(Wallet1),
+	Address2 = big_wallet:to_address(Wallet2),
 	{ok, Account1} = ar_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
@@ -71,9 +71,9 @@ test_account() ->
 		ar_p3_db:get_account(Account2#p3_account.address)).
 
 test_account_errors() ->
-	Wallet = {_, PubKey} = ar_wallet:new(),
+	Wallet = {_, PubKey} = big_wallet:new(),
 	{ok, Account} = ar_p3_db:get_or_create_account(
-		ar_wallet:to_address(Wallet),
+		big_wallet:to_address(Wallet),
 		PubKey,
 		?BIGFILE_BIG
 	),
@@ -110,10 +110,10 @@ test_account_errors() ->
 %% and confirm that no data is destroyed.
 test_deposit() ->
 	TestStart = erlang:system_time(microsecond),
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Wallet2 = {_, PubKey2} = ar_wallet:new(),
-	Address1 = ar_wallet:to_address(Wallet1),
-	Address2 = ar_wallet:to_address(Wallet2),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Wallet2 = {_, PubKey2} = big_wallet:new(),
+	Address1 = big_wallet:to_address(Wallet1),
+	Address2 = big_wallet:to_address(Wallet2),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
@@ -201,8 +201,8 @@ test_deposit() ->
 
 test_double_deposit() ->
 	TestStart = erlang:system_time(microsecond),
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Address1 = ar_wallet:to_address(Wallet1),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Address1 = big_wallet:to_address(Wallet1),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
@@ -233,8 +233,8 @@ test_double_deposit() ->
 	
 
 test_deposit_errors() ->
-	Wallet = {_, PubKey} = ar_wallet:new(),
-	Address3 = ar_wallet:to_address(Wallet),
+	Wallet = {_, PubKey} = big_wallet:new(),
+	Address3 = big_wallet:to_address(Wallet),
 	{ok, _} = ar_p3_db:get_or_create_account(
 		Address3,
 		PubKey,
@@ -294,8 +294,8 @@ test_deposit_errors() ->
 
 test_charge() ->
 	TestStart = erlang:system_time(microsecond),
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Address1 = ar_wallet:to_address(Wallet1),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Address1 = big_wallet:to_address(Wallet1),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
@@ -345,8 +345,8 @@ test_charge() ->
 
 test_double_charge() ->
 	TestStart = erlang:system_time(microsecond),
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Address1 = ar_wallet:to_address(Wallet1),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Address1 = big_wallet:to_address(Wallet1),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
@@ -381,8 +381,8 @@ test_double_charge() ->
 	?assertEqual(-20, element(2, ar_p3_db:get_balance(Address1))).
 
 test_charge_errors() ->
-	Wallet = {_, PubKey} = ar_wallet:new(),
-	Address3 = ar_wallet:to_address(Wallet),
+	Wallet = {_, PubKey} = big_wallet:new(),
+	Address3 = big_wallet:to_address(Wallet),
 	{ok, _} = ar_p3_db:get_or_create_account(
 		Address3,
 		PubKey,
@@ -454,10 +454,10 @@ test_charge_errors() ->
 			Request)).
 
 test_reverse() ->
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Wallet2 = {_, PubKey2} = ar_wallet:new(),
-	Address1 = ar_wallet:to_address(Wallet1),
-	Address2 = ar_wallet:to_address(Wallet2),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Wallet2 = {_, PubKey2} = big_wallet:new(),
+	Address1 = big_wallet:to_address(Wallet1),
+	Address2 = big_wallet:to_address(Wallet2),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
@@ -527,8 +527,8 @@ test_scan_height() ->
 %% This will bypass the gen_server message queue and run the code in parallel - causing
 %% the test to fail.
 test_concurrent_deposits() ->
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Wallet1),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Address = big_wallet:to_address(Wallet1),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address,
 			PubKey1,
@@ -547,8 +547,8 @@ test_concurrent_deposits() ->
 	?assertEqual(NumThreads, Account#p3_account.count).
 
 test_concurrent_charges() ->
-	Wallet1 = {_, PubKey1} = ar_wallet:new(),
-	Address = ar_wallet:to_address(Wallet1),
+	Wallet1 = {_, PubKey1} = big_wallet:new(),
+	Address = big_wallet:to_address(Wallet1),
 	{ok, _} = ar_p3_db:get_or_create_account(
 			Address,
 			PubKey1,

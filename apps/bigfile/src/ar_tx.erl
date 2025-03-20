@@ -46,7 +46,7 @@ new(Data, Reward, Last) ->
 		reward = Reward
 	}.
 new({SigType, PubKey}, Reward, Qty, Last) ->
-	new(ar_wallet:to_address(PubKey, SigType), Reward, Qty, Last, SigType);
+	new(big_wallet:to_address(PubKey, SigType), Reward, Qty, Last, SigType);
 new(Dest, Reward, Qty, Last) ->
 	#tx{
 		id = crypto:strong_rand_bytes(32),
@@ -135,7 +135,7 @@ check_last_tx(_WalletList, TX) when TX#tx.owner == <<>> ->
 check_last_tx(WalletList, _TX) when map_size(WalletList) == 0 ->
 	true;
 check_last_tx(WalletList, TX) ->
-	Addr = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+	Addr = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	case maps:get(Addr, WalletList, not_found) of
 		not_found ->
 			false;
@@ -150,7 +150,7 @@ check_last_tx(WalletList, TX) ->
 check_last_tx(WalletList, _TX) when map_size(WalletList) == 0 ->
 	true;
 check_last_tx(WalletList, TX) ->
-	Addr = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+	Addr = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	case maps:get(Addr, WalletList, not_found) of
 		not_found ->
 			false;
@@ -315,7 +315,7 @@ signature_data_segment_v1(TX) ->
 
 sign(TX, PrivKey, {KeyType, Owner}, SignatureDataSegment) ->
 	NewTX = TX#tx{ owner = Owner, signature_type = KeyType },
-	Sig = ar_wallet:sign(PrivKey, SignatureDataSegment),
+	Sig = big_wallet:sign(PrivKey, SignatureDataSegment),
 	ID = crypto:hash(?HASH_ALG, <<Sig/binary>>),
 	NewTX#tx{ id = ID, signature = Sig }.
 
@@ -367,7 +367,7 @@ do_verify(TX, _Args, _VerifySignature) ->
 get_addresses([], Addresses) ->
 	sets:to_list(Addresses);
 get_addresses([TX | TXs], Addresses) ->
-	Source = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+	Source = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	WithSource = sets:add_element(Source, Addresses),
 	WithDest = sets:add_element(TX#tx.target, WithSource),
 	get_addresses(TXs, WithDest).
@@ -386,7 +386,7 @@ do_verify_v1(TX, Args, VerifySignature) ->
 		false ->
 			collect_validation_results(TX#tx.id, [{"invalid_denomination", false}]);
 		true ->
-			From = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+			From = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 			FeeArgs = {TX, PricePerGiBMinute, KryderPlusRateMultiplier, Denomination,
 					Height, Accounts, TX#tx.target},
 			Checks = [
@@ -428,7 +428,7 @@ do_verify_v2(TX, Args, VerifySignature) ->
 		false ->
 			collect_validation_results(TX#tx.id, [{"invalid_denomination", false}]);
 		true ->
-			From = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+			From = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 			FeeArgs = {TX, PricePerGiBMinute, KryderPlusRateMultiplier, Denomination,
 					Height, Accounts, TX#tx.target},
 			Checks = [
@@ -481,7 +481,7 @@ verify_signature_v1(_TX, do_not_verify_signature) ->
 	true;
 verify_signature_v1(TX, verify_signature) ->
 	SignatureDataSegment = generate_signature_data_segment(TX),
-	ar_wallet:verify({?DEFAULT_KEY_TYPE, TX#tx.owner}, SignatureDataSegment, TX#tx.signature).
+	big_wallet:verify({?DEFAULT_KEY_TYPE, TX#tx.owner}, SignatureDataSegment, TX#tx.signature).
 
 verify_signature_v1(_TX, do_not_verify_signature, _Height) ->
 	true;
@@ -489,10 +489,10 @@ verify_signature_v1(TX, verify_signature, Height) ->
 	SignatureDataSegment = generate_signature_data_segment(TX),
 	case Height >= ar_fork:height_2_4() of
 		true ->
-			ar_wallet:verify({?DEFAULT_KEY_TYPE, TX#tx.owner}, SignatureDataSegment,
+			big_wallet:verify({?DEFAULT_KEY_TYPE, TX#tx.owner}, SignatureDataSegment,
 					TX#tx.signature);
 		false ->
-			ar_wallet:verify_pre_fork_2_4({?DEFAULT_KEY_TYPE, TX#tx.owner}, SignatureDataSegment,
+			big_wallet:verify_pre_fork_2_4({?DEFAULT_KEY_TYPE, TX#tx.owner}, SignatureDataSegment,
 					TX#tx.signature)
 	end.
 
@@ -551,7 +551,7 @@ verify_signature_v2(_TX, do_not_verify_signature) ->
 	true;
 verify_signature_v2(TX = #tx{ signature_type = SigType }, verify_signature) ->
 	SignatureDataSegment = generate_signature_data_segment(TX),
-	ar_wallet:verify({SigType, TX#tx.owner}, SignatureDataSegment, TX#tx.signature).
+	big_wallet:verify({SigType, TX#tx.owner}, SignatureDataSegment, TX#tx.signature).
 
 verify_signature_v2(_TX, do_not_verify_signature, _Height) ->
 	true;
@@ -566,14 +566,14 @@ verify_signature_v2(TX, verify_signature, Height) ->
 		end,
 	case Height >= ar_fork:height_2_4() of
 		true ->
-			ar_wallet:verify(Wallet, SignatureDataSegment, TX#tx.signature);
+			big_wallet:verify(Wallet, SignatureDataSegment, TX#tx.signature);
 		false ->
-			ar_wallet:verify_pre_fork_2_4({{?RSA_SIGN_ALG, 65537}, TX#tx.owner},
+			big_wallet:verify_pre_fork_2_4({{?RSA_SIGN_ALG, 65537}, TX#tx.owner},
 					SignatureDataSegment, TX#tx.signature)
 	end.
 
 validate_overspend(TX, Accounts) ->
-	From = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+	From = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	Addresses = case TX#tx.target of
 		<<>> ->
 			[From];
@@ -727,7 +727,7 @@ sign_tx_test_() ->
 	{timeout, 30, fun test_sign_tx/0}.
 test_sign_tx() ->
 	NewTX = new(<<"TEST DATA">>, ?BIG(1)),
-	{Priv, Pub} = ar_wallet:new(),
+	{Priv, Pub} = big_wallet:new(),
 	Rate = ?INITIAL_USD_TO_BIG_PRE_FORK_2_5,
 	PricePerGiBMinute = 1,
 	Timestamp = os:system_time(seconds),
@@ -795,7 +795,7 @@ sign_and_verify_chunked_pre_fork_2_5_test_() ->
 
 test_sign_and_verify_chunked() ->
 	TXData = crypto:strong_rand_bytes(trunc(?DATA_CHUNK_SIZE * 5.5)),
-	{Priv, Pub} = ar_wallet:new(),
+	{Priv, Pub} = big_wallet:new(),
 	UnsignedTX =
 		generate_chunk_tree(
 			#tx{
@@ -810,7 +810,7 @@ test_sign_and_verify_chunked() ->
 	Rate = {1, 3},
 	PricePerGiBMinute = 200,
 	Timestamp = os:system_time(seconds),
-	Address = ar_wallet:to_address(Pub),
+	Address = big_wallet:to_address(Pub),
 	Args = {Rate, PricePerGiBMinute, 1, 1, 0, Height,
 			maps:from_list([{Address, {?BIG(100), <<>>}}]), Timestamp},
 	?assert(verify(SignedTX, Args)).
@@ -822,7 +822,7 @@ forge_test_() ->
 
 test_forge() ->
 	NewTX = new(<<"TEST DATA">>, ?BIG(10)),
-	{Priv, Pub} = ar_wallet:new(),
+	{Priv, Pub} = big_wallet:new(),
 	Rate = ?INITIAL_USD_TO_BIG_PRE_FORK_2_5,
 	PricePerGiBMinute = 400,
 	Height = 0,
@@ -855,9 +855,9 @@ check_last_tx_pre_fork_2_5_test_() ->
 		fun test_sign_and_verify_chunked/0, 120).
 
 test_check_last_tx() ->
-	{_Priv1, Pub1} = ar_wallet:new(),
-	{Priv2, Pub2} = ar_wallet:new(),
-	{Priv3, Pub3} = ar_wallet:new(),
+	{_Priv1, Pub1} = big_wallet:new(),
+	{Priv2, Pub2} = big_wallet:new(),
+	{Priv3, Pub3} = big_wallet:new(),
 	TX = ar_tx:new(Pub2, ?BIG(1), ?BIG(500), <<>>),
 	TX2 = ar_tx:new(Pub3, ?BIG(1), ?BIG(400), TX#tx.id),
 	TX3 = ar_tx:new(Pub1, ?BIG(1), ?BIG(300), TX#tx.id),
@@ -866,9 +866,9 @@ test_check_last_tx() ->
 	WalletList =
 		maps:from_list(
 			[
-				{ar_wallet:to_address(Pub1), {1000, <<>>}},
-				{ar_wallet:to_address(Pub2), {2000, TX#tx.id}},
-				{ar_wallet:to_address(Pub3), {3000, <<>>}}
+				{big_wallet:to_address(Pub1), {1000, <<>>}},
+				{big_wallet:to_address(Pub2), {2000, TX#tx.id}},
+				{big_wallet:to_address(Pub3), {3000, <<>>}}
 			]
 		),
 	false = check_last_tx(WalletList, SignedTX3),

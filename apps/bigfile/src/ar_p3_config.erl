@@ -119,7 +119,7 @@ parse_payments(BadToken, _PaymentsConfig) ->
 		BadToken).
 
 parse_payment([{?P3_ADDRESS_HEADER, Address} | Rest], PaymentConfig) ->
-	case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Address) of
+	case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Address) of
 		{error, invalid} ->
 			erlang:error(
 				"Invalid 'address' value. " ++

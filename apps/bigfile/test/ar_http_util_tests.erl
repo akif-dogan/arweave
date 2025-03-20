@@ -21,9 +21,9 @@ get_tx_content_type_test() ->
 		])
 	),
 	?assertEqual(
-		{valid, <<"application/x.arweave-manifest+json">>},
+		{valid, <<"application/x.bigfile-manifest+json">>},
 		content_type_from_tags([
-			{<<"Content-Type">>, <<"application/x.arweave-manifest+json">>}
+			{<<"Content-Type">>, <<"application/x.bigfile-manifest+json">>}
 		])
 	),
 	?assertEqual(

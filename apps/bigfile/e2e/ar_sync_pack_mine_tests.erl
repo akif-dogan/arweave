@@ -224,7 +224,7 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 	SinkNode = peer2,
 
 	Wallet = ar_test_node:remote_call(SinkNode, ar_e2e, load_wallet_fixture, [wallet_b]),
-	SinkAddr = ar_wallet:to_address(Wallet),
+	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = ar_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 	
@@ -288,7 +288,7 @@ test_entropy_last_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPacki
 	SinkNode = peer2,
 
 	Wallet = ar_test_node:remote_call(SinkNode, ar_e2e, load_wallet_fixture, [wallet_b]),
-	SinkAddr = ar_wallet:to_address(Wallet),
+	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = ar_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 	
@@ -342,7 +342,7 @@ test_small_module_aligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, S
 	SinkNode = peer2,
 
 	Wallet = ar_test_node:remote_call(SinkNode, ar_e2e, load_wallet_fixture, [wallet_b]),
-	SinkAddr = ar_wallet:to_address(Wallet),
+	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = ar_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 
@@ -390,7 +390,7 @@ test_small_module_unaligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType},
 	SinkNode = peer2,
 
 	Wallet = ar_test_node:remote_call(SinkNode, ar_e2e, load_wallet_fixture, [wallet_b]),
-	SinkAddr = ar_wallet:to_address(Wallet),
+	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = ar_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 
@@ -479,7 +479,7 @@ test_disk_pool_threshold({SourcePackingType, SinkPackingType}) ->
 
 start_sink_node(Node, SourceNode, B0, PackingType) ->
 	Wallet = ar_test_node:remote_call(Node, ar_e2e, load_wallet_fixture, [wallet_b]),
-	SinkAddr = ar_wallet:to_address(Wallet),
+	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = ar_e2e:packing_type_to_packing(PackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(Node),
 	
@@ -506,7 +506,7 @@ start_sink_node(Node, SourceNode, B0, PackingType) ->
 
 start_sink_node(Node, SourceNode, B0, PackingType1, PackingType2) ->
 	Wallet = ar_test_node:remote_call(Node, ar_e2e, load_wallet_fixture, [wallet_b]),
-	SinkAddr = ar_wallet:to_address(Wallet),
+	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking1 = ar_e2e:packing_type_to_packing(PackingType1, SinkAddr),
 	SinkPacking2 = ar_e2e:packing_type_to_packing(PackingType2, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(Node),

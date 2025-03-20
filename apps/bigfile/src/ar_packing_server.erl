@@ -850,8 +850,8 @@ pack_test() ->
 	PackingState = init_packing_state(),
 	PackedList = lists:flatten(lists:map(
 		fun({Chunk, Offset, TXRoot}) ->
-			ECDSA = ar_wallet:to_address(ar_wallet:new({ecdsa, secp256k1})),
-			EDDSA = ar_wallet:to_address(ar_wallet:new({eddsa, ed25519})),
+			ECDSA = big_wallet:to_address(big_wallet:new({ecdsa, secp256k1})),
+			EDDSA = big_wallet:to_address(big_wallet:new({eddsa, ed25519})),
 			{ok, Chunk, already_packed} = pack(unpacked, Offset, TXRoot, Chunk,
 						PackingState, external),
 			{ok, Packed, was_not_already_packed} = pack(spora_2_5, Offset, TXRoot, Chunk,

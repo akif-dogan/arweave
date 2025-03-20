@@ -100,7 +100,7 @@ new_custom_size_rsa_wallet(Size) ->
 				]
 			}
 		),
-	Filename = ar_wallet:wallet_filepath(wallet_address, Pub, KeyType),
+	Filename = big_wallet:wallet_filepath(wallet_address, Pub, KeyType),
 	case filelib:ensure_dir(Filename) of
 		ok ->
 			case ar_storage:write_file_atomic(Filename, Key) of
@@ -313,7 +313,7 @@ start_coordinated(MiningNodeCount) when MiningNodeCount >= 1, MiningNodeCount =<
 	MinerNodes ++ [peer1, main].
 
 base_cm_config(Peers) ->
-	RewardAddr = ar_wallet:to_address(remote_call(peer1, ar_wallet, new_keyfile, [])),
+	RewardAddr = big_wallet:to_address(remote_call(peer1, big_wallet, new_keyfile, [])),
 	#config{
 		start_from_latest_state = true,
 		auto_join = true,
@@ -542,7 +542,7 @@ start(Options) when is_map(Options) ->
 	RewardAddr =
 		case maps:get(addr, Options, not_set) of
 			not_set ->
-				ar_wallet:to_address(ar_wallet:new_keyfile());
+				big_wallet:to_address(big_wallet:new_keyfile());
 			Addr ->
 				Addr
 		end,
@@ -800,7 +800,7 @@ join(JoinOnNode, Rejoin) ->
 		false ->
 			clean_up_and_stop()
 	end,
-	RewardAddr = ar_wallet:to_address(ar_wallet:new_keyfile()),
+	RewardAddr = big_wallet:to_address(big_wallet:new_keyfile()),
 	StorageModules = [{?PARTITION_SIZE, N,
 			get_default_storage_module_packing(RewardAddr, N)} || N <- lists:seq(0, 4)],
 	ok = application:set_env(bigfile, config, Config#config{
@@ -1074,11 +1074,11 @@ post_tx_to_peer(Node, TX, Wait) ->
 				case TX#tx.owner of
 					<<>> ->
 						DataSegment = ar_tx:generate_signature_data_segment(TX),
-						ar_wallet:to_address(
-							ar_wallet:recover_key(DataSegment, TX#tx.signature, TX#tx.signature_type),
+						big_wallet:to_address(
+							big_wallet:recover_key(DataSegment, TX#tx.signature, TX#tx.signature_type),
 							TX#tx.signature_type);
 					_ ->
-						ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type)
+						big_wallet:to_address(TX#tx.owner, TX#tx.signature_type)
 			end,
 			?debugFmt(
 				"Failed to post transaction.~nTX: ~s.~nTX format: ~B.~nTX fee: ~B.~n"
@@ -1279,13 +1279,13 @@ await_post_block(#block{ indep_hash = H } = B, ExpectedResults, Peer) ->
 	end.
 
 sign_block(#block{ cumulative_diff = CDiff } = B, PrevB, {Priv, Pub}) ->
-	B2 = B#block{ reward_key = Pub, reward_addr = ar_wallet:to_address(Pub) },
+	B2 = B#block{ reward_key = Pub, reward_addr = big_wallet:to_address(Pub) },
 	SignedH = ar_block:generate_signed_hash(B2),
 	PrevCDiff = PrevB#block.cumulative_diff,
 	SignaturePreimage = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
 			<< (B#block.previous_solution_hash)/binary, SignedH/binary >>,
 			B#block.height),
-	Signature = ar_wallet:sign(Priv, SignaturePreimage),
+	Signature = big_wallet:sign(Priv, SignaturePreimage),
 	H = ar_block:indep_hash2(SignedH, Signature),
 	B2#block{ indep_hash = H, signature = Signature }.
 

@@ -24,17 +24,17 @@ setup_nodes() ->
 	setup_nodes(#{}).
 
 setup_nodes(Options) ->
-	Addr = maps:get(addr, Options, ar_wallet:to_address(ar_wallet:new_keyfile())),
-	PeerAddr = maps:get(peer_addr, Options, ar_wallet:to_address(
-			ar_test_node:remote_call(peer1, ar_wallet, new_keyfile, []))),
+	Addr = maps:get(addr, Options, big_wallet:to_address(big_wallet:new_keyfile())),
+	PeerAddr = maps:get(peer_addr, Options, big_wallet:to_address(
+			ar_test_node:remote_call(peer1, big_wallet, new_keyfile, []))),
 	setup_nodes2(Options#{ addr => Addr, peer_addr => PeerAddr }).
 
 setup_nodes2(#{ peer_addr := PeerAddr } = Options) ->
-	Wallet = {_, Pub} = ar_wallet:new(),
+	Wallet = {_, Pub} = big_wallet:new(),
 	{B0, Options2} =
 		case maps:get(b0, Options, not_set) of
 			not_set ->
-				[Genesis] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(200000), <<>>}]),
+				[Genesis] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(200000), <<>>}]),
 				{Genesis, Options#{ b0 => Genesis }};
 			Value ->
 				{Value, Options}

@@ -449,8 +449,8 @@ verify_signature(BlockPreimage, PrevCDiff,
 				byte_size(Pub) == ?RSA_BLOCK_SIG_SIZE ->
 	SignaturePreimage = get_block_signature_preimage(CDiff, PrevCDiff,
 			<< PrevSolutionH/binary, BlockPreimage/binary >>, Height),
-	ar_wallet:to_address(RewardKey) == RewardAddr andalso
-			ar_wallet:verify(RewardKey, SignaturePreimage, Signature);
+	big_wallet:to_address(RewardKey) == RewardAddr andalso
+			big_wallet:verify(RewardKey, SignaturePreimage, Signature);
 verify_signature(BlockPreimage, PrevCDiff,
 		#block{ signature = Signature, reward_key = {?ECDSA_KEY_TYPE, Pub} = RewardKey,
 				reward_addr = RewardAddr, previous_solution_hash = PrevSolutionH,
@@ -460,8 +460,8 @@ verify_signature(BlockPreimage, PrevCDiff,
 			<< PrevSolutionH/binary, BlockPreimage/binary >>, Height),
 	case Height >= ar_fork:height_2_9() of
 		true ->
-			ar_wallet:to_address(RewardKey) == RewardAddr andalso
-					ar_wallet:verify(RewardKey, SignaturePreimage, Signature);
+			big_wallet:to_address(RewardKey) == RewardAddr andalso
+					big_wallet:verify(RewardKey, SignaturePreimage, Signature);
 		false ->
 			false
 	end;

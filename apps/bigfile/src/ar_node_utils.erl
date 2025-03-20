@@ -21,7 +21,7 @@
 %% @doc Update the given accounts by applying a transaction.
 apply_tx(Accounts, Denomination, TX) ->
 	#tx{ owner = From, signature_type = SigType } = TX,
-	Addr = ar_wallet:to_address(From, SigType),
+	Addr = big_wallet:to_address(From, SigType),
 	case maps:get(Addr, Accounts, not_found) of
 		not_found ->
 			Accounts;
@@ -159,7 +159,7 @@ update_sender_balance(Accounts, Denomination,
 			reward = Reward,
 			denomination = TXDenomination
 		}) ->
-	Addr = ar_wallet:to_address(From, SigType),
+	Addr = big_wallet:to_address(From, SigType),
 	case maps:get(Addr, Accounts, not_found) of
 		{Balance, _LastTX} ->
 			Balance2 = ar_pricing:redenominate(Balance, 1, Denomination),
@@ -269,7 +269,7 @@ may_be_apply_double_signing_proof2(B, PrevB, Accounts) ->
 		true ->
 			{error, invalid_double_signing_proof_same_address};
 		false ->
-			Addr = ar_wallet:to_address(Key),
+			Addr = big_wallet:to_address(Key),
 			case is_account_banned(Addr, Accounts) of
 				true ->
 					{error, invalid_double_signing_proof_already_banned};
@@ -291,14 +291,14 @@ may_be_apply_double_signing_proof3(B, PrevB, Accounts) ->
 	SignaturePreimage1 = ar_block:get_block_signature_preimage(CDiff1, PrevCDiff1,
 			Preimage1, Height),
 	Key = get_reward_key(Pub, B#block.height),
-	Addr = ar_wallet:to_address(Key),
-	case ar_wallet:verify(Key, SignaturePreimage1, Signature1) of
+	Addr = big_wallet:to_address(Key),
+	case big_wallet:verify(Key, SignaturePreimage1, Signature1) of
 		false ->
 			{error, invalid_double_signing_proof_invalid_signature};
 		true ->
 			SignaturePreimage2 = ar_block:get_block_signature_preimage(CDiff2, PrevCDiff2,
 					Preimage2, Height),
-			case ar_wallet:verify(Key, SignaturePreimage2, Signature2) of
+			case big_wallet:verify(Key, SignaturePreimage2, Signature2) of
 				false ->
 					{error, invalid_double_signing_proof_invalid_signature};
 				true ->
@@ -330,7 +330,7 @@ update_accounts4(B, PrevB, Accounts, Args) ->
 			update_accounts5(B, Accounts, Args);
 		Proof ->
 			Denomination = PrevB#block.denomination,
-			BannedAddr = ar_wallet:hash_pub_key(element(1, Proof)),
+			BannedAddr = big_wallet:hash_pub_key(element(1, Proof)),
 			Sum = ar_rewards:get_total_reward_for_address(BannedAddr, PrevB) - 1,
 			{Dividend, Divisor} = ?DOUBLE_SIGNING_PROVER_REWARD_SHARE,
 			LockedRewards = ar_rewards:get_locked_rewards(PrevB),
@@ -649,7 +649,7 @@ validate_block(merkle_rebase_support_threshold, {NewB, OldB}) ->
 is_wallet_invalid(#tx{ signature = <<>> }, _Wallets) ->
 	false;
 is_wallet_invalid(#tx{ owner = Owner, signature_type = SigType }, Wallets) ->
-	Address = ar_wallet:to_address(Owner, SigType),
+	Address = big_wallet:to_address(Owner, SigType),
 	case maps:get(Address, Wallets, not_found) of
 		{Balance, LastTX} when Balance >= 0 ->
 			case Balance of
@@ -670,7 +670,7 @@ is_wallet_invalid(#tx{ owner = Owner, signature_type = SigType }, Wallets) ->
 	end.
 -else.
 is_wallet_invalid(#tx{ owner = Owner, signature_type = SigType }, Wallets) ->
-	Address = ar_wallet:to_address(Owner, SigType),
+	Address = big_wallet:to_address(Owner, SigType),
 	case maps:get(Address, Wallets, not_found) of
 		{Balance, LastTX} when Balance >= 0 ->
 			case Balance of
@@ -699,8 +699,8 @@ block_validation_test_() ->
 	{timeout, 90, fun test_block_validation/0}.
 
 test_block_validation() ->
-	Wallet = {_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(200), <<>>}]),
+	Wallet = {_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(200), <<>>}]),
 	ar_test_node:start(B0),
 	%% Add at least 10 KiB of data to the weave and mine a block on top,
 	%% to make sure SPoRA mining activates.
@@ -722,7 +722,7 @@ test_block_validation() ->
 	ar_test_node:mine(),
 	[{H, _, _} | _] = ar_test_node:wait_until_height(main, 3),
 	B = ar_node:get_block_shadow_from_cache(H),
-	Wallets = #{ ar_wallet:to_address(Pub) => {?BIG(200), <<>>} },
+	Wallets = #{ big_wallet:to_address(Pub) => {?BIG(200), <<>>} },
 	?assertEqual(valid, validate(B, PrevB, Wallets, BlockAnchors, RecentTXMap,
 			PartitionUpperBound)),
 	?assertMatch({ok, _}, update_accounts(B, PrevB, Wallets)),
@@ -789,16 +789,16 @@ update_accounts_rejects_same_signature_in_double_signing_proof_test_() ->
 
 test_update_accounts_rejects_same_signature_in_double_signing_proof() ->
 	Accounts = #{},
-	Key = ar_wallet:new(),
+	Key = big_wallet:new(),
 	Pub = element(2, element(2, Key)),
 	Random = crypto:strong_rand_bytes(64),
 	Preimage = << (ar_serialize:encode_int(1, 16))/binary,
 			(ar_serialize:encode_int(1, 16))/binary, Random/binary >>,
-	Sig1 = ar_wallet:sign(element(1, Key), Preimage),
+	Sig1 = big_wallet:sign(element(1, Key), Preimage),
 	DoubleSigningProof = {Pub, Sig1, 1, 1, Random, Sig1, 1, 1, Random},
-	BannedAddr = ar_wallet:to_address(Key),
-	ProverKey = ar_wallet:new(),
-	RewardAddr = ar_wallet:to_address(ProverKey),
+	BannedAddr = big_wallet:to_address(Key),
+	ProverKey = big_wallet:new(),
+	RewardAddr = big_wallet:to_address(ProverKey),
 	B = #block{ timestamp = os:system_time(second), reward_addr = RewardAddr, weave_size = 1,
 			double_signing_proof = DoubleSigningProof },
 	Reward = 12,
@@ -831,17 +831,17 @@ test_update_accounts_receives_released_reward_and_prover_reward() ->
 	?assert(?LOCKED_REWARDS_BLOCKS >= 3),
 	?assert(?DOUBLE_SIGNING_PROVER_REWARD_SHARE == {1, 2}),
 	Accounts = #{},
-	Key = ar_wallet:new(),
+	Key = big_wallet:new(),
 	Pub = element(2, element(2, Key)),
 	Random = crypto:strong_rand_bytes(64),
 	Preimage = << 0:256, (ar_serialize:encode_int(1, 16))/binary,
 			(ar_serialize:encode_int(1, 16))/binary, Random/binary >>,
-	Sig1 = ar_wallet:sign(element(1, Key), Preimage),
-	Sig2 = ar_wallet:sign(element(1, Key), Preimage),
+	Sig1 = big_wallet:sign(element(1, Key), Preimage),
+	Sig2 = big_wallet:sign(element(1, Key), Preimage),
 	DoubleSigningProof = {Pub, Sig1, 1, 1, Random, Sig2, 1, 1, Random},
-	BannedAddr = ar_wallet:to_address(Key),
-	ProverKey = ar_wallet:new(),
-	RewardAddr = ar_wallet:to_address(ProverKey),
+	BannedAddr = big_wallet:to_address(Key),
+	ProverKey = big_wallet:new(),
+	RewardAddr = big_wallet:to_address(ProverKey),
 	B = #block{ timestamp = os:system_time(second), reward_addr = RewardAddr, weave_size = 1,
 			double_signing_proof = DoubleSigningProof },
 	Reward = 13,
@@ -863,17 +863,17 @@ test_update_accounts_does_not_let_banned_account_take_reward() ->
 	?assert(?LOCKED_REWARDS_BLOCKS >= 3),
 	?assert(?DOUBLE_SIGNING_PROVER_REWARD_SHARE == {1, 2}),
 	Accounts = #{},
-	Key = ar_wallet:new(),
+	Key = big_wallet:new(),
 	Pub = element(2, element(2, Key)),
 	Random = crypto:strong_rand_bytes(64),
 	Preimage = << 0:256, (ar_serialize:encode_int(1, 16))/binary,
 			(ar_serialize:encode_int(1, 16))/binary, Random/binary >>,
-	Sig1 = ar_wallet:sign(element(1, Key), Preimage),
-	Sig2 = ar_wallet:sign(element(1, Key), Preimage),
+	Sig1 = big_wallet:sign(element(1, Key), Preimage),
+	Sig2 = big_wallet:sign(element(1, Key), Preimage),
 	DoubleSigningProof = {Pub, Sig1, 1, 1, Random, Sig2, 1, 1, Random},
-	BannedAddr = ar_wallet:to_address(Key),
-	ProverKey = ar_wallet:new(),
-	RewardAddr = ar_wallet:to_address(ProverKey),
+	BannedAddr = big_wallet:to_address(Key),
+	ProverKey = big_wallet:new(),
+	RewardAddr = big_wallet:to_address(ProverKey),
 	B = #block{ timestamp = os:system_time(second), reward_addr = RewardAddr, weave_size = 1,
 			double_signing_proof = DoubleSigningProof },
 	Reward = 12,

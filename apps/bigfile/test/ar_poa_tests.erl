@@ -9,11 +9,11 @@ v1_transactions_after_2_0_test_() ->
 	{timeout, 420, fun test_v1_transactions_after_2_0/0}.
 
 test_v1_transactions_after_2_0() ->
-	Key = {_, Pub1} = ar_wallet:new(),
-	Key2 = {_, Pub2} = ar_wallet:new(),
+	Key = {_, Pub1} = big_wallet:new(),
+	Key2 = {_, Pub2} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub1), ?BIG(100), <<>>},
-		{ar_wallet:to_address(Pub2), ?BIG(100), <<>>}
+		{big_wallet:to_address(Pub1), ?BIG(100), <<>>},
+		{big_wallet:to_address(Pub2), ?BIG(100), <<>>}
 	]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
@@ -67,11 +67,11 @@ v2_transactions_after_2_0_test_() ->
 	{timeout, 420, fun test_v2_transactions_after_2_0/0}.
 
 test_v2_transactions_after_2_0() ->
-	Key = {_, Pub1} = ar_wallet:new(),
-	Key2 = {_, Pub2} = ar_wallet:new(),
+	Key = {_, Pub1} = big_wallet:new(),
+	Key2 = {_, Pub2} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub1), ?BIG(100), <<>>},
-		{ar_wallet:to_address(Pub2), ?BIG(100), <<>>}
+		{big_wallet:to_address(Pub1), ?BIG(100), <<>>},
+		{big_wallet:to_address(Pub2), ?BIG(100), <<>>}
 	]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
@@ -125,9 +125,9 @@ recall_byte_on_the_border_test_() ->
 	{timeout, 420, fun test_recall_byte_on_the_border/0}.
 
 test_recall_byte_on_the_border() ->
-	Key = {_, Pub} = ar_wallet:new(),
+	Key = {_, Pub} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub), ?BIG(100), <<>>}
+		{big_wallet:to_address(Pub), ?BIG(100), <<>>}
 	]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
@@ -166,9 +166,9 @@ ignores_transactions_with_invalid_data_root_test_() ->
 	{timeout, 420, fun test_ignores_transactions_with_invalid_data_root/0}.
 
 test_ignores_transactions_with_invalid_data_root() ->
-	Key = {_, Pub} = ar_wallet:new(),
+	Key = {_, Pub} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub), ?BIG(100), <<>>}
+		{big_wallet:to_address(Pub), ?BIG(100), <<>>}
 	]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),

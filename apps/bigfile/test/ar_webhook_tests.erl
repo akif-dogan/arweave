@@ -38,14 +38,14 @@ webhooks_test_() ->
 	{timeout, 120, fun test_webhooks/0}.
 
 test_webhooks() ->
-	{_, Pub} = Wallet = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
+	{_, Pub} = Wallet = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 	{ok, Config} = application:get_env(bigfile, config),
 	try
 		Port = ar_test_node:get_unused_port(),
 		PortBinary = integer_to_binary(Port),
 		TXBlacklistFilename = random_tx_blacklist_filename(),
-		Addr = ar_wallet:to_address(ar_wallet:new_keyfile()),
+		Addr = big_wallet:to_address(big_wallet:new_keyfile()),
 		Config2 = Config#config{
 			webhooks = [
 				#config_webhook{

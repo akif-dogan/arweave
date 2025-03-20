@@ -5,9 +5,9 @@
 -include_lib("eunit/include/eunit.hrl").
 
 sign_ecrecover_test() ->
-	{{_, PrivBytes, PubBytes}, _} = ar_wallet:new({?ECDSA_SIGN_ALG, secp256k1}),
+	{{_, PrivBytes, PubBytes}, _} = big_wallet:new({?ECDSA_SIGN_ALG, secp256k1}),
 	% Just call. It should not fail
-	ar_wallet:hash_pub_key(PubBytes),
+	big_wallet:hash_pub_key(PubBytes),
 	Msg = <<"This is a test message!">>,
 	SigRecoverable = secp256k1_nif:sign(Msg, PrivBytes),
 	?assertEqual(byte_size(SigRecoverable), 65),

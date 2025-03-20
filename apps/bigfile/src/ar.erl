@@ -724,14 +724,14 @@ start(normal, _Args) ->
 	ar_sup:start_link().
 
 set_mining_address(#config{ mining_addr = not_set } = C) ->
-	case ar_wallet:get_or_create_wallet([{?RSA_SIGN_ALG, 65537}]) of
+	case big_wallet:get_or_create_wallet([{?RSA_SIGN_ALG, 65537}]) of
 		{error, Reason} ->
 			ar:console("~nFailed to create a wallet, reason: ~p.~n",
 				[io_lib:format("~p", [Reason])]),
 			timer:sleep(500),
 			erlang:halt();
 		W ->
-			Addr = ar_wallet:to_address(W),
+			Addr = big_wallet:to_address(W),
 			ar:console("~nSetting the mining address to ~s.~n", [ar_util:encode(Addr)]),
 			C2 = C#config{ mining_addr = Addr },
 			application:set_env(bigfile, config, C2),
@@ -741,7 +741,7 @@ set_mining_address(#config{ mine = false }) ->
 	ok;
 set_mining_address(#config{ mining_addr = Addr, cm_exit_peer = CmExitPeer,
 		is_pool_client = PoolClient }) ->
-	case ar_wallet:load_key(Addr) of
+	case big_wallet:load_key(Addr) of
 		not_found ->
 			case {CmExitPeer, PoolClient} of
 				{not_set, false} ->
@@ -778,14 +778,14 @@ create_wallet(DataDir, KeyType) ->
 			create_wallet_fail(KeyType);
 		true ->
 			ok = application:set_env(bigfile, config, #config{ data_dir = DataDir }),
-			case ar_wallet:new_keyfile(KeyType) of
+			case big_wallet:new_keyfile(KeyType) of
 				{error, Reason} ->
 					ar:console("Failed to create a wallet, reason: ~p.~n~n",
 							[io_lib:format("~p", [Reason])]),
 					timer:sleep(500),
 					erlang:halt();
 				W ->
-					Addr = ar_wallet:to_address(W),
+					Addr = big_wallet:to_address(W),
 					ar:console("Created a wallet with address ~s.~n", [ar_util:encode(Addr)]),
 					erlang:halt()
 			end

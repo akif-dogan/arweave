@@ -15,7 +15,7 @@
 
 -include_lib("bigfile/include/ar.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
--include_lib("bigfile/include/ar_wallets.hrl").
+-include_lib("bigfile/include/big_wallets.hrl").
 
 %% Internal state definition.
 -record(state, {

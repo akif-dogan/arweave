@@ -542,8 +542,8 @@ replica_2_9_test_() ->
 
 test_replica_2_9() ->
     RewardAddr =
-        ar_wallet:to_address(
-            ar_wallet:new_keyfile()),
+        big_wallet:to_address(
+            big_wallet:new_keyfile()),
     Packing = {replica_2_9, RewardAddr},
     StorageModules = [{?PARTITION_SIZE, 0, Packing}, {?PARTITION_SIZE, 1, Packing}],
     {ok, Config} = application:get_env(bigfile, config),

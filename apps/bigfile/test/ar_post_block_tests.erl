@@ -31,7 +31,7 @@ reset_node() ->
 	B = ar_test_node:remote_call(peer1, ar_block_cache, get, [block_cache, H]),
 	PrevB = ar_test_node:remote_call(peer1, ar_block_cache, get, [block_cache, PrevH]),
 	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
-	Key = ar_test_node:remote_call(peer1, ar_wallet, load_key, [Config#config.mining_addr]),
+	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
 	{Key, B, PrevB}.
 
 setup_all_post_2_7() ->
@@ -323,7 +323,7 @@ test_rejects_invalid_blocks() ->
 	%% Nonce limiter output too far in the future.
 	Info1 = B1#block.nonce_limiter_info,
 	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
-	Key = ar_test_node:remote_call(peer1, ar_wallet, load_key, [Config#config.mining_addr]),
+	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
 	B3 = sign_block(B1#block{
 			%% Change the solution hash so that the validator does not go down
 			%% the comparing the resigned solution with the cached solution path.
@@ -349,8 +349,8 @@ test_rejects_invalid_blocks() ->
 			hash = binary:encode_unsigned(B1SolutionNum - 1) }, B1, Key),
 	post_block(B5, invalid_nonce_limiter_global_step_number),
 	%% Correct hash, but invalid PoW.
-	InvalidKey = ar_wallet:new(),
-	InvalidAddr = ar_wallet:to_address(InvalidKey),
+	InvalidKey = big_wallet:new(),
+	InvalidAddr = big_wallet:to_address(InvalidKey),
 	B6 = sign_block(B1#block{ reward_addr = InvalidAddr,
 			%% Change the solution hash so that the validator does not go down
 			%% the comparing the resigned solution with the cached solution path.
@@ -496,18 +496,18 @@ test_reject_block_invalid_double_signing_proof() ->
 
 test_reject_block_invalid_double_signing_proof(KeyType) ->
 	?debugFmt("KeyType: ~p~n", [KeyType]),
-	FullKey = ar_test_node:remote_call(peer1, ar_wallet, new_keyfile, [KeyType]),
-	MiningAddr = ar_wallet:to_address(FullKey),
-	Key0 = ar_wallet:new(),
-	Addr0 = ar_wallet:to_address(Key0),
+	FullKey = ar_test_node:remote_call(peer1, big_wallet, new_keyfile, [KeyType]),
+	MiningAddr = big_wallet:to_address(FullKey),
+	Key0 = big_wallet:new(),
+	Addr0 = big_wallet:to_address(Key0),
 	[B0] = ar_weave:init([{Addr0, ?BIG(1000), <<>>}], ar_retarget:switch_to_linear_diff(2)),
 	?debugFmt("Genesis address: ~s, initial balance: ~B BIG.~n", [ar_util:encode(Addr0), 1000]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0, MiningAddr),
 	ar_test_node:disconnect_from(peer1),
 	ok = ar_events:subscribe(block),
-	{Priv, _} = Key = ar_test_node:remote_call(peer1, ar_wallet, load_key, [MiningAddr]),
-	TX0 = ar_test_node:sign_tx(Key0, #{ target => ar_wallet:to_address(Key), quantity => ?BIG(10) }),
+	{Priv, _} = Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [MiningAddr]),
+	TX0 = ar_test_node:sign_tx(Key0, #{ target => big_wallet:to_address(Key), quantity => ?BIG(10) }),
 	ar_test_node:assert_post_tx_to_peer(peer1, TX0),
 	ar_test_node:assert_post_tx_to_peer(main, TX0),
 	ar_test_node:mine(peer1),
@@ -529,7 +529,7 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	Preimage2 = << (B0#block.hash)/binary, (crypto:strong_rand_bytes(32))/binary >>,
 	SignaturePreimage = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
 			Preimage2, 0),
-	Signature2 = ar_wallet:sign(Priv, SignaturePreimage),
+	Signature2 = big_wallet:sign(Priv, SignaturePreimage),
 	%% We cannot ban ourselves.
 	InvalidProof2 = {element(3, Priv), B1#block.signature, CDiff, PrevCDiff, Preimage1,
 			Signature2, CDiff, PrevCDiff, Preimage2},
@@ -538,15 +538,15 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	ar_test_node:mine(peer1),
 	BI2 = ar_test_node:assert_wait_until_height(peer1, 2),
 	{ok, MainConfig} = application:get_env(bigfile, config),
-	Key2 = element(1, ar_wallet:load_key(MainConfig#config.mining_addr)),
+	Key2 = element(1, big_wallet:load_key(MainConfig#config.mining_addr)),
 	Preimage3 = << (B0#block.hash)/binary, (crypto:strong_rand_bytes(32))/binary >>,
 	Preimage4 = << (B0#block.hash)/binary, (crypto:strong_rand_bytes(32))/binary >>,
 	SignaturePreimage3 = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
 			Preimage3, 0),
 	SignaturePreimage4 = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
 			Preimage4, 0),
-	Signature3 = ar_wallet:sign(Key2, SignaturePreimage3),
-	Signature4 = ar_wallet:sign(Key2, SignaturePreimage4),
+	Signature3 = big_wallet:sign(Key2, SignaturePreimage3),
+	Signature4 = big_wallet:sign(Key2, SignaturePreimage4),
 	%% The account address is not in the reward history.
 	InvalidProof3 = {element(3, Key2), Signature3, CDiff, PrevCDiff, Preimage3,
 			Signature4, CDiff, PrevCDiff, Preimage4},
@@ -574,19 +574,19 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	B8 = ar_test_node:remote_call(peer1, ar_storage, read_block, [hd(BI3)]),
 	?assertNotEqual(undefined, B8#block.double_signing_proof),
 	RewardAddr = B8#block.reward_addr,
-	BannedAddr = ar_wallet:to_address(Key),
-	Accounts = ar_wallets:get(B8#block.wallet_list, [BannedAddr, RewardAddr]),
+	BannedAddr = big_wallet:to_address(Key),
+	Accounts = big_wallets:get(B8#block.wallet_list, [BannedAddr, RewardAddr]),
 	?assertMatch(#{ BannedAddr := {_, _, 1, false}, RewardAddr := {_, _} }, Accounts),
 	%% The banned address may still use their accounts for transfers/uploads.
-	Key3 = ar_wallet:new(),
-	Target = ar_wallet:to_address(Key3),
+	Key3 = big_wallet:new(),
+	Target = big_wallet:to_address(Key3),
 	TX1 = ar_test_node:sign_tx(FullKey, #{ last_tx => <<>>, quantity => 1, target => Target }),
 	TX2 = ar_test_node:sign_tx(FullKey, #{ last_tx => ar_test_node:get_tx_anchor(peer1), data => <<"a">> }),
 	lists:foreach(fun(TX) -> ar_test_node:assert_post_tx_to_peer(main, TX) end, [TX1, TX2]),
 	ar_test_node:mine(),
 	BI4 = assert_wait_until_height(peer1, 4),
 	B9 = ar_test_node:remote_call(peer1, ar_storage, read_block, [hd(BI4)]),
-	Accounts2 = ar_wallets:get(B9#block.wallet_list, [BannedAddr, Target]),
+	Accounts2 = big_wallets:get(B9#block.wallet_list, [BannedAddr, Target]),
 	TXID = TX2#tx.id,
 	?assertEqual(2, length(B9#block.txs)),
 	?assertMatch(#{ Target := {1, <<>>}, BannedAddr := {_, TXID, 1, false} }, Accounts2).
@@ -596,12 +596,12 @@ send_block2_test_() ->
 		fun() -> test_send_block2() end).
 
 test_send_block2() ->
-	{_, Pub} = Wallet = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(100), <<>>}]),
-	MainWallet = ar_wallet:new_keyfile(),
-	MainAddress = ar_wallet:to_address(MainWallet),
-	PeerWallet = ar_test_node:remote_call(peer1, ar_wallet, new_keyfile, []),
-	PeerAddress = ar_wallet:to_address(PeerWallet),
+	{_, Pub} = Wallet = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(100), <<>>}]),
+	MainWallet = big_wallet:new_keyfile(),
+	MainAddress = big_wallet:to_address(MainWallet),
+	PeerWallet = ar_test_node:remote_call(peer1, big_wallet, new_keyfile, []),
+	PeerAddress = big_wallet:to_address(PeerWallet),
 	ar_test_node:start(B0, MainAddress),
 	ar_test_node:start_peer(peer1, B0, PeerAddress),
 	ar_test_node:disconnect_from(peer1),
@@ -738,7 +738,7 @@ test_resigned_solution() ->
 	ar_test_node:mine(peer1),
 	B = ar_node:get_current_block(),
 	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
-	Key = ar_test_node:remote_call(peer1, ar_wallet, load_key, [Config#config.mining_addr]),
+	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
 	ok = ar_events:subscribe(block),
 	B2 = sign_block(B#block{ tags = [<<"tag1">>] }, B0, Key),
 	post_block(B2, [valid]),

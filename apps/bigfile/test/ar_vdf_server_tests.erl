@@ -37,7 +37,7 @@ setup_external_update() ->
 	%% this is necessary so that we can test the behavior of apply_external_update without any
 	%% auto-computed VDF steps getting in the way.
 	_ = ar_test_node:start(
-		B0, ar_wallet:to_address(ar_wallet:new_keyfile()),
+		B0, big_wallet:to_address(big_wallet:new_keyfile()),
 		Config#config{ nonce_limiter_server_trusted_peers = [
 			ar_util:format_peer(vdf_server_1()),
 			ar_util:format_peer(vdf_server_2()) ],
@@ -160,8 +160,8 @@ mining_session_test_() ->
 %%
 test_vdf_server_push_fast_block() ->
 	VDFPort = ar_test_node:get_unused_port(),
-	{_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
+	{_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -170,7 +170,7 @@ test_vdf_server_push_fast_block() ->
 
 	{ok, Config} = application:get_env(bigfile, config),
 	_ = ar_test_node:start(
-		B0, ar_wallet:to_address(ar_wallet:new_keyfile()),
+		B0, big_wallet:to_address(big_wallet:new_keyfile()),
 		Config#config{ nonce_limiter_client_peers = [ "127.0.0.1:" ++ integer_to_list(VDFPort) ]}),
 	%% Setup a server to listen for VDF pushes
 	Routes = [{"/[...]", ar_vdf_server_tests, []}],
@@ -203,12 +203,12 @@ test_vdf_server_push_fast_block() ->
 	cowboy:stop_listener(ar_vdf_server_test_listener).
 
 test_vdf_server_push_slow_block() ->
-	{_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
+	{_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 
 	{ok, Config} = application:get_env(bigfile, config),
 	_ = ar_test_node:start(
-		B0, ar_wallet:to_address(ar_wallet:new_keyfile()),
+		B0, big_wallet:to_address(big_wallet:new_keyfile()),
 		Config#config{ nonce_limiter_client_peers = [ "127.0.0.1:1986" ]}),
 	timer:sleep(3000),
 
@@ -267,10 +267,10 @@ test_vdf_server_push_slow_block() ->
 %%
 test_vdf_client_fast_block() ->
 	{ok, Config} = application:get_env(bigfile, config),
-	{_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
+	{_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 
-	PeerAddress = ar_wallet:to_address(ar_test_node:remote_call(peer1, ar_wallet, new_keyfile, [])),
+	PeerAddress = big_wallet:to_address(ar_test_node:remote_call(peer1, big_wallet, new_keyfile, [])),
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -291,7 +291,7 @@ test_vdf_client_fast_block() ->
 			ar_util:format_peer(ar_test_node:peer_ip(main)) ] }),
 	%% Start main as a VDF server
 	_ = ar_test_node:start(
-		B0, ar_wallet:to_address(ar_wallet:new_keyfile()),
+		B0, big_wallet:to_address(big_wallet:new_keyfile()),
 		Config#config{ nonce_limiter_client_peers = [
 			ar_util:format_peer(ar_test_node:peer_ip(peer1)) ]}),
 	ar_test_node:connect_to_peer(peer1),
@@ -314,10 +314,10 @@ test_vdf_client_fast_block() ->
 
 test_vdf_client_fast_block_pull_interface() ->
   	{ok, Config} = application:get_env(bigfile, config),
-	{_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
+	{_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 
-	PeerAddress = ar_wallet:to_address(ar_test_node:remote_call(peer1, ar_wallet, new_keyfile, [])),
+	PeerAddress = big_wallet:to_address(ar_test_node:remote_call(peer1, big_wallet, new_keyfile, [])),
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -338,7 +338,7 @@ test_vdf_client_fast_block_pull_interface() ->
 				enable = [vdf_server_pull | PeerConfig#config.enable] }),
 	%% Start the main as a VDF server
 	_ = ar_test_node:start(
-		B0, ar_wallet:to_address(ar_wallet:new_keyfile()),
+		B0, big_wallet:to_address(big_wallet:new_keyfile()),
 		Config#config{ nonce_limiter_client_peers = [ "127.0.0.1:" ++ integer_to_list(ar_test_node:peer_port(peer1)) ]}),
 	ar_test_node:connect_to_peer(peer1),
 
@@ -360,10 +360,10 @@ test_vdf_client_fast_block_pull_interface() ->
 
 test_vdf_client_slow_block() ->
 	{ok, Config} = application:get_env(bigfile, config),
-	{_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
+	{_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 
-	PeerAddress = ar_wallet:to_address(ar_test_node:remote_call(peer1, ar_wallet, new_keyfile, [])),
+	PeerAddress = big_wallet:to_address(ar_test_node:remote_call(peer1, big_wallet, new_keyfile, [])),
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -384,7 +384,7 @@ test_vdf_client_slow_block() ->
 		] }),
 	%% Start the main as a VDF server
 	_ = ar_test_node:start(
-		B0, ar_wallet:to_address(ar_wallet:new_keyfile()),
+		B0, big_wallet:to_address(big_wallet:new_keyfile()),
 		Config#config{ nonce_limiter_client_peers = [
 			"127.0.0.1:" ++ integer_to_list(ar_test_node:peer_port(peer1))
 		]}),
@@ -398,10 +398,10 @@ test_vdf_client_slow_block() ->
 
 test_vdf_client_slow_block_pull_interface() ->
   {ok, Config} = application:get_env(bigfile, config),
-	{_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
+	{_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 
-	PeerAddress = ar_wallet:to_address(ar_test_node:remote_call(peer1, ar_wallet, new_keyfile, [])),
+	PeerAddress = big_wallet:to_address(ar_test_node:remote_call(peer1, big_wallet, new_keyfile, [])),
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -423,7 +423,7 @@ test_vdf_client_slow_block_pull_interface() ->
 	%% Start the main as a VDF server
 	{ok, Config} = application:get_env(bigfile, config),
 	_ = ar_test_node:start(
-		B0, ar_wallet:to_address(ar_wallet:new_keyfile()),
+		B0, big_wallet:to_address(big_wallet:new_keyfile()),
 		Config#config{ nonce_limiter_client_peers = [
 			"127.0.0.1:" ++ integer_to_list(ar_test_node:peer_port(peer1))
 		]}),

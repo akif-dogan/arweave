@@ -352,7 +352,7 @@ del_from_last_tx_map(LastTXMap, TX) ->
 %% when resolving overspends.
 add_to_origin_tx_map(OriginTXMap, TX) ->
 	Element = unconfirmed_tx(TX),
-	Origin = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+	Origin = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	Set2 = case maps:get(Origin, OriginTXMap, not_found) of
 		not_found ->
 			gb_sets:from_list([Element]);
@@ -363,7 +363,7 @@ add_to_origin_tx_map(OriginTXMap, TX) ->
 
 del_from_origin_tx_map(OriginTXMap, TX) ->
 	Element = unconfirmed_tx(TX),
-	Origin = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+	Origin = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	case maps:get(Origin, OriginTXMap, not_found) of
 		not_found ->
 			OriginTXMap;
@@ -439,7 +439,7 @@ should_drop_low_priority_tx(_TX, {_MempoolHeaderSize, _MempoolDataSize}) ->
 find_clashing_txs(#tx{ last_tx = <<>> }) ->
 	[];
 find_clashing_txs(TX = #tx{}) ->
-	Wallets = ar_wallets:get(ar_tx:get_addresses([TX])),
+	Wallets = big_wallets:get(ar_tx:get_addresses([TX])),
 	find_clashing_txs(TX, Wallets).
 
 find_clashing_txs(TX = #tx{}, Wallets) when is_map(Wallets) ->
@@ -499,11 +499,11 @@ find_overspent_txs(<<>>) ->
 	[];
 find_overspent_txs(TX)
 		when TX#tx.reward > 0 orelse TX#tx.quantity > 0  ->
-	Origin = ar_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
+	Origin = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	SpentTXIDs = maps:get(Origin, get_origin_tx_map(), gb_sets:new()),
 	% We only care about the origin wallet since we aren't tracking
 	% unconfirmed deposits
-	Wallet = ar_wallets:get(Origin),
+	Wallet = big_wallets:get(Origin),
 	B = ar_node:get_current_block(),
 	Denomination = B#block.denomination,
 	find_overspent_txs(Origin, SpentTXIDs, Wallet, Denomination);

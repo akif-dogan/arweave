@@ -86,7 +86,7 @@ register_workers(Module) ->
     ConfiguredWorkers ++ RepackInPlaceWorkers.
 
 -spec initialize_context(ar_storage_module:store_id(), ar_chunk_storage:packing()) ->
-    {IsPrepared :: boolean(), RewardAddr :: none | ar_wallet:address()}.
+    {IsPrepared :: boolean(), RewardAddr :: none | big_wallet:address()}.
 initialize_context(StoreID, Packing) ->
     case Packing of
         {replica_2_9, Addr} ->

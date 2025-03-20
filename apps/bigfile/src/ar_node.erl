@@ -207,22 +207,22 @@ get_block_shadow_from_cache(H) ->
 %% @doc Get the current balance of a given wallet address.
 %% The balance returned is in relation to the nodes current wallet list.
 get_balance({SigType, PubKey}) ->
-	get_balance(ar_wallet:to_address(PubKey, SigType));
+	get_balance(big_wallet:to_address(PubKey, SigType));
 get_balance(MaybeRSAPub) when byte_size(MaybeRSAPub) == 512 ->
 	%% A legacy feature where we may search the public key instead of address.
-	ar_wallets:get_balance(ar_wallet:hash_pub_key(MaybeRSAPub));
+	big_wallets:get_balance(big_wallet:hash_pub_key(MaybeRSAPub));
 get_balance(Addr) ->
-	ar_wallets:get_balance(Addr).
+	big_wallets:get_balance(Addr).
 
 %% @doc Get the last tx id associated with a given wallet address.
 %% Should the wallet not have made a tx the empty binary will be returned.
 get_last_tx({SigType, PubKey}) ->
-	get_last_tx(ar_wallet:to_address(PubKey, SigType));
+	get_last_tx(big_wallet:to_address(PubKey, SigType));
 get_last_tx(MaybeRSAPub) when byte_size(MaybeRSAPub) == 512 ->
 	%% A legacy feature where we may search the public key instead of address.
-	get_last_tx(ar_wallet:hash_pub_key(MaybeRSAPub));
+	get_last_tx(big_wallet:hash_pub_key(MaybeRSAPub));
 get_last_tx(Addr) ->
-	{ok, ar_wallets:get_last_tx(Addr)}.
+	{ok, big_wallets:get_last_tx(Addr)}.
 
 get_recent_partition_upper_bound_by_prev_h(H) ->
 	get_recent_partition_upper_bound_by_prev_h(H, 0).

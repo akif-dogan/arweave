@@ -9,14 +9,14 @@
 
 start_node() ->
 	%% Starting a node is slow so we'll run it once for the whole test module
-	Wallet1 = {_, Pub1} = ar_wallet:new(),
-	Wallet2 = {_, Pub2} = ar_wallet:new(),
+	Wallet1 = {_, Pub1} = big_wallet:new(),
+	Wallet2 = {_, Pub2} = big_wallet:new(),
 	%% This wallet is never spent from or deposited to, so the balance is predictable
-	StaticWallet = {_, Pub3} = ar_wallet:new(),
+	StaticWallet = {_, Pub3} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub1), ?BIG(10000), <<>>},
-		{ar_wallet:to_address(Pub2), ?BIG(10000), <<>>},
-		{ar_wallet:to_address(Pub3), ?BIG(10), <<"TEST_ID">>}
+		{big_wallet:to_address(Pub1), ?BIG(10000), <<>>},
+		{big_wallet:to_address(Pub2), ?BIG(10000), <<>>},
+		{big_wallet:to_address(Pub3), ?BIG(10), <<"TEST_ID">>}
 	], 0), %% Set difficulty to 0 to speed up tests
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
@@ -126,7 +126,7 @@ test_addresses_with_checksum({_, Wallet1, {_, Pub2}, _}) ->
 	Address19 = crypto:strong_rand_bytes(19),
 	Address65 = crypto:strong_rand_bytes(65),
 	Address20 = crypto:strong_rand_bytes(20),
-	Address32 = ar_wallet:to_address(Pub2),
+	Address32 = big_wallet:to_address(Pub2),
 	TX = ar_test_node:sign_tx(Wallet1, #{ last_tx => ar_test_node:get_tx_anchor(peer1) }),
 	{JSON} = ar_serialize:tx_to_json_struct(TX),
 	JSON2 = proplists:delete(<<"target">>, JSON),
@@ -368,7 +368,7 @@ group(Grouper, [Item | List], Acc) ->
 %% @doc Check that balances can be retreived over the network.
 test_get_balance({B0, _, _, {_, Pub1}}) ->
 	LocalHeight = ar_node:get_height(),
-	Addr = binary_to_list(ar_util:encode(ar_wallet:to_address(Pub1))),
+	Addr = binary_to_list(ar_util:encode(big_wallet:to_address(Pub1))),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
 		ar_http:req(#{
 			method => get,
@@ -393,9 +393,9 @@ test_get_balance({B0, _, _, {_, Pub1}}) ->
 		}).
 
 test_get_wallet_list_in_chunks({B0, {_, Pub1}, {_, Pub2}, {_, StaticPub}}) ->
-	Addr1 = ar_wallet:to_address(Pub1),
-	Addr2 = ar_wallet:to_address(Pub2),
-	StaticAddr = ar_wallet:to_address(StaticPub),
+	Addr1 = big_wallet:to_address(Pub1),
+	Addr2 = big_wallet:to_address(Pub2),
+	StaticAddr = big_wallet:to_address(StaticPub),
 	NonExistentRootHash = binary_to_list(ar_util:encode(crypto:strong_rand_bytes(32))),
 	{ok, {{<<"404">>, _}, _, <<"Root hash not found.">>, _, _}} =
 		ar_http:req(#{
@@ -405,7 +405,7 @@ test_get_wallet_list_in_chunks({B0, {_, Pub1}, {_, Pub2}, {_, StaticPub}}) ->
 		}),
 
 	[TX] = B0#block.txs,
-	GenesisAddr = ar_wallet:to_address(TX#tx.owner, {?RSA_SIGN_ALG, 65537}),
+	GenesisAddr = big_wallet:to_address(TX#tx.owner, {?RSA_SIGN_ALG, 65537}),
 	TXID = TX#tx.id,
 	ExpectedWallets = lists:sort([
 			{Addr1, {?BIG(10000), <<>>}},
@@ -446,7 +446,7 @@ test_get_height(_) ->
 
 %% @doc Test that last tx associated with a wallet can be fetched.
 test_get_last_tx_single({_, _, _, {_, StaticPub}}) ->
-	Addr = binary_to_list(ar_util:encode(ar_wallet:to_address(StaticPub))),
+	Addr = binary_to_list(ar_util:encode(big_wallet:to_address(StaticPub))),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
 		ar_http:req(#{
 			method => get,
@@ -660,7 +660,7 @@ test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
 	{_Priv1, Pub1} = Wallet1,
 	{_Priv2, Pub2} = Wallet2,
 	SignedTX = ar_test_node:sign_tx(Wallet1, #{
-		target => ar_wallet:to_address(Pub2),
+		target => big_wallet:to_address(Pub2),
 		quantity => ?BIG(2),
 		reward => ?BIG(1)}),
 	ID = SignedTX#tx.id,
@@ -674,7 +674,7 @@ test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet/"
-					++ binary_to_list(ar_util:encode(ar_wallet:to_address(Pub1)))
+					++ binary_to_list(ar_util:encode(big_wallet:to_address(Pub1)))
 					++ "/last_tx"
 		}),
 	?assertEqual(ID, ar_util:decode(Body)).
@@ -987,7 +987,7 @@ test_get_total_supply(_Args) ->
 					Acc + ar_pricing:redenominate(B, Denomination, BlockDenomination)
 			end,
 			0,
-			ar_diff_dag:get_sink(sys:get_state(ar_wallets))
+			ar_diff_dag:get_sink(sys:get_state(big_wallets))
 		),
 	TotalSupplyBin = integer_to_binary(TotalSupply),
 	?assertMatch({ok, {{<<"200">>, _}, _, TotalSupplyBin, _, _}},

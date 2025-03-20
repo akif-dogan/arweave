@@ -369,10 +369,10 @@ packs_chunks_depending_on_packing_threshold_test_() ->
 			fun test_packs_chunks_depending_on_packing_threshold/0).
 
 test_packs_chunks_depending_on_packing_threshold() ->
-	MainWallet = ar_wallet:new_keyfile(),
-	PeerWallet = ar_test_node:remote_call(peer1, ar_wallet, new_keyfile, []),
-	MainAddr = ar_wallet:to_address(MainWallet),
-	PeerAddr = ar_wallet:to_address(PeerWallet),
+	MainWallet = big_wallet:new_keyfile(),
+	PeerWallet = ar_test_node:remote_call(peer1, big_wallet, new_keyfile, []),
+	MainAddr = big_wallet:to_address(MainWallet),
+	PeerAddr = big_wallet:to_address(PeerWallet),
 	DataMap =
 		lists:foldr(
 			fun(Height, Acc) ->

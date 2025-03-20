@@ -559,14 +559,14 @@ handle(<<"POST">>, [<<"wallet">>], Req, _Pid) ->
 	case check_internal_api_secret(Req) of
 		pass ->
 			WalletAccessCode = ar_util:encode(crypto:strong_rand_bytes(32)),
-			case ar_wallet:new_keyfile(?DEFAULT_KEY_TYPE, WalletAccessCode) of
+			case big_wallet:new_keyfile(?DEFAULT_KEY_TYPE, WalletAccessCode) of
 				{error, Reason} ->
 					?LOG_ERROR([{event, failed_to_create_new_wallet},
 							{reason, io_lib:format("~p", [Reason])}]),
 					{500, #{}, <<>>, Req};
 				{_, Pub} ->
 					ResponseProps = [
-						{<<"wallet_address">>, ar_util:encode(ar_wallet:to_address(Pub))},
+						{<<"wallet_address">>, ar_util:encode(big_wallet:to_address(Pub))},
 						{<<"wallet_access_code">>, WalletAccessCode}
 					],
 					{200, #{}, ar_serialize:jsonify({ResponseProps}), Req}
@@ -610,8 +610,8 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 							{<<"signature">>, ar_util:encode(<<"signature placeholder">>)}
 						]
 					),
-					KeyPair = ar_wallet:load_keyfile(
-							ar_wallet:wallet_filepath(WalletAccessCode)),
+					KeyPair = big_wallet:load_keyfile(
+							big_wallet:wallet_filepath(WalletAccessCode)),
 					UnsignedTX = ar_serialize:json_struct_to_tx({FullTxProps}),
 					Data = UnsignedTX#tx.data,
 					DataSize = byte_size(Data),
@@ -735,7 +735,7 @@ handle(<<"GET">>, [<<"price">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(
+			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(
 					EncodedAddr) of
 				{error, invalid} ->
 					{400, #{}, <<"Invalid address.">>, Req};
@@ -759,7 +759,7 @@ handle(<<"GET">>, [<<"price2">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(
+			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(
 					EncodedAddr) of
 				{error, invalid} ->
 					{400, #{}, <<"Invalid address.">>, Req};
@@ -784,7 +784,7 @@ handle(<<"GET">>, [<<"optimistic_price">>, SizeInBytesBinary, EncodedAddr], Req,
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(
+			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(
 					EncodedAddr) of
 				{error, invalid} ->
 					{400, #{}, <<"Invalid address.">>, Req};
@@ -826,7 +826,7 @@ handle(<<"GET">>, [<<"v2price">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(
+			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(
 					EncodedAddr) of
 				{error, invalid} ->
 					{400, #{}, <<"Invalid address.">>, Req};
@@ -1070,7 +1070,7 @@ handle(<<"GET">>, [<<"wallet_list">>, EncodedRootHash, EncodedAddr, <<"balance">
 				{_, {error, invalid}} ->
 					{400, #{}, jiffy:encode(#{ error => invalid_address_encoding }), Req};
 				{{ok, RootHash}, {ok, Addr}} ->
-					case ar_wallets:get_balance(RootHash, Addr) of
+					case big_wallets:get_balance(RootHash, Addr) of
 						{error, not_found} ->
 							{404, #{}, jiffy:encode(#{ error => root_hash_not_found }), Req};
 						Balance when is_integer(Balance) ->
@@ -1093,7 +1093,7 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"balance">>], Req, _Pid) ->
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
+			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
 				{error, invalid} ->
 					{400, #{}, <<"Invalid address.">>, Req};
 				{ok, AddrOK} ->
@@ -1113,7 +1113,7 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"reserved_rewards_total">>], Req, _Pid)
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
+			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
 				{ok, AddrOK} when byte_size(AddrOK) == 32 ->
 					B = ar_node:get_current_block(),
 					Sum = ar_rewards:get_total_reward_for_address(AddrOK, B),
@@ -1130,7 +1130,7 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"last_tx">>], Req, _Pid) ->
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
+			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
 				{error, invalid} ->
 					{400, #{}, <<"Invalid address.">>, Req};
 				{ok, AddrOK} ->
@@ -1258,7 +1258,7 @@ handle(<<"GET">>, [<<"tx">>, Hash, Field], Req, _Pid) ->
 	end;
 
 handle(<<"GET">>, [<<"balance">>, Addr, Network, Token], Req, _Pid) ->
-	case ar_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
+	case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
 		{error, invalid} ->
 			{400, #{}, <<"Invalid address.">>, Req};
 		{ok, AddrOK} ->
@@ -1742,7 +1742,7 @@ estimate_tx_fee(Size, Addr, Type) ->
 			<<>> ->
 				#{};
 			_ ->
-				ar_wallets:get(RootHash, Addr)
+				big_wallets:get(RootHash, Addr)
 		end,
 	Size2 = ar_tx:get_weave_size_increase(Size, Height + 1),
 	Args = {Size2, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height + 1},
@@ -1778,7 +1778,7 @@ estimate_tx_fee_v2(Size, Addr) ->
 			<<>> ->
 				#{};
 			_ ->
-				ar_wallets:get(RootHash, Addr)
+				big_wallets:get(RootHash, Addr)
 		end,
 	Size2 = ar_tx:get_weave_size_increase(Size, Height + 1),
 	Args = {Size2, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height + 1},
@@ -2695,7 +2695,7 @@ get_recent_hash_list_diff([]) ->
 	<<>>.
 
 get_total_supply(RootHash, Cursor, Sum, Denomination) ->
-	{ok, {NextCursor, Range}} = ar_wallets:get_chunk(RootHash, Cursor),
+	{ok, {NextCursor, Range}} = big_wallets:get_chunk(RootHash, Cursor),
 	RangeSum = get_balance_sum(Range, Denomination),
 	case NextCursor of
 		last ->
@@ -2846,7 +2846,7 @@ handle_get_block_wallet_balance(EncodedHeight, EncodedAddr, Req) ->
 	end.
 
 handle_get_block_wallet_balance2(Addr, RootHash, Req) ->
-	case ar_wallets:get_balance(RootHash, Addr) of
+	case big_wallets:get_balance(RootHash, Addr) of
 		{error, not_found} ->
 			handle_get_block_wallet_balance3(Addr, RootHash, Req);
 		Balance when is_integer(Balance) ->
@@ -2879,7 +2879,7 @@ process_get_wallet_list_chunk(EncodedRootHash, EncodedCursor, Req) ->
 		{_, {error, invalid}} ->
 			{400, #{}, <<"Invalid root hash.">>, Req};
 		{{ok, RootHash}, {ok, Cursor}} ->
-			case ar_wallets:get_chunk(RootHash, Cursor) of
+			case big_wallets:get_chunk(RootHash, Cursor) of
 				{ok, {NextCursor, Wallets}} ->
 					SerializeFn = case cowboy_req:header(<<"content-type">>, Req) of
 						<<"application/json">> -> fun wallet_list_chunk_to_json/1;

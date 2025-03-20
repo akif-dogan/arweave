@@ -1066,7 +1066,7 @@ parse_tx(<< Format:8, TXID:32/binary,
 					case SigType of
 						{?ECDSA_SIGN_ALG, secp256k1} ->
 							DataSegment = ar_tx:generate_signature_data_segment(TX),
-							Owner2 = ar_wallet:recover_key(DataSegment, Signature, SigType),
+							Owner2 = big_wallet:recover_key(DataSegment, Signature, SigType),
 							{ok, TX#tx{ owner = Owner2 }};
 						{?RSA_SIGN_ALG, 65537} ->
 							{ok, TX}
@@ -1340,7 +1340,7 @@ json_struct_to_block({BlockStruct}) ->
 			unclaimed ->
 				unclaimed;
 			_ ->
-				ar_wallet:base64_address_with_optional_checksum_to_decoded_address(RewardAddr)
+				big_wallet:base64_address_with_optional_checksum_to_decoded_address(RewardAddr)
 		end,
 	{RewardPool, BlockSize, WeaveSize} =
 		case Height >= ar_fork:height_2_4() of
@@ -1611,7 +1611,7 @@ json_struct_to_tx(TXStruct, ComputeDataSize) ->
 		tags = [{ar_util:decode(Name), ar_util:decode(Value)}
 				%% Only the elements matching this pattern are included in the list.
 				|| {[{<<"name">>, Name}, {<<"value">>, Value}]} <- Tags],
-		target = ar_wallet:base64_address_with_optional_checksum_to_decoded_address(
+		target = big_wallet:base64_address_with_optional_checksum_to_decoded_address(
 				find_value(<<"target">>, TXStruct)),
 		quantity = binary_to_integer(find_value(<<"quantity">>, TXStruct)),
 		data = Data,
@@ -1629,7 +1629,7 @@ json_struct_to_tx(TXStruct, ComputeDataSize) ->
 	case SigType of
 		?ECDSA_KEY_TYPE ->
 			DataSegment = ar_tx:generate_signature_data_segment(TX),
-			Owner2 = ar_wallet:recover_key(DataSegment, Sig, SigType),
+			Owner2 = big_wallet:recover_key(DataSegment, Sig, SigType),
 			TX#tx{ owner = Owner2 };
 		?RSA_KEY_TYPE ->
 			TX

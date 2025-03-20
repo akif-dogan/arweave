@@ -12,8 +12,8 @@ height_plus_one_fork_recovery_test_() ->
 test_height_plus_one_fork_recovery() ->
 	%% Mine on two nodes until they fork. Mine an extra block on one of them.
 	%% Expect the other one to recover.
-	{_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(20), <<>>}]),
+	{_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(20), <<>>}]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
 	ar_test_node:disconnect_from(peer1),
@@ -41,8 +41,8 @@ height_plus_three_fork_recovery_test_() ->
 test_height_plus_three_fork_recovery() ->
 	%% Mine on two nodes until they fork. Mine three extra blocks on one of them.
 	%% Expect the other one to recover.
-	{_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(20), <<>>}]),
+	{_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(20), <<>>}]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
 	ar_test_node:disconnect_from(peer1),
@@ -70,8 +70,8 @@ test_missing_txs_fork_recovery() ->
 	%% Mine a block with a transaction on the peer1 node
 	%% but do not gossip the transaction. The main node
 	%% is expected fetch the missing transaction and apply the block.
-	Key = {_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(20), <<>>}]),
+	Key = {_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(20), <<>>}]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
 	ar_test_node:disconnect_from(peer1),
@@ -92,8 +92,8 @@ test_orphaned_txs_are_remined_after_fork_recovery() ->
 	%% Mine a transaction on peer1, mine two blocks on main to
 	%% make the transaction orphaned. Mine a block on peer1 and
 	%% assert the transaction is re-mined.
-	Key = {_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(20), <<>>}]),
+	Key = {_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(20), <<>>}]),
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
 	ar_test_node:disconnect_from(peer1),
@@ -123,11 +123,11 @@ test_invalid_block_with_high_cumulative_difficulty() ->
 	%% Submit an alternative fork with valid blocks weaker than the tip and
 	%% an invalid block on top, much stronger than the tip. Make sure the node
 	%% ignores the invalid block and continues to build on top of the valid fork.
-	RewardKey = ar_wallet:new_keyfile(),
-	RewardAddr = ar_wallet:to_address(RewardKey),
+	RewardKey = big_wallet:new_keyfile(),
+	RewardAddr = big_wallet:to_address(RewardKey),
 	WalletName = ar_util:encode(RewardAddr),
-	Path = ar_wallet:wallet_filepath(WalletName),
-	PeerPath = ar_test_node:remote_call(peer1, ar_wallet, wallet_filepath, [WalletName]),
+	Path = big_wallet:wallet_filepath(WalletName),
+	PeerPath = ar_test_node:remote_call(peer1, big_wallet, wallet_filepath, [WalletName]),
 	%% Copy the key because we mine blocks on both nodes using the same key in this test.
 	{ok, _} = file:copy(Path, PeerPath),
 	[B0] = ar_weave:init([]),
@@ -181,8 +181,8 @@ fake_block_with_strong_cumulative_difficulty(B, PrevB, CDiff) ->
 		diff = Diff
 	} = B,
 	B2 = B#block{ cumulative_diff = CDiff },
-	Wallet = ar_wallet:new(),
-	RewardAddr2 = ar_wallet:to_address(Wallet),
+	Wallet = big_wallet:new(),
+	RewardAddr2 = big_wallet:to_address(Wallet),
 	H0 = ar_block:compute_h0(B, PrevB),
 	{RecallByte, _RecallRange2Start} = ar_block:get_recall_range(H0, PartitionNumber,
 			PartitionUpperBound),
@@ -217,7 +217,7 @@ fake_block_with_strong_cumulative_difficulty(B, PrevB, CDiff) ->
 			SignedH = ar_block:generate_signed_hash(B4),
 			SignaturePreimage = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
 				<< PrevSolutionH/binary, SignedH/binary >>, Height),
-			Signature = ar_wallet:sign(element(1, Wallet), SignaturePreimage),
+			Signature = big_wallet:sign(element(1, Wallet), SignaturePreimage),
 			B4#block{ indep_hash = ar_block:indep_hash2(SignedH, Signature),
 					signature = Signature };
 		false ->

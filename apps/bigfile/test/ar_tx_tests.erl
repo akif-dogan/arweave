@@ -20,8 +20,8 @@ accepts_gossips_and_mines_test_() ->
 			%% The weave has to be initialised under the fork so that
 			%% we can get the correct price estimations according
 			%% to the new pricinig model.
-			Key = {_, Pub} = ar_wallet:new(KeyType),
-			Wallets = [{ar_wallet:to_address(Pub), ?BIG(5), <<>>}],
+			Key = {_, Pub} = big_wallet:new(KeyType),
+			Wallets = [{big_wallet:to_address(Pub), ?BIG(5), <<>>}],
 			[B0] = ar_weave:init(Wallets),
 			accepts_gossips_and_mines(B0, BuildTXSetFun(Key, B0))
 		end
@@ -51,8 +51,8 @@ polls_for_transactions_and_gossips_and_mines_test_() ->
 			%% The weave has to be initialised under the fork so that
 			%% we can get the correct price estimations according
 			%% to the new pricinig model.
-			Key = {_, Pub} = ar_wallet:new(KeyType),
-			Wallets = [{ar_wallet:to_address(Pub), ?BIG(5), <<>>}],
+			Key = {_, Pub} = big_wallet:new(KeyType),
+			Wallets = [{big_wallet:to_address(Pub), ?BIG(5), <<>>}],
 			[B0] = ar_weave:init(Wallets),
 			polls_for_transactions_and_gossips_and_mines(B0, BuildTXSetFun(Key, B0))
 		end
@@ -71,10 +71,10 @@ polls_for_transactions_and_gossips_and_mines_test_() ->
 keeps_txs_after_new_block_test_() ->
 	PrepareTestFor = fun(BuildFirstTXSetFun, BuildSecondTXSetFun) ->
 		fun() ->
-			Key = {_, Pub} = ar_wallet:new(),
+			Key = {_, Pub} = big_wallet:new(),
 			Key2 = {_, Pub2} = ar_test_node:new_custom_size_rsa_wallet(66),
-			Wallets = [{ar_wallet:to_address(Pub), ?BIG(5), <<>>},
-					{ar_wallet:to_address(Pub2), ?BIG(5), <<>>}],
+			Wallets = [{big_wallet:to_address(Pub), ?BIG(5), <<>>},
+					{big_wallet:to_address(Pub2), ?BIG(5), <<>>}],
 			[B0] = ar_weave:init(Wallets),
 			keeps_txs_after_new_block(
 				B0,
@@ -154,9 +154,9 @@ rejects_txs_with_outdated_anchors_test_() ->
 		%% Post a transaction anchoring the block at ?MAX_TX_ANCHOR_DEPTH + 1.
 		%%
 		%% Expect the transaction to be rejected.
-		Key = {_, Pub} = ar_wallet:new(),
+		Key = {_, Pub} = big_wallet:new(),
 		[B0] = ar_weave:init([
-			{ar_wallet:to_address(Pub), ?BIG(20), <<>>}
+			{big_wallet:to_address(Pub), ?BIG(20), <<>>}
 		]),
 		_ = ar_test_node:start_peer(peer1, B0),
 		mine_blocks(peer1, ?MAX_TX_ANCHOR_DEPTH),
@@ -350,8 +350,8 @@ keeps_txs_after_new_block(B0, FirstTXSetFuns, SecondTXSetFuns) ->
 	end.
 
 returns_error_when_txs_exceed_balance(BuildTXSetFun) ->
-	Key = {_, Pub} = ar_wallet:new(),
-	[B0] = ar_weave:init([{ar_wallet:to_address(Pub), ?BIG(20), <<>>}]),
+	Key = {_, Pub} = big_wallet:new(),
+	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(20), <<>>}]),
 
 	_ = ar_test_node:start(B0),
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -411,11 +411,11 @@ returns_error_when_txs_exceed_balance(BuildTXSetFun) ->
 
 test_rejects_transactions_above_the_size_limit() ->
 	%% Create a genesis block with a wallet.
-	Key1 = {_, Pub1} = ar_wallet:new(),
-	Key2 = {_, Pub2} = ar_wallet:new(),
+	Key1 = {_, Pub1} = big_wallet:new(),
+	Key2 = {_, Pub2} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub1), ?BIG(20), <<>>},
-		{ar_wallet:to_address(Pub2), ?BIG(20), <<>>}
+		{big_wallet:to_address(Pub1), ?BIG(20), <<>>},
+		{big_wallet:to_address(Pub2), ?BIG(20), <<>>}
 	]),
 	%% Start the node.
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -444,9 +444,9 @@ test_accepts_at_most_one_wallet_list_anchored_tx_per_block() ->
 	%% Post the fourth TX referencing the block.
 	%%
 	%% Expect the fourth TX to be accepted and mined into a block.
-	Key = {_, Pub} = ar_wallet:new(),
+	Key = {_, Pub} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub), ?BIG(20), <<>>}
+		{big_wallet:to_address(Pub), ?BIG(20), <<>>}
 	]),
 	_ = ar_test_node:start_peer(peer1, B0),
 	_ = ar_test_node:connect_to_peer(peer1),
@@ -475,21 +475,21 @@ test_does_not_allow_to_spend_mempool_tokens() ->
 	%% Post another transaction spending the rest of tokens from the new wallet.
 	%%
 	%% Expect the transaction to be accepted.
-	Key1 = {_, Pub1} = ar_wallet:new(),
-	Key2 = {_, Pub2} = ar_wallet:new(),
+	Key1 = {_, Pub1} = big_wallet:new(),
+	Key2 = {_, Pub2} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub1), ?BIG(20), <<>>},
-		{ar_wallet:to_address(Pub2), ?BIG(0), <<>>}
+		{big_wallet:to_address(Pub1), ?BIG(20), <<>>},
+		{big_wallet:to_address(Pub2), ?BIG(0), <<>>}
 	]),
 	_ = ar_test_node:start_peer(peer1, B0),
 	_ = ar_test_node:connect_to_peer(peer1),
-	TX1 = ar_test_node:sign_v1_tx(Key1, #{ target => ar_wallet:to_address(Pub2), reward => ?BIG(1),
+	TX1 = ar_test_node:sign_v1_tx(Key1, #{ target => big_wallet:to_address(Pub2), reward => ?BIG(1),
 			quantity => ?BIG(2) }),
 	ar_test_node:assert_post_tx_to_peer(peer1, TX1),
 	TX2 = ar_test_node:sign_v1_tx(
 		Key2,
 		#{
-			target => ar_wallet:to_address(Pub1),
+			target => big_wallet:to_address(Pub1),
 			reward => ?BIG(1),
 			quantity => ?BIG(1),
 			last_tx => B0#block.indep_hash,
@@ -505,7 +505,7 @@ test_does_not_allow_to_spend_mempool_tokens() ->
 	TX3 = ar_test_node:sign_v1_tx(
 		Key2,
 		#{
-			target => ar_wallet:to_address(Pub1),
+			target => big_wallet:to_address(Pub1),
 			reward => ?BIG(1),
 			quantity => ?BIG(1),
 			last_tx => B1#block.indep_hash,
@@ -525,18 +525,18 @@ test_does_not_allow_to_replay_empty_wallet_txs() ->
 	%% Try to replay the transaction which sent the tokens back (before and after mining).
 	%%
 	%% Expect the replay to be rejected.
-	Key1 = {_, Pub1} = ar_wallet:new(),
-	Key2 = {_, Pub2} = ar_wallet:new(),
+	Key1 = {_, Pub1} = big_wallet:new(),
+	Key2 = {_, Pub2} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub1), ?BIG(50), <<>>}
+		{big_wallet:to_address(Pub1), ?BIG(50), <<>>}
 	]),
 	_ = ar_test_node:start_peer(peer1, B0),
-	TX1 = ar_test_node:sign_v1_tx(Key1, #{ target => ar_wallet:to_address(Pub2), reward => ?BIG(6),
+	TX1 = ar_test_node:sign_v1_tx(Key1, #{ target => big_wallet:to_address(Pub2), reward => ?BIG(6),
 			quantity => ?BIG(2), last_tx => <<>> }),
 	ar_test_node:assert_post_tx_to_peer(peer1, TX1),
 	ar_test_node:mine(peer1),
 	assert_wait_until_height(peer1, 1),
-	GetBalancePath = binary_to_list(ar_util:encode(ar_wallet:to_address(Pub2))),
+	GetBalancePath = binary_to_list(ar_util:encode(big_wallet:to_address(Pub2))),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
 		ar_http:req(#{
 			method => get,
@@ -544,7 +544,7 @@ test_does_not_allow_to_replay_empty_wallet_txs() ->
 			path => "/wallet/" ++ GetBalancePath ++ "/balance"
 		}),
 	Balance = binary_to_integer(Body),
-	TX2 = ar_test_node:sign_v1_tx(Key2, #{ target => ar_wallet:to_address(Pub1), reward => Balance - ?BIG(1),
+	TX2 = ar_test_node:sign_v1_tx(Key2, #{ target => big_wallet:to_address(Pub1), reward => Balance - ?BIG(1),
 			quantity => ?BIG(1), last_tx => <<>> }),
 	ar_test_node:assert_post_tx_to_peer(peer1, TX2),
 	ar_test_node:mine(peer1),
@@ -556,7 +556,7 @@ test_does_not_allow_to_replay_empty_wallet_txs() ->
 			path => "/wallet/" ++ GetBalancePath ++ "/balance"
 		}),
 	?assertEqual(0, binary_to_integer(Body2)),
-	TX3 = ar_test_node:sign_v1_tx(Key1, #{ target => ar_wallet:to_address(Pub2), reward => ?BIG(6),
+	TX3 = ar_test_node:sign_v1_tx(Key1, #{ target => big_wallet:to_address(Pub2), reward => ?BIG(6),
 			quantity => ?BIG(2), last_tx => TX1#tx.id }),
 	ar_test_node:assert_post_tx_to_peer(peer1, TX3),
 	ar_test_node:mine(peer1),
@@ -611,9 +611,9 @@ assert_wait_until_txs_are_stored(TXIDs) ->
 	).
 
 mines_format_2_txs_without_size_limit() ->
-	Key = {_, Pub} = ar_wallet:new(),
+	Key = {_, Pub} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub), ?BIG(20), <<>>}
+		{big_wallet:to_address(Pub), ?BIG(20), <<>>}
 	]),
 	_ = ar_test_node:start(B0),
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -645,9 +645,9 @@ test_drops_v1_txs_exceeding_mempool_limit() ->
 	%% Post transactions which exceed the mempool size limit.
 	%%
 	%% Expect the exceeding transaction to be dropped.
-	Key = {_, Pub} = ar_wallet:new(),
+	Key = {_, Pub} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub), ?BIG(20), <<>>}
+		{big_wallet:to_address(Pub), ?BIG(20), <<>>}
 	]),
 	_ = ar_test_node:start_peer(peer1, B0),
 	BigChunk = random_v1_data(?TX_DATA_SIZE_LIMIT - ?TX_SIZE_BASE),
@@ -675,9 +675,9 @@ test_drops_v1_txs_exceeding_mempool_limit() ->
 	?assertEqual([TX#tx.id || TX <- lists:sublist(TXs, 5)], Mempool2).
 
 drops_v2_txs_exceeding_mempool_limit() ->
-	Key = {_, Pub} = ar_wallet:new(),
+	Key = {_, Pub} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub), ?BIG(20), <<>>}
+		{big_wallet:to_address(Pub), ?BIG(20), <<>>}
 	]),
 	_ = ar_test_node:start_peer(peer1, B0),
 	BigChunk = crypto:strong_rand_bytes(?TX_DATA_SIZE_LIMIT div 2),
@@ -729,9 +729,9 @@ joins_network_successfully() ->
 	%% tracking the block just referenced by peer1. Reconnect the nodes, mine another
 	%% block with transactions anchoring the oldest block possible on peer1.
 	%% Expect main to fork recover successfully.
-	Key = {_, Pub} = ar_wallet:new(),
+	Key = {_, Pub} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub), ?BIG(200000000), <<>>},
+		{big_wallet:to_address(Pub), ?BIG(200000000), <<>>},
 		{Addr = crypto:strong_rand_bytes(32), ?BIG(200000000), <<>>},
 		{crypto:strong_rand_bytes(32), ?BIG(200000000), <<>>}
 	]),
@@ -855,9 +855,9 @@ recovers_from_forks(ForkHeight) ->
 	%%
 	%% Resubmit all the transactions from the orphaned fork. Expect them to be accepted
 	%% and successfully mined into a block.
-	Key = {_, Pub} = ar_wallet:new(),
+	Key = {_, Pub} = big_wallet:new(),
 	[B0] = ar_weave:init([
-		{ar_wallet:to_address(Pub), ?BIG(20), <<>>}
+		{big_wallet:to_address(Pub), ?BIG(20), <<>>}
 	]),
 	_ = ar_test_node:start(B0),
 	_ = ar_test_node:start_peer(peer1, B0),
@@ -1044,11 +1044,11 @@ mixed_anchor_txs_spending_balance_plus_one_more(Key, B0) ->
 	[TX1, TX2, TX3, TX4, TX5].
 
 grouped_txs() ->
-	Key1 = {_, Pub1} = ar_wallet:new(),
-	Key2 = {_, Pub2} = ar_wallet:new(),
+	Key1 = {_, Pub1} = big_wallet:new(),
+	Key2 = {_, Pub2} = big_wallet:new(),
 	Wallets = [
-		{ar_wallet:to_address(Pub1), ?BIG(100), <<>>},
-		{ar_wallet:to_address(Pub2), ?BIG(100), <<>>}
+		{big_wallet:to_address(Pub1), ?BIG(100), <<>>},
+		{big_wallet:to_address(Pub2), ?BIG(100), <<>>}
 	],
 	[B0] = ar_weave:init(Wallets),
 	Chunk1 = random_v1_data(?TX_DATA_SIZE_LIMIT),

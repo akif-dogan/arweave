@@ -19,7 +19,7 @@
 
 -include_lib("bigfile/include/ar.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
--include_lib("bigfile/include/ar_wallets.hrl").
+-include_lib("bigfile/include/big_wallets.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("kernel/include/file.hrl").
 
@@ -416,7 +416,7 @@ read_account2(Addr, RootHash) ->
 	%% Unfortunately, we do not have an easy access to the information about how many
 	%% accounts there were in the given tree so we perform the binary search starting
 	%% from the number in the latest block.
-	Size = ar_wallets:get_size(),
+	Size = big_wallets:get_size(),
 	MaxFileCount = Size div ?WALLET_LIST_CHUNK_SIZE + 1,
 	{ok, Config} = application:get_env(bigfile, config),
 	read_account(Addr, RootHash, 0, MaxFileCount, Config#config.data_dir, false).
@@ -1361,7 +1361,7 @@ store_and_retrieve_wallet_list_test_() ->
 test_store_and_retrieve_wallet_list() ->
 	[B0] = ar_weave:init(),
 	[TX] = B0#block.txs,
-	Addr = ar_wallet:to_address(TX#tx.owner, {?RSA_SIGN_ALG, 65537}),
+	Addr = big_wallet:to_address(TX#tx.owner, {?RSA_SIGN_ALG, 65537}),
 	write_block(B0),
 	TXID = TX#tx.id,
 	ExpectedWL = ar_patricia_tree:from_proplist([{Addr, {0, TXID}}]),
