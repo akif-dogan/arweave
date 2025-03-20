@@ -200,7 +200,7 @@ handle_cast(Msg, DAG) ->
 	{noreply, DAG}.
 
 terminate(Reason, _State) ->
-	?LOG_INFO([{event, ar_wallets_terminated}, {reason, Reason}]).
+	?LOG_INFO([{event, big_wallets_terminated}, {reason, Reason}]).
 
 %%%===================================================================
 %%% Private functions.
