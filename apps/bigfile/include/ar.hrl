@@ -219,7 +219,7 @@
 
 %% A part of transaction propagation delay independent from the size, in seconds.
 -ifdef(AR_TEST).
--define(BASE_TX_PROPAGATION_DELAY, 0).
+-define(BASE_TX_PROPAGATION_DELAY, 30).
 -else.
 -ifndef(BASE_TX_PROPAGATION_DELAY).
 -define(BASE_TX_PROPAGATION_DELAY, 30).

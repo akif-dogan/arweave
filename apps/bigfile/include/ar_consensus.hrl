@@ -40,7 +40,9 @@
 %% The size in bytes of the total RX2 entropy (# of lanes * scratchpad size).
 -ifdef(AR_TEST).
 %% 24_576 bytes worth of entropy.
--define(REPLICA_2_9_ENTROPY_SIZE, (3 * ?COMPOSITE_PACKING_SUB_CHUNK_SIZE)).
+-define(REPLICA_2_9_ENTROPY_SIZE, (
+	?REPLICA_2_9_RANDOMX_LANE_COUNT * ?RANDOMX_SCRATCHPAD_SIZE
+)).
 -else.
 %% 8_388_608 bytes worth of entropy.
 -define(REPLICA_2_9_ENTROPY_SIZE, (
@@ -90,7 +92,7 @@
 %% of equal size. A miner can search for a solution in each of the partitions
 %% in parallel, per mining address.
 -ifdef(AR_TEST).
--define(PARTITION_SIZE, 2_097_152). % 8 * 256 * 1024
+-define(PARTITION_SIZE, 3_600_000_000_000). % 90% of 4 TB.
 -else.
 -define(PARTITION_SIZE, 3_600_000_000_000). % 90% of 4 TB.
 -endif.

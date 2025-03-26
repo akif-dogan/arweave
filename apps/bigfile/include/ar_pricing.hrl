@@ -56,7 +56,7 @@ end).
 -ifdef(AR_TEST).
 	% testnet value should have same ratio 30:1 to VDF_DIFFICULTY_RETARGET
 	% BUT. For tests we are using old value
-	-define(LOCKED_REWARDS_BLOCKS, 3).
+	-define(LOCKED_REWARDS_BLOCKS, (30 * 24 * 30)).
 -else.
 	-ifndef(LOCKED_REWARDS_BLOCKS).
 		-define(LOCKED_REWARDS_BLOCKS, (30 * 24 * 30)).
@@ -67,7 +67,7 @@ end).
 %% of the average price of storing a gibibyte for a minute. A recent subset of the
 %% reward history is used for tracking the reserved mining rewards.
 -ifdef(AR_TEST).
-	-define(REWARD_HISTORY_BLOCKS, 3).
+	-define(REWARD_HISTORY_BLOCKS, (3 * 30 * 24 * 30)).
 -else.
 	-ifndef(REWARD_HISTORY_BLOCKS).
 		-define(REWARD_HISTORY_BLOCKS, (3 * 30 * 24 * 30)).
@@ -76,7 +76,7 @@ end).
 
 %% The REWARD_HISTORY_BLOCKS before 2.8.
 -ifdef(AR_TEST).
-	-define(LEGACY_REWARD_HISTORY_BLOCKS, 3).
+	-define(LEGACY_REWARD_HISTORY_BLOCKS, (30 * 24 * 30)).
 -else.
 	-ifndef(LEGACY_REWARD_HISTORY_BLOCKS).
 		-define(LEGACY_REWARD_HISTORY_BLOCKS, (30 * 24 * 30)).
@@ -85,7 +85,7 @@ end).
 
 %% The prices are re-estimated every so many blocks.
 -ifdef(AR_TEST).
--define(PRICE_ADJUSTMENT_FREQUENCY, 2).
+-define(PRICE_ADJUSTMENT_FREQUENCY, 50).
 -else.
 	-ifndef(PRICE_ADJUSTMENT_FREQUENCY).
 		-define(PRICE_ADJUSTMENT_FREQUENCY, 50).

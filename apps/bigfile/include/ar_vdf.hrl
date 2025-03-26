@@ -13,8 +13,8 @@
 -ifdef(AR_TEST).
 	% NOTE. VDF_DIFFICULTY_RETARGET should be > 10 because it's > 10 in mainnet
 	% So VDF difficulty should change slower than difficulty
-	-define(VDF_DIFFICULTY_RETARGET, 20).
-	-define(VDF_HISTORY_CUT, 2).
+	-define(VDF_DIFFICULTY_RETARGET, 720).
+	-define(VDF_HISTORY_CUT, 50).
 -else.
 	-ifndef(VDF_DIFFICULTY_RETARGET).
 		-define(VDF_DIFFICULTY_RETARGET, 720).
