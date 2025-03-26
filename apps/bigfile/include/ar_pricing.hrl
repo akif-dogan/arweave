@@ -121,14 +121,14 @@ end).
 	%% The debug constant is not always actually equal to the sum of genesis balances plust
 	%% the total emission. We just set a relatively low value so that we can reproduce
 	%% autoredenomination in tests.
-	-define(TOTAL_SUPPLY, 1500000000000).
+	-define(TOTAL_SUPPLY, 200000000000000000000).
 -else.
 	-ifdef(FORKS_RESET).
 		%% This value should be ideally adjusted if the genesis balances
 		%% of a new weave differ from those in mainnet.
-		-define(TOTAL_SUPPLY, 66000015859279336957).
+		-define(TOTAL_SUPPLY, 200000000000000000000).
 	-else.
-		-define(TOTAL_SUPPLY, 66_000_015_859_279_336_957).
+		-define(TOTAL_SUPPLY, 200_000_000_000_000_000_000).
 	-endif.
 -endif.
 
