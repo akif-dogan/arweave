@@ -2,7 +2,7 @@
 
 -export([main/0, main/1]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_chunk_storage.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
@@ -34,11 +34,11 @@ main(Args) ->
 	end.
 
 help() ->
-	ar:console("~n"),
+	big:console("~n"),
 	ar_doctor_merge:help(),
-	ar:console("~n"),
+	big:console("~n"),
 	ar_doctor_bench:help(),
-	ar:console("~n"),
+	big:console("~n"),
 	ar_doctor_dump:help(),
-	ar:console("~n").
+	big:console("~n").
 

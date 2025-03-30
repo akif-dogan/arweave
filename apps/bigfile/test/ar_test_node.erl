@@ -36,7 +36,7 @@
 
 		mock_functions/1, test_with_mocked_functions/2, test_with_mocked_functions/3]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_config.hrl").
 -include("../include/ar_consensus.hrl").
 
@@ -138,7 +138,7 @@ try_boot_peer(TestType, Node, Retries) ->
 	Schedulers = erlang:system_info(schedulers_online),
     Cmd = io_lib:format(
         "erl +S ~B:~B -pa ~s -config config/sys.config -noshell " ++
-		"-name ~s -setcookie ~s -run ar main debug port ~p " ++
+		"-name ~s -setcookie ~s -run big main debug port ~p " ++
         "data_dir .tmp/data_~s_~s no_auto_join " ++
 		"> ~s-~s.out 2>&1 &",
         [Schedulers, Schedulers, string:join(Paths, " "), NodeName, Cookie, Port,
@@ -256,7 +256,7 @@ start_node(B0, Config, WaitUntilSync) ->
 	{ok, BaseConfig} = application:get_env(bigfile, config),
 	write_genesis_files(BaseConfig#config.data_dir, B0),
 	update_config(Config),
-	ar:start_dependencies(),
+	big:start_dependencies(),
 	wait_until_joined(),
 	case WaitUntilSync of
 		true ->
@@ -600,14 +600,14 @@ start(B0, RewardAddr, Config, StorageModules) ->
 				double_check_nonce_limiter, serve_wallet_lists | Config#config.enable],
 		debug = true
 	}),
-	ar:start_dependencies(),
+	big:start_dependencies(),
 	wait_until_joined(),
 	wait_until_syncs_genesis_data().
 
 restart() ->
 	?LOG_INFO("Restarting node"),
 	stop(),
-	ar:start_dependencies(),
+	big:start_dependencies(),
 	wait_until_joined().
 
 restart_with_config(Config) ->
@@ -616,7 +616,7 @@ restart_with_config(Config) ->
 
 	update_config(Config),
 
-	ar:start_dependencies(),
+	big:start_dependencies(),
 	wait_until_joined().
 
 restart(Node) ->
@@ -776,7 +776,7 @@ sign_tx(Node, Wallet, Args, SignFun) ->
 stop() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	application:stop(bigfile),
-	ar:stop_dependencies(),
+	big:stop_dependencies(),
 	Config.
 
 stop(Node) ->
@@ -810,7 +810,7 @@ join(JoinOnNode, Rejoin) ->
 		auto_join = true,
 		peers = [Peer]
 	}),
-	ar:start_dependencies(),
+	big:start_dependencies(),
 	whereis(ar_node_worker).
 
 get_default_storage_module_packing(RewardAddr, Index) ->

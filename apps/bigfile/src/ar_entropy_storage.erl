@@ -6,7 +6,7 @@
          is_entropy_recorded/2, delete_record/2, store_entropy/7, record_chunk/7]).
 -export([start_link/2, init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_consensus.hrl").
 
 -include_lib("eunit/include/eunit.hrl").

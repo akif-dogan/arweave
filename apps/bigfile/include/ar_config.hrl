@@ -1,7 +1,7 @@
 -ifndef(AR_CONFIG_HRL).
 -define(AR_CONFIG_HRL, true).
 
--include_lib("ar.hrl").
+-include_lib("big.hrl").
 -include_lib("ar_p3.hrl").
 
 -record(config_webhook, {

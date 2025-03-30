@@ -9,7 +9,7 @@
 		height_2_7/0, height_2_7_1/0, height_2_7_2/0,
 		height_2_8/0, height_2_9/0]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 
 -ifdef(FORKS_RESET).

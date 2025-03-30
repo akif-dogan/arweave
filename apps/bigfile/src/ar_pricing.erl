@@ -13,7 +13,7 @@
 %% For tests.
 -export([get_v2_price_per_gib_minute/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_inflation.hrl").
 -include_lib("bigfile/include/ar_pricing.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").

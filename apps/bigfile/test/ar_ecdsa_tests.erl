@@ -1,6 +1,6 @@
 -module(ar_ecdsa_tests).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 

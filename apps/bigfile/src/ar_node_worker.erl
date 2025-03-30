@@ -14,7 +14,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 -export([set_reward_addr/1]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_consensus.hrl").
 -include("../include/ar_config.hrl").
 -include("../include/ar_pricing.hrl").
@@ -114,7 +114,7 @@ init([]) ->
 								ok ->
 									ok;
 								Error ->
-									ar:console("~n~n\tFailed to read the local state: ~p.~n",
+									big:console("~n~n\tFailed to read the local state: ~p.~n",
 											[Error]),
 									?LOG_INFO([{event, failed_to_read_local_state},
 											{reason, io_lib:format("~p", [Error])}]),
@@ -189,7 +189,7 @@ get_block_index_at_state2([_ | BI], H) ->
 	get_block_index_at_state2(BI, H).
 
 block_index_not_found([]) ->
-	ar:console("~n~n\tThe local state is empty, consider joining the network "
+	big:console("~n~n\tThe local state is empty, consider joining the network "
 			"via the trusted peers.~n"),
 	?LOG_INFO([{event, local_state_empty}]),
 	timer:sleep(1000),
@@ -197,7 +197,7 @@ block_index_not_found([]) ->
 block_index_not_found(BI) ->
 	{Last, _, _} = hd(BI),
 	{First, _, _} = lists:last(BI),
-	ar:console("~n~n\tThe local state is missing the target block. Available height range: ~p to ~p.~n",
+	big:console("~n~n\tThe local state is missing the target block. Available height range: ~p to ~p.~n",
 			[ar_util:encode(First), ar_util:encode(Last)]),
 	?LOG_INFO([{event, local_state_missing_target},
 			{first, ar_util:encode(First)}, {last, ar_util:encode(Last)}]),
@@ -212,7 +212,7 @@ validate_trusted_peers(Config) ->
 	ValidPeers = filter_valid_peers(Peers),
 	case ValidPeers of
 		[] ->
-			ar:console("The specified trusted peers are not valid.~n", []),
+			big:console("The specified trusted peers are not valid.~n", []),
 			?LOG_INFO([{event, no_valid_trusted_peers}]),
 			timer:sleep(2000),
 			erlang:halt();
@@ -272,7 +272,7 @@ validate_clock_sync(Peers) ->
 						true
 				end;
 			{error, Err} ->
-				ar:console(
+				big:console(
 					"Failed to get time from peer ~s: ~p.",
 					[ar_util:format_peer(Peer), Err]
 				),
@@ -284,7 +284,7 @@ validate_clock_sync(Peers) ->
 		true ->
 			ok;
 		false ->
-			ar:console(
+			big:console(
 				"~n\tInvalid peers. A valid peer must be part of the"
 				" network ~s and its clock must deviate from ours by no"
 				" more than ~B seconds.~n", [?NETWORK_NAME, ?JOIN_CLOCK_TOLERANCE]
@@ -379,7 +379,7 @@ handle_info({join, Height, BI, Blocks}, State) ->
 handle_info({event, node_state, {account_tree_initialized, Height}}, State) ->
 	[{_, {Height2, Blocks, BI}}] = ets:lookup(node_state, join_state),
 	?LOG_INFO([{event, account_tree_initialized}, {height, Height}]),
-	ar:console("The account tree has been initialized at the block height ~B.~n", [Height]),
+	big:console("The account tree has been initialized at the block height ~B.~n", [Height]),
 	%% Take the latest block the account tree is stored for.
 	Blocks2 = lists:nthtail(Height2 - Height, Blocks),
 	BI2 = lists:nthtail(Height2 - Height, BI),
@@ -454,7 +454,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 	ar_events:send(node_state, {initialized, B}),
 	ar_events:send(node_state, {checkpoint_block, 
 		ar_block_cache:get_checkpoint_block(RecentBI)}),
-	ar:console("Joined the BigFile network successfully at the block ~s, height ~B.~n",
+	big:console("Joined the BigFile network successfully at the block ~s, height ~B.~n",
 			[ar_util:encode(Current), Height]),
 	?LOG_INFO([{event, joined_the_network}, {block, ar_util:encode(Current)},
 			{height, Height}]),
@@ -1781,7 +1781,7 @@ read_recent_blocks2([{BH, _, _} | BI], SearchDepth, Skipped) ->
 					end
 			end;
 		Error ->
-			ar:console("Skipping the block ~s, reason: ~p.~n", [ar_util:encode(BH),
+			big:console("Skipping the block ~s, reason: ~p.~n", [ar_util:encode(BH),
 					io_lib:format("~p", [Error])]),
 			read_recent_blocks2(BI, SearchDepth, Skipped + 1)
 	end.
@@ -1796,7 +1796,7 @@ read_recent_blocks3([{BH, _, _} | BI], BlocksToRead, Blocks) ->
 			TXs = ar_storage:read_tx(B#block.txs),
 			case lists:any(fun(TX) -> TX == unavailable end, TXs) of
 				true ->
-					ar:console("Failed to find all transaction headers for the block ~s.~n",
+					big:console("Failed to find all transaction headers for the block ~s.~n",
 							[ar_util:encode(BH)]),
 					not_found;
 				false ->
@@ -1806,7 +1806,7 @@ read_recent_blocks3([{BH, _, _} | BI], BlocksToRead, Blocks) ->
 							[B#block{ size_tagged_txs = SizeTaggedTXs, txs = TXs } | Blocks])
 			end;
 		Error ->
-			ar:console("Failed to read block header ~s, reason: ~p.~n",
+			big:console("Failed to read block header ~s, reason: ~p.~n",
 					[ar_util:encode(BH), io_lib:format("~p", [Error])]),
 			not_found
 	end.
@@ -1997,7 +1997,7 @@ handle_found_solution(Args, PrevB, State) ->
 		not_found ->
 			?LOG_WARNING([{event, mined_block_but_no_mining_key_found}, {node, node()},
 					{mining_address, ar_util:encode(MiningAddress)}]),
-			ar:console("WARNING. Can't find key ~s~n", [ar_util:encode(MiningAddress)]),
+			big:console("WARNING. Can't find key ~s~n", [ar_util:encode(MiningAddress)]),
 			not_found;
 		Key ->
 			Key

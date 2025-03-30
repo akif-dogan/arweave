@@ -17,7 +17,7 @@
 
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -48,14 +48,14 @@ read_block_index_from_map(Map, Height, End, PrevH, BI) ->
 	V = maps:get(<< Height:256 >>, Map, not_found),
 	case V of
 		not_found ->
-			ar:console("The stored block index is invalid. Height ~B not found.~n", [Height]),
+			big:console("The stored block index is invalid. Height ~B not found.~n", [Height]),
 			not_found;
 		_ ->
 			case binary_to_term(V) of
 				{H, WeaveSize, TXRoot, PrevH} ->
 					read_block_index_from_map(Map, Height + 1, End, H, [{H, WeaveSize, TXRoot} | BI]);
 				{_, _, _, PrevH2} ->
-					ar:console("The stored block index is invalid. Height: ~B, "
+					big:console("The stored block index is invalid. Height: ~B, "
 							"stored previous hash: ~s, expected previous hash: ~s.~n",
 							[Height, ar_util:encode(PrevH2), ar_util:encode(PrevH)]),
 					not_found

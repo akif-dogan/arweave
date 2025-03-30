@@ -17,7 +17,7 @@
 
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 
 %% The frequency of choosing the peers to poll.
@@ -122,7 +122,7 @@ handle_cast({peer_out_of_sync, Peer}, State) ->
 							|| Peer2 <- Config#config.peers], ", "),
 					?LOG_INFO([{event, node_out_of_sync}, {peer, ar_util:format_peer(Peer)},
 						{trusted_peers, TrustedPeersStr}]),
-					ar:console("WARNING: The node is out of sync with all of the specified "
+					big:console("WARNING: The node is out of sync with all of the specified "
 							"trusted peers: ~s.~n~n"
 							"Please, check whether you are in sync with the network and "
 							"make sure your CPU computes VDF fast enough or you are connected "

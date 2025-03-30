@@ -2,7 +2,7 @@
 
 -export([start/1]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
@@ -57,14 +57,14 @@ filter_peers2([{_Height, Peer} | Peers], MaxHeight) ->
 	[Peer | filter_peers2(Peers, MaxHeight)].
 
 start2([]) ->
-	ar:console("~nTrusted peers are not available.~n", []),
+	big:console("~nTrusted peers are not available.~n", []),
 	?LOG_WARNING([{event, not_joining}, {reason, trusted_peers_not_available}]),
 	timer:sleep(1000),
 	erlang:halt();
 start2(Peers) ->
-	ar:console("Joining the BigFile network...~n"),
+	big:console("Joining the BigFile network...~n"),
 	[{H, _, _} | _] = BI = get_block_index(Peers, ?REJOIN_RETRIES),
-	ar:console("Downloaded the block index successfully.~n", []),
+	big:console("Downloaded the block index successfully.~n", []),
 	B = get_block(Peers, H),
 	ExpectedBIMerkleH = ar_unbalanced_merkle:block_index_to_merkle_root(tl(BI)),
 	case B#block.hash_list_merkle of
@@ -76,7 +76,7 @@ start2(Peers) ->
 			File = filename:join(Config#config.data_dir,
 					"inconsistent_joining_data_dump_" ++ ID),
 			file:write_file(File, term_to_binary({B, Peers, BI})),
-			ar:console("Inconsistent head block and block index. Error dump: ~s.", [File]),
+			big:console("Inconsistent head block and block index. Error dump: ~s.", [File]),
 			timer:sleep(2000),
 			erlang:halt()
 	end.
@@ -86,7 +86,7 @@ get_block_index(Peers, Retries) ->
 		unavailable ->
 			case Retries > 0 of
 				true ->
-					ar:console(
+					big:console(
 						"Failed to fetch the block index from any of the peers."
 						" Retrying..~n"
 					),
@@ -94,7 +94,7 @@ get_block_index(Peers, Retries) ->
 					timer:sleep(?REJOIN_TIMEOUT),
 					get_block_index(Peers, Retries - 1);
 				false ->
-					ar:console(
+					big:console(
 						"Failed to fetch the block index from any of the peers. Giving up.."
 						" Consider changing the peers.~n"
 					),
@@ -162,14 +162,14 @@ get_block(Peers, H) ->
 	end.
 
 get_block(Peers, H, Retries) ->
-	ar:console("Downloading joining block ~s.~n", [ar_util:encode(H)]),
+	big:console("Downloading joining block ~s.~n", [ar_util:encode(H)]),
 	case ar_http_iface_client:get_block_shadow(Peers, H) of
 		{_Peer, #block{} = BShadow, _Time, _Size} ->
 			get_block(Peers, BShadow, BShadow#block.txs, [], Retries);
 		_ ->
 			case Retries > 0 of
 				true ->
-					ar:console(
+					big:console(
 						"Failed to fetch a joining block ~s from any of the peers."
 						" Retrying..~n", [ar_util:encode(H)]
 					),
@@ -180,7 +180,7 @@ get_block(Peers, H, Retries) ->
 					timer:sleep(1000),
 					get_block(Peers, H, Retries - 1);
 				false ->
-					ar:console(
+					big:console(
 						"Failed to fetch a joining block ~s from any of the peers. Giving up.."
 						" Consider changing the peers.~n", [ar_util:encode(H)]
 					),
@@ -202,7 +202,7 @@ get_block(Peers, BShadow, [TXID | TXIDs], TXs, Retries) ->
 		_ ->
 			case Retries > 0 of
 				true ->
-					ar:console(
+					big:console(
 						"Failed to fetch a joining transaction ~s from any of the peers."
 						" Retrying..~n", [ar_util:encode(TXID)]
 					),
@@ -213,7 +213,7 @@ get_block(Peers, BShadow, [TXID | TXIDs], TXs, Retries) ->
 					timer:sleep(1000),
 					get_block(Peers, BShadow, [TXID | TXIDs], TXs, Retries - 1);
 				false ->
-					ar:console(
+					big:console(
 						"Failed to fetch a joining tx ~s from any of the peers. Giving up.."
 						" Consider changing the peers.~n", [ar_util:encode(TXID)]
 					),
@@ -228,7 +228,7 @@ get_block(Peers, BShadow, [TXID | TXIDs], TXs, Retries) ->
 
 %% @doc Perform the joining process.
 do_join(Peers, B, BI) ->
-	ar:console("Downloading the block trail.~n", []),
+	big:console("Downloading the block trail.~n", []),
 	{ok, Config} = application:get_env(bigfile, config),
 	WorkerQ = queue:from_list([spawn(fun() -> worker() end)
 			|| _ <- lists:seq(1, Config#config.join_workers)]),
@@ -238,7 +238,7 @@ do_join(Peers, B, BI) ->
 	Retries = lists:foldl(fun(Peer, Acc) -> maps:put(Peer, 10, Acc) end, #{}, Peers),
 	Blocks = [B#block{ size_tagged_txs = SizeTaggedTXs }
 			| get_block_trail(WorkerQ, PeerQ, Trail, Retries)],
-	ar:console("Downloaded the block trail successfully.~n", []),
+	big:console("Downloaded the block trail successfully.~n", []),
 	Blocks2 = maybe_set_reward_history(Blocks, Peers),
 	Blocks3 = maybe_set_block_time_history(Blocks2, Peers),
 	ar_node_worker ! {join, B#block.height, BI, Blocks3},
@@ -295,7 +295,7 @@ get_block_trail_loop(WorkerQ, PeerQ, Retries, Trail, FetchState) ->
 			PeerRetries = maps:get(Peer, Retries),
 			case PeerRetries > 0 of
 				true ->
-					ar:console("Failed to fetch a joining block ~s from ~s."
+					big:console("Failed to fetch a joining block ~s from ~s."
 							" Retrying..~n", [ar_util:encode(H), ar_util:format_peer(Peer)]),
 					?LOG_WARNING([
 						{event, failed_to_fetch_joining_block},
@@ -310,7 +310,7 @@ get_block_trail_loop(WorkerQ, PeerQ, Retries, Trail, FetchState) ->
 				false ->
 					case queue:to_list(PeerQ) of
 						[Peer] -> % The last peer left and it is out of attempts.
-							ar:console(
+							big:console(
 								"Failed to fetch the joining headers from any of the peers, "
 								"consider trying some other trusted peers.", []),
 							?LOG_ERROR([{event, failed_to_join}]),
@@ -324,7 +324,7 @@ get_block_trail_loop(WorkerQ, PeerQ, Retries, Trail, FetchState) ->
 											FetchState);
 								true ->
 									PeerQ2 = queue:delete(Peer, PeerQ),
-									ar:console("Failed to fetch a joining block ~s from ~s. "
+									big:console("Failed to fetch a joining block ~s from ~s. "
 											"Removing the peer from the queue..",
 											[ar_util:encode(H), ar_util:format_peer(Peer)]),
 									?LOG_ERROR([
@@ -366,7 +366,7 @@ get_block_trail_loop(WorkerQ, PeerQ, Retries, Trail, FetchState) ->
 			PeerRetries = maps:get(Peer, Retries),
 			case PeerRetries > 0 of
 				true ->
-					ar:console("Failed to fetch a joining transaction ~s from ~s. "
+					big:console("Failed to fetch a joining transaction ~s from ~s. "
 							"Retrying..~n", [ar_util:encode(TXID), ar_util:format_peer(Peer)]),
 					?LOG_WARNING([{event, failed_to_fetch_joining_tx},
 							{block, ar_util:encode(H)},
@@ -380,7 +380,7 @@ get_block_trail_loop(WorkerQ, PeerQ, Retries, Trail, FetchState) ->
 				false ->
 					case queue:to_list(PeerQ) of
 						[Peer] -> % The last peer left and it is out of attempts.
-							ar:console(
+							big:console(
 								"Failed to fetch the joining headers from any of the peers, "
 								"consider trying some other trusted peers.", []),
 							?LOG_ERROR([{event, failed_to_join}]),
@@ -394,7 +394,7 @@ get_block_trail_loop(WorkerQ, PeerQ, Retries, Trail, FetchState) ->
 											FetchState);
 								true ->
 									PeerQ2 = queue:delete(Peer, PeerQ),
-									ar:console("Failed to fetch a joining tx ~s from ~s. "
+									big:console("Failed to fetch a joining tx ~s from ~s. "
 											"Removing the peer from the queue..",
 											[ar_util:encode(TXID), ar_util:format_peer(Peer)]),
 									?LOG_ERROR([
@@ -447,7 +447,7 @@ maybe_set_reward_history(Blocks, Peers) ->
 		{ok, RewardHistory} ->
 			ar_rewards:set_reward_history(Blocks, RewardHistory);
 		_ ->
-			ar:console("Failed to fetch the reward history for the block ~s from "
+			big:console("Failed to fetch the reward history for the block ~s from "
 					"any of the peers. Consider changing the peers.~n",
 					[ar_util:encode((hd(Blocks))#block.indep_hash)]),
 			?LOG_WARNING([{event, failed_to_fetch_reward_history}]),
@@ -463,7 +463,7 @@ maybe_set_block_time_history([#block{ height = Height } | _] = Blocks, Peers) ->
 				{ok, BlockTimeHistory} ->
 					ar_block_time_history:set_history(Blocks, BlockTimeHistory);
 				_ ->
-					ar:console("Failed to fetch the block time history for the block ~s from "
+					big:console("Failed to fetch the block time history for the block ~s from "
 							"any of the peers. Consider changing the peers.~n",
 							[ar_util:encode((hd(Blocks))#block.indep_hash)]),
 					timer:sleep(1000),

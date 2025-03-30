@@ -1,7 +1,7 @@
 -module(ar_info_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_chain_stats.hrl").
 
 recent_blocks_test_() ->

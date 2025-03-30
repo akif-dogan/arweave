@@ -5,7 +5,7 @@
 		step_number_to_salt_number/1, checkpoint_buffer_to_checkpoints/1]).
 
 -include_lib("bigfile/include/ar_vdf.hrl").
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 
 step_number_to_salt_number(0) ->
 	0;

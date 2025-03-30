@@ -224,7 +224,7 @@ disk_free_cmd({unix, _}, Df, DataDirPath, Port) ->
 check_for_hardware_error(DfOutput, ThrowOnError) ->
     case lists:member("Input/output error", DfOutput) of
         true ->
-            ar:console("~nERROR: one or more of your disks are in corrupt/failing state.~n~p~n", [DfOutput]),
+            big:console("~nERROR: one or more of your disks are in corrupt/failing state.~n~p~n", [DfOutput]),
             case ThrowOnError of
                 true ->
                     erlang:error({input_output_error_detected, DfOutput});
@@ -255,7 +255,7 @@ broadcast_disk_free({unix, _} = Os, Port) ->
 		HasDiskError = check_for_hardware_error(Result, false),
 		case HasDiskError of
 			true ->
-						ar:console("~nERROR: storage module ~p is offline.~n", [StorageModulePath]),
+						big:console("~nERROR: storage module ~p is offline.~n", [StorageModulePath]),
 						ok;
 			false ->
 						[StorageModuleFs, Bytes, Percentage] = parse_df_2(Result),
@@ -268,7 +268,7 @@ broadcast_disk_free({unix, _} = Os, Port) ->
 end,
 	lists:foreach(HandleSmPath, StorageModulePaths);
 broadcast_disk_free(_, _) ->
-	ar:console("~nWARNING: disk space checks are not supported on your platform. The node "
+	big:console("~nWARNING: disk space checks are not supported on your platform. The node "
 			"may stop working if it runs out of space.~n", []).
 
 %% This code works for Linux and FreeBSD as well.

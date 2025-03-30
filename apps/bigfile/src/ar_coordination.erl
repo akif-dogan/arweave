@@ -13,7 +13,7 @@
 
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("bigfile/include/ar_mining.hrl").
@@ -174,7 +174,7 @@ init([]) ->
 		true ->
 			case Config#config.cm_exit_peer of
 				not_set ->
-					ar:console(
+					big:console(
 						"This node is configured as a Coordinated Mining Exit Node. If this is "
 						"not correct, set 'cm_exit_peer' and relaunch.~n");
 				_ ->

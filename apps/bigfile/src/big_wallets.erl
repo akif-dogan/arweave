@@ -9,7 +9,7 @@
 
 -export([init/1, handle_call/3, handle_cast/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_header_sync.hrl").
 -include_lib("bigfile/include/ar_pricing.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").
@@ -176,7 +176,7 @@ handle_cast({init, Blocks, [{from_state, SearchDepth}]}, _) ->
 	?LOG_DEBUG([{event, init_from_state}, {block_count, length(Blocks)}]),
 	case find_local_account_tree(Blocks, SearchDepth) of
 		not_found ->
-			ar:console("~n~n\tThe local state is missing an account tree, consider joining "
+			big:console("~n~n\tThe local state is missing an account tree, consider joining "
 					"the network via the trusted peers.~n"),
 			timer:sleep(1000),
 			erlang:halt();
@@ -258,7 +258,7 @@ initialize_state(Blocks, Tree) ->
 
 get_tree_from_peers(B, Peers) ->
 	ID = B#block.wallet_list,
-	ar:console("Downloading the wallet tree, chunk 1.~n", []),
+	big:console("Downloading the wallet tree, chunk 1.~n", []),
 	case ar_http_iface_client:get_wallet_list_chunk(Peers, ID) of
 		{ok, {Cursor, Chunk}} ->
 			{ok, Tree} = load_wallet_tree_from_peers(
@@ -268,10 +268,10 @@ get_tree_from_peers(B, Peers) ->
 				Cursor,
 				2
 			),
-			ar:console("Downloaded the wallet tree successfully.~n", []),
+			big:console("Downloaded the wallet tree successfully.~n", []),
 			Tree;
 		_ ->
-			ar:console("Failed to download wallet tree chunk, retrying...~n", []),
+			big:console("Failed to download wallet tree chunk, retrying...~n", []),
 			timer:sleep(1000),
 			get_tree_from_peers(B, Peers)
 	end.
@@ -280,7 +280,7 @@ load_wallet_tree_from_peers(_ID, _Peers, Acc, last, _) ->
 	{ok, Acc};
 load_wallet_tree_from_peers(ID, Peers, Acc, Cursor, N) ->
 	ar_util:terminal_clear(),
-	ar:console("Downloading the wallet tree, chunk ~B.~n", [N]),
+	big:console("Downloading the wallet tree, chunk ~B.~n", [N]),
 	case ar_http_iface_client:get_wallet_list_chunk(Peers, ID, Cursor) of
 		{ok, {NextCursor, Chunk}} ->
 			Acc3 =
@@ -292,7 +292,7 @@ load_wallet_tree_from_peers(ID, Peers, Acc, Cursor, N) ->
 				),
 			load_wallet_tree_from_peers(ID, Peers, Acc3, NextCursor, N + 1);
 		_ ->
-			ar:console("Failed to download wallet tree chunk, retrying...~n", []),
+			big:console("Failed to download wallet tree chunk, retrying...~n", []),
 			timer:sleep(1000),
 			load_wallet_tree_from_peers(ID, Peers, Acc, Cursor, N)
 	end.

@@ -17,7 +17,7 @@
 		get_partition_number/1, get_max_partition_number/1,
 		get_current_weave_size/0, get_recent_max_block_size/0]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 

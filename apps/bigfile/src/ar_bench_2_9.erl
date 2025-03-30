@@ -72,10 +72,10 @@ run_benchmark({Format, Dirs, Threads, DataMiB}) ->
 	
 	case Dirs of
 		[] ->
-			ar:console("~n~nRunning ~p threads (~p iterations per thread) to pack ~.1f MiB of data~n", [Threads, Iterations, PackedData]);
+			big:console("~n~nRunning ~p threads (~p iterations per thread) to pack ~.1f MiB of data~n", [Threads, Iterations, PackedData]);
 		_ ->
-			ar:console("~n~nRunning ~p threads (~p iterations per thread) to pack and write ~.1f MiB of data~n", [Threads, Iterations, PackedData]),
-			ar:console("Directories: ~p~n", [Dirs])
+			big:console("~n~nRunning ~p threads (~p iterations per thread) to pack and write ~.1f MiB of data~n", [Threads, Iterations, PackedData]),
+			big:console("Directories: ~p~n", [Dirs])
 	end,
 	Times = ar_util:pmap(
 		fun({Thread, Dir}) ->
@@ -85,12 +85,12 @@ run_benchmark({Format, Dirs, Threads, DataMiB}) ->
 			End - Start
 		end,
 		ThreadDirPairs),
-	ar:console("~n~nTimes: ~p~n", [Times]),
+	big:console("~n~nTimes: ~p~n", [Times]),
 	Average = lists:sum(Times) / length(Times),
-	ar:console("~nAverage: ~p ms~n", [Average]),
+	big:console("~nAverage: ~p ms~n", [Average]),
 	
 	Rate = PackedData / Average * 1000,
-	ar:console("~nTime ~p ms, ~.1f MiB, ~.2f MiB/s ~n~n", [Average, PackedData, Rate]).
+	big:console("~nTime ~p ms, ~.1f MiB, ~.2f MiB/s ~n~n", [Average, PackedData, Rate]).
 
 assign_threads_to_dirs(Threads, []) ->
 	[ {Thread, undefined} || Thread <- lists:seq(1, Threads) ];

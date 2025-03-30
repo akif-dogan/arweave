@@ -6,7 +6,7 @@
 
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_config.hrl").
 
 %% Remove identifiers of recently emitted transactions from the cache after this long.

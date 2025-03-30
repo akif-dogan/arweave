@@ -2,7 +2,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 
 -export([setup_nodes/0, setup_nodes/1,

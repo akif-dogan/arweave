@@ -2,7 +2,7 @@
 
 -export([read_cursor/3, store_cursor/3, repack/5, chunk_repacked/5]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_consensus.hrl").
 -include("../include/ar_config.hrl").
 

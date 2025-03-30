@@ -1,9 +1,8 @@
 -module(ar_sync_record_tests).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("eunit/include/eunit.hrl").
--include_lib("bigfile/include/ar.hrl").
 
 sync_record_test_() ->
 	[

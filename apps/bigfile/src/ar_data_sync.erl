@@ -20,7 +20,7 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 -export([enqueue_intervals/3, remove_expired_disk_pool_data_roots/0]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_sup.hrl").
 -include("../include/ar_consensus.hrl").
 -include("../include/ar_config.hrl").
@@ -753,7 +753,7 @@ init({"default" = StoreID, _}) ->
 			Limit2 ->
 				Limit2
 		end,
-	ar:console("~nSetting the data chunk cache size limit to ~B chunks.~n", [Limit]),
+	big:console("~nSetting the data chunk cache size limit to ~B chunks.~n", [Limit]),
 	ets:insert(ar_data_sync_state, {chunk_cache_size_limit, Limit}),
 	ets:insert(ar_data_sync_state, {chunk_cache_size, 0}),
 	timer:apply_interval(200, ?MODULE, record_chunk_cache_size_metric, []),
@@ -844,7 +844,7 @@ handle_cast({cut, Start}, #sync_data_state{ store_id = StoreID,
 			{ok, Config} = application:get_env(bigfile, config),
 			case lists:member(remove_orphaned_storage_module_data, Config#config.enable) of
 				false ->
-					ar:console("The storage module ~s contains some orphaned data above the "
+					big:console("The storage module ~s contains some orphaned data above the "
 							"weave offset ~B. Make sure you are joining the network through "
 							"trusted in-sync peers and restart with "
 							"`enable remove_orphaned_storage_module_data`.~n",
@@ -1417,7 +1417,7 @@ handle_info({event, disksup, {remaining_disk_space, StoreID, true, _Percentage, 
 	BufferSize = 10_000_000_000,
 	case Bytes < DiskPoolSize + DiskCacheSize + (BufferSize div 2) of
 		true ->
-			ar:console("error: Not enough disk space left on 'data_dir' disk for "
+			big:console("error: Not enough disk space left on 'data_dir' disk for "
 				"the requested 'disk_pool_size' ~Bmb and 'disk_cache_size' ~Bmb "
 				"either lower these values or add more disk space.~n",
 			[Config#config.max_disk_pool_buffer_mb, Config#config.disk_cache_size]),
@@ -3636,12 +3636,12 @@ validate_chunk_id_size(Chunk, ChunkID, ChunkSize) ->
 	end.
 
 log_sufficient_disk_space(StoreID) ->
-	ar:console("~nThe node has detected available disk space and resumed syncing data "
+	big:console("~nThe node has detected available disk space and resumed syncing data "
 			"into the storage module ~s.~n", [StoreID]),
 	?LOG_INFO([{event, storage_module_resumed_syncing}, {storage_module, StoreID}]).
 
 log_insufficient_disk_space(StoreID) ->
-	ar:console("~nThe node has stopped syncing data into the storage module ~s due to "
+	big:console("~nThe node has stopped syncing data into the storage module ~s due to "
 			"the insufficient disk space.~n", [StoreID]),
 	?LOG_INFO([{event, storage_module_stopped_syncing},
 			{reason, insufficient_disk_space}, {storage_module, StoreID}]).

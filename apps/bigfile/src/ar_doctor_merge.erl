@@ -2,7 +2,7 @@
 
 -export([main/1, help/0]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_chunk_storage.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
@@ -11,7 +11,7 @@ main(Args) ->
     merge(Args).
 
 help() ->
-    ar:console("data-doctor merge data_dir storage_module src_directories~n").
+    big:console("data-doctor merge data_dir storage_module src_directories~n").
 
 merge(Args) when length(Args) < 3 ->
     false;
@@ -28,7 +28,7 @@ merge(_DataDir, _StorageModule, _StoreID, []) ->
     ok;
 merge(DataDir, StorageModule, StoreID, [SrcDir | SrcDirs]) ->
     DstDir = filename:join([DataDir, "storage_modules", StoreID]),
-    ar:console("~n~nMerge data from ~p into ~p~n~n", [SrcDir, DstDir]),
+    big:console("~n~nMerge data from ~p into ~p~n~n", [SrcDir, DstDir]),
 
     move_chunk_storage(SrcDir, DstDir),
 
@@ -43,14 +43,14 @@ merge(DataDir, StorageModule, StoreID, [SrcDir | SrcDirs]) ->
 move_chunk_storage(SrcDir, DstDir) ->
     MkDir = io_lib:format("mkdir -p ~s/chunk_storage ~s/rocksdb~n", [DstDir, DstDir]),
     Mv = io_lib:format("mv ~s/chunk_storage/* ~s/chunk_storage~n", [SrcDir, DstDir]),
-    ar:console(MkDir),
+    big:console(MkDir),
     os:cmd(MkDir),
-    ar:console(Mv),
+    big:console(Mv),
     os:cmd(Mv).
 
 % Function to copy all key/value pairs from one DB to another
 copy_db(DB, SrcDir, DstDir) ->
-    ar:console("~nCopying DB ~p~n", [DB]),
+    big:console("~nCopying DB ~p~n", [DB]),
     SrcPath = filename:join([SrcDir, "rocksdb", DB]),
     DstPath = filename:join([DstDir, "rocksdb", DB]),
     % List all column families in the source database
@@ -70,7 +70,7 @@ copy_db(DB, SrcDir, DstDir) ->
 
     % Iterate and copy for each column family
     lists:zipwith(fun({SrcCF, DstCF}, ColumnFamily) ->
-                     ar:console("Copying family ~p~n", [ColumnFamily]),
+                     big:console("Copying family ~p~n", [ColumnFamily]),
                      copy_column_family(SrcDB, DstDB, SrcCF, DstCF)
                   end,
                   lists:zip(SrcCFs, DstCFs),
@@ -99,7 +99,7 @@ copy_from_iterator(Itr, Res, DstDB, DstCF) ->
     end.
 
 copy_sync_records(SrcDir, DstDir) ->
-    ar:console("Copying sync records~n", []),
+    big:console("Copying sync records~n", []),
     SrcPath = filename:join([SrcDir, "rocksdb", "ar_sync_record_db"]),
     DstPath = filename:join([DstDir, "rocksdb", "ar_sync_record_db"]),
     {ok, SrcDB} = rocksdb:open(SrcPath, [{create_if_missing, false}]),

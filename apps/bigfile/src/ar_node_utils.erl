@@ -6,7 +6,7 @@
 	block_passes_diff_check/1, block_passes_diff_check/2, passes_diff_check/4,
 	update_account/6, is_account_banned/2]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_pricing.hrl").
 -include("../include/ar_consensus.hrl").
 -include("../include/ar_mining.hrl").

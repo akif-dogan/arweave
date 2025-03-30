@@ -109,7 +109,7 @@ else
 fi
 
 # This variable is the main own used to start bigfile
-BIGFILE_OPTS="-run ar main ${RANDOM_JIT}"
+BIGFILE_OPTS="-run big main ${RANDOM_JIT}"
 
 ######################################################################
 # Bigfile System Check Section
@@ -208,22 +208,22 @@ bigfile_benchmark_help() {
 }
 
 bigfile_benchmark_2_9() {
-    BIGFILE_OPTS="-run ar benchmark_2_9"
+    BIGFILE_OPTS="-run big benchmark_2_9"
     echo ${*}
 }
 
 bigfile_benchmark_hash() {
-    BIGFILE_OPTS="-run ar benchmark_hash"
+    BIGFILE_OPTS="-run big benchmark_hash"
     echo ${*}
 }
 
 bigfile_benchmark_packing() {
-    BIGFILE_OPTS="-run ar benchmark_packing"
+    BIGFILE_OPTS="-run big benchmark_packing"
     echo ${*}
 }
 
 bigfile_benchmark_vdf() {
-    BIGFILE_OPTS="-run ar benchmark_vdf"
+    BIGFILE_OPTS="-run big benchmark_vdf"
     echo ${*}
 }
 
@@ -275,12 +275,12 @@ bigfile_wallet_create_help() {
 }
 
 bigfile_wallet_create_rsa() {
-    BIGFILE_OPTS="-run ar create_wallet"
+    BIGFILE_OPTS="-run big create_wallet"
     echo ${*}
 }
 
 bigfile_wallet_create_ecdsa() {
-    BIGFILE_OPTS="-run ar create_ecdsa_wallet"
+    BIGFILE_OPTS="-run big create_ecdsa_wallet"
     echo ${*}
 }
 
@@ -389,7 +389,7 @@ bigfile_test_run() {
 	TEST_PATH="$(./rebar3 as ${TEST_PROFILE} path)"
 	TEST_PATH_BASE="$(./rebar3 as ${TEST_PROFILE} path --base)/lib/bigfile/test"
 	PARAMS="-pa ${TEST_PATH} ${TEST_PATH_BASE} -config ${TEST_CONFIG} -noshell"	
-	ENTRY_POINT="-run ar ${TEST_MODULE} ${*} -s init stop"
+	ENTRY_POINT="-run big ${TEST_MODULE} ${*} -s init stop"
 	command="erl ${PARAMS} -name ${TEST_NODE} -setcookie ${TEST_COOKIE} ${ENTRY_POINT}"
 	set +e
 	set -x	
@@ -453,7 +453,7 @@ relx_usage() {
 	    echo "Usage: $REL_NAME foreground"
 	    echo "Starts the Bigfile release in the foreground, meaning all output"
 	    echo "going to stdout but without an interactive shell."
-	    echo "The entry point is set to -run ar main"
+	    echo "The entry point is set to -run big main"
 	    ;;
 	foreground_clean)
 	    echo "Usage: $REL_NAME foreground"

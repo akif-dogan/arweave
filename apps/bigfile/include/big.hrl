@@ -1,5 +1,5 @@
--ifndef(AR_HRL).
--define(AR_HRL, true).
+-ifndef(BIG_HRL).
+-define(BIG_HRL, true).
 
 %%% A collection of record structures used throughout the BigFile server.
 
@@ -27,7 +27,7 @@
 -define(CLIENT_VERSION, 1).
 
 %% The current build number -- incremented for every release.
--define(RELEASE_NUMBER, 10).
+-define(RELEASE_NUMBER, 15).
 
 -define(DEFAULT_REQUEST_HEADERS,
 	[

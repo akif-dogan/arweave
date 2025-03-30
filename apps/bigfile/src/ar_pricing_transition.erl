@@ -5,7 +5,7 @@
 	transition_length_2_7_2/0, transition_length/1
 	]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_inflation.hrl").
 -include_lib("bigfile/include/ar_pricing.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").

@@ -13,7 +13,7 @@
 	terminate/2
 ]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_config.hrl").
 -record(state, {
 	last_seen_tx_timestamp = 0,

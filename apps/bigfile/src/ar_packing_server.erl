@@ -15,7 +15,7 @@
 %% Only used by ar_bench_packing.erl
 -export([chunk_key/3]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 
@@ -264,20 +264,20 @@ pack_replica_2_9_chunk(RewardAddr, AbsoluteEndOffset, Chunk) ->
 init([]) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	
-	ar:console("~nInitialising RandomX datasets. Keys: ~p, ~p. "
+	big:console("~nInitialising RandomX datasets. Keys: ~p, ~p. "
 			"The process may take several minutes.~n",
 			[ar_util:encode(?RANDOMX_PACKING_KEY),
 				ar_util:encode(?RANDOMX_PACKING_KEY)]),
 	{RandomXState512, _RandomXState4096, _RandomXStateSharedEntropy}
 			= PackingState = init_packing_state(),
-	ar:console("RandomX dataset initialisation complete.~n", []),
+	big:console("RandomX dataset initialisation complete.~n", []),
 	{H0, H1} = ar_bench_hash:run_benchmark(RandomXState512),
 	H0String = io_lib:format("~.3f", [H0 / 1000]),
 	H1String = io_lib:format("~.3f", [H1 / 1000]),
-	ar:console("Hashing benchmark~nH0: ~s ms~nH1/H2: ~s ms~n", [H0String, H1String]),
+	big:console("Hashing benchmark~nH0: ~s ms~nH1/H2: ~s ms~n", [H0String, H1String]),
 	?LOG_INFO([{event, hash_benchmark}, {h0_ms, H0String}, {h1_ms, H1String}]),
 	NumWorkers = Config#config.packing_workers,
-	ar:console("~nStarting ~B packing threads.~n", [NumWorkers]),
+	big:console("~nStarting ~B packing threads.~n", [NumWorkers]),
 	?LOG_INFO([{event, starting_packing_threads}, {num_threads, NumWorkers}]),
 	Workers = queue:from_list(
 		[spawn_link(fun() -> worker(PackingState) end) || _ <- lists:seq(1, NumWorkers)]),
@@ -293,7 +293,7 @@ init([]) ->
 			Limit ->
 				Limit
 		end,
-	ar:console("~nSetting the packing chunk cache size limit to ~B chunks.~n", [MaxSize]),
+	big:console("~nSetting the packing chunk cache size limit to ~B chunks.~n", [MaxSize]),
 	ets:insert(?MODULE, {buffer_size_limit, MaxSize}),
 	timer:apply_interval(200, ?MODULE, record_buffer_size_metric, []),
 	{ok, #state{

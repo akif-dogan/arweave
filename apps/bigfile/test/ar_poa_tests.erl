@@ -1,6 +1,6 @@
 -module(ar_poa_tests).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -import(ar_test_node, [wait_until_height/2, assert_wait_until_height/2, read_block_when_stored/1]).

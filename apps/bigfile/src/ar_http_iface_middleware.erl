@@ -4,7 +4,7 @@
 
 -export([execute/2, read_body_chunk/4]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_config.hrl").
 -include("../include/ar_mining.hrl").
 -include("../include/ar_data_sync.hrl").
@@ -3240,7 +3240,7 @@ handle_mining_cm_publish(Req, Pid) ->
 						{'EXIT', _} ->
 							{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 						Solution ->
-							ar:console("Block candidate ~p from ~p ~n", [
+							big:console("Block candidate ~p from ~p ~n", [
 								ar_util:encode(Solution#mining_solution.solution_hash),
 								ar_util:format_peer(Peer)]),
 							?LOG_INFO("Block candidate ~p from ~p ~n", [

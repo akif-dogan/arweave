@@ -6,7 +6,7 @@
 -export([start_link/0, update/2]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_verify_chunks.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
@@ -78,13 +78,13 @@ print_reports(Reports) ->
 	ok.
 
 print_header() ->
-	ar:console("Verification Report~n", []),
-	ar:console("+-------------------------------------------------------------------+-----------+------+----------+-------------+---------+~n", []),
-	ar:console("|                                                    Storage Module | Processed |    % |   Errors | Verify Rate |  Status |~n", []),
-	ar:console("+-------------------------------------------------------------------+-----------+------+----------+-------------+---------+~n", []).
+	big:console("Verification Report~n", []),
+	big:console("+-------------------------------------------------------------------+-----------+------+----------+-------------+---------+~n", []),
+	big:console("|                                                    Storage Module | Processed |    % |   Errors | Verify Rate |  Status |~n", []),
+	big:console("+-------------------------------------------------------------------+-----------+------+----------+-------------+---------+~n", []).
 
 print_footer() ->
-	ar:console("+-------------------------------------------------------------------+-----------+------+----------+-------------+---------+~n~n", []).
+	big:console("+-------------------------------------------------------------------+-----------+------+----------+-------------+---------+~n~n", []).
 
 print_report(StoreID, Report) ->
 	#verify_report{
@@ -96,7 +96,7 @@ print_report(StoreID, Report) ->
 	} = Report,
 	Duration = erlang:system_time(millisecond) - StartTime,
 	Rate = 1000 * BytesProcessed / Duration,
-	ar:console("| ~65s |   ~4B GB | ~3B% | ~5.1f GB | ~6.1f MB/s | ~7s |~n", 
+	big:console("| ~65s |   ~4B GB | ~3B% | ~5.1f GB | ~6.1f MB/s | ~7s |~n", 
 		[
 			StoreID, BytesProcessed div 1000000000, Progress,
 			TotalErrorBytes / 1000000000, Rate / 1000000,

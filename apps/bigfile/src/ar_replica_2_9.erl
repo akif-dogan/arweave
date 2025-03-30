@@ -3,7 +3,7 @@
 -export([get_entropy_partition/1, get_entropy_key/3, get_sector_size/0, 
     get_slice_index/1, get_partition_offset/1]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("eunit/include/eunit.hrl").
 

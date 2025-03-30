@@ -24,7 +24,7 @@ run_benchmark_from_cli(Args) ->
 	{H0, H1} = run_benchmark(RandomXState, JIT, LargePages, HardwareAES),
 	H0String = io_lib:format("~.3f", [H0 / 1000]),
 	H1String = io_lib:format("~.3f", [H1 / 1000]),
-	ar:console("Hashing benchmark~nH0: ~s ms~nH1/H2: ~s ms~n", [H0String, H1String]).
+	big:console("Hashing benchmark~nH0: ~s ms~nH1/H2: ~s ms~n", [H0String, H1String]).
 
 get_flag_value([], _, DefaultValue) ->
     DefaultValue;

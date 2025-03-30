@@ -6,7 +6,7 @@
 
 -export([get_info/0, get_recent/0]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_chain_stats.hrl").
 
 get_info() ->

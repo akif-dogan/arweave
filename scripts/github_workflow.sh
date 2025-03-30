@@ -107,7 +107,7 @@ do
 		-noshell \
 		-name "${NODE_NAME}" \
 		-setcookie "${COOKIE}" \
-		-run ar ${MODE} "${NAMESPACE}" \
+		-run big ${MODE} "${NAMESPACE}" \
 		-s init stop 2>&1 | tee main.out
 	EXIT_CODE=${PIPESTATUS[0]}
 	set +x

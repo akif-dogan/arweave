@@ -1,6 +1,6 @@
 -module(ar_tx_tests).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_config.hrl").
 
 -include_lib("eunit/include/eunit.hrl").

@@ -18,7 +18,7 @@
 %% Used in tests.
 -export([delete_chunk/2]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_sup.hrl").
 -include("../include/ar_config.hrl").
 -include("../include/ar_consensus.hrl").
@@ -276,7 +276,7 @@ run_defragmentation() ->
 		false ->
 			ok;
 		true ->
-			ar:console("Defragmentation threshold: ~B bytes.~n",
+			big:console("Defragmentation threshold: ~B bytes.~n",
 					   [Config#config.defragmentation_trigger_threshold]),
 			DefragModules = modules_to_defrag(Config),
 			Sizes = read_chunks_sizes(Config#config.data_dir),
@@ -419,7 +419,7 @@ warn_custom_chunk_group_size(StoreID) ->
 			WarningMessage = "WARNING: changing chunk_storage_file_size is not "
 				"recommended and may cause errors if different sizes are used for the same "
 				"chunk storage files.",
-			ar:console(WarningMessage),
+			big:console(WarningMessage),
 			?LOG_WARNING(WarningMessage);
 		false ->
 			ok
@@ -606,7 +606,7 @@ maybe_log_repacking_complete(State) ->
 	} = State,
 	case RepackStatus == complete andalso IsPrepared of
 		true ->
-			ar:console("~n~nRepacking of ~s is complete! "
+			big:console("~n~nRepacking of ~s is complete! "
 			"We suggest you stop the node, rename "
 			"the storage module folder to reflect "
 			"the new packing, and start the "
@@ -944,14 +944,14 @@ defrag_files([]) ->
 	ok;
 defrag_files([Filepath | Rest]) ->
 	?LOG_DEBUG([{event, defragmenting_file}, {file, Filepath}]),
-	ar:console("Defragmenting ~s...~n", [Filepath]),
+	big:console("Defragmenting ~s...~n", [Filepath]),
 	TmpFilepath = Filepath ++ ".tmp",
 	DefragCmd = io_lib:format("rsync --sparse --quiet ~ts ~ts", [Filepath, TmpFilepath]),
 	MoveDefragCmd = io_lib:format("mv ~ts ~ts", [TmpFilepath, Filepath]),
 	%% We expect nothing to be returned on successful calls.
 	[] = os:cmd(DefragCmd),
 	[] = os:cmd(MoveDefragCmd),
-	ar:console("Defragmented ~s...~n", [Filepath]),
+	big:console("Defragmented ~s...~n", [Filepath]),
 	defrag_files(Rest).
 
 update_sizes_file([], Sizes) ->

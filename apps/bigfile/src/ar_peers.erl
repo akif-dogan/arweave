@@ -3,7 +3,7 @@
 
 -behaviour(gen_server).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_peers.hrl").
 
@@ -567,21 +567,21 @@ load_peers() ->
 			ok;
 		{ok, {_TotalRating, Records}} ->
 			?LOG_INFO([{event, polling_saved_peers}, {records, length(Records)}]),
-			ar:console("Polling saved peers...~n"),
+			big:console("Polling saved peers...~n"),
 			load_peers(Records),
 			recalculate_total_rating(lifetime),
 			recalculate_total_rating(current),
 			?LOG_INFO([{event, polled_saved_peers}]),
-			ar:console("Polled saved peers.~n");
+			big:console("Polled saved peers.~n");
 		{ok, {_TotalRating, Records, Tags}} ->
 			?LOG_INFO([{event, polling_saved_peers}, {records, length(Records)}]),
-			ar:console("Polling saved peers...~n"),
+			big:console("Polling saved peers...~n"),
 			load_peers(Records),
 			recalculate_total_rating(lifetime),
 			recalculate_total_rating(current),
 			[ ets:insert(?MODULE, {K, V}) || {K, V} <- Tags ],
 			?LOG_INFO([{event, polled_saved_peers}]),
-			ar:console("Polled saved peers.~n")
+			big:console("Polled saved peers.~n")
 	end.
 
 load_peers(Peers) when length(Peers) < 20 ->

@@ -7,7 +7,7 @@
 
 -export([start_link/2, init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_sup.hrl").
 -include("../include/ar_config.hrl").
 -include("../include/ar_consensus.hrl").
@@ -238,7 +238,7 @@ do_prepare_entropy(State) ->
                 ar_device_lock:release_lock(prepare, StoreID),
                 ?LOG_INFO([{event, storage_module_entropy_preparation_complete},
                         {store_id, StoreID}]),
-                ar:console("The storage module ~s is prepared for 2.9 replication.~n",
+                big:console("The storage module ~s is prepared for 2.9 replication.~n",
                         [StoreID]),
                 ar_chunk_storage:set_entropy_complete(StoreID),
                 complete;

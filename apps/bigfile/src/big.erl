@@ -1,7 +1,7 @@
 %%%
 %%% @doc BigFile server entrypoint and basic utilities.
 %%%
--module(ar).
+-module(big).
 
 -behaviour(application).
 
@@ -14,7 +14,7 @@
 		tests/0, tests/1, tests/2, e2e/0, e2e/1, shell/0, stop_shell/0,
 		docs/0, shutdown/1, console/1, console/2]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_consensus.hrl").
 -include("../include/ar_config.hrl").
 
@@ -726,13 +726,13 @@ start(normal, _Args) ->
 set_mining_address(#config{ mining_addr = not_set } = C) ->
 	case big_wallet:get_or_create_wallet([{?RSA_SIGN_ALG, 65537}]) of
 		{error, Reason} ->
-			ar:console("~nFailed to create a wallet, reason: ~p.~n",
+			big:console("~nFailed to create a wallet, reason: ~p.~n",
 				[io_lib:format("~p", [Reason])]),
 			timer:sleep(500),
 			erlang:halt();
 		W ->
 			Addr = big_wallet:to_address(W),
-			ar:console("~nSetting the mining address to ~s.~n", [ar_util:encode(Addr)]),
+			big:console("~nSetting the mining address to ~s.~n", [ar_util:encode(Addr)]),
 			C2 = C#config{ mining_addr = Addr },
 			application:set_env(bigfile, config, C2),
 			set_mining_address(C2)
@@ -745,7 +745,7 @@ set_mining_address(#config{ mining_addr = Addr, cm_exit_peer = CmExitPeer,
 		not_found ->
 			case {CmExitPeer, PoolClient} of
 				{not_set, false} ->
-					ar:console("~nThe mining key for the address ~s was not found."
+					big:console("~nThe mining key for the address ~s was not found."
 						" Make sure you placed the file in [data_dir]/~s (the node is looking for"
 						" [data_dir]/~s/bigfile_keyfile_[mining_addr].json or "
 						"[data_dir]/~s/bigfile_keyfile_[mining_addr].json file)."
@@ -780,13 +780,13 @@ create_wallet(DataDir, KeyType) ->
 			ok = application:set_env(bigfile, config, #config{ data_dir = DataDir }),
 			case big_wallet:new_keyfile(KeyType) of
 				{error, Reason} ->
-					ar:console("Failed to create a wallet, reason: ~p.~n~n",
+					big:console("Failed to create a wallet, reason: ~p.~n~n",
 							[io_lib:format("~p", [Reason])]),
 					timer:sleep(500),
 					erlang:halt();
 				W ->
 					Addr = big_wallet:to_address(W),
-					ar:console("Created a wallet with address ~s.~n", [ar_util:encode(Addr)]),
+					big:console("Created a wallet with address ~s.~n", [ar_util:encode(Addr)]),
 					erlang:halt()
 			end
 	end.

@@ -3,7 +3,7 @@
 -export([main/1, help/0]).
 
 -include_lib("kernel/include/file.hrl").
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_mining.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
@@ -17,23 +17,23 @@ main(Args) ->
 	bench_read(Args).
 
 help() ->
-	ar:console("data-doctor bench <duration> <data_dir> <storage_module> [<storage_module> ...]~n"),
-	ar:console("  duration: How long, in seconds, to run the benchmark for.~n"), 
-	ar:console("  data_dir: Full path to your data_dir.~n"), 
-	ar:console("  storage_module: List of storage modules in same format used for Bigfile ~n"),
-	ar:console("                  configuration (e.g. 0,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI).~n"), 
-	ar:console("                  It's recommended that you specify all configured storage_modules ~n"),
-	ar:console("                  in order to benchmark the overall system performance including  ~n"),
-	ar:console("                  any data busses that are shared across disks.~n"), 
-	ar:console("~n"), 
-	ar:console("Example:~n"), 
-	ar:console("data-doctor bench 60 /mnt/bigfile-data 0,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
-	ar:console("    1,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
-	ar:console("    2,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
-	ar:console("    3,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI~n"),
-	ar:console("~n"), 
-	ar:console("Note: During the run data will be logged to ~p in the format:~n", [?OUTPUT_FILENAME]),
-	ar:console("      '~s'~n", [?FILE_FORMAT]).
+	big:console("data-doctor bench <duration> <data_dir> <storage_module> [<storage_module> ...]~n"),
+	big:console("  duration: How long, in seconds, to run the benchmark for.~n"), 
+	big:console("  data_dir: Full path to your data_dir.~n"), 
+	big:console("  storage_module: List of storage modules in same format used for Bigfile ~n"),
+	big:console("                  configuration (e.g. 0,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI).~n"), 
+	big:console("                  It's recommended that you specify all configured storage_modules ~n"),
+	big:console("                  in order to benchmark the overall system performance including  ~n"),
+	big:console("                  any data busses that are shared across disks.~n"), 
+	big:console("~n"), 
+	big:console("Example:~n"), 
+	big:console("data-doctor bench 60 /mnt/bigfile-data 0,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
+	big:console("    1,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
+	big:console("    2,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI \\~n"),
+	big:console("    3,En2eqsVJARnTVOSh723PBXAKGmKgrGSjQ2YIGwE_ZRI~n"),
+	big:console("~n"), 
+	big:console("Note: During the run data will be logged to ~p in the format:~n", [?OUTPUT_FILENAME]),
+	big:console("      '~s'~n", [?FILE_FORMAT]).
 
 bench_read(Args) when length(Args) < 3 ->
 	false;
@@ -42,7 +42,7 @@ bench_read(Args) ->
 	Duration = list_to_integer(DurationString),
 
 	{StorageModules, Address} = parse_storage_modules(StorageModuleConfigs, [], undefined),
-	ar:console("Assuming mining address: ~p~n", [ar_util:safe_encode(Address)]),
+	big:console("Assuming mining address: ~p~n", [ar_util:safe_encode(Address)]),
 	{ok, Config} = application:get_env(bigfile, config),
 	Config2 = Config#config{
 		data_dir = DataDir,
@@ -56,9 +56,9 @@ bench_read(Args) ->
 	ar_chunk_storage_sup:start_link(),
 	ar_mining_io:start_link(standalone),
 
-	ar:console("~n~nDisk read benchmark will run for ~B seconds.~n", [Duration]),
-	ar:console("Data will be logged continuously to ~p in the format:~n", [?OUTPUT_FILENAME]),
-	ar:console("'~s'~n~n", [?FILE_FORMAT]),
+	big:console("~n~nDisk read benchmark will run for ~B seconds.~n", [Duration]),
+	big:console("Data will be logged continuously to ~p in the format:~n", [?OUTPUT_FILENAME]),
+	big:console("'~s'~n~n", [?FILE_FORMAT]),
 
 	StopTime = erlang:monotonic_time() + erlang:convert_time_unit(Duration, second, native),
 
@@ -72,11 +72,11 @@ bench_read(Args) ->
 	lists:foreach(
 		fun({StoreID, SumChunks, SumElapsedTime}) ->
 			ReadRate = (SumChunks * 1000 div 4) div SumElapsedTime,
-			ar:console("~s read ~B chunks in ~B ms (~B MiB/s)~n", [StoreID, SumChunks, SumElapsedTime, ReadRate])
+			big:console("~s read ~B chunks in ~B ms (~B MiB/s)~n", [StoreID, SumChunks, SumElapsedTime, ReadRate])
 		end,
 		Results),
 
-	ar:console("~n"),
+	big:console("~n"),
 	
 	true.
 
@@ -89,7 +89,7 @@ parse_storage_modules([StorageModuleConfig | StorageModuleConfigs], StorageModul
 		true ->
 			ok;
 		false ->
-			ar:console("Warning: multiple mining addresses specified in storage_modules:~n")
+			big:console("Warning: multiple mining addresses specified in storage_modules:~n")
 	end,
 	parse_storage_modules(
 		StorageModuleConfigs,	
@@ -167,7 +167,7 @@ random_chunk_pread(DataDir, StoreID) ->
 	random_chunk_pread(DataDir, StoreID, ?NUM_ITERATIONS, 0, 0).
 random_chunk_pread(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
-	ar:console("*Random* chunk pread ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
+	big:console("*Random* chunk pread ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 random_chunk_pread(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
 	Files = open_files(DataDir, StoreID),
 	StartTime = erlang:monotonic_time(),
@@ -180,7 +180,7 @@ random_dev_pread(DataDir, StoreID) ->
 	random_dev_pread(DataDir, StoreID, ?NUM_ITERATIONS, 0, 0).
 random_dev_pread(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
-	ar:console("*Random* device pread ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
+	big:console("*Random* device pread ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 random_dev_pread(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
 	Filepath = hd(ar_chunk_storage:list_files(DataDir, StoreID)),
 	Device = get_mounted_device(Filepath),
@@ -196,7 +196,7 @@ dd_chunk_files_read(DataDir, StoreID) ->
 	dd_chunk_files_read(DataDir, StoreID, ?NUM_ITERATIONS, 0, 0).
 dd_chunk_files_read(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
-	ar:console("*dd* multi chunk files read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
+	big:console("*dd* multi chunk files read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 dd_chunk_files_read(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
 	Files = open_files(DataDir, StoreID),
 	StartTime = erlang:monotonic_time(),
@@ -209,7 +209,7 @@ dd_chunk_file_read(DataDir, StoreID) ->
 	dd_chunk_file_read(DataDir, StoreID, ?NUM_ITERATIONS, 0, 0).
 dd_chunk_file_read(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
-	ar:console("*dd* single chunk file read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
+	big:console("*dd* single chunk file read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 dd_chunk_file_read(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
 	Files = open_files(DataDir, StoreID),
 	{Filepath, _File, FileSize} = hd(Files),
@@ -224,7 +224,7 @@ dd_dev_file_read(DataDir, StoreID) ->
 	dd_dev_file_read(DataDir, StoreID, ?NUM_ITERATIONS, 0, 0).
 dd_dev_file_read(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
-	ar:console("*dd* multi dev file read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
+	big:console("*dd* multi dev file read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 dd_dev_file_read(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
 	Filepath = "/opt/prod/data/storage_modules/storage_module_19_cLGt682uYLJCl47QsRHfdTzMhSPTHPsUnUOzuvTm1HQ/dd.10GB",
 	StartTime = erlang:monotonic_time(),
@@ -238,7 +238,7 @@ dd_devs_read(DataDir, StoreID) ->
 	dd_devs_read(DataDir, StoreID, ?NUM_ITERATIONS, 0, 0).
 dd_devs_read(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
-	ar:console("*dd* multi devs read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
+	big:console("*dd* multi devs read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 dd_devs_read(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
 	Filepath = hd(ar_chunk_storage:list_files(DataDir, StoreID)),
 	Device = get_mounted_device(Filepath),
@@ -253,7 +253,7 @@ dd_dev_read(DataDir, StoreID) ->
 	dd_dev_read(DataDir, StoreID, ?NUM_ITERATIONS, 0, 0).
 dd_dev_read(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
-	ar:console("*dd* single dev read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
+	big:console("*dd* single dev read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 dd_dev_read(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
 	Filepath = hd(ar_chunk_storage:list_files(DataDir, StoreID)),
 	Device = get_mounted_device(Filepath),
@@ -284,7 +284,7 @@ pread([], _Size, NumBytes) ->
 	NumBytes;
 pread([{Filepath, File, FileSize} | Files], Size, NumBytes) ->
 	Position = max(0, rand:uniform(FileSize - Size)),
- 	% ar:console("pread: ~p ~B ~B ~B ~B~n", [Filepath, FileSize, Position, Size, NumBytes]),
+ 	% big:console("pread: ~p ~B ~B ~B ~B~n", [Filepath, FileSize, Position, Size, NumBytes]),
 	{ok, Bin} = file:pread(File, Position, Size),
 	pread(Files, Size, NumBytes + byte_size(Bin)).
 
@@ -301,5 +301,5 @@ dd(Filepath, FileSize, Size, Count) ->
 	MaxOffset = max(1, FileSize - Bytes),
 	Position = rand:uniform(MaxOffset) div BlockSize,
 	Command = io_lib:format("dd iflag=direct if=~s skip=~B of=/dev/null bs=~B count=~B", [Filepath, Position, BlockSize, Blocks]),
-	% ar:console("~s~n", [Command]),
+	% big:console("~s~n", [Command]),
 	os:cmd(Command).

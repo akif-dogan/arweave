@@ -1,6 +1,6 @@
 -module(ar_node_tests).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_pricing.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -190,7 +190,7 @@ test_persisted_mempool() ->
 			start_from_latest_state = false,
 			peers = [ar_test_node:peer_ip(peer1)]
 		}),
-		ar:start_dependencies(),
+		big:start_dependencies(),
 		ar_test_node:wait_until_joined(),
 		ar_test_node:connect_to_peer(peer1),
 		ar_test_node:assert_wait_until_receives_txs(peer1, [SignedTX]),

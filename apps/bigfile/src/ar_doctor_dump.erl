@@ -3,21 +3,21 @@
 -export([main/1, help/0]).
 
 -include_lib("kernel/include/file.hrl").
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 
 main(Args) ->
 	dump(Args).
 
 help() ->
-	ar:console("data-doctor dump <include_txs> <block_id> <min_height> <data_dir> <output_dir>~n"),
-	ar:console("  include_txs: Whether to include transactions in the dump (true/false).~n"),
-	ar:console("  block_id: The block ID to start the dump from.~n"),
-	ar:console("  min_height: The minimum height of the blocks to dump.~n"),
-	ar:console("  data_dir: Full path to your data_dir.~n"),
-	ar:console("  output_dir: Full path to a directory where the dumped data will be written.~n"),
-	ar:console("~nExample:~n"),
-	ar:console("data-doctor dump true ZR7zbobdw55a....pRpUabEkLD0V 100000 /mnt/bigfile-data /mnt/output~n").
+	big:console("data-doctor dump <include_txs> <block_id> <min_height> <data_dir> <output_dir>~n"),
+	big:console("  include_txs: Whether to include transactions in the dump (true/false).~n"),
+	big:console("  block_id: The block ID to start the dump from.~n"),
+	big:console("  min_height: The minimum height of the blocks to dump.~n"),
+	big:console("  data_dir: Full path to your data_dir.~n"),
+	big:console("  output_dir: Full path to a directory where the dumped data will be written.~n"),
+	big:console("~nExample:~n"),
+	big:console("data-doctor dump true ZR7zbobdw55a....pRpUabEkLD0V 100000 /mnt/bigfile-data /mnt/output~n").
 
 dump([IncludeTXs, H, MinHeight, DataDir, OutputDir]) ->
 	ok = filelib:ensure_dir(filename:join([OutputDir, "blocks", "dummy"])),

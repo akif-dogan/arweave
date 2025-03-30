@@ -6,7 +6,7 @@
 
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 
 -record(state, {
@@ -190,7 +190,7 @@ get_missing_tx_indices([TXID | TXIDs], N) ->
 slow_block_application_warning(N) ->
 	ar_mining_stats:pause_performance_reports(60000),
 	ar_util:terminal_clear(),
-	ar:console("WARNING: there are more than ~B not yet validated blocks on the longest chain."
+	big:console("WARNING: there are more than ~B not yet validated blocks on the longest chain."
 			" Please, double-check if you are in sync with the network and make sure your "
 			"CPU computes VDF fast enough or you are connected to a VDF server."
 			"~nThe node may be still mining, but console performance reports are temporarily "
@@ -211,7 +211,7 @@ warning(Peer, Event) ->
 						"is on a fork branching off of our fork 5 or more blocks behind"
 				end,
 			ar_util:terminal_clear(),
-			ar:console("WARNING: peer ~s ~s. "
+			big:console("WARNING: peer ~s ~s. "
 					"Please, double-check if you are in sync with the network and "
 					"make sure your CPU computes VDF fast enough or you are connected "
 					"to a VDF server.~nThe node may be still mining, but console performance "

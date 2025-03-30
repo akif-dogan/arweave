@@ -1,7 +1,7 @@
 -module(ar_vdf_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_vdf.hrl").
 -include_lib("bigfile/include/ar_pricing.hrl").
 

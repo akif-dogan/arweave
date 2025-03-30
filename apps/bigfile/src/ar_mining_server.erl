@@ -13,7 +13,7 @@
 
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_data_discovery.hrl").
@@ -119,7 +119,7 @@ log_prepare_solution_failure2(Solution, FailureReason, AdditionalLogData) ->
 	#mining_solution{
 		solution_hash = SolutionH,
 		packing_difficulty = PackingDifficulty } = Solution,
-	ar:console("~nFailed to prepare block from the mining solution.. Reason: ~p~n",
+	big:console("~nFailed to prepare block from the mining solution.. Reason: ~p~n",
 			[FailureReason]),
 	?LOG_ERROR([{event, failed_to_prepare_block_from_mining_solution},
 			{reason, FailureReason},
@@ -187,7 +187,7 @@ handle_call(Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast(pause, State) ->
-	ar:console("Pausing mining.~n"),
+	big:console("Pausing mining.~n"),
 	?LOG_INFO([{event, pause_mining}]),
 	ar_mining_stats:mining_paused(),
 	%% Setting paused to true allows all pending tasks to complete, but prevents new output to be 
@@ -197,7 +197,7 @@ handle_cast(pause, State) ->
 
 handle_cast({start_mining, Args}, State) ->
 	{DiffPair, RebaseThreshold, Height} = Args,
-	ar:console("Starting mining.~n"),
+	big:console("Starting mining.~n"),
 	?LOG_INFO([{event, start_mining}, {difficulty, DiffPair},
 			{rebase_threshold, RebaseThreshold}, {height, Height}]),
 	ar_mining_stats:start_performance_reports(),
@@ -399,7 +399,7 @@ add_sessions([], State) ->
 	State;
 add_sessions([SessionKey | AddedSessions], State) ->
 	{NextSeed, StartIntervalNumber, NextVDFDifficulty} = SessionKey,
-	ar:console("Starting new mining session: "
+	big:console("Starting new mining session: "
 		"next entropy nonce: ~s, interval number: ~B, next vdf difficulty: ~B.~n",
 		[ar_util:safe_encode(NextSeed), StartIntervalNumber, NextVDFDifficulty]),
 	?LOG_INFO([{event, new_mining_session}, 
@@ -501,7 +501,7 @@ maybe_update_cache_limits(Limits, State) ->
 		State#state.workers
 	),
 
-	ar:console(
+	big:console(
 		"~nSetting the mining chunk cache size limit to ~B MiB "
 		"(~B sub-chunks per partition).~n",
 			[OverallCacheLimitMiB, PartitionCacheLimit]),
@@ -511,7 +511,7 @@ maybe_update_cache_limits(Limits, State) ->
 		{vdf_queue_limit_steps, VDFQueueLimit}]),
 	case OverallCacheLimitMiB < MinimumCacheLimitMiB of
 		true ->
-			ar:console("~nChunk cache size limit (~p MiB) is below minimum limit of "
+			big:console("~nChunk cache size limit (~p MiB) is below minimum limit of "
 				"~p MiB. Mining performance may be impacted.~n"
 				"Consider changing the 'mining_cache_size_mb' option.",
 				[OverallCacheLimitMiB, MinimumCacheLimitMiB]);
@@ -933,7 +933,7 @@ post_solution(not_set, Solution, State) ->
 					{recall_byte2, RecallByte2},
 					{solution_h, ar_util:safe_encode(H)},
 					{nonce_limiter_output, ar_util:safe_encode(NonceLimiterOutput)}]),
-			ar:console("WARNING: we failed to validate our solution. Check logs for more "
+			big:console("WARNING: we failed to validate our solution. Check logs for more "
 					"details~n");
 		{false, Reason} ->
 			?LOG_WARNING([{event, found_invalid_solution},
@@ -945,7 +945,7 @@ post_solution(not_set, Solution, State) ->
 					{recall_byte2, RecallByte2},
 					{solution_h, ar_util:safe_encode(H)},
 					{nonce_limiter_output, ar_util:safe_encode(NonceLimiterOutput)}]),
-			ar:console("WARNING: the solution we found is invalid. Check logs for more "
+			big:console("WARNING: the solution we found is invalid. Check logs for more "
 					"details~n");
 		{true, PoACache, PoA2Cache} ->
 			ar_node_worker:found_solution(miner, Solution, PoACache, PoA2Cache)
@@ -957,7 +957,7 @@ post_solution(ExitPeer, Solution, #state{ is_pool_client = true }) ->
 		{error, Reason} ->
 			?LOG_WARNING([{event, found_partial_solution_but_failed_to_reach_exit_node},
 					{reason, io_lib:format("~p", [Reason])}]),
-			ar:console("We found a partial solution but failed to reach the exit node, "
+			big:console("We found a partial solution but failed to reach the exit node, "
 					"error: ~p.", [io_lib:format("~p", [Reason])])
 	end;
 post_solution(ExitPeer, Solution, _State) ->
@@ -967,7 +967,7 @@ post_solution(ExitPeer, Solution, _State) ->
 		{error, Reason} ->
 			?LOG_WARNING([{event, found_solution_but_failed_to_reach_exit_node},
 					{reason, io_lib:format("~p", [Reason])}]),
-			ar:console("We found a solution but failed to reach the exit node, "
+			big:console("We found a solution but failed to reach the exit node, "
 					"error: ~p.", [io_lib:format("~p", [Reason])])
 	end.
 

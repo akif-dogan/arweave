@@ -1,6 +1,6 @@
 -module(ar_metrics).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 
 -export([register/0, get_status_class/1, record_rate_metric/4]).
 

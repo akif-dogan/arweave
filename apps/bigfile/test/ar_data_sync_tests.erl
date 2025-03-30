@@ -2,7 +2,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_consensus.hrl").
 -include("../include/ar_config.hrl").
 

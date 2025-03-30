@@ -4,7 +4,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 
 -import(ar_test_node, [

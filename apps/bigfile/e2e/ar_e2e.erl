@@ -11,7 +11,7 @@
 	assert_partition_size/3, assert_partition_size/4, assert_empty_partition/3,
 	assert_mine_and_validate/3]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("eunit/include/eunit.hrl").

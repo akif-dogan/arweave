@@ -5,7 +5,7 @@
 -export([start/0, execute/2, reset/0, reset_rate_limit/3,
 		ban_peer/2, is_peer_banned/1, cleanup_ban/1, decrement_ip_addr/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_blacklist_middleware.hrl").
 -include_lib("eunit/include/eunit.hrl").

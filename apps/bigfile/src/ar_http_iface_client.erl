@@ -24,7 +24,7 @@
 	 post_cm_partition_table_to_pool/2]).
 -export([get_block_shadow/2, get_block_shadow/3, get_block_shadow/4]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").

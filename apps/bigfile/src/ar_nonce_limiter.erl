@@ -17,7 +17,7 @@
 
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_vdf.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
@@ -858,7 +858,7 @@ apply_base_block(B, State) ->
 apply_chain(#nonce_limiter_info{ global_step_number = StepNumber },
 		#nonce_limiter_info{ global_step_number = PrevStepNumber })
 		when StepNumber - PrevStepNumber > ?NONCE_LIMITER_MAX_CHECKPOINTS_COUNT ->
-	ar:console("Cannot do a trusted join - there are not enough checkpoints"
+	big:console("Cannot do a trusted join - there are not enough checkpoints"
 			" to apply quickly; step number: ~B, previous step number: ~B.",
 			[StepNumber, PrevStepNumber]),
 	timer:sleep(1000),

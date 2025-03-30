@@ -7,7 +7,7 @@
 
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_header_sync.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").
@@ -288,7 +288,7 @@ handle_info({event, disksup, {remaining_disk_space, "default", true, _Percentage
 							"space but you need to make sure the remaining disk space "
 							"stays available for the node.~n~n"
 							"The mining performance is not affected.~n",
-					ar:console(Msg, []),
+					big:console(Msg, []),
 					?LOG_INFO([{event, ar_header_sync_stopped_syncing},
 							{reason, insufficient_disk_space}]);
 				false ->
@@ -304,7 +304,7 @@ handle_info({event, disksup, {remaining_disk_space, "default", true, _Percentage
 						false ->
 							Msg = "The available disk space has been detected, "
 									"resuming header syncing.~n",
-							ar:console(Msg, []),
+							big:console(Msg, []),
 							?LOG_INFO([{event, ar_header_sync_resumed_syncing}])
 					end,
 					{noreply, State#state{ is_disk_space_sufficient = true }};

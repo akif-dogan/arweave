@@ -13,7 +13,7 @@
 
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 
 -record(state, {
@@ -102,7 +102,7 @@ handle_call(Request, _From, State) ->
 handle_cast(started_hashing, State) when State#state.miner_logging == true ->
 	Message = "Starting to hash.",
 	?LOG_INFO([{event, starting_to_hash}]),
-	ar:console("~s~n", [Message]),
+	big:console("~s~n", [Message]),
 	{noreply, State};
 
 handle_cast(started_hashing, State) ->
@@ -117,7 +117,7 @@ handle_cast({block_received_n_confirmations, BH, Height}, State) ->
 			Message = io_lib:format("Your block ~s was accepted by the network!",
 					[ar_util:encode(BH)]),
 			?LOG_INFO([{event, block_got_10_confirmations}, {block, ar_util:encode(BH)}]),
-			ar:console("~s~n", [Message]),
+			big:console("~s~n", [Message]),
 			ar_mining_stats:block_found(),
 			Map;
 		{_, Map} ->
@@ -135,7 +135,7 @@ handle_cast({mined_block, BH, Height, PrevH}, State) ->
 					[ar_util:encode(BH), Height, ar_util:encode(PrevH)]),
 			?LOG_INFO([{event, mined_block}, {block, ar_util:encode(BH)}, {height, Height},
 					{previous_block, ar_util:encode(PrevH)}]),
-			ar:console("~s~n", [Message]);
+			big:console("~s~n", [Message]);
 		_ ->
 			ok
 	end,

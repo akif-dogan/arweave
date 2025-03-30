@@ -4,7 +4,7 @@
 	parse_p3/2, validate_config/1, get_payments_value/3, get_service_config/2, get_rate/2,
 	get_json/1]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/ar_p3.hrl").
 

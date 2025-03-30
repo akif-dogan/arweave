@@ -13,7 +13,7 @@
 -export([start_link/0, init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
 		code_change/3]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_config.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").
 

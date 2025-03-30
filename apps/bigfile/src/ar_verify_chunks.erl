@@ -5,7 +5,7 @@
 -export([start_link/2, name/1]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
--include_lib("bigfile/include/ar.hrl").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("bigfile/include/ar_verify_chunks.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -57,7 +57,7 @@ handle_cast(verify, #state{ready = false, end_offset = EndOffset} = State) ->
 	{noreply, State#state{ready = is_ready(EndOffset)}};
 handle_cast(verify,
 		#state{cursor = Cursor, end_offset = EndOffset} = State) when Cursor >= EndOffset ->
-	ar:console("Done!~n"),
+	big:console("Done!~n"),
 	{noreply, State};
 handle_cast(verify, State) ->
 	State2 = verify(State),
@@ -93,7 +93,7 @@ verify(State) ->
 	State2 = verify_chunks(UnionInterval, Intervals, State),
 	case State2#state.cursor >= State2#state.end_offset of
 		true ->
-			ar:console("Done verifying ~s!~n", [StoreID]),
+			big:console("Done verifying ~s!~n", [StoreID]),
 			?LOG_INFO([{event, verify_chunk_storage_verify_chunks_done}, {store_id, StoreID}]),
 			State2;
 		false ->

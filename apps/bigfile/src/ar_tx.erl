@@ -8,7 +8,7 @@
 		chunk_binary/2, chunks_to_size_tagged_chunks/1, sized_chunks_to_sized_chunk_ids/1,
 		get_addresses/1, get_weave_size_increase/2, utility/1]).
 
--include("../include/ar.hrl").
+-include("../include/big.hrl").
 -include("../include/ar_pricing.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
