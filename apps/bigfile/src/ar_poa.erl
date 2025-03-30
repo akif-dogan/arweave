@@ -7,7 +7,7 @@
 		 get_padded_offset/1, get_padded_offset/2]).
 
 -include_lib("bigfile/include/ar_poa.hrl").
--include_lib("bigfile/include/big.hrl ").
+-include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("bigfile/include/ar_pricing.hrl").
 
