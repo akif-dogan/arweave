@@ -19,7 +19,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/big_consensus.hrl ").
+-include_lib("bigfile/include/big_consensus.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
