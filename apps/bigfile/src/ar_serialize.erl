@@ -34,7 +34,7 @@
 		pool_cm_jobs_to_json_struct/1, json_map_to_pool_cm_jobs/1]).
 
 -include("../include/big.hrl").
--include("../include/ar_consensus.hrl").
+-include("../include/big_consensus.hrl").
 -include("../include/ar_vdf.hrl").
 -include("../include/ar_mining.hrl").
 -include("../include/ar_pool.hrl").

@@ -24,7 +24,7 @@
 		get_chunk_padded_offset/1]).
 
 -include("../include/big.hrl").
--include("../include/ar_consensus.hrl").
+-include("../include/big_consensus.hrl").
 -include("../include/ar_block.hrl").
 -include("../include/ar_vdf.hrl").
 

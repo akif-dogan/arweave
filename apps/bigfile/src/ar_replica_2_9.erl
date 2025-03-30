@@ -4,7 +4,7 @@
     get_slice_index/1, get_partition_offset/1]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -moduledoc """

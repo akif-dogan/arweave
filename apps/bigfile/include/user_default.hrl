@@ -12,7 +12,7 @@
 -include_lib("bigfile/include/ar_chain_stats.hrl").
 -include_lib("bigfile/include/ar_chunk_storage.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/ar_data_discovery.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").
 -include_lib("bigfile/include/ar_header_sync.hrl").

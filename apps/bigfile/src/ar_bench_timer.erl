@@ -4,7 +4,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_vdf.hrl").
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 
 record(Key, Fun, Args) ->
     {Time, Result} = timer:tc(Fun, Args),

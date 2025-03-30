@@ -2,7 +2,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 
 setup_replica_2_9() ->
 	FastState = ar_mine_randomx:init_fast2(rxsquared, ?RANDOMX_PACKING_KEY, 0, 0,

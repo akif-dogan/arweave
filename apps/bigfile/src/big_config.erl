@@ -5,7 +5,7 @@
 		is_public_vdf_server/0, parse/1, parse_storage_module/1, log_config/1]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_p3.hrl").
 

@@ -15,7 +15,7 @@
 -export([set_reward_addr/1]).
 
 -include("../include/big.hrl").
--include("../include/ar_consensus.hrl").
+-include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 -include("../include/ar_pricing.hrl").
 -include("../include/ar_data_sync.hrl").

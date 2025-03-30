@@ -38,7 +38,7 @@
 
 -include("../include/big.hrl").
 -include("../include/big_config.hrl").
--include("../include/ar_consensus.hrl").
+-include("../include/big_consensus.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 

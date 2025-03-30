@@ -22,7 +22,7 @@
 
 -include("../include/big.hrl").
 -include("../include/ar_sup.hrl").
--include("../include/ar_consensus.hrl").
+-include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 -include("../include/ar_poa.hrl").
 -include("../include/ar_data_discovery.hrl").

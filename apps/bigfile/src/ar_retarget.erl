@@ -9,7 +9,7 @@
 		switch_to_linear_diff/1, switch_to_linear_diff_pre_fork_2_5/1, switch_to_log_diff/1]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 

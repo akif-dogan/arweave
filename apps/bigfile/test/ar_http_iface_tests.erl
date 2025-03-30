@@ -1,6 +1,6 @@
 -module(ar_http_iface_tests).
 
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("eunit/include/eunit.hrl").
 

@@ -15,7 +15,7 @@
 		docs/0, shutdown/1, console/1, console/2]).
 
 -include("../include/big.hrl").
--include("../include/ar_consensus.hrl").
+-include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 
 -include_lib("eunit/include/eunit.hrl").

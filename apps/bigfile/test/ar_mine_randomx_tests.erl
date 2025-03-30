@@ -3,7 +3,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 
 -define(ENCODED_RX512_HASH, <<"NcXUtn7gA42QoM8MtaS-vgVy8gJ21EE2YxV18mHndmM">>).
 -define(ENCODED_RX4096_HASH, <<"HqbpuoVNu8u4l4slkwnP3fvX9Q-mgjFH-3LgCyhMPPk">>).

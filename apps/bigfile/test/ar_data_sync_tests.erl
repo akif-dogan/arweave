@@ -3,7 +3,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -include("../include/big.hrl").
--include("../include/ar_consensus.hrl").
+-include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 
 -import(ar_test_node, [assert_wait_until_height/2, test_with_mocked_functions/2]).

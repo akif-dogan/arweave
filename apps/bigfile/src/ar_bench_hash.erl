@@ -2,7 +2,7 @@
 
 -export([run_benchmark_from_cli/1, run_benchmark/1]).
 
--include_lib("bigfile/include/ar_consensus.hrl").
+-include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 
 run_benchmark_from_cli(Args) ->

@@ -7,7 +7,7 @@
 		has_any/1, has_range/2, get_cover/3, get_overlap/1]).
 
 -include("../include/big.hrl").
--include("../include/ar_consensus.hrl").
+-include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
