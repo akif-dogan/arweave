@@ -4,7 +4,7 @@
 
 -include("../include/big.hrl").
 -include("../include/ar_consensus.hrl").
--include("../include/ar_config.hrl").
+-include("../include/big_config.hrl").
 
 -moduledoc """
 	This module handles the repack-in-place logic. This logic is orchestrated by the

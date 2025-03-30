@@ -16,7 +16,7 @@
 
 -include("../include/big.hrl").
 -include("../include/ar_consensus.hrl").
--include("../include/ar_config.hrl").
+-include("../include/big_config.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -377,7 +377,7 @@ parse_config_file([], Skipped, Config) ->
 
 read_config_from_file(Path) ->
 	case file:read_file(Path) of
-		{ok, FileData} -> ar_config:parse(FileData);
+		{ok, FileData} -> big_config:parse(FileData);
 		{error, _} -> {error, file_unreadable, Path}
 	end.
 
@@ -433,7 +433,7 @@ parse_cli_args(["log_dir", Dir | Rest], C) ->
 	parse_cli_args(Rest, C#config{ log_dir = Dir });
 parse_cli_args(["storage_module", StorageModuleString | Rest], C) ->
 	try
-		case ar_config:parse_storage_module(StorageModuleString) of
+		case big_config:parse_storage_module(StorageModuleString) of
 			{ok, StorageModule} ->
 				StorageModules = C#config.storage_modules,
 				parse_cli_args(Rest, C#config{
@@ -601,7 +601,7 @@ parse_cli_args(["block_throttle_by_solution_interval", Num | Rest], C) ->
 parse_cli_args(["defragment_module", DefragModuleString | Rest], C) ->
 	DefragModules = C#config.defragmentation_modules,
 	try
-		{ok, DefragModule} = ar_config:parse_storage_module(DefragModuleString),
+		{ok, DefragModule} = big_config:parse_storage_module(DefragModuleString),
 		DefragModules2 = [DefragModule | DefragModules],
 		parse_cli_args(Rest, C#config{ defragmentation_modules = DefragModules2 })
 	catch _:_ ->
@@ -687,14 +687,14 @@ start(Config) ->
 		_->
 			ok
   	end,
-	case ar_config:validate_config(Config) of
+	case big_config:validate_config(Config) of
 		true ->
 			ok;
 		false ->
 			timer:sleep(2000),
 			erlang:halt()
 	end,
-	Config2 = ar_config:set_dependent_flags(Config),
+	Config2 = big_config:set_dependent_flags(Config),
 	ok = application:set_env(bigfile, config, Config2),
 	filelib:ensure_dir(Config2#config.log_dir ++ "/"),
 	warn_if_single_scheduler(),
@@ -837,7 +837,7 @@ stop_dependencies() ->
 start_dependencies() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	{ok, _} = application:ensure_all_started(bigfile, permanent),
-	ar_config:log_config(Config).
+	big_config:log_config(Config).
 
 %% One scheduler => one dirty scheduler => Calculating a RandomX hash, e.g.
 %% for validating a block, will be blocked on initializing a RandomX dataset,

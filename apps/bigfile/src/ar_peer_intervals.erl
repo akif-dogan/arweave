@@ -3,7 +3,7 @@
 -export([fetch/4]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_data_discovery.hrl").
 
 %%%===================================================================

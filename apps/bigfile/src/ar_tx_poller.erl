@@ -14,7 +14,7 @@
 ]).
 
 -include("../include/big.hrl").
--include("../include/ar_config.hrl").
+-include("../include/big_config.hrl").
 -record(state, {
 	last_seen_tx_timestamp = 0,
 	pending_txids = []

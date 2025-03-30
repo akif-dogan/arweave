@@ -25,7 +25,7 @@
 -export([get_block_shadow/2, get_block_shadow/3, get_block_shadow/4]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").
 -include_lib("bigfile/include/ar_data_discovery.hrl").
@@ -624,7 +624,7 @@ get_vdf_update(Peer) ->
 
 get_vdf_session(Peer) ->
 	{Path, Format} =
-		case ar_config:compute_own_vdf() of
+		case big_config:compute_own_vdf() of
 			true ->
 				%% If we compute our own VDF, we need to know the VDF difficulties
 				%% so that we can continue extending the new session. The VDF difficulties
@@ -647,7 +647,7 @@ get_vdf_session(Peer) ->
 
 get_previous_vdf_session(Peer) ->
 	{Path, Format} =
-		case ar_config:compute_own_vdf() of
+		case big_config:compute_own_vdf() of
 			true ->
 				%% If we compute our own VDF, we need to know the VDF difficulties
 				%% so that we can continue extending the new session. The VDF difficulties

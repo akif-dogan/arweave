@@ -37,7 +37,7 @@
 		mock_functions/1, test_with_mocked_functions/2, test_with_mocked_functions/3]).
 
 -include("../include/big.hrl").
--include("../include/ar_config.hrl").
+-include("../include/big_config.hrl").
 -include("../include/ar_consensus.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
@@ -242,7 +242,7 @@ update_config(Config) ->
 	},
 	ok = application:set_env(bigfile, config, Config2),
 	?LOG_INFO("Updated Config:"),
-	ar_config:log_config(Config2),
+	big_config:log_config(Config2),
 	Config2.
 
 start_other_node(Node, B0, Config, WaitUntilSync) ->

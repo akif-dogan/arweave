@@ -9,7 +9,7 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("bigfile/include/ar_mining.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -48,7 +48,7 @@ read_recall_range(WhichChunk, Worker, Candidate, RecallRangeStart) ->
 
 get_packing() ->
 	{ok, Config} = application:get_env(bigfile, config),
-	%% ar_config:validate_storage_modules/1 ensures that we only mine against a single
+	%% big_config:validate_storage_modules/1 ensures that we only mine against a single
 	%% packing format. So we can grab it any partition.
 	case Config#config.storage_modules of
 		[] -> undefined;

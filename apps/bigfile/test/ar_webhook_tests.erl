@@ -5,7 +5,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 
 -import(ar_test_node, [
 		wait_until_height/2, read_block_when_stored/1]).

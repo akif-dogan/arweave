@@ -10,7 +10,7 @@
 		get_or_create_wallet/1, recover_key/3]).
 
 -include("../include/big.hrl").
--include("../include/ar_config.hrl").
+-include("../include/big_config.hrl").
 
 -include_lib("public_key/include/public_key.hrl").
 

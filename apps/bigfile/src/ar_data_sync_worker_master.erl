@@ -11,7 +11,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_sup.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").
 -include_lib("bigfile/include/ar_peers.hrl").
 -include_lib("eunit/include/eunit.hrl").

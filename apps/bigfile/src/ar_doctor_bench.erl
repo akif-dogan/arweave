@@ -4,7 +4,7 @@
 
 -include_lib("kernel/include/file.hrl").
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_mining.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 
@@ -83,7 +83,7 @@ bench_read(Args) ->
 parse_storage_modules([], StorageModules, Address) ->
 	{StorageModules, Address};
 parse_storage_modules([StorageModuleConfig | StorageModuleConfigs], StorageModules, Address) ->
-	{ok, StorageModule} = ar_config:parse_storage_module(StorageModuleConfig),
+	{ok, StorageModule} = big_config:parse_storage_module(StorageModuleConfig),
 	Address2 = ar_storage_module:module_address(StorageModule),
 	case Address2 == Address orelse Address == undefined of
 		true ->

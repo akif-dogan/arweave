@@ -1,7 +1,7 @@
 -module(ar_sync_pack_mine_tests).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("eunit/include/eunit.hrl").
 

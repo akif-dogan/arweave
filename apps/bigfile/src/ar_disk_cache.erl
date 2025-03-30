@@ -14,7 +14,7 @@
 		code_change/3]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").
 
 %% Internal state definition.

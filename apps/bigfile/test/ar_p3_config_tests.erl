@@ -1,7 +1,7 @@
 -module(ar_p3_config_tests).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_p3.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
@@ -28,19 +28,19 @@
 %% in-memory representation of a P3 services configuration.
 empty_config_parse_test() ->
 	Config = <<"{}">>,
-	{ok, ParsedConfig} = ar_config:parse(Config),
+	{ok, ParsedConfig} = big_config:parse(Config),
 	ExpectedConfig = empty_p3_config(),
 	?assertEqual(ExpectedConfig, ParsedConfig#config.p3).
 
 no_p3_parse_test() ->
 	Config = <<"{\"p3\": {}}">>,
-	{ok, ParsedConfig} = ar_config:parse(Config),
+	{ok, ParsedConfig} = big_config:parse(Config),
 	ExpectedConfig = empty_p3_config(),
 	?assertEqual(ExpectedConfig, ParsedConfig#config.p3).
 
 empty_p3_parse_test() ->
 	Config = <<"{\"p3\": { \"payments\": {}, \"services\": [] }}">>,
-	{ok, ParsedConfig} = ar_config:parse(Config),
+	{ok, ParsedConfig} = big_config:parse(Config),
 	ExpectedConfig = empty_p3_config(),
 	?assertEqual(ExpectedConfig, ParsedConfig#config.p3).
 
@@ -74,7 +74,7 @@ basic_parse_test() ->
 			]
 		}
 	}">>,
-	{ok, ParsedConfig} = ar_config:parse(Config),
+	{ok, ParsedConfig} = big_config:parse(Config),
 	ExpectedConfig = sample_p3_config(ar_util:decode(<<?DEPOSIT_ADDRESS>>), -1000000, 2),
 	?assertEqual(ExpectedConfig, ParsedConfig#config.p3).
 
@@ -108,7 +108,7 @@ checksum_parse_test() ->
 			]
 		}
 	}">>,
-	{ok, ParsedConfig} = ar_config:parse(Config),
+	{ok, ParsedConfig} = big_config:parse(Config),
 	ExpectedConfig = sample_p3_config(ar_util:decode(<<?DEPOSIT_ADDRESS>>), -1000000, 2),
 	?assertEqual(ExpectedConfig, ParsedConfig#config.p3).
 
@@ -126,7 +126,7 @@ unsupported_payments_asset_parse_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 bad_address_parse_error_test() ->
 	Config = <<"{
@@ -142,7 +142,7 @@ bad_address_parse_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 bad_minimum_balance_parse_error_test() ->
 	Config = <<"{
@@ -158,7 +158,7 @@ bad_minimum_balance_parse_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 bad_confirmations_parse_error_test() ->
 	Config = <<"{
@@ -174,7 +174,7 @@ bad_confirmations_parse_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 bad_payments_token_error_test() ->
 	Config = <<"{
@@ -191,7 +191,7 @@ bad_payments_token_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 no_service_list_parse_error_test() ->
 	Config = <<"{
@@ -207,7 +207,7 @@ no_service_list_parse_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 bad_service_token_parse_error_test() ->
 	Config = <<"{
@@ -224,7 +224,7 @@ bad_service_token_parse_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 modseq_not_integer_parse_error_test() ->
 	Config = <<"{
@@ -240,7 +240,7 @@ modseq_not_integer_parse_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 bad_rates_token_parse_error_test() ->
 	Config = <<"{
@@ -257,7 +257,7 @@ bad_rates_token_parse_error_test() ->
 		}
 	}">>,
 	?assertMatch(
-		{error, {bad_format, p3, _}, _}, ar_config:parse(Config)).
+		{error, {bad_format, p3, _}, _}, big_config:parse(Config)).
 
 %% @doc the XXX_validate_test() tests assert that a correctly parsed #p3_config record is
 %% correctly validated by the semantic/business logic rules.

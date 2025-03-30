@@ -5,7 +5,7 @@
 	get_json/1]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_p3.hrl").
 
 -define(RATE_TYPE_MAP, #{ <<"request">> => <<"Price per request">> }).

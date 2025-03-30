@@ -38,7 +38,7 @@ start_link(Name, RawPeer) ->
 
 init(RawPeer) ->
 	ok = ar_events:subscribe(nonce_limiter),
-	case ar_config:is_public_vdf_server() of
+	case big_config:is_public_vdf_server() of
 		false ->
 			gen_server:cast(self(), re_resolve_peer_domain);
 		true ->

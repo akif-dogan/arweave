@@ -3,7 +3,7 @@
 -export([main/1, help/0]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_chunk_storage.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 
@@ -18,7 +18,7 @@ merge(Args) when length(Args) < 3 ->
 merge(Args) ->
     [DataDir, StorageModuleConfig | SrcDirs] = Args,
 
-    StorageModule = ar_config:parse_storage_module(StorageModuleConfig),
+    StorageModule = big_config:parse_storage_module(StorageModuleConfig),
     StoreID = ar_storage_module:id(StorageModule),
 
     ok = merge(DataDir, StorageModule, StoreID, SrcDirs),

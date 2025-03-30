@@ -19,7 +19,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_vdf.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
@@ -306,7 +306,7 @@ request_validation(H, #nonce_limiter_info{ output = Output,
 			spawn(fun() -> ar_events:send(nonce_limiter, {invalid, H, 2}) end);
 		{RemainingStepsToValidate, NumAlreadyComputed}
 		  		when StartStepNumber + NumAlreadyComputed < StepNumber ->
-			case ar_config:use_remote_vdf_server() and not ar_config:compute_own_vdf() of
+			case big_config:use_remote_vdf_server() and not big_config:compute_own_vdf() of
 				true ->
 					%% Wait for our VDF server(s) to validate the remaining steps.
 					%% Alternatively, the network may abandon this block.
@@ -420,13 +420,13 @@ init([]) ->
 			_ ->
 				#state{}
 		end,
-	case ar_config:use_remote_vdf_server() and not ar_config:compute_own_vdf() of
+	case big_config:use_remote_vdf_server() and not big_config:compute_own_vdf() of
 		true ->
 			gen_server:cast(?MODULE, check_external_vdf_server_input);
 		false ->
 			ok
 	end,
-	{ok, start_worker(State#state{ autocompute = ar_config:compute_own_vdf() })}.
+	{ok, start_worker(State#state{ autocompute = big_config:compute_own_vdf() })}.
 
 get_blocks() ->
 	B = ar_node:get_current_block(),
@@ -703,7 +703,7 @@ handle_info({computed, Args}, State) ->
 	gen_server:cast(?MODULE, schedule_step),
 	case PrevOutput == SessionOutput2 of
 		false ->
-			case ar_config:use_remote_vdf_server() of
+			case big_config:use_remote_vdf_server() of
 				true ->
 					ok;
 				false ->

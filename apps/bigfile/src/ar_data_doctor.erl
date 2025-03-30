@@ -3,7 +3,7 @@
 -export([main/0, main/1]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_chunk_storage.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
 

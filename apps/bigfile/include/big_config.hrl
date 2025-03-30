@@ -1,5 +1,5 @@
--ifndef(AR_CONFIG_HRL).
--define(AR_CONFIG_HRL, true).
+-ifndef(BIG_CONFIG_HRL).
+-define(BIG_CONFIG_HRL, true).
 
 -include_lib("big.hrl").
 -include_lib("ar_p3.hrl").

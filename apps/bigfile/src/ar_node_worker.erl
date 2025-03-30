@@ -16,7 +16,7 @@
 
 -include("../include/big.hrl").
 -include("../include/ar_consensus.hrl").
--include("../include/ar_config.hrl").
+-include("../include/big_config.hrl").
 -include("../include/ar_pricing.hrl").
 -include("../include/ar_data_sync.hrl").
 -include("../include/ar_vdf.hrl").

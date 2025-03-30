@@ -1,4 +1,4 @@
--module(ar_config).
+-module(big_config).
 
 -export([validate_config/1, set_dependent_flags/1, use_remote_vdf_server/0,
 		pull_from_remote_vdf_server/0, compute_own_vdf/0, is_vdf_server/0,
@@ -6,7 +6,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_consensus.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_p3.hrl").
 
 %%%===================================================================

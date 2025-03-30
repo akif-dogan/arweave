@@ -5,7 +5,7 @@
 -export([execute/2, read_body_chunk/4]).
 
 -include("../include/big.hrl").
--include("../include/ar_config.hrl").
+-include("../include/big_config.hrl").
 -include("../include/ar_mining.hrl").
 -include("../include/ar_data_sync.hrl").
 -include("../include/ar_data_discovery.hrl").
@@ -3056,7 +3056,7 @@ handle_post_vdf(Req, Pid) ->
 	end.
 
 handle_post_vdf2(Req, Pid, Peer) ->
-	case ar_config:pull_from_remote_vdf_server() of
+	case big_config:pull_from_remote_vdf_server() of
 		true ->
 			%% We are pulling the updates - tell the server not to push them.
 			Response = #nonce_limiter_update_response{ postpone = 120 },
@@ -3070,7 +3070,7 @@ handle_post_vdf3(Req, Pid, Peer) ->
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
 			Format =
-				case ar_config:compute_own_vdf() of
+				case big_config:compute_own_vdf() of
 					true ->
 						%% If we compute our own VDF, we need to know the VDF difficulties
 						%% so that we can continue extending the new session.

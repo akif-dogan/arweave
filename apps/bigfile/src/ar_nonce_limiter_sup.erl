@@ -7,7 +7,7 @@
 -export([init/1]).
 
 -include_lib("bigfile/include/ar_sup.hrl").
--include_lib("bigfile/include/ar_config.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 
 %%%===================================================================
 %%% Public interface.
@@ -35,7 +35,7 @@ init([]) ->
 	Server = ?CHILD(ar_nonce_limiter_server, worker),
 	NonceLimiter = ?CHILD(ar_nonce_limiter, worker),
 
-	Workers = case ar_config:is_vdf_server() of
+	Workers = case big_config:is_vdf_server() of
 		true ->
 			[NonceLimiter, Server, Client | ServerWorkers];
 		false ->
