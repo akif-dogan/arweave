@@ -8,7 +8,7 @@
 
 -include("../include/big.hrl").
 -include("../include/ar_pricing.hrl").
--include("../include/big_consensus.hrl ").
+-include("../include/big_consensus.hrl").
 -include("../include/ar_mining.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
