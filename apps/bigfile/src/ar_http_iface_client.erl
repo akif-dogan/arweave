@@ -958,10 +958,10 @@ handle_get_recent_hash_list_response(Response) ->
 handle_get_recent_hash_list_diff_response({ok, {{<<"200">>, _}, _, Body, _, _}}, HL, Peer) ->
 	case parse_recent_hash_list_diff(Body, HL) of
 		{error, invalid_input} ->
-			ar_peers:issue_warning(Peer, recent_hash_list_diff, invalid_input),
+			big_peers:issue_warning(Peer, recent_hash_list_diff, invalid_input),
 			{error, invalid_input};
 		{error, unknown_base} ->
-			ar_peers:issue_warning(Peer, recent_hash_list_diff, unknown_base),
+			big_peers:issue_warning(Peer, recent_hash_list_diff, unknown_base),
 			{error, unknown_base};
 		{ok, Reply} ->
 			{ok, Reply}
@@ -1113,7 +1113,7 @@ get_tx_from_remote_peer(Peers, TXID, RatePeer) when is_list(Peers) ->
 			get_tx_from_remote_peer(Peers -- [Peer], TXID, RatePeer)
 	end;
 get_tx_from_remote_peer(Peer, TXID, RatePeer) ->
-	Release = ar_peers:get_peer_release(Peer),
+	Release = big_peers:get_peer_release(Peer),
 	Encoding = case Release >= 52 of true -> binary; _ -> json end,
 	case handle_tx_response(Peer, Encoding,
 		ar_http:req(#{
@@ -1134,12 +1134,12 @@ get_tx_from_remote_peer(Peer, TXID, RatePeer) ->
 						{peer, ar_util:format_peer(Peer)},
 						{tx, ar_util:encode(TXID)}
 					]),
-					ar_peers:issue_warning(Peer, tx, invalid),
+					big_peers:issue_warning(Peer, tx, invalid),
 					{error, invalid_tx};
 				true ->
 					case RatePeer of
 						true ->
-							ar_peers:rate_fetched_data(Peer, tx, Time, Size);
+							big_peers:rate_fetched_data(Peer, tx, Time, Size);
 						false ->
 							ok
 					end,
@@ -1270,7 +1270,7 @@ handle_block_response(Peer, Encoding, {ok, {{<<"200">>, _}, _, Body, Start, End}
 			?LOG_INFO(
 				"event: failed_to_parse_block_response, peer: ~s, reason: ~p",
 				[ar_util:format_peer(Peer), Reason]),
-			ar_peers:issue_warning(Peer, block, Reason),
+			big_peers:issue_warning(Peer, block, Reason),
 			not_found;
 		{ok, B} ->
 			{ok, B, End - Start, byte_size(term_to_binary(B))};
@@ -1280,11 +1280,11 @@ handle_block_response(Peer, Encoding, {ok, {{<<"200">>, _}, _, Body, Start, End}
 			?LOG_INFO(
 				"event: failed_to_parse_block_response, peer: ~s, error: ~p",
 				[ar_util:format_peer(Peer), Error]),
-			ar_peers:issue_warning(Peer, block, Error),
+			big_peers:issue_warning(Peer, block, Error),
 			not_found
 	end;
 handle_block_response(Peer, _Encoding, Response) ->
-	ar_peers:issue_warning(Peer, block, Response),
+	big_peers:issue_warning(Peer, block, Response),
 	not_found.
 
 %% @doc Process the response of a GET /unconfirmed_tx call.
@@ -1315,14 +1315,14 @@ handle_tx_response(Peer, Encoding, {ok, {{<<"200">>, _}, _, Body, Start, End}}) 
 					{ok, TX#tx{ data = <<>> }, End - Start, Size - DataSize}
 			end;
 		{'EXIT', Reason} ->
-			ar_peers:issue_warning(Peer, tx, Reason),
+			big_peers:issue_warning(Peer, tx, Reason),
 			{error, Reason};
 		Reply ->
-			ar_peers:issue_warning(Peer, tx, Reply),
+			big_peers:issue_warning(Peer, tx, Reply),
 			Reply
 	end;
 handle_tx_response(Peer, _Encoding, Response) ->
-	ar_peers:issue_warning(Peer, tx, Response),
+	big_peers:issue_warning(Peer, tx, Response),
 	{error, Response}.
 
 handle_cm_partition_table_response({ok, {{<<"200">>, _}, _, Body, _, _}}) ->

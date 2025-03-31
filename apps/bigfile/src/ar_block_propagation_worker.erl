@@ -50,12 +50,12 @@ handle_cast({send_block2, Peer, SendAnnouncementFun, SendFun, RetryCount, From},
 				{'EXIT', Reason} ->
 					?LOG_INFO([{event, send_announcement_response}, {peer, ar_util:format_peer(Peer)},
 						{exit, Reason}]),
-					ar_peers:issue_warning(Peer, block_announcement, Reason),
+					big_peers:issue_warning(Peer, block_announcement, Reason),
 					From ! {worker_sent_block, self()};
 				{error, Reason} ->
 					?LOG_INFO([{event, send_announcement_response}, {peer, ar_util:format_peer(Peer)},
 						{error, Reason}]),
-					ar_peers:issue_warning(Peer, block_announcement, Reason),
+					big_peers:issue_warning(Peer, block_announcement, Reason),
 					From ! {worker_sent_block, self()};
 				{ok, #block_announcement_response{ missing_tx_indices = L,
 						missing_chunk = MissingChunk, missing_chunk2 = MissingChunk2 }} ->

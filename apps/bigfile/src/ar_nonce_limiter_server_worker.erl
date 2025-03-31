@@ -51,7 +51,7 @@ handle_call(Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast(re_resolve_peer_domain, #state{ raw_peer = RawPeer } = State) ->
-	case ar_peers:resolve_and_cache_peer(RawPeer, vdf_client_peer) of
+	case big_peers:resolve_and_cache_peer(RawPeer, vdf_client_peer) of
 		{ok, _} ->
 			ok;
 		Error ->
@@ -68,7 +68,7 @@ handle_cast(Cast, State) ->
 
 handle_info({event, nonce_limiter, {computed_output, Args}}, State) ->
 	#state{ raw_peer = RawPeer } = State,
-	case ar_peers:resolve_and_cache_peer(RawPeer, vdf_client_peer) of
+	case big_peers:resolve_and_cache_peer(RawPeer, vdf_client_peer) of
 		{error, _} ->
 			?LOG_WARNING([{event, failed_to_resolve_vdf_client_peer_before_push},
 					{raw_peer, io_lib:format("~p", [RawPeer])}]),

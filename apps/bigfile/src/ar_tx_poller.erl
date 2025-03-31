@@ -121,7 +121,7 @@ check_for_received_txs(#state{ pending_txids = [TXID | PendingTXIDs] } = State) 
 	State#state{ pending_txids = PendingTXIDs };
 
 check_for_received_txs(#state{ pending_txids = [] } = State) ->
-	Peers = lists:sublist(ar_peers:get_peers(current), ?QUERY_PEERS_COUNT),
+	Peers = lists:sublist(big_peers:get_peers(current), ?QUERY_PEERS_COUNT),
 	Reply = ar_http_iface_client:get_mempool(Peers),
 	ar_util:cast_after(?POLL_INTERVAL_MS, self(), check_for_received_txs),
 	case Reply of
@@ -133,7 +133,7 @@ check_for_received_txs(#state{ pending_txids = [] } = State) ->
 
 download_and_verify_tx(TXID) ->
 	ar_ignore_registry:add_temporary(TXID, 10_000),
-	Peers = lists:sublist(ar_peers:get_peers(current), ?QUERY_PEERS_COUNT),
+	Peers = lists:sublist(big_peers:get_peers(current), ?QUERY_PEERS_COUNT),
 	case ar_http_iface_client:get_tx_from_remote_peer(Peers, TXID, false) of
 		not_found ->
 			ar_ignore_registry:remove_temporary(TXID),
@@ -146,7 +146,7 @@ download_and_verify_tx(TXID) ->
 				{invalid, Code} ->
 					log_invalid_tx(Code, TXID, TX, Peer);
 				{valid, TX2} ->
-					ar_peers:rate_fetched_data(Peer, tx, Time, Size),
+					big_peers:rate_fetched_data(Peer, tx, Time, Size),
 					ar_data_sync:add_data_root_to_disk_pool(TX2#tx.data_root,
 							TX2#tx.data_size, TX#tx.id),
 					ar_events:send(tx, {new, TX2, {pulled, Peer}}),

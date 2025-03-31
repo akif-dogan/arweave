@@ -72,7 +72,7 @@ handle_cast(pull, State) ->
 			ar_util:cast_after(?PULL_THROTTLE_MS, ?MODULE, pull),
 			{noreply, State};
 		false ->
-			case ar_peers:resolve_and_cache_peer(RawPeer, vdf_server_peer) of
+			case big_peers:resolve_and_cache_peer(RawPeer, vdf_server_peer) of
 				{error, _} ->
 					?LOG_WARNING([{event, failed_to_resolve_peer},
 							{raw_peer, io_lib:format("~p", [RawPeer])}]),
@@ -172,7 +172,7 @@ handle_cast({maybe_request_sessions, SessionKey}, State) ->
 	{{value, {RawPeer, _Timestamp}}, Q2} = queue:out(Q),
 	Now = erlang:system_time(millisecond),
 	RotatedServers = queue:in({RawPeer, Now}, Q2),
-	case ar_peers:resolve_and_cache_peer(RawPeer, vdf_server_peer) of
+	case big_peers:resolve_and_cache_peer(RawPeer, vdf_server_peer) of
 		{error, _} ->
 			%% Push the peer to the back of the queue. We'll also wait and see if another
 			%% `maybe_request_sessions` message comes in before we fetch the full session.

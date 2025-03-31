@@ -96,9 +96,9 @@ record_propagation_rate(PropagatedSize, PropagationTimeUs) ->
 
 % retrieve information about peer(s)
 emit(#{ tx := TX, peer := Peer } = Data) ->
-	TrustedPeers = ar_peers:get_trusted_peers(),
+	TrustedPeers = big_peers:get_trusted_peers(),
 	PropagatedTX = tx_to_propagated_tx(TX, Peer, TrustedPeers),
-	Release = ar_peers:get_peer_release(Peer),
+	Release = big_peers:get_peer_release(Peer),
 	NewData = Data#{ propagated_tx => PropagatedTX
 		       , trusted_peers => TrustedPeers
 		       , release => Release

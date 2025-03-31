@@ -2,7 +2,7 @@
 %%% @doc Gathers the data for the /info and /recent endpoints.
 %%%
 
--module(ar_info).
+-module(big_info).
 
 -export([get_info/0, get_recent/0]).
 

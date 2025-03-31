@@ -178,17 +178,17 @@ handle4(Method, SplitPath, Req, Pid) ->
 %% Return network information from a given node.
 %% GET request to endpoint /info.
 handle(<<"GET">>, [], Req, _Pid) ->
-	{200, #{}, ar_serialize:jsonify(ar_info:get_info()), Req};
+	{200, #{}, ar_serialize:jsonify(big_info:get_info()), Req};
 
 handle(<<"GET">>, [<<"info">>], Req, _Pid) ->
-	{200, #{}, ar_serialize:jsonify(ar_info:get_info()), Req};
+	{200, #{}, ar_serialize:jsonify(big_info:get_info()), Req};
 
 handle(<<"GET">>, [<<"recent">>], Req, _Pid) ->
 	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			{200, #{}, ar_serialize:jsonify(ar_info:get_recent()), Req}
+			{200, #{}, ar_serialize:jsonify(big_info:get_recent()), Req}
 	end;
 	
 handle(<<"GET">>, [<<"is_tx_blacklisted">>, EncodedTXID], Req, _Pid) ->
@@ -654,9 +654,9 @@ handle(<<"GET">>, [<<"peers">>], Req, _Pid) ->
 			[
 				list_to_binary(ar_util:format_peer(P))
 			||
-				P <- ar_peers:get_peers(current),
+				P <- big_peers:get_peers(current),
 				P /= ar_http_util:bigfile_peer(Req),
-				ar_peers:is_public_peer(P)
+				big_peers:is_public_peer(P)
 			]
 		),
 	Req};
@@ -1943,7 +1943,7 @@ handle_post_tx_accepted(Req, TX, Peer) ->
 	{A, B, C, D, _} = Peer,
 	ar_blacklist_middleware:decrement_ip_addr({A, B, C, D}, Req),
 	BodyReadTime = ar_http_req:body_read_time(Req),
-	ar_peers:rate_gossiped_data(Peer, tx,
+	big_peers:rate_gossiped_data(Peer, tx,
 		erlang:convert_time_unit(BodyReadTime, native, microsecond),
 		byte_size(term_to_binary(TX))),
 	ar_events:send(tx, {new, TX, {pushed, Peer}}),
@@ -2471,7 +2471,7 @@ post_block(enqueue_block, {B, Peer}, Req, ReceiveTimestamp) ->
 	BodyReadTime = ar_http_req:body_read_time(Req),
 	case ar_block_pre_validator:pre_validate(B2, Peer, ReceiveTimestamp) of
 		ok ->
-			ar_peers:rate_gossiped_data(Peer, block,
+			big_peers:rate_gossiped_data(Peer, block,
 				erlang:convert_time_unit(BodyReadTime, native, microsecond),
 				byte_size(term_to_binary(B)));
 		_ ->
@@ -3048,7 +3048,7 @@ post_tx_parse_id(verify_id_match, {MaybeTXID, Req, TX}) ->
 
 handle_post_vdf(Req, Pid) ->
 	Peer = ar_http_util:bigfile_peer(Req),
-	case ets:member(ar_peers, {vdf_server_peer, Peer}) of
+	case ets:member(big_peers, {vdf_server_peer, Peer}) of
 		false ->
 			{400, #{}, <<>>, Req};
 		true ->
@@ -3107,7 +3107,7 @@ handle_get_vdf(Req, Call, Format) ->
 			handle_get_vdf2(Req, Call, Format);
 		false ->
 			Peer = ar_http_util:bigfile_peer(Req),
-			case ets:lookup(ar_peers, {vdf_client_peer, Peer}) of
+			case ets:lookup(big_peers, {vdf_client_peer, Peer}) of
 				[] ->
 					{400, #{}, jiffy:encode(#{ error => not_our_vdf_client }), Req};
 				[{_, _RawPeer}] ->

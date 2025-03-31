@@ -69,9 +69,9 @@ handle_cast(process_chunk, State) ->
 	% only current (active) peers should be used, using lifetime
 	% peers will create unecessary timeouts. The first to
 	% contact are the trusted peers.
-	TrustedPeers = ar_peers:get_trusted_peers(),
-	CurrentPeers = ar_peers:get_peers(current),
-	FilteredPeers = ar_peers:filter_peers(CurrentPeers, {timestamp, 60*60*24}),
+	TrustedPeers = big_peers:get_trusted_peers(),
+	CurrentPeers = big_peers:get_peers(current),
+	FilteredPeers = big_peers:filter_peers(CurrentPeers, {timestamp, 60*60*24}),
 	CleanedPeers = FilteredPeers -- TrustedPeers,
 	Peers = TrustedPeers ++ CleanedPeers,
 

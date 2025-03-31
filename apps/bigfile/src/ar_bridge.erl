@@ -123,9 +123,9 @@ handle_info({event, block, {new, B, _}}, State) ->
 			{noreply, State};
 		_ ->
 			{ok, Config} = application:get_env(bigfile, config),
-			TrustedPeers = ar_peers:get_trusted_peers(),
+			TrustedPeers = big_peers:get_trusted_peers(),
 			SpecialPeers = Config#config.block_gossip_peers,
-			Peers = ((SpecialPeers ++ ar_peers:get_peers(current)) -- TrustedPeers) ++ TrustedPeers,
+			Peers = ((SpecialPeers ++ big_peers:get_peers(current)) -- TrustedPeers) ++ TrustedPeers,
 			JSON =
 				case B#block.height >= ar_fork:height_2_6() of
 					true ->
@@ -196,7 +196,7 @@ dequeue(Q) ->
 send_to_worker(Peer, {JSON, B}, W) ->
 	#block{ height = Height, indep_hash = H, previous_block = PrevH, txs = TXs,
 			hash = SolutionH } = B,
-	Release = ar_peers:get_peer_release(Peer),
+	Release = big_peers:get_peer_release(Peer),
 	Fork_2_6 = ar_fork:height_2_6(),
 	SolutionH2 = case Height >= ar_fork:height_2_6() of true -> SolutionH; _ -> undefined end,
 	case Release >= 52 orelse Height >= Fork_2_6 of

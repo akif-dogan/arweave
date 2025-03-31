@@ -46,7 +46,7 @@ start_link() ->
 %% data synced in the given Bucket of size ?NETWORK_DATA_BUCKET_SIZE. 80% of the peers
 %% are chosen from the 20% of peers with the biggest share in the given bucket.
 get_bucket_peers(Bucket) ->
-	case ets:member(ar_peers, block_connections) of
+	case ets:member(big_peers, block_connections) of
 		true ->
 			[];
 		false ->
@@ -205,7 +205,7 @@ pick_peers(Peers, PeerLen, N) ->
 collect_peers() ->
 	N = ?DATA_DISCOVERY_COLLECT_PEERS_COUNT,
 	%% rank peers by current rating since we care about their recent throughput performance
-	collect_peers(lists:sublist(ar_peers:get_peers(current), N)).
+	collect_peers(lists:sublist(big_peers:get_peers(current), N)).
 
 collect_peers([Peer | Peers]) ->
 	gen_server:cast(?MODULE, {add_peer, Peer}),

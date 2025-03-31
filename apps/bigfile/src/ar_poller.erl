@@ -87,8 +87,8 @@ handle_cast(collect_peers, #state{ pause = true } = State) ->
 	{noreply, State};
 handle_cast(collect_peers, State) ->
 	#state{ worker_count = N, workers = Workers } = State,
-	TrustedPeers = ar_util:pick_random(ar_peers:get_trusted_peers(), N div 3),
-	Peers = ar_peers:get_peers(current),
+	TrustedPeers = ar_util:pick_random(big_peers:get_trusted_peers(), N div 3),
+	Peers = big_peers:get_peers(current),
 	OtherPeers =  ar_data_discovery:pick_peers(Peers -- TrustedPeers, N - length(TrustedPeers)),
 	PickedPeers = TrustedPeers ++ OtherPeers,
 	start_polling_peers(Workers, PickedPeers),
@@ -146,7 +146,7 @@ handle_cast({block, Peer, B, BlockQueryTime}, State) ->
 	end,
 	case ar_block_pre_validator:pre_validate(B, Peer, erlang:timestamp()) of
 		ok ->
-			ar_peers:rate_fetched_data(Peer, block, BlockQueryTime, byte_size(term_to_binary(B)));
+			big_peers:rate_fetched_data(Peer, block, BlockQueryTime, byte_size(term_to_binary(B)));
 		_ ->
 			ok
 	end,

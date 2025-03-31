@@ -1,11 +1,11 @@
 %%% @doc Tracks the availability and performance of the network peers.
--module(ar_peers).
+-module(big_peers).
 
 -behaviour(gen_server).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_peers.hrl").
+-include_lib("bigfile/include/big_peers.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -1224,12 +1224,12 @@ block_rejected_test_() ->
 test_block_rejected() ->
 	ar_blacklist_middleware:cleanup_ban(whereis(ar_blacklist_middleware)),
 	Peer = {127, 0, 0, 1, ar_test_node:get_unused_port()},
-	ar_peers:add_peer(Peer, -1),
+	big_peers:add_peer(Peer, -1),
 
 	ar_events:send(block, {rejected, invalid_signature, <<>>, Peer}),
 	timer:sleep(5000),
 
-	?assertEqual(#{Peer => #performance{}}, ar_peers:get_peer_performances([Peer])),
+	?assertEqual(#{Peer => #performance{}}, big_peers:get_peer_performances([Peer])),
 	?assertEqual(not_banned, ar_blacklist_middleware:is_peer_banned(Peer)),
 
 	ar_events:send(block, {rejected, failed_to_fetch_first_chunk, <<>>, Peer}),
@@ -1237,13 +1237,13 @@ test_block_rejected() ->
 
 	?assertEqual(
 		#{Peer => #performance{ average_success = 0.965 }},
-		ar_peers:get_peer_performances([Peer])),
+		big_peers:get_peer_performances([Peer])),
 	?assertEqual(not_banned, ar_blacklist_middleware:is_peer_banned(Peer)),
 
 	ar_events:send(block, {rejected, invalid_previous_solution_hash, <<>>, Peer}),
 	timer:sleep(5000),
 
-	?assertEqual(#{Peer => #performance{}}, ar_peers:get_peer_performances([Peer])),
+	?assertEqual(#{Peer => #performance{}}, big_peers:get_peer_performances([Peer])),
 	?assertEqual(banned, ar_blacklist_middleware:is_peer_banned(Peer)).
 
 rate_data_test() ->
@@ -1254,13 +1254,13 @@ rate_data_test() ->
 	?assertEqual(0, get_total_rating(lifetime)),
 	?assertEqual(0, get_total_rating(current)),
 
-	ar_peers:rate_fetched_data(Peer1, chunk, {error, timeout}, 1000000, 100, 10),
+	big_peers:rate_fetched_data(Peer1, chunk, {error, timeout}, 1000000, 100, 10),
 	timer:sleep(500),
 	assert_performance(#performance{ average_success = 0.965 }, get_or_init_performance(Peer1)),
 	?assertEqual(0, get_total_rating(lifetime)),
 	?assertEqual(0, get_total_rating(current)),
 
-	ar_peers:rate_fetched_data(Peer1, block, 1000000, 100),
+	big_peers:rate_fetched_data(Peer1, block, 1000000, 100),
 	timer:sleep(500),
 	assert_performance(#performance{
 			total_bytes = 100,
@@ -1275,7 +1275,7 @@ rate_data_test() ->
 	?assertEqual(0.0966, round(get_total_rating(lifetime), 4)),
 	?assertEqual(0.0048, round(get_total_rating(current), 4)),
 
-	ar_peers:rate_fetched_data(Peer1, tx, ok, 1000000, 100, 2),
+	big_peers:rate_fetched_data(Peer1, tx, ok, 1000000, 100, 2),
 	timer:sleep(500),
 	assert_performance(#performance{
 			total_bytes = 200,
@@ -1290,7 +1290,7 @@ rate_data_test() ->
 	?assertEqual(0.0967, round(get_total_rating(lifetime), 4)),
 	?assertEqual(0.0143, round(get_total_rating(current), 4)),
 
-	ar_peers:rate_gossiped_data(Peer1, block, 1000000, 100),
+	big_peers:rate_gossiped_data(Peer1, block, 1000000, 100),
 	timer:sleep(500),
 	assert_performance(#performance{
 			total_bytes = 300,

@@ -869,7 +869,7 @@ connect_to_peer(Node) ->
 		}),
 	true = ar_util:do_until(
 		fun() ->
-			Peers = remote_call(Node, ar_peers, get_peers, [lifetime]),
+			Peers = remote_call(Node, big_peers, get_peers, [lifetime]),
 			lists:member(peer_ip(Self), Peers)
 		end,
 		100,
@@ -884,7 +884,7 @@ connect_to_peer(Node) ->
 		}),
 	ar_util:do_until(
 		fun() ->
-			lists:member(Peer, ar_peers:get_peers(lifetime))
+			lists:member(Peer, big_peers:get_peers(lifetime))
 		end,
 		100,
 	        ?CONNECT_TO_PEER_TIMEOUT

@@ -19,7 +19,7 @@
 -include_lib("bigfile/include/big_inflation.hrl").
 -include_lib("bigfile/include/big_mining.hrl").
 -include_lib("bigfile/include/ar_p3.hrl").
--include_lib("bigfile/include/ar_peers.hrl").
+-include_lib("bigfile/include/big_peers.hrl").
 -include_lib("bigfile/include/ar_poa.hrl").
 -include_lib("bigfile/include/ar_pool.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").

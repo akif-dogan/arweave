@@ -99,7 +99,7 @@ init([]) ->
 			Config#config.start_from_block /= undefined,
 	case {StartFromLocalState, Config#config.init, Config#config.auto_join} of
 		{false, false, true} ->
-			ar_join:start(ar_peers:get_trusted_peers());
+			ar_join:start(big_peers:get_trusted_peers());
 		{true, _, _} ->
 			case ar_storage:read_block_index() of
 				not_found ->
@@ -371,7 +371,7 @@ handle_info({join_from_state, Height, BI, Blocks}, State) ->
 	{noreply, State};
 
 handle_info({join, Height, BI, Blocks}, State) ->
-	Peers = ar_peers:get_trusted_peers(),
+	Peers = big_peers:get_trusted_peers(),
 	{ok, _} = big_wallets:start_link([{blocks, Blocks}, {from_peers, Peers}]),
 	ets:insert(node_state, {join_state, {Height, Blocks, BI}}),
 	{noreply, State};
@@ -1288,7 +1288,7 @@ get_missing_txs_and_retry(#block{ txs = TXIDs }, _Worker)
 	ok;
 get_missing_txs_and_retry(BShadow, Worker) ->
 	get_missing_txs_and_retry(BShadow#block.indep_hash, BShadow#block.txs,
-			Worker, ar_peers:get_peers(current), [], 0).
+			Worker, big_peers:get_peers(current), [], 0).
 
 get_missing_txs_and_retry(_H, _TXIDs, _Worker, _Peers, _TXs, TotalSize)
 		when TotalSize > ?BLOCK_TX_DATA_SIZE_LIMIT ->

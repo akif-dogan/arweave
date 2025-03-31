@@ -30,7 +30,7 @@ start_link() ->
 
 init([]) ->
 	%% These ETS tables should belong to the supervisor.
-	ets:new(ar_peers, [set, public, named_table, {read_concurrency, true}]),
+	ets:new(big_peers, [set, public, named_table, {read_concurrency, true}]),
 	ets:new(ar_http, [set, public, named_table]),
 	ets:new(ar_blacklist_middleware, [set, public, named_table]),
 	ets:new(blacklist, [set, public, named_table]),
@@ -72,7 +72,7 @@ init([]) ->
 		?CHILD_SUP(ar_http_sup, supervisor),
 		?CHILD_SUP(ar_kv_sup, supervisor),
 		?CHILD_SUP(ar_storage_sup, supervisor),
-		?CHILD(ar_peers, worker),
+		?CHILD(big_peers, worker),
 		?CHILD(ar_disk_cache, worker),
 		?CHILD(ar_watchdog, worker),
 		?CHILD(ar_tx_blacklist, worker),

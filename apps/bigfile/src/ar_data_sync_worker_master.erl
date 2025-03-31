@@ -13,7 +13,7 @@
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").
--include_lib("bigfile/include/ar_peers.hrl").
+-include_lib("bigfile/include/big_peers.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -define(REBALANCE_FREQUENCY_MS, 10*1000).
@@ -137,7 +137,7 @@ handle_cast(rebalance_peers, State) ->
 	ar_util:cast_after(?REBALANCE_FREQUENCY_MS, ?MODULE, rebalance_peers),
 	State2 = purge_empty_peers(State),
 	Peers = maps:keys(State2#state.peer_tasks),
-	AllPeerPerformances = ar_peers:get_peer_performances(Peers),
+	AllPeerPerformances = big_peers:get_peer_performances(Peers),
 	TotalMaxActive = calculate_total_max_active(State2),
 	{TargetLatency, TotalThroughput} = calculate_targets(Peers, AllPeerPerformances),
 	State3 = rebalance_peers(
@@ -323,7 +323,7 @@ complete_sync_range(PeerTasks, Result, ElapsedNative, DataSize, State) ->
 	PeerTasks2 = PeerTasks#peer_tasks{ 
 		active_count = PeerTasks#peer_tasks.active_count - 1
 	},
-	ar_peers:rate_fetched_data(
+	big_peers:rate_fetched_data(
 		PeerTasks2#peer_tasks.peer, chunk, Result,
 		erlang:convert_time_unit(ElapsedNative, native, microsecond), DataSize,
 		PeerTasks2#peer_tasks.max_active),
