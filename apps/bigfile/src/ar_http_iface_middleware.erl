@@ -672,7 +672,7 @@ handle(<<"GET">>, [<<"inflation">>, EncodedHeight], Req, _Pid) ->
 		Height when Height > 13000000 -> % An approximate number.
 			{200, #{}, "0", Req};
 		Height ->
-			{200, #{}, integer_to_list(trunc(ar_inflation:calculate(Height))), Req}
+			{200, #{}, integer_to_list(trunc(big_inflation:calculate(Height))), Req}
 	end;
 
 %% Return the estimated transaction fee not including a new wallet fee.

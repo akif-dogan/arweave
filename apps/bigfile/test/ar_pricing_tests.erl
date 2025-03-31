@@ -365,7 +365,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	%% so the new algorithm kicks in which estimates the expected block reward and takes
 	%% the missing amount from the endowment pool or takes on debt.
 	AvgBlockTime4 = ar_block_time_history:compute_block_interval(B3),
-	ExpectedReward4 = max(ar_inflation:calculate(4), B3#block.price_per_gib_minute
+	ExpectedReward4 = max(big_inflation:calculate(4), B3#block.price_per_gib_minute
 			* ?N_REPLICATIONS(B4#block.height)
 			* AvgBlockTime4 div 60
 			* 3 div (4 * 1024)), % weave_size / GiB
@@ -399,7 +399,7 @@ test_auto_redenomination_and_endowment_debt() ->
 			* ?N_REPLICATIONS(B5#block.height)
 			* AvgBlockTime5 div 60
 			* 3 div (4 * 1024), % weave_size / GiB
-			ar_inflation:calculate(5)),
+			big_inflation:calculate(5)),
 	?assertEqual(ExpectedReward5, B5#block.reward),
 	?assertEqual([{MinerAddr, 1, ExpectedReward5, 1}, {MinerAddr, 1, ExpectedReward4, 1},
 			{MinerAddr, 1, 10, 1}, {MinerAddr, 1, 10, 1}, {MinerAddr, 1, 10, 1},

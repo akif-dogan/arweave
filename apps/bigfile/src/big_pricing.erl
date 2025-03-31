@@ -14,7 +14,7 @@
 -export([get_v2_price_per_gib_minute/2]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_inflation.hrl").
+-include_lib("bigfile/include/big_inflation.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 
@@ -255,7 +255,7 @@ get_miner_reward_endowment_pool_debt_supply(Args) ->
 	{EndowmentPool, DebtSupply, TXs, WeaveSize, Height, GiBMinutePrice,
 			KryderPlusRateMultiplierLatch, KryderPlusRateMultiplier, Denomination,
 			BlockInterval} = Args,
-	Inflation = redenominate(ar_inflation:calculate(Height), 1, Denomination),
+	Inflation = redenominate(big_inflation:calculate(Height), 1, Denomination),
 	ExpectedReward = (?N_REPLICATIONS(Height)) * WeaveSize * GiBMinutePrice
 			* BlockInterval div (60 * ?GiB),
 	{EndowmentPoolFeeShare, MinerFeeShare} = distribute_transaction_fees2(TXs, Denomination),
@@ -435,7 +435,7 @@ get_miner_reward_and_endowment_pool({Pool, TXs, unclaimed, _, _, _, _}) ->
 	{0, Pool + lists:sum([TX#tx.reward || TX <- TXs])};
 get_miner_reward_and_endowment_pool(Args) ->
 	{Pool, TXs, _Addr, WeaveSize, Height, Timestamp, Rate} = Args,
-	Inflation = trunc(ar_inflation:calculate(Height)),
+	Inflation = trunc(big_inflation:calculate(Height)),
 	{PoolFeeShare, MinerFeeShare} = distribute_transaction_fees(TXs, Height),
 	BaseReward = Inflation + MinerFeeShare,
 	StorageCostPerGBPerBlock =
@@ -470,8 +470,8 @@ usd_to_big_rate(#block{ height = PrevHeight } = PrevB) ->
 usd_to_big(USD, Rate, Height) when is_number(USD) ->
 	usd_to_big({USD, 1}, Rate, Height);
 usd_to_big({Dividend, Divisor}, Rate, Height) ->
-	InitialInflation = trunc(ar_inflation:calculate(?INITIAL_USD_TO_BIG_HEIGHT(Height)())),
-	CurrentInflation = trunc(ar_inflation:calculate(Height)),
+	InitialInflation = trunc(big_inflation:calculate(?INITIAL_USD_TO_BIG_HEIGHT(Height)())),
+	CurrentInflation = trunc(big_inflation:calculate(Height)),
 	{InitialRateDividend, InitialRateDivisor} = Rate,
 	trunc(	Dividend
 			* ?WINSTON_PER_BIG
@@ -633,9 +633,9 @@ get_gb_cost_per_block_at_datetime(DT, Height) ->
 	case Height >= ar_fork:height_2_5() of
 		true ->
 			{Dividend, Divisor} = get_gb_cost_per_year_at_datetime(DT, Height),
-			{Dividend, Divisor * ar_inflation:blocks_per_year(Height)};
+			{Dividend, Divisor * big_inflation:blocks_per_year(Height)};
 		false ->
-			get_gb_cost_per_year_at_datetime(DT, Height) / ar_inflation:blocks_per_year(Height)
+			get_gb_cost_per_year_at_datetime(DT, Height) / big_inflation:blocks_per_year(Height)
 	end.
 
 %% @doc Return the cost in USD of storing 1 GB per year. Estmimated from empirical data.
