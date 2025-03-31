@@ -3,7 +3,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -define(WEAVE_SIZE, trunc(2.5 * ?PARTITION_SIZE)).

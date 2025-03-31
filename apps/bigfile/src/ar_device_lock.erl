@@ -122,7 +122,7 @@ handle_call(Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast(initialize_state, State) ->
-	State2 = case ar_node:is_joined() of
+	State2 = case big_node:is_joined() of
 		false ->
 			ar_util:cast_after(1000, self(), initialize_state),
 			State;

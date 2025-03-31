@@ -36,7 +36,7 @@ test_syncs_headers() ->
 				200,
 				30000
 			),
-			MainB = ar_storage:read_block(Height, ar_node:get_block_index()),
+			MainB = ar_storage:read_block(Height, big_node:get_block_index()),
 			?assertEqual(B, MainB),
 			TXs = ar_test_node:remote_call(peer1, ar_storage, read_tx, [B#block.txs]),
 			MainTXs = ar_storage:read_tx(B#block.txs),
@@ -79,7 +79,7 @@ test_syncs_headers() ->
 		10000
 	),
 	timer:sleep(1000),
-	[{LatestH, _, _} | _] = ar_node:get_block_index(),
+	[{LatestH, _, _} | _] = big_node:get_block_index(),
 	%% The latest block must not be cleaned up.
 	LatestB = read_block_when_stored(LatestH),
 	?assertMatch(#block{}, LatestB),

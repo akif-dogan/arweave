@@ -53,7 +53,7 @@ test_start_from_block() ->
     ar_test_node:disconnect_from(peer1),
     ar_test_node:disconnect_from(peer2),
 
-    MainBI = ar_node:get_blocks(),
+    MainBI = big_node:get_blocks(),
 
     StartFrom = get_block_hash(4, MainBI),
     StartMinus1 = get_block_hash(3, MainBI),
@@ -146,7 +146,7 @@ get_block_hash(Height, BI) ->
     H.
 
 get_block_index(Peer) ->
-    ar_test_node:remote_call(Peer, ar_node, get_blocks, []).
+    ar_test_node:remote_call(Peer, big_node, get_blocks, []).
 
 get_reward_history(Peer, H) ->
     PeerIP = ar_test_node:peer_ip(Peer),

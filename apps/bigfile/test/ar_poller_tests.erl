@@ -30,7 +30,7 @@ test_polling() ->
 	ar_test_node:wait_until_height(main, 9),
 	lists:foreach(
 		fun(Height) ->
-			{H, _, _} = ar_node:get_block_index_entry(Height),
+			{H, _, _} = big_node:get_block_index_entry(Height),
 			B = read_block_when_stored(H),
 			TX = lists:nth(Height, TXs),
 			?assertEqual([TX#tx.id], B#block.txs)
@@ -64,14 +64,14 @@ test_polling() ->
 		true ->
 			?debugFmt("Case 1.", []),
 			?assertEqual(ok, ar_test_node:wait_until_block_index(peer1, MBI12)),
-			?assertMatch([{MH13, _, _} | _], ar_node:get_block_index());
+			?assertMatch([{MH13, _, _} | _], big_node:get_block_index());
 		false ->
 			case CDiffM13 < CDiffS13 of
 				true ->
 					?debugFmt("Case 2.", []),
 					?assertEqual(ok, ar_test_node:wait_until_block_index(SBI12)),
 					?assertMatch([{SH13, _, _} | _],
-							ar_test_node:remote_call(peer1, ar_node, get_block_index, []));
+							ar_test_node:remote_call(peer1, big_node, get_block_index, []));
 				false ->
 					?debugFmt("Case 3.", []),
 					ar_test_node:mine(peer1),

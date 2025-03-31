@@ -205,7 +205,7 @@ wait_until_joined(Node) ->
 %% @doc Wait until the node joins the network (initializes the state).
 wait_until_joined() ->
 	ar_util:do_until(
-		fun() -> ar_node:is_joined() end,
+		fun() -> big_node:is_joined() end,
 		100,
 		?WAIT_UNTIL_JOINED_TIMEOUT
 	 ).
@@ -354,7 +354,7 @@ http_get_block(H, Node) ->
 	end.
 
 get_blocks(Node) ->
-	remote_call(Node, ar_node, get_blocks, []).
+	remote_call(Node, big_node, get_blocks, []).
 
 invalid_solution() ->
 	<<0:256>>.
@@ -899,7 +899,7 @@ wait_until_syncs_genesis_data(Node) ->
 
 wait_until_syncs_genesis_data() ->
 	{ok, Config} = application:get_env(bigfile, config),
-	B = ar_node:get_current_block(),
+	B = big_node:get_current_block(),
 	WeaveSize = B#block.weave_size,
 	?LOG_INFO([{event, wait_until_syncs_genesis_data}, {status, initial_sync_started},
 		{weave_size, WeaveSize}]),
@@ -924,13 +924,13 @@ wait_until_height(Node, TargetHeight, Strict) ->
 		main ->
 			{
 				wait_until_height(TargetHeight),
-				ar_node:get_height()
+				big_node:get_height()
 			};
 		_ -> 
 			{
 				remote_call(Node, ?MODULE, wait_until_height, [TargetHeight],
 					?WAIT_UNTIL_BLOCK_HEIGHT_TIMEOUT + 500),
-				remote_call(Node, ar_node, get_height, [])
+				remote_call(Node, big_node, get_height, [])
 			}
 	end,
 	case Strict of
@@ -945,7 +945,7 @@ wait_until_height(Node, TargetHeight, Strict) ->
 wait_until_height(TargetHeight) ->
 	{ok, BI} = ar_util:do_until(
 		fun() ->
-			case ar_node:get_blocks() of
+			case big_node:get_blocks() of
 				BI when length(BI) - 1 >= TargetHeight ->
 					{ok, BI};
 				_ ->
@@ -968,7 +968,7 @@ wait_until_block_index(Node, BI) ->
 wait_until_block_index(BI) ->
 	ar_util:do_until(
 		fun() ->
-			case ar_node:get_blocks() of
+			case big_node:get_blocks() of
 				BI ->
 					ok;
 				_ ->
@@ -1031,7 +1031,7 @@ wait_until_receives_txs(Node, TXs) ->
 wait_until_receives_txs(TXs) ->
 	ar_util:do_until(
 		fun() ->
-			MinedTXIDs = ar_node:get_ready_for_mining_txs(),
+			MinedTXIDs = big_node:get_ready_for_mining_txs(),
 			case lists:all(fun(TX) -> lists:member(TX#tx.id, MinedTXIDs) end, TXs) of
 				true ->
 					ok;
@@ -1209,7 +1209,7 @@ test_with_mocked_functions(Functions, TestFun, Timeout) ->
 	}.
 
 post_and_mine(#{ miner := Node, await_on := AwaitOnNode }, TXs) ->
-	CurrentHeight = remote_call(Node, ar_node, get_height, []),
+	CurrentHeight = remote_call(Node, big_node, get_height, []),
 	lists:foreach(fun(TX) -> assert_post_tx_to_peer(Node, TX) end, TXs),
 	mine(Node),
 	[{H, _, _} | _] = wait_until_height(AwaitOnNode, CurrentHeight + 1),

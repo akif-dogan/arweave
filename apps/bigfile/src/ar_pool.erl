@@ -43,7 +43,7 @@
 
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("bigfile/include/ar_pool.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
@@ -401,7 +401,7 @@ process_partial_solution_poa2_size(Solution, Ref) ->
 process_partial_solution_partition_number(Solution, Ref) ->
 	PartitionNumber = Solution#mining_solution.partition_number,
 	PartitionUpperBound = Solution#mining_solution.partition_upper_bound,
-	Max = ar_node:get_max_partition_number(PartitionUpperBound),
+	Max = big_node:get_max_partition_number(PartitionUpperBound),
 	case PartitionNumber > Max of
 		false ->
 			process_partial_solution_packing_difficulty(Solution, Ref);
@@ -411,7 +411,7 @@ process_partial_solution_partition_number(Solution, Ref) ->
 
 process_partial_solution_packing_difficulty(Solution, Ref) ->
 	#mining_solution{ packing_difficulty = PackingDifficulty } = Solution,
-	Height = ar_node:get_height(),
+	Height = big_node:get_height(),
 	case ar_block:validate_replica_format(Height, PackingDifficulty, 0) of
 		true ->
 			process_partial_solution_nonce(Solution, Ref);
@@ -549,7 +549,7 @@ process_partial_solution_difficulty(Solution, Ref, PoACache, PoA2Cache) ->
 	#mining_solution{ solution_hash = SolutionH, recall_byte2 = RecallByte2,
 			packing_difficulty = PackingDifficulty } = Solution,
 	IsPoA1 = (RecallByte2 == undefined),
-	case ar_node_utils:passes_diff_check(SolutionH, IsPoA1, ar_node:get_current_diff(),
+	case ar_node_utils:passes_diff_check(SolutionH, IsPoA1, big_node:get_current_diff(),
 			PackingDifficulty) of
 		false ->
 			#partial_solution_response{ status = <<"accepted">> };
@@ -721,8 +721,8 @@ process_partial_solution_test_() ->
 						false
 				end
 			end},
-		{ar_node, get_current_diff, fun() -> {?MAX_DIFF, ?MAX_DIFF} end},
-		{ar_node, get_height, fun() -> 0 end}],
+		{big_node, get_current_diff, fun() -> {?MAX_DIFF, ?MAX_DIFF} end},
+		{big_node, get_height, fun() -> 0 end}],
 		fun test_process_partial_solution/0
 	).
 
@@ -954,8 +954,8 @@ process_solution_test_() ->
 						false
 				end
 			end},
-		{ar_node, get_current_diff, fun() -> {0, 0} end},
-		{ar_node, get_height, fun() -> 0 end},
+		{big_node, get_current_diff, fun() -> {0, 0} end},
+		{big_node, get_height, fun() -> 0 end},
 		{ar_nonce_limiter, get_step_checkpoints,
 			fun(S, {N, SIN, D}) ->
 				case {S, N, SIN, D} of

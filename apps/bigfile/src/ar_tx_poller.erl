@@ -158,8 +158,8 @@ download_and_verify_tx(TXID) ->
 
 log_invalid_tx(tx_bad_anchor, TXID, TX, Peer) ->
 	LastTX = ar_util:encode(TX#tx.last_tx),
-	CurrentHeight = ar_node:get_height(),
-	CurrentBlockHash = ar_util:encode(ar_node:get_current_block_hash()),
+	CurrentHeight = big_node:get_height(),
+	CurrentBlockHash = ar_util:encode(big_node:get_current_block_hash()),
 	?LOG_INFO(format_invalid_tx_message(tx_bad_anchor, TXID, Peer, [
 		{last_tx, LastTX},
 		{current_height, CurrentHeight},
@@ -167,8 +167,8 @@ log_invalid_tx(tx_bad_anchor, TXID, TX, Peer) ->
 	]));
 log_invalid_tx(tx_verification_failed, TXID, TX, Peer) ->
 	LastTX = ar_util:encode(TX#tx.last_tx),
-	CurrentHeight = ar_node:get_height(),
-	CurrentBlockHash = ar_util:encode(ar_node:get_current_block_hash()),
+	CurrentHeight = big_node:get_height(),
+	CurrentBlockHash = ar_util:encode(big_node:get_current_block_hash()),
 	ErrorCodes = ar_tx_db:get_error_codes(TXID),
 	?LOG_INFO(format_invalid_tx_message(tx_verification_failed, TXID, Peer, [
 		{last_tx, LastTX},

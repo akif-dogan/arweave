@@ -6,7 +6,7 @@
 
 -include("../include/big.hrl").
 -include("../include/big_config.hrl").
--include("../include/ar_mining.hrl").
+-include("../include/big_mining.hrl").
 -include("../include/ar_data_sync.hrl").
 -include("../include/ar_data_discovery.hrl").
 
@@ -163,7 +163,7 @@ handle4(<<"GET">>, [<<"tx">>, <<"ready_for_mining">>], Req, _Pid) ->
 			ar_serialize:jsonify(
 				lists:map(
 					fun ar_util:encode/1,
-					ar_node:get_ready_for_mining_txs()
+					big_node:get_ready_for_mining_txs()
 				)
 			),
 	Req};
@@ -184,7 +184,7 @@ handle(<<"GET">>, [<<"info">>], Req, _Pid) ->
 	{200, #{}, ar_serialize:jsonify(ar_info:get_info()), Req};
 
 handle(<<"GET">>, [<<"recent">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -226,7 +226,7 @@ handle(<<"GET">>, [<<"time">>], Req, _Pid) ->
 %% Return all mempool transactions.
 %% GET request to endpoint /tx/pending.
 handle(<<"GET">>, [<<"tx">>, <<"pending">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -250,7 +250,7 @@ handle(<<"GET">>, [<<"queue">>], Req, _Pid) ->
 %% Return additional information about the transaction with the given identifier (hash).
 %% GET request to endpoint /tx/{hash}/status.
 handle(<<"GET">>, [<<"tx">>, Hash, <<"status">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -300,7 +300,7 @@ handle(<<"GET">>, [<<"tx">>, Hash, << "data.", _/binary >>], Req, _Pid) ->
 	end;
 
 handle(<<"GET">>, [<<"sync_buckets">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -316,7 +316,7 @@ handle(<<"GET">>, [<<"sync_buckets">>], Req, _Pid) ->
 	end;
 
 handle(<<"GET">>, [<<"data_sync_record">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -369,7 +369,7 @@ handle(<<"GET">>, [<<"chunk_proof2">>, OffsetBinary], Req, _Pid) ->
 	handle_get_chunk_proof(OffsetBinary, Req, binary);
 
 handle(<<"GET">>, [<<"tx">>, EncodedID, <<"offset">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -396,7 +396,7 @@ handle(<<"GET">>, [<<"tx">>, EncodedID, <<"offset">>], Req, _Pid) ->
 
 handle(<<"POST">>, [<<"chunk">>], Req, Pid) ->
 	Joined =
-		case ar_node:is_joined() of
+		case big_node:is_joined() of
 			false ->
 				not_joined(Req);
 			true ->
@@ -491,7 +491,7 @@ handle(<<"POST">>, [<<"block2">>], Req, Pid) ->
 %% "rejected_invalid_packing_difficulty".
 %% If the solution is partial, "indep_hash" string is empty.
 handle(<<"POST">>, [<<"partial_solution">>], Req, Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		true ->
 			handle_post_partial_solution(Req, Pid);
 		false ->
@@ -524,7 +524,7 @@ handle(<<"POST">>, [<<"partial_solution">>], Req, Pid) ->
 %%   "next_vdf_difficulty": "..."
 %% }
 handle(<<"GET">>, [<<"jobs">>, EncodedPrevOutput], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -537,7 +537,7 @@ handle(<<"GET">>, [<<"jobs">>, EncodedPrevOutput], Req, _Pid) ->
 	end;
 
 handle(<<"GET">>, [<<"jobs">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -545,7 +545,7 @@ handle(<<"GET">>, [<<"jobs">>], Req, _Pid) ->
 	end;
 
 handle(<<"POST">>, [<<"pool_cm_jobs">>], Req, Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -590,7 +590,7 @@ handle(<<"POST">>, [<<"tx2">>], Req, Pid) ->
 %% Requires internal_api_secret startup option to be set.
 %% WARNING: only use it if you really really know what you are doing.
 handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
-	case {ar_node:is_joined(), check_internal_api_secret(Req)} of
+	case {big_node:is_joined(), check_internal_api_secret(Req)} of
 		{false, _} ->
 			not_joined(Req);
 		{true, pass} ->
@@ -678,7 +678,7 @@ handle(<<"GET">>, [<<"inflation">>, EncodedHeight], Req, _Pid) ->
 %% Return the estimated transaction fee not including a new wallet fee.
 %% GET request to endpoint /price/{bytes}.
 handle(<<"GET">>, [<<"price">>, SizeInBytesBinary], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -695,7 +695,7 @@ handle(<<"GET">>, [<<"price">>, SizeInBytesBinary], Req, _Pid) ->
 %% denomination code.
 %% GET request to endpoint /price2/{bytes}.
 handle(<<"GET">>, [<<"price2">>, SizeInBytesBinary], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -713,7 +713,7 @@ handle(<<"GET">>, [<<"price2">>, SizeInBytesBinary], Req, _Pid) ->
 %% denomination code.
 %% GET request to endpoint /optimistic_price/{bytes}.
 handle(<<"GET">>, [<<"optimistic_price">>, SizeInBytesBinary], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -731,7 +731,7 @@ handle(<<"GET">>, [<<"optimistic_price">>, SizeInBytesBinary], Req, _Pid) ->
 %% is not found in the account tree).
 %% GET request to endpoint /price/{bytes}/{address}.
 handle(<<"GET">>, [<<"price">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -755,7 +755,7 @@ handle(<<"GET">>, [<<"price">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
 %% is not found in the account tree) along with the denomination code.
 %% GET request to endpoint /price2/{bytes}/{address}.
 handle(<<"GET">>, [<<"price2">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -780,7 +780,7 @@ handle(<<"GET">>, [<<"price2">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
 %% is not found in the account tree) along with the denomination code.
 %% GET request to endpoint /optimistic_price/{bytes}/{address}.
 handle(<<"GET">>, [<<"optimistic_price">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -805,7 +805,7 @@ handle(<<"GET">>, [<<"optimistic_price">>, SizeInBytesBinary, EncodedAddr], Req,
 %% using the new pricing scheme.
 %% GET request to endpoint /v2price/{bytes}.
 handle(<<"GET">>, [<<"v2price">>, SizeInBytesBinary], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -822,7 +822,7 @@ handle(<<"GET">>, [<<"v2price">>, SizeInBytesBinary], Req, _Pid) ->
 %% is not found in the account tree). The fee is estimated using the new pricing scheme.
 %% GET request to endpoint /v2price/{bytes}/{address}.
 handle(<<"GET">>, [<<"v2price">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -843,7 +843,7 @@ handle(<<"GET">>, [<<"v2price">>, SizeInBytesBinary, EncodedAddr], Req, _Pid) ->
 	end;
 
 handle(<<"GET">>, [<<"reward_history">>, EncodedBH], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -868,7 +868,7 @@ handle(<<"GET">>, [<<"reward_history">>, EncodedBH], Req, _Pid) ->
 	end;
 
 handle(<<"GET">>, [<<"block_time_history">>, EncodedBH], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -897,15 +897,15 @@ handle(<<"GET">>, [<<"hash_list">>], Req, _Pid) ->
 
 handle(<<"GET">>, [<<"block_index">>], Req, _Pid) ->
 	ok = ar_semaphore:acquire(get_block_index, infinity),
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_node:get_height() >= ar_fork:height_2_6() of
+			case big_node:get_height() >= ar_fork:height_2_6() of
 				true ->
 					{400, #{}, jiffy:encode(#{ error => not_supported_since_fork_2_6 }), Req};
 				false ->
-					BI = ar_node:get_block_index(),
+					BI = big_node:get_block_index(),
 					{200, #{},
 						ar_serialize:jsonify(
 							ar_serialize:block_index_to_json_struct(
@@ -920,15 +920,15 @@ handle(<<"GET">>, [<<"block_index">>], Req, _Pid) ->
 %% GET request to endpoint /block_index2.
 handle(<<"GET">>, [<<"block_index2">>], Req, _Pid) ->
 	ok = ar_semaphore:acquire(get_block_index, infinity),
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			case ar_node:get_height() >= ar_fork:height_2_6() of
+			case big_node:get_height() >= ar_fork:height_2_6() of
 				true ->
 					{400, #{}, jiffy:encode(#{ error => not_supported_since_fork_2_6 }), Req};
 				false ->
-					BI = ar_node:get_block_index(),
+					BI = big_node:get_block_index(),
 					Bin = ar_serialize:block_index_to_binary(BI),
 					{200, #{}, Bin, Req}
 			end
@@ -946,7 +946,7 @@ handle(<<"GET">>, [<<"block_index2">>, From, To], Req, _Pid) ->
 
 handle(<<"GET">>, [<<"block_index">>, From, To], Req, _Pid) ->
 	ok = ar_semaphore:acquire(get_block_index, infinity),
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -971,11 +971,11 @@ handle(<<"GET">>, [<<"block_index">>, From, To], Req, _Pid) ->
 	end;
 
 handle(<<"GET">>, [<<"recent_hash_list">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			Encoded = [ar_util:encode(H) || H <- ar_node:get_block_anchors()],
+			Encoded = [ar_util:encode(H) || H <- big_node:get_block_anchors()],
 			{200, #{}, ar_serialize:jsonify(Encoded), Req}
 	end;
 
@@ -984,7 +984,7 @@ handle(<<"GET">>, [<<"recent_hash_list">>], Req, _Pid) ->
 %% Peers may use this endpoint to make sure they did not miss blocks or learn
 %% about the missed blocks and their transactions so that they can catch up quickly.
 handle(<<"GET">>, [<<"recent_hash_list_diff">>], Req, Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1014,12 +1014,12 @@ handle(<<"GET">>, [<<"recent_hash_list_diff">>], Req, Pid) ->
 %% Return the sum of all the existing accounts in the latest state, in Winston.
 %% GET request to endpoint /total_supply.
 handle(<<"GET">>, [<<"total_supply">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
 			ok = ar_semaphore:acquire(get_wallet_list, infinity),
-			B = ar_node:get_current_block(),
+			B = big_node:get_current_block(),
 			TotalSupply = get_total_supply(B#block.wallet_list, first, 0,
 					B#block.denomination),
 			{200, #{}, integer_to_binary(TotalSupply), Req}
@@ -1028,18 +1028,18 @@ handle(<<"GET">>, [<<"total_supply">>], Req, _Pid) ->
 %% Return the current wallet list held by the node.
 %% GET request to endpoint /wallet_list.
 handle(<<"GET">>, [<<"wallet_list">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			H = ar_node:get_current_block_hash(),
+			H = big_node:get_current_block_hash(),
 			process_request(get_block, [<<"hash">>, ar_util:encode(H), <<"wallet_list">>], Req)
 	end;
 
 %% Return a bunch of wallets, up to ?WALLET_LIST_CHUNK_SIZE, from the tree with
 %% the given root hash. The wallet addresses are picked in the ascending alphabetical order.
 handle(<<"GET">>, [<<"wallet_list">>, EncodedRootHash], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1050,7 +1050,7 @@ handle(<<"GET">>, [<<"wallet_list">>, EncodedRootHash], Req, _Pid) ->
 %% the given root hash, starting with the provided cursor, taken the wallet addresses
 %% are picked in the ascending alphabetical order.
 handle(<<"GET">>, [<<"wallet_list">>, EncodedRootHash, EncodedCursor], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1060,7 +1060,7 @@ handle(<<"GET">>, [<<"wallet_list">>, EncodedRootHash, EncodedCursor], Req, _Pid
 %% Return the balance of the given address from the wallet tree with the given root hash.
 handle(<<"GET">>, [<<"wallet_list">>, EncodedRootHash, EncodedAddr, <<"balance">>], Req,
 		_Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1089,7 +1089,7 @@ handle(<<"POST">>, [<<"peers">>], Req, _Pid) ->
 %% Return the balance of the wallet specified via wallet_address.
 %% GET request to endpoint /wallet/{wallet_address}/balance.
 handle(<<"GET">>, [<<"wallet">>, Addr, <<"balance">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1097,7 +1097,7 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"balance">>], Req, _Pid) ->
 				{error, invalid} ->
 					{400, #{}, <<"Invalid address.">>, Req};
 				{ok, AddrOK} ->
-					case ar_node:get_balance(AddrOK) of
+					case big_node:get_balance(AddrOK) of
 						node_unavailable ->
 							{503, #{}, <<"Internal timeout.">>, Req};
 						Balance ->
@@ -1109,13 +1109,13 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"balance">>], Req, _Pid) ->
 %% Return the sum of reserved mining rewards of the given account.
 %% GET request to endpoint /wallet/{wallet_address}/reserved_rewards_total.
 handle(<<"GET">>, [<<"wallet">>, Addr, <<"reserved_rewards_total">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
 			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
 				{ok, AddrOK} when byte_size(AddrOK) == 32 ->
-					B = ar_node:get_current_block(),
+					B = big_node:get_current_block(),
 					Sum = ar_rewards:get_total_reward_for_address(AddrOK, B),
 					{200, #{}, integer_to_binary(Sum), Req};
 				_ ->
@@ -1126,7 +1126,7 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"reserved_rewards_total">>], Req, _Pid)
 %% Return the last transaction ID (hash) for the wallet specified via wallet_address.
 %% GET request to endpoint /wallet/{wallet_address}/last_tx.
 handle(<<"GET">>, [<<"wallet">>, Addr, <<"last_tx">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1136,7 +1136,7 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"last_tx">>], Req, _Pid) ->
 				{ok, AddrOK} ->
 					{200, #{},
 						ar_util:encode(
-							?OK(ar_node:get_last_tx(AddrOK))
+							?OK(big_node:get_last_tx(AddrOK))
 						),
 					Req}
 			end
@@ -1144,11 +1144,11 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"last_tx">>], Req, _Pid) ->
 
 %% Return a block anchor to use for building transactions.
 handle(<<"GET">>, [<<"tx_anchor">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			List = ar_node:get_block_anchors(),
+			List = big_node:get_block_anchors(),
 			SuggestedAnchor = lists:nth(min(length(List), ?SUGGESTED_TX_ANCHOR_DEPTH), List),
 			{200, #{}, ar_util:encode(SuggestedAnchor), Req}
 	end;
@@ -1175,7 +1175,7 @@ handle(<<"GET">>, [<<"block2">>, Type, ID], Req, Pid)
 %% Return block or block field.
 handle(<<"GET">>, [<<"block">>, Type, ID, Field], Req, _Pid)
 		when Type == <<"height">> orelse Type == <<"hash">> ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1191,7 +1191,7 @@ handle(<<"GET">>, [<<"block">>, <<"height">>, Height, <<"wallet">>, Addr, <<"bal
 %% Return the current block.
 %% GET request to endpoint /block/current.
 handle(<<"GET">>, [<<"block">>, <<"current">>], Req, Pid) ->
-	case ar_node:get_current_block_hash() of
+	case big_node:get_current_block_hash() of
 		not_joined ->
 			not_joined(Req);
 		H when is_binary(H) ->
@@ -1207,7 +1207,7 @@ handle(<<"GET">>, [<<"current_block">>], Req, Pid) ->
 %%
 %% {field} := { id | last_tx | owner | tags | target | quantity | data | signature | reward }
 handle(<<"GET">>, [<<"tx">>, Hash, Field], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1273,11 +1273,11 @@ handle(<<"GET">>, [<<"rates">>], Req, _Pid) ->
 %% Return the current block hieght, or 500.
 handle(Method, [<<"height">>], Req, _Pid)
 		when (Method == <<"GET">>) or (Method == <<"HEAD">>) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			H = ar_node:get_height(),
+			H = big_node:get_height(),
 			{200, #{}, integer_to_binary(H), Req}
 	end;
 
@@ -1290,7 +1290,7 @@ handle(<<"GET">>, [<<Hash:43/binary, MaybeExt/binary>>], Req, Pid) ->
 %% Accept a nonce limiter (VDF) update from a configured peer, if any.
 %% POST request to /vdf.
 handle(<<"POST">>, [<<"vdf">>], Req, Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1300,7 +1300,7 @@ handle(<<"POST">>, [<<"vdf">>], Req, Pid) ->
 %% Serve an VDF update to a configured VDF client.
 %% GET request to /vdf.
 handle(<<"GET">>, [<<"vdf">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1310,7 +1310,7 @@ handle(<<"GET">>, [<<"vdf">>], Req, _Pid) ->
 %% Serve an VDF update to a configured VDF client.
 %% GET request to /vdf2.
 handle(<<"GET">>, [<<"vdf2">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1320,7 +1320,7 @@ handle(<<"GET">>, [<<"vdf2">>], Req, _Pid) ->
 %% Serve the current VDF session to a configured VDF client.
 %% GET request to /vdf/session.
 handle(<<"GET">>, [<<"vdf">>, <<"session">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1330,7 +1330,7 @@ handle(<<"GET">>, [<<"vdf">>, <<"session">>], Req, _Pid) ->
 %% Serve the current VDF session to a configured VDF client.
 %% GET request to /vdf2/session.
 handle(<<"GET">>, [<<"vdf2">>, <<"session">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1340,7 +1340,7 @@ handle(<<"GET">>, [<<"vdf2">>, <<"session">>], Req, _Pid) ->
 %% Serve the current VDF session to a configured VDF client.
 %% GET request to /vdf3/session.
 handle(<<"GET">>, [<<"vdf3">>, <<"session">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1350,7 +1350,7 @@ handle(<<"GET">>, [<<"vdf3">>, <<"session">>], Req, _Pid) ->
 %% Serve the current VDF session to a configured VDF client.
 %% GET request to /vdf3/session.
 handle(<<"GET">>, [<<"vdf4">>, <<"session">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1360,7 +1360,7 @@ handle(<<"GET">>, [<<"vdf4">>, <<"session">>], Req, _Pid) ->
 %% Serve the previous VDF session to a configured VDF client.
 %% GET request to /vdf/previous_session.
 handle(<<"GET">>, [<<"vdf">>, <<"previous_session">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1370,7 +1370,7 @@ handle(<<"GET">>, [<<"vdf">>, <<"previous_session">>], Req, _Pid) ->
 %% Serve the previous VDF session to a configured VDF client.
 %% GET request to /vdf2/previous_session.
 handle(<<"GET">>, [<<"vdf2">>, <<"previous_session">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1380,7 +1380,7 @@ handle(<<"GET">>, [<<"vdf2">>, <<"previous_session">>], Req, _Pid) ->
 %% Serve the previous VDF session to a configured VDF client.
 %% GET request to /vdf4/previous_session.
 handle(<<"GET">>, [<<"vdf4">>, <<"previous_session">>], Req, _Pid) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -1390,7 +1390,7 @@ handle(<<"GET">>, [<<"vdf4">>, <<"previous_session">>], Req, _Pid) ->
 handle(<<"GET">>, [<<"coordinated_mining">>, <<"partition_table">>], Req, _Pid) ->
 	case check_cm_api_secret(Req) of
 		pass ->
-			case ar_node:is_joined() of
+			case big_node:is_joined() of
 				false ->
 					not_joined(Req);
 				true ->
@@ -1418,7 +1418,7 @@ handle(<<"GET">>, [<<"coordinated_mining">>, <<"partition_table">>], Req, _Pid) 
 handle(<<"GET">>, [<<"coordinated_mining">>, <<"state">>], Req, _Pid) ->
 	case check_cm_api_secret(Req) of
 		pass ->
-			case ar_node:is_joined() of
+			case big_node:is_joined() of
 				false ->
 					not_joined(Req);
 				true ->
@@ -1453,7 +1453,7 @@ handle(<<"GET">>, [<<"coordinated_mining">>, <<"state">>], Req, _Pid) ->
 handle(<<"POST">>, [<<"coordinated_mining">>, <<"h1">>], Req, Pid) ->
 	case check_cm_api_secret(Req) of
 		pass ->
-			case ar_node:is_joined() of
+			case big_node:is_joined() of
 				false ->
 					not_joined(Req);
 				true ->
@@ -1467,7 +1467,7 @@ handle(<<"POST">>, [<<"coordinated_mining">>, <<"h1">>], Req, Pid) ->
 handle(<<"POST">>, [<<"coordinated_mining">>, <<"h2">>], Req, Pid) ->
 	case check_cm_api_secret(Req) of
 		pass ->
-			case ar_node:is_joined() of
+			case big_node:is_joined() of
 				false ->
 					not_joined(Req);
 				true ->
@@ -1480,7 +1480,7 @@ handle(<<"POST">>, [<<"coordinated_mining">>, <<"h2">>], Req, Pid) ->
 handle(<<"POST">>, [<<"coordinated_mining">>, <<"publish">>], Req, Pid) ->
 	case check_cm_api_secret(Req) of
 		pass ->
-			case ar_node:is_joined() of
+			case big_node:is_joined() of
 				false ->
 					not_joined(Req);
 				true ->
@@ -1575,7 +1575,7 @@ handle_get_tx_status(EncodedTXID, Req) ->
 								not_found ->
 									{404, #{}, <<"Not Found.">>, Req};
 								{BH, _, _} ->
-									CurrentHeight = ar_node:get_height(),
+									CurrentHeight = big_node:get_height(),
 									%% First confirmation is when the TX is
 									%% in the latest block.
 									NumberOfConfirmations = CurrentHeight - Height + 1,
@@ -1794,11 +1794,11 @@ handle_get_block(Type, ID, Req, Pid, Encoding) ->
 					handle_get_block(H, Req, Pid, Encoding)
 			end;
 		<<"height">> ->
-			case ar_node:is_joined() of
+			case big_node:is_joined() of
 				false ->
 					not_joined(Req);
 				true ->
-					CurrentHeight = ar_node:get_height(),
+					CurrentHeight = big_node:get_height(),
 					try binary_to_integer(ID) of
 						Height when Height < 0 ->
 							{400, #{}, <<"Invalid height.">>, Req};
@@ -1879,7 +1879,7 @@ collect_missing_transactions([], _Indices, _N) ->
 	#{}.
 
 handle_post_tx({Req, Pid, Encoding}) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
@@ -2335,7 +2335,7 @@ handle_block_announcement(#block_announcement{ indep_hash = H, previous_block = 
 			check_block_receive_timestamp(H),
 			{208, #{}, <<>>, Req};
 		false ->
-			case ar_node:get_block_shadow_from_cache(PrevH) of
+			case big_node:get_block_shadow_from_cache(PrevH) of
 				not_found ->
 					{412, #{}, <<>>, Req};
 				#block{} ->
@@ -2381,9 +2381,9 @@ post_block(request, {Req, Pid, Encoding}, ReceiveTimestamp) ->
 	end.
 
 post_block(check_joined, Peer, {Req, Pid, Encoding}, ReceiveTimestamp) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		true ->
-			ConfirmedHeight = ar_node:get_height() - ?STORE_BLOCKS_BEHIND_CURRENT,
+			ConfirmedHeight = big_node:get_height() - ?STORE_BLOCKS_BEHIND_CURRENT,
 			case {Encoding, ConfirmedHeight >= ar_fork:height_2_6()} of
 				{json, true} ->
 					%% We gesticulate it explicitly here that POST /block is not
@@ -2723,11 +2723,11 @@ process_request(get_block, [Type, ID, <<"hash_list">>], Req) ->
 			{404, #{}, <<"Not Found.">>, Req};
 		B ->
 			ok = ar_semaphore:acquire(get_block_index, infinity),
-			case ar_node:get_height() >= ar_fork:height_2_6() of
+			case big_node:get_height() >= ar_fork:height_2_6() of
 				true ->
 					{400, #{}, jiffy:encode(#{ error => not_supported_since_fork_2_6 }), Req};
 				false ->
-					CurrentBI = ar_node:get_block_index(),
+					CurrentBI = big_node:get_block_index(),
 					HL = ar_block:generate_hash_list_for_block(B#block.indep_hash, CurrentBI),
 					{200, #{}, ar_serialize:jsonify(lists:map(fun ar_util:encode/1, HL)), Req}
 			end
@@ -2803,11 +2803,11 @@ process_request(get_block, [Type, ID, Field], Req) ->
 	end.
 
 handle_get_block_wallet_balance(EncodedHeight, EncodedAddr, Req) ->
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			CurrentHeight = ar_node:get_height(),
+			CurrentHeight = big_node:get_height(),
 			try binary_to_integer(EncodedHeight) of
 				Height when Height < 0 ->
 					{400, #{}, jiffy:encode(#{ error => invalid_height }), Req};

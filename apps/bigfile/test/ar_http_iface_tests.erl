@@ -367,7 +367,7 @@ group(Grouper, [Item | List], Acc) ->
 
 %% @doc Check that balances can be retreived over the network.
 test_get_balance({B0, _, _, {_, Pub1}}) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	Addr = binary_to_list(ar_util:encode(big_wallet:to_address(Pub1))),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
 		ar_http:req(#{
@@ -510,7 +510,7 @@ test_get_non_existent_block(_) ->
 
 %% @doc A test for retrieving format=2 transactions from HTTP API.
 test_get_format_2_tx(_) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	DataRoot = (ar_tx:generate_chunk_tree(#tx{ data = <<"DATA">> }))#tx.data_root,
 	ValidTX = #tx{ id = TXID } = (ar_tx:new(<<"DATA">>))#tx{
 			format = 2,
@@ -579,7 +579,7 @@ test_get_format_2_tx(_) ->
 	).
 
 test_get_format_1_tx(_) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	TX = #tx{ id = TXID } = ar_tx:new(<<"DATA">>),
 	EncodedTXID = binary_to_list(ar_util:encode(TXID)),
 	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
@@ -608,7 +608,7 @@ test_get_format_1_tx(_) ->
 
 %% @doc Test adding transactions to a block.
 test_add_external_tx_with_tags(_) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	TX = ar_tx:new(<<"DATA">>),
 	TaggedTX =
 		TX#tx {
@@ -623,7 +623,7 @@ test_add_external_tx_with_tags(_) ->
 	wait_until_receives_txs([TaggedTX]),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
-	[B1Hash | _] = ar_node:get_blocks(),
+	[B1Hash | _] = big_node:get_blocks(),
 	B1 = read_block_when_stored(B1Hash, true),
 	TXID = TaggedTX#tx.id,
 	?assertEqual([TXID], [TX2#tx.id || TX2 <- B1#block.txs]),
@@ -631,7 +631,7 @@ test_add_external_tx_with_tags(_) ->
 
 %% @doc Test getting transactions
 test_find_external_tx(_) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	TX = ar_tx:new(<<"DATA">>),
 	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			ar_serialize:tx_to_binary(TX)),
@@ -655,7 +655,7 @@ test_find_external_tx(_) ->
 
 %% @doc Post a tx to the network and ensure that last_tx call returns the ID of last tx.
 test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	ar_test_node:disconnect_from(peer1),
 	{_Priv1, Pub1} = Wallet1,
 	{_Priv2, Pub2} = Wallet2,
@@ -681,7 +681,7 @@ test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
 
 %% @doc Post a tx to the network and ensure that its subfields can be gathered
 test_get_subfields_of_tx(_) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	TX = ar_tx:new(<<"DATA">>),
 	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			ar_serialize:tx_to_binary(TX)),
@@ -709,7 +709,7 @@ test_get_pending_tx(_) ->
 %% @doc Mine a transaction into a block and retrieve it's binary body via HTTP.
 test_get_tx_body(_) ->
 	ar_test_node:disconnect_from(peer1),
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	TX = ar_tx:new(<<"TEST DATA">>),
 	ar_test_node:assert_post_tx_to_peer(main, TX),
 	ar_test_node:mine(),
@@ -719,7 +719,7 @@ test_get_tx_body(_) ->
 
 test_get_tx_status(_) ->
 	ar_test_node:connect_to_peer(peer1),
-	Height = ar_node:get_height(),
+	Height = big_node:get_height(),
 	assert_wait_until_height(peer1, Height),
 	ar_test_node:disconnect_from(peer1),
 	TX = (ar_tx:new())#tx{ tags = [{<<"TestName">>, <<"TestVal">>}] },
@@ -736,7 +736,7 @@ test_get_tx_status(_) ->
 	wait_until_height(main, Height + 1),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} = FetchStatus(),
 	{Res} = ar_serialize:dejsonify(Body),
-	BI = ar_node:get_block_index(),
+	BI = big_node:get_block_index(),
 	?assertEqual(
 		#{
 			<<"block_height">> => length(BI) - 1,
@@ -771,7 +771,7 @@ test_get_tx_status(_) ->
 	?assertMatch({ok, {{<<"202">>, _}, _, _, _, _}}, FetchStatus()).
 
 test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	{_, Pub} = Wallet = Wallet1,
 	%% Generate a wallet and receive a wallet access code.
 	{ok, {{<<"421">>, _}, _, _, _, _}} =
@@ -882,7 +882,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 %% @doc Ensure the HTTP client stops fetching data from an endpoint when its data size
 %% limit is exceeded.
 test_get_error_of_data_limit(_) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	Limit = 1460,
 	TX = ar_tx:new(<< <<0>> || _ <- lists:seq(1, Limit * 2) >>),
 	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
@@ -901,7 +901,7 @@ test_get_error_of_data_limit(_) ->
 	?assertEqual({error, too_much_data}, Resp).
 
 test_send_missing_tx_with_the_block({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	RemoteHeight = height(peer1),
 	ar_test_node:disconnect_from(peer1),
 	TXs = [ar_test_node:sign_tx(Wallet1, #{ last_tx => ar_test_node:get_tx_anchor(peer1) }) || _ <- lists:seq(1, 10)],
@@ -918,7 +918,7 @@ test_send_missing_tx_with_the_block({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 	assert_wait_until_height(peer1, RemoteHeight + 1).
 
 test_fallback_to_block_endpoint_if_cannot_send_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
-	LocalHeight = ar_node:get_height(),
+	LocalHeight = big_node:get_height(),
 	RemoteHeight = height(peer1),
 	ar_test_node:disconnect_from(peer1),
 	TXs = [ar_test_node:sign_tx(Wallet1, #{ last_tx => ar_test_node:get_tx_anchor(peer1) }) || _ <- lists:seq(1, 10)],
@@ -934,8 +934,8 @@ test_fallback_to_block_endpoint_if_cannot_send_tx({_B0, Wallet1, _Wallet2, _Stat
 	assert_wait_until_height(peer1, RemoteHeight + 1).
 
 test_get_recent_hash_list_diff({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
-	LocalHeight = ar_node:get_height(),
-	BTip = ar_node:get_current_block(),
+	LocalHeight = big_node:get_height(),
+	BTip = big_node:get_current_block(),
 	ar_test_node:disconnect_from(peer1),
 	{ok, {{<<"404">>, _}, _, <<>>, _, _}} = ar_http:req(#{ method => get,
 		peer => ar_test_node:peer_ip(main), path => "/recent_hash_list_diff",
@@ -961,7 +961,7 @@ test_get_recent_hash_list_diff({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 	ar_test_node:mine(),
 	BI2 = wait_until_height(main, LocalHeight + 2),
 	{B2H, _, _} = hd(BI2),
-	[TXID1, TXID2, TXID3] = [TX#tx.id || TX <- (ar_node:get_current_block())#block.txs],
+	[TXID1, TXID2, TXID3] = [TX#tx.id || TX <- (big_node:get_current_block())#block.txs],
 	{ok, {{<<"200">>, _}, _, << B0H:48/binary, B1H:48/binary, 0:16, B2H:48/binary,
 			3:16, TXID1:32/binary, TXID2:32/binary, TXID3/binary >> , _, _}}
 			= ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
@@ -978,7 +978,7 @@ test_get_recent_hash_list_diff({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 			body => << B0H/binary, B1H/binary, (crypto:strong_rand_bytes(48))/binary >>}).
 
 test_get_total_supply(_Args) ->
-	BlockDenomination = (ar_node:get_current_block())#block.denomination,
+	BlockDenomination = (big_node:get_current_block())#block.denomination,
 	TotalSupply =
 		ar_patricia_tree:foldr(
 			fun	(_, {B, _}, Acc) ->
@@ -1014,4 +1014,4 @@ wait_until_syncs_tx_data(TXID) ->
 	).
 
 height(Node) ->
-	ar_test_node:remote_call(Node, ar_node, get_height, []).
+	ar_test_node:remote_call(Node, big_node, get_height, []).

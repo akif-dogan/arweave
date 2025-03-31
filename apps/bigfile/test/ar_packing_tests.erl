@@ -455,7 +455,7 @@ test_packs_chunks_depending_on_packing_threshold() ->
 		end,
 		lists:seq(1, 5)
 	),
-	BILast = ar_node:get_block_index(),
+	BILast = big_node:get_block_index(),
 	LastB = ar_test_node:read_block_when_stored(
 			element(1, lists:nth(10, lists:reverse(BILast)))),
 	lists:foldl(

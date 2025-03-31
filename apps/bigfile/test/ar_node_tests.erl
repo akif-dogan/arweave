@@ -13,13 +13,13 @@ ar_node_interface_test_() ->
 test_ar_node_interface() ->
 	[B0] = ar_weave:init(),
 	ar_test_node:start(B0),
-	?assertEqual(0, ar_node:get_height()),
-	?assertEqual(B0#block.indep_hash, ar_node:get_current_block_hash()),
+	?assertEqual(0, big_node:get_height()),
+	?assertEqual(B0#block.indep_hash, big_node:get_current_block_hash()),
 	ar_test_node:mine(),
 	B0H = B0#block.indep_hash,
 	[{H, _, _}, {B0H, _, _}] = ar_test_node:wait_until_height(main, 1),
-	?assertEqual(1, ar_node:get_height()),
-	?assertEqual(H, ar_node:get_current_block_hash()).
+	?assertEqual(1, big_node:get_height()),
+	?assertEqual(H, big_node:get_current_block_hash()).
 
 mining_reward_test_() ->
 	{timeout, 120, fun test_mining_reward/0}.
@@ -30,27 +30,27 @@ test_mining_reward() ->
 	ar_test_node:start(B0, MiningAddr = big_wallet:to_address(Pub1)),
 	ar_test_node:mine(),
 	ar_test_node:wait_until_height(main, 1),
-	B1 = ar_node:get_current_block(),
+	B1 = big_node:get_current_block(),
 	[{MiningAddr, _, Reward, 1}, _] = B1#block.reward_history,
 	{_, TotalLocked} = lists:foldl(
 		fun(Height, {PrevB, TotalLocked}) ->
-			?assertEqual(0, ar_node:get_balance(Pub1)),
+			?assertEqual(0, big_node:get_balance(Pub1)),
 			?assertEqual(TotalLocked, ar_rewards:get_total_reward_for_address(MiningAddr, PrevB)),
 			ar_test_node:mine(),
 			ar_test_node:wait_until_height(main, Height + 1),
-			B = ar_node:get_current_block(),
+			B = big_node:get_current_block(),
 			{B, TotalLocked + B#block.reward}
 		end,
 		{B1, Reward},
 		lists:seq(1, ?LOCKED_REWARDS_BLOCKS)
 	),
-	?assertEqual(Reward, ar_node:get_balance(Pub1)),
+	?assertEqual(Reward, big_node:get_balance(Pub1)),
 
 	%% Unlock one more reward.
 	ar_test_node:mine(),
 	ar_test_node:wait_until_height(main, ?LOCKED_REWARDS_BLOCKS + 2),
-	FinalB = ar_node:get_current_block(),
-	?assertEqual(Reward + 10, ar_node:get_balance(Pub1)),
+	FinalB = big_node:get_current_block(),
+	?assertEqual(Reward + 10, big_node:get_balance(Pub1)),
 	?assertEqual(
 		TotalLocked - Reward - 10 + FinalB#block.reward,
 		ar_rewards:get_total_reward_for_address(MiningAddr, FinalB)).
@@ -68,18 +68,18 @@ test_multi_node_mining_reward() ->
 	ar_test_node:connect_to_peer(peer1),
 	ar_test_node:mine(peer1),
 	ar_test_node:wait_until_height(main, 1),
-	B1 = ar_node:get_current_block(),
+	B1 = big_node:get_current_block(),
 	[{MiningAddr, _, Reward, 1}, _] = B1#block.reward_history,
-	?assertEqual(0, ar_node:get_balance(Pub1)),
+	?assertEqual(0, big_node:get_balance(Pub1)),
 	lists:foreach(
 		fun(Height) ->
-			?assertEqual(0, ar_node:get_balance(Pub1)),
+			?assertEqual(0, big_node:get_balance(Pub1)),
 			ar_test_node:mine(),
 			ar_test_node:wait_until_height(main, Height + 1)
 		end,
 		lists:seq(1, ?LOCKED_REWARDS_BLOCKS)
 	),
-	?assertEqual(Reward, ar_node:get_balance(Pub1)).
+	?assertEqual(Reward, big_node:get_balance(Pub1)).
 
 %% @doc Ensure that TX replay attack mitigation works.
 replay_attack_test_() ->
@@ -95,14 +95,14 @@ replay_attack_test_() ->
 		ar_test_node:assert_post_tx_to_peer(main, SignedTX),
 		ar_test_node:mine(),
 		ar_test_node:assert_wait_until_height(peer1, 1),
-		?assertEqual(?BIG(8999), ar_test_node:remote_call(peer1, ar_node, get_balance, [Pub1])),
-		?assertEqual(?BIG(1000), ar_test_node:remote_call(peer1, ar_node, get_balance, [Pub2])),
+		?assertEqual(?BIG(8999), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub1])),
+		?assertEqual(?BIG(1000), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub2])),
 		ar_events:send(tx, {ready_for_mining, SignedTX}),
 		ar_test_node:wait_until_receives_txs([SignedTX]),
 		ar_test_node:mine(),
 		ar_test_node:assert_wait_until_height(peer1, 2),
-		?assertEqual(?BIG(8999), ar_test_node:remote_call(peer1, ar_node, get_balance, [Pub1])),
-		?assertEqual(?BIG(1000), ar_test_node:remote_call(peer1, ar_node, get_balance, [Pub2]))
+		?assertEqual(?BIG(8999), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub1])),
+		?assertEqual(?BIG(1000), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub2]))
 	end}.
 
 %% @doc Create two new wallets and a blockweave with a wallet balance.
@@ -126,8 +126,8 @@ test_wallet_transaction() ->
 			ar_test_node:mine(),
 			ar_test_node:wait_until_height(main, 1),
 			ar_test_node:assert_wait_until_height(peer1, 1),
-			?assertEqual(?BIG(999), ar_test_node:remote_call(peer1, ar_node, get_balance, [Pub1])),
-			?assertEqual(?BIG(9000), ar_test_node:remote_call(peer1, ar_node, get_balance, [Pub2]))
+			?assertEqual(?BIG(999), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub1])),
+			?assertEqual(?BIG(9000), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub2]))
 		end
 	end,
 	[
@@ -155,8 +155,8 @@ tx_threading_test_() ->
 		ar_test_node:assert_post_tx_to_peer(main, SignedTX2),
 		ar_test_node:mine(),
 		ar_test_node:assert_wait_until_height(peer1, 2),
-		?assertEqual(?BIG(7998), ar_test_node:remote_call(peer1, ar_node, get_balance, [Pub1])),
-		?assertEqual(?BIG(2000), ar_test_node:remote_call(peer1, ar_node, get_balance, [Pub2]))
+		?assertEqual(?BIG(7998), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub1])),
+		?assertEqual(?BIG(2000), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub2]))
 	end}.
 
 persisted_mempool_test_() ->

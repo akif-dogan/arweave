@@ -239,7 +239,7 @@ test_fork_recovery(Split) ->
 			B1#block.height]),
 	Proofs1 = ar_test_data_sync:post_proofs(main, B1, TX1, Chunks1),
 	ar_test_data_sync:wait_until_syncs_chunks(Proofs1),
-	UpperBound = ar_node:get_partition_upper_bound(ar_node:get_block_index()),
+	UpperBound = big_node:get_partition_upper_bound(big_node:get_block_index()),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, UpperBound),
 	ar_test_node:disconnect_from(peer1),
 	{PeerTX2, PeerChunks2} = ar_test_data_sync:tx(Wallet, {Split, 5}, v2, ?BIG(10)),
@@ -275,7 +275,7 @@ test_fork_recovery(Split) ->
 			MainB3#block.height]),
 	ar_test_node:connect_to_peer(peer1),
 	MainProofs3 = ar_test_data_sync:post_proofs(main, MainB3, MainTX3, MainChunks3),
-	UpperBound2 = ar_node:get_partition_upper_bound(ar_node:get_block_index()),
+	UpperBound2 = big_node:get_partition_upper_bound(big_node:get_block_index()),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs2, UpperBound2),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs3, UpperBound2),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, infinity),
@@ -293,6 +293,6 @@ test_fork_recovery(Split) ->
 	%% We did not submit proofs for PeerTX4 to main - they are supposed to be still stored
 	%% in the disk pool.
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs4, infinity),
-	UpperBound3 = ar_node:get_partition_upper_bound(ar_node:get_block_index()),
+	UpperBound3 = big_node:get_partition_upper_bound(big_node:get_block_index()),
 	ar_test_data_sync:wait_until_syncs_chunks(Proofs4, UpperBound3),
 	ar_test_data_sync:post_proofs(peer1, PeerB2, PeerTX2, PeerChunks2).

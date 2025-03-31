@@ -11,9 +11,9 @@
 
 get_info() ->
 	{Time, Current} =
-		timer:tc(fun() -> ar_node:get_current_block_hash() end),
+		timer:tc(fun() -> big_node:get_current_block_hash() end),
 	{Time2, Height} =
-		timer:tc(fun() -> ar_node:get_height() end),
+		timer:tc(fun() -> big_node:get_height() end),
 	[{_, BlockCount}] = ets:lookup(ar_header_sync, synced_blocks),
     #{
         <<"network">> => list_to_binary(?NETWORK_NAME),
@@ -64,7 +64,7 @@ get_recent() ->
 %% 3. The final lists:reverse puts the list back into reverse chronological order
 %%    (latest block first)
 get_recent_blocks() ->
-    Anchors = lists:sublist(ar_node:get_block_anchors(), ?CHECKPOINT_DEPTH),
+    Anchors = lists:sublist(big_node:get_block_anchors(), ?CHECKPOINT_DEPTH),
     Blocks = lists:foldl(
         fun(H, Acc) ->
             B = ar_block_cache:get(block_cache, H),

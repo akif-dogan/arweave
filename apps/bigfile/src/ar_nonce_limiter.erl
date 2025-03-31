@@ -388,7 +388,7 @@ get_or_init_nonce_limiter_info(#block{ height = Height, indep_hash = H } = B) ->
 			B#block.nonce_limiter_info;
 		false ->
 			{Seed, PartitionUpperBound} =
-					ar_node:get_recent_partition_upper_bound_by_prev_h(H),
+					big_node:get_recent_partition_upper_bound_by_prev_h(H),
 			get_or_init_nonce_limiter_info(B, Seed, PartitionUpperBound)
 	end.
 
@@ -413,7 +413,7 @@ apply_external_update(Update, Peer) ->
 init([]) ->
 	ok = ar_events:subscribe(node_state),
 	State =
-		case ar_node:is_joined() of
+		case big_node:is_joined() of
 			true ->
 				Blocks = get_blocks(),
 				handle_initialized(Blocks, #state{});
@@ -429,7 +429,7 @@ init([]) ->
 	{ok, start_worker(State#state{ autocompute = big_config:compute_own_vdf() })}.
 
 get_blocks() ->
-	B = ar_node:get_current_block(),
+	B = big_node:get_current_block(),
 	[B | get_blocks(B#block.previous_block, 1)].
 
 get_blocks(_H, N) when N >= ?STORE_BLOCKS_BEHIND_CURRENT ->

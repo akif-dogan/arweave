@@ -100,7 +100,7 @@ add_tx(#tx{ id = TXID } = TX, Status) ->
 		{origin_tx_map, OriginTXMap}
 	]),
 	
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		true ->
 			% 1. Drop unconfirmable transactions:
 			%    - those with clashing last_tx
@@ -504,7 +504,7 @@ find_overspent_txs(TX)
 	% We only care about the origin wallet since we aren't tracking
 	% unconfirmed deposits
 	Wallet = big_wallets:get(Origin),
-	B = ar_node:get_current_block(),
+	B = big_node:get_current_block(),
 	Denomination = B#block.denomination,
 	find_overspent_txs(Origin, SpentTXIDs, Wallet, Denomination);
 find_overspent_txs(_TX) ->

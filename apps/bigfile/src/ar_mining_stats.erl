@@ -378,8 +378,8 @@ get_total_minable_data_size(Packing) ->
 	Sizes = [Size || [Size] <- ets:match(?MODULE, Pattern)],
 	TotalDataSize = lists:sum(Sizes),
 
-	WeaveSize = ar_node:get_weave_size(),
-	TipPartition = ar_node:get_max_partition_number(WeaveSize) + 1,
+	WeaveSize = big_node:get_weave_size(),
+	TipPartition = big_node:get_max_partition_number(WeaveSize) + 1,
 	TipPartitionSize = get_partition_data_size(TipPartition, Packing),
 	?LOG_DEBUG([{event, get_total_minable_data_size},
 		{total_data_size, TotalDataSize}, {weave_size, WeaveSize},
@@ -436,7 +436,7 @@ optimal_partition_hash_hps(PoA1Multiplier, VDFSpeed, PartitionDataSize, TotalDat
 
 generate_report() ->
 	{ok, Config} = application:get_env(bigfile, config),
-	Height = ar_node:get_height(),
+	Height = big_node:get_height(),
 	Packing = ar_mining_io:get_packing(),
 	Partitions = ar_mining_io:get_partitions(),
 	generate_report(
@@ -444,7 +444,7 @@ generate_report() ->
 		Packing,
 		Partitions,
 		Config#config.cm_peers,
-		ar_node:get_weave_size(),
+		big_node:get_weave_size(),
 		erlang:monotonic_time(millisecond)
 	).
 
@@ -663,7 +663,7 @@ clear_peer_metrics([PeerReport | PeerReports]) ->
 	clear_peer_metrics(PeerReports).
 
 format_report(Report) ->
-	format_report(Report, ar_node:get_weave_size()).
+	format_report(Report, big_node:get_weave_size()).
 format_report(Report, WeaveSize) ->
 	Preamble = io_lib:format(
 		"================================================= Mining Performance Report =================================================\n"

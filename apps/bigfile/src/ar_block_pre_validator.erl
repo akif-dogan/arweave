@@ -198,7 +198,7 @@ pre_validate_is_peer_banned(B, Peer) ->
 
 pre_validate_previous_block(B, Peer) ->
 	PrevH = B#block.previous_block,
-	case ar_node:get_block_shadow_from_cache(PrevH) of
+	case big_node:get_block_shadow_from_cache(PrevH) of
 		not_found ->
 			%% We have not seen the previous block yet - might happen if two
 			%% successive blocks are distributed at the same time. Do not
@@ -636,7 +636,7 @@ pre_validate_nonce_limiter_seed_data(B, PrevB, SolutionResigned, Peer) ->
 	end.
 
 pre_validate_partition_number(B, PrevB, PartitionUpperBound, SolutionResigned, Peer) ->
-	Max = ar_node:get_max_partition_number(PartitionUpperBound),
+	Max = big_node:get_max_partition_number(PartitionUpperBound),
 	case B#block.partition_number > Max of
 		true ->
 			post_block_reject_warn_and_error_dump(B, check_partition_number, Peer),

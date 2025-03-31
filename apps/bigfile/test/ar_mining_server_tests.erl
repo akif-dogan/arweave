@@ -3,7 +3,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -define(WEAVE_SIZE, (3 * ?PARTITION_SIZE)).
@@ -212,7 +212,7 @@ test_pool_job_no_cached_sessions() ->
 %% Helpers
 %% ------------------------------------------------------------------------------------------------
 do_test_chunk_cache_size_with_mocks(H1s, H2s, RecallRange2s, FirstChunks) ->
-	Height = ar_node:get_height() + 1,
+	Height = big_node:get_height() + 1,
 	ets:insert(mock_counter, {compute_h1, 0}),
 	ets:insert(mock_counter, {compute_h2, 0}),
 	ets:insert(mock_counter, {get_recall_range, 0}),

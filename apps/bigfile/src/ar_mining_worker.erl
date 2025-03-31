@@ -9,7 +9,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -record(state, {
@@ -422,7 +422,7 @@ handle_task({computed_h0, Candidate, _ExtraArgs}, State) ->
 				partition_upper_bound = PartitionUpperBound } = Candidate,
 	{RecallRange1Start, RecallRange2Start} = ar_block:get_recall_range(H0,
 			Partition1, PartitionUpperBound),
-	Partition2 = ar_node:get_partition_number(RecallRange2Start),
+	Partition2 = big_node:get_partition_number(RecallRange2Start),
 	Candidate2 = Candidate#mining_candidate{ partition_number2 = Partition2 },
 	Candidate3 = generate_cache_ref(Candidate2),
 	Range1Exists = ar_mining_io:read_recall_range(

@@ -5,7 +5,7 @@
 -include_lib("kernel/include/file.hrl").
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 
 -define(NUM_ITERATIONS, 5).

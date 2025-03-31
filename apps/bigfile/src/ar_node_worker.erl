@@ -20,7 +20,7 @@
 -include("../include/big_pricing.hrl").
 -include("../include/ar_data_sync.hrl").
 -include("../include/ar_vdf.hrl").
--include("../include/ar_mining.hrl").
+-include("../include/big_mining.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -449,7 +449,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 		{scheduled_price_per_gib_minute, B#block.scheduled_price_per_gib_minute},
 		{merkle_rebase_support_threshold, get_merkle_rebase_threshold(B)}
 	]),
-	SearchSpaceUpperBound = ar_node:get_partition_upper_bound(RecentBI),
+	SearchSpaceUpperBound = big_node:get_partition_upper_bound(RecentBI),
 	ar_events:send(node_state, {search_space_upper_bound, SearchSpaceUpperBound}),
 	ar_events:send(node_state, {initialized, B}),
 	ar_events:send(node_state, {checkpoint_block, 
@@ -617,9 +617,9 @@ terminate(Reason, _State) ->
 
 record_metrics() ->
 	[{mempool_size, MempoolSize}] = ets:lookup(node_state, mempool_size),
-	prometheus_gauge:set(bigfile_block_height, ar_node:get_height()),
+	prometheus_gauge:set(bigfile_block_height, big_node:get_height()),
 	record_mempool_size_metrics(MempoolSize),
-	prometheus_gauge:set(weave_size, ar_node:get_weave_size()).
+	prometheus_gauge:set(weave_size, big_node:get_weave_size()).
 
 record_mempool_size_metrics({HeaderSize, DataSize}) ->
 	prometheus_gauge:set(mempool_header_size_bytes, HeaderSize),
@@ -628,7 +628,7 @@ record_mempool_size_metrics({HeaderSize, DataSize}) ->
 may_be_initialize_nonce_limiter([#block{ height = Height } = B | Blocks], BI) ->
 	case Height + 1 == ar_fork:height_2_6() of
 		true ->
-			{Seed, PartitionUpperBound, _TXRoot} = ar_node:get_nth_or_last(
+			{Seed, PartitionUpperBound, _TXRoot} = big_node:get_nth_or_last(
 					?SEARCH_SPACE_UPPER_BOUND_DEPTH, BI),
 			Output = crypto:hash(sha256, Seed),
 			NextSeed = B#block.indep_hash,
@@ -679,7 +679,7 @@ handle_task({filter_mempool, Mempool}, State) ->
 			{noreply, State};
 		_ ->
 			[{wallet_list, WalletList}] = ets:lookup(node_state, wallet_list),
-			Height = ar_node:get_height(),
+			Height = big_node:get_height(),
 			[{usd_to_big_rate, Rate}] = ets:lookup(node_state, usd_to_big_rate),
 			[{price_per_gib_minute, Price}] = ets:lookup(node_state, price_per_gib_minute),
 			[{kryder_plus_rate_multiplier, KryderPlusRateMultiplier}] = ets:lookup(node_state,
@@ -718,7 +718,7 @@ handle_task({filter_mempool, Mempool}, State) ->
 
 handle_task(compute_mining_difficulty, State) ->
 	Diff = get_current_diff(),
-	case ar_node:get_height() of
+	case big_node:get_height() of
 		Height when (Height + 1) rem 10 == 0 ->
 			?LOG_INFO([{event, current_mining_difficulty}, {height, Height}, {difficulty, Diff}]);
 		_ ->
@@ -923,7 +923,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 	BlockTXPairs3 = tl(BlockTXPairs2),
 	{BlockAnchors, RecentTXMap} = get_block_anchors_and_recent_txs_map(BlockTXPairs3),
 	RecentBI3 = tl(RecentBI2),
-	PartitionUpperBound = ar_node:get_partition_upper_bound(RecentBI3),
+	PartitionUpperBound = big_node:get_partition_upper_bound(RecentBI3),
 	case ar_node_utils:validate(B, PrevB, Accounts, BlockAnchors, RecentTXMap,
 			PartitionUpperBound) of
 		error ->
@@ -1442,7 +1442,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 		{scheduled_price_per_gib_minute, B#block.scheduled_price_per_gib_minute},
 		{merkle_rebase_support_threshold, get_merkle_rebase_threshold(B)}
 	]),
-	SearchSpaceUpperBound = ar_node:get_partition_upper_bound(RecentBI),
+	SearchSpaceUpperBound = big_node:get_partition_upper_bound(RecentBI),
 	ar_events:send(node_state, {search_space_upper_bound, SearchSpaceUpperBound}),
 	ar_events:send(node_state, {new_tip, B, PrevB}),
 	ar_events:send(node_state, {checkpoint_block, 
@@ -1450,8 +1450,8 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	maybe_reset_miner(State).
 
 log_applied_block(B) ->
-	Partition1 = ar_node:get_partition_number(B#block.recall_byte),
-	Partition2 = ar_node:get_partition_number(B#block.recall_byte2),
+	Partition1 = big_node:get_partition_number(B#block.recall_byte),
+	Partition2 = big_node:get_partition_number(B#block.recall_byte2),
 	case Partition1 of
 		undefined ->
 			ok;

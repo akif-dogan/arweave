@@ -41,7 +41,7 @@ test_syncs_data() ->
 	),
 	Proofs = [Proof || {_, _, _, Proof} <- RecordsWithProofs],
 	ar_test_data_sync:wait_until_syncs_chunks(Proofs),
-	DiskPoolThreshold = ar_node:get_partition_upper_bound(ar_node:get_block_index()),
+	DiskPoolThreshold = big_node:get_partition_upper_bound(big_node:get_block_index()),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs, DiskPoolThreshold),
 	lists:foreach(
 		fun({B, #tx{ id = TXID }, Chunks, {_, Proof}}) ->
@@ -87,7 +87,7 @@ test_syncs_after_joining(Split) ->
 	{TX1, Chunks1} = ar_test_data_sync:tx(Wallet, {Split, 1}, v2, ?BIG(1)),
 	B1 = ar_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX1]),
 	Proofs1 = ar_test_data_sync:post_proofs(main, B1, TX1, Chunks1),
-	UpperBound = ar_node:get_partition_upper_bound(ar_node:get_block_index()),
+	UpperBound = big_node:get_partition_upper_bound(big_node:get_block_index()),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, UpperBound),
 	ar_test_data_sync:wait_until_syncs_chunks(Proofs1),
 	ar_test_node:disconnect_from(peer1),
@@ -104,7 +104,7 @@ test_syncs_after_joining(Split) ->
 	_Peer2 = ar_test_node:rejoin_on(#{ node => peer1, join_on => main }),
 	assert_wait_until_height(peer1, 3),
 	ar_test_node:connect_to_peer(peer1),
-	UpperBound2 = ar_node:get_partition_upper_bound(ar_node:get_block_index()),
+	UpperBound2 = big_node:get_partition_upper_bound(big_node:get_block_index()),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs2, UpperBound2),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs3, UpperBound2),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, infinity).

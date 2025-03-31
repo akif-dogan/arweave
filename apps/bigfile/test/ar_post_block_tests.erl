@@ -692,7 +692,7 @@ test_send_block2() ->
 		end,
 		lists:seq(3, 3 + ?SEARCH_SPACE_UPPER_BOUND_DEPTH)
 	),
-	B5 = ar_storage:read_block(ar_node:get_current_block_hash()),
+	B5 = ar_storage:read_block(big_node:get_current_block_hash()),
 	{ok, {{<<"208">>, _}, _, _, _, _}} = ar_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => ar_serialize:block_announcement_to_binary(#block_announcement{
@@ -701,7 +701,7 @@ test_send_block2() ->
 	ar_test_node:disconnect_from(peer1),
 	ar_test_node:mine(),
 	[_ | _] = wait_until_height(main, 3 + ?SEARCH_SPACE_UPPER_BOUND_DEPTH + 1),
-	B6 = ar_storage:read_block(ar_node:get_current_block_hash()),
+	B6 = ar_storage:read_block(big_node:get_current_block_hash()),
 	{ok, {{<<"200">>, _}, _, Body5, _, _}} = ar_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => ar_serialize:block_announcement_to_binary(#block_announcement{
@@ -736,7 +736,7 @@ test_resigned_solution() ->
 	wait_until_height(main, 1),
 	ar_test_node:disconnect_from(peer1),
 	ar_test_node:mine(peer1),
-	B = ar_node:get_current_block(),
+	B = big_node:get_current_block(),
 	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
 	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
 	ok = ar_events:subscribe(block),
@@ -745,7 +745,7 @@ test_resigned_solution() ->
 	B3 = sign_block(B#block{ tags = [<<"tag2">>] }, B0, Key),
 	post_block(B3, [valid]),
 	assert_wait_until_height(peer1, 2),
-	B4 = ar_test_node:remote_call(peer1, ar_node, get_current_block, []),
+	B4 = ar_test_node:remote_call(peer1, big_node, get_current_block, []),
 	?assertEqual(B#block.indep_hash, B4#block.previous_block),
 	B2H = B2#block.indep_hash,
 	?assertNotEqual(B2#block.indep_hash, B4#block.previous_block),
@@ -788,4 +788,4 @@ tx_id(ID) ->
 	ID.
 
 height(Node) ->
-	ar_test_node:remote_call(Node, ar_node, get_height, []).
+	ar_test_node:remote_call(Node, big_node, get_height, []).

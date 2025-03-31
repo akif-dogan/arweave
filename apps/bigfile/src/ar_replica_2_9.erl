@@ -97,7 +97,7 @@
 ) -> non_neg_integer().
 get_entropy_partition(AbsoluteChunkEndOffset) ->
     BucketStart = get_entropy_bucket_start(AbsoluteChunkEndOffset),
-    ar_node:get_partition_number(BucketStart).
+    big_node:get_partition_number(BucketStart).
 
 %% @doc Return the key used to generate the entropy for the 2.9 replication format.
 %% RewardAddr: The address of the miner that mined the chunk.

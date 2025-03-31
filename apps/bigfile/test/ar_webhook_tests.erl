@@ -108,7 +108,7 @@ test_webhooks() ->
 					fun() ->
 						case ets:lookup(?MODULE, {block, Height}) of
 							[{_, B}] ->
-								{H, _, _} = ar_node:get_block_index_entry(Height),
+								{H, _, _} = big_node:get_block_index_entry(Height),
 								B2 = read_block_when_stored(H),
 								Struct = ar_serialize:block_to_json_struct(B2),
 								Expected =

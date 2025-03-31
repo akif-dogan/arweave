@@ -31,7 +31,7 @@ init([]) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	[ok] = ar_events:subscribe([node_state]),
 	State = #state{ polling_frequency_ms = Config#config.polling * 1000 },
-	case ar_node:is_joined() of
+	case big_node:is_joined() of
 		true ->
 			{ok, handle_node_state_initialized(State)};
 		false ->
@@ -58,7 +58,7 @@ handle_cast({poll, _Ref}, #state{ peer = undefined } = State) ->
 	{noreply, State#state{ pause = true }};
 handle_cast({poll, Ref}, #state{ ref = Ref, peer = Peer,
 		polling_frequency_ms = FrequencyMs } = State) ->
-	CurrentHeight = ar_node:get_height(),
+	CurrentHeight = big_node:get_height(),
 	{L, NotOnChain} = ar_block_cache:get_longest_chain_cache(block_cache),
 	HL = [H || {H, _TXIDs} <- L],
 	case NotOnChain >= 5 of

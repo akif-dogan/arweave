@@ -328,14 +328,14 @@ delete_chunk_metadata_range(Start, End, State) ->
 %% @doc Return true if we expect the chunk with the given data root index value and
 %% relative end offset to end up in one of the configured storage modules.
 is_estimated_long_term_chunk(DataRootOffsetReply, EndOffset) ->
-	WeaveSize = ar_node:get_current_weave_size(),
+	WeaveSize = big_node:get_current_weave_size(),
 	case DataRootOffsetReply of
 		not_found ->
 			%% A chunk from a pending transaction.
 			is_offset_vicinity_covered(WeaveSize);
 		{ok, {TXStartOffset, _}} ->
-			WeaveSize = ar_node:get_current_weave_size(),
-			Size = ar_node:get_recent_max_block_size(),
+			WeaveSize = big_node:get_current_weave_size(),
+			Size = big_node:get_recent_max_block_size(),
 			AbsoluteEndOffset = TXStartOffset + EndOffset,
 			case AbsoluteEndOffset > WeaveSize - Size * 4 of
 				true ->
@@ -349,7 +349,7 @@ is_estimated_long_term_chunk(DataRootOffsetReply, EndOffset) ->
 	end.
 
 is_offset_vicinity_covered(Offset) ->
-	Size = ar_node:get_recent_max_block_size(),
+	Size = big_node:get_recent_max_block_size(),
 	ar_storage_module:has_range(max(0, Offset - Size * 2), Offset + Size * 2).
 
 %% @doc Notify the server about the new pending data root (added to mempool).
@@ -948,7 +948,7 @@ handle_cast({collect_peer_intervals, Start, End}, State) ->
 			store_id = StoreID, weave_size = WeaveSize,
 			all_peers_intervals = AllPeersIntervals } = State,
 	IsJoined =
-		case ar_node:is_joined() of
+		case big_node:is_joined() of
 			false ->
 				ar_util:cast_after(1000, self(), {collect_peer_intervals, Start, End}),
 				false;
@@ -1931,7 +1931,7 @@ remove_invalid_sync_records(PaddedEndOffset, StartOffset, StoreID) ->
 validate_fetched_chunk(Args) ->
 	{Offset, DataPath, TXPath, TXRoot, ChunkSize, StoreID, RequestOrigin} = Args,
 	[{_, T}] = ets:lookup(ar_data_sync_state, disk_pool_threshold),
-	case Offset > T orelse not ar_node:is_joined() of
+	case Offset > T orelse not big_node:is_joined() of
 		true ->
 			log_chunk_error(RequestOrigin, miner_requested_disk_pool_chunk,
 				[{disk_pool_threshold, T}, {end_offset, Offset}]),
@@ -2296,7 +2296,7 @@ recalculate_disk_pool_size(Index, DataRootMap, Cursor, Sum) ->
 get_disk_pool_threshold([]) ->
 	0;
 get_disk_pool_threshold(BI) ->
-	ar_node:get_partition_upper_bound(BI).
+	big_node:get_partition_upper_bound(BI).
 
 remove_orphaned_data(State, BlockStartOffset, WeaveSize) ->
 	ok = remove_tx_index_range(BlockStartOffset, WeaveSize, State),

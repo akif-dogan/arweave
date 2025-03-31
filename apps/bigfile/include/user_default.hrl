@@ -17,7 +17,7 @@
 -include_lib("bigfile/include/ar_data_sync.hrl").
 -include_lib("bigfile/include/ar_header_sync.hrl").
 -include_lib("bigfile/include/big_inflation.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("bigfile/include/ar_p3.hrl").
 -include_lib("bigfile/include/ar_peers.hrl").
 -include_lib("bigfile/include/ar_poa.hrl").

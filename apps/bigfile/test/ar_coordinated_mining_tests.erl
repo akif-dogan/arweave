@@ -3,7 +3,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -import(ar_test_node, [http_get_block/2]).
@@ -410,7 +410,7 @@ mine_in_parallel(Miners, ValidatorNode, CurrentHeight) ->
 	BIValidator = ar_test_node:wait_until_height(ValidatorNode, CurrentHeight + 1, false),
 	%% Since multiple nodes are mining in parallel it's possible that multiple blocks
 	%% were mined. Get the Validator's current height in cas it's more than CurrentHeight+1.
-	NewHeight = ar_test_node:remote_call(ValidatorNode, ar_node, get_height, []),
+	NewHeight = ar_test_node:remote_call(ValidatorNode, big_node, get_height, []),
 
 	Hashes = [Hash || {Hash, _, _} <- lists:sublist(BIValidator, NewHeight - CurrentHeight)],
 	
@@ -435,12 +435,12 @@ mine_in_parallel(Miners, ValidatorNode, CurrentHeight) ->
 	case Block#block.recall_byte2 of
 		undefined -> 
 			[
-				ar_node:get_partition_number(Block#block.recall_byte)
+				big_node:get_partition_number(Block#block.recall_byte)
 			];
 		RecallByte2 ->
 			[
-				ar_node:get_partition_number(Block#block.recall_byte), 
-				ar_node:get_partition_number(RecallByte2)
+				big_node:get_partition_number(Block#block.recall_byte), 
+				big_node:get_partition_number(RecallByte2)
 			]
 	end.
 

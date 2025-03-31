@@ -186,7 +186,7 @@ handle_cast(process_item, #state{ retry_queue = Queue, retry_record = RetryRecor
 		nothing_to_sync ->
 			{noreply, State2};
 		Height ->
-			case ar_node:get_block_index_entry(Height) of
+			case big_node:get_block_index_entry(Height) of
 				not_joined ->
 					{noreply, State2};
 				not_found ->
@@ -200,7 +200,7 @@ handle_cast(process_item, #state{ retry_queue = Queue, retry_record = RetryRecor
 					H2 =
 						case Height < ar_fork:height_2_0() of
 							true ->
-								ar_node:get_2_0_hash_of_1_0_block(Height);
+								big_node:get_2_0_hash_of_1_0_block(Height);
 							false ->
 								not_set
 						end,
@@ -469,7 +469,7 @@ check_fork(Height, H, TXRoot) ->
 		true ->
 			true;
 		false ->
-			case ar_node:get_block_index_entry(Height) of
+			case big_node:get_block_index_entry(Height) of
 				not_joined ->
 					false;
 				not_found ->

@@ -7,7 +7,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("bigfile/include/ar_vdf.hrl").
 
 -import(ar_test_node, [assert_wait_until_height/2, post_block/2, send_new_block/2]).
@@ -301,7 +301,7 @@ test_vdf_client_fast_block() ->
 	send_new_block(ar_test_node:peer_ip(peer1), B1),
 	timer:sleep(10000),
 	?assertEqual(1,
-		length(ar_test_node:remote_call(peer1, ar_node, get_blocks, [])),
+		length(ar_test_node:remote_call(peer1, big_node, get_blocks, [])),
 		"VDF client shouldn't be able to validate the block until the VDF server posts a "
 		"new VDF session"),
 
@@ -347,7 +347,7 @@ test_vdf_client_fast_block_pull_interface() ->
 	send_new_block(ar_test_node:peer_ip(peer1), B1),
 	timer:sleep(10000),
 	?assertEqual(1,
-		length(ar_test_node:remote_call(peer1, ar_node, get_blocks, [])),
+		length(ar_test_node:remote_call(peer1, big_node, get_blocks, [])),
 		"VDF client shouldn't be able to validate the block until the VDF server posts a "
 		"new VDF session"),
 

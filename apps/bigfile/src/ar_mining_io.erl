@@ -11,7 +11,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
--include_lib("bigfile/include/ar_mining.hrl").
+-include_lib("bigfile/include/big_mining.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -define(CACHE_TTL_MS, 2000).
@@ -59,7 +59,7 @@ get_partitions(PartitionUpperBound) when PartitionUpperBound =< 0 ->
 	[];
 get_partitions(PartitionUpperBound) ->
 	{ok, Config} = application:get_env(bigfile, config),
-	Max = ar_node:get_max_partition_number(PartitionUpperBound),
+	Max = big_node:get_max_partition_number(PartitionUpperBound),
 	AllPartitions = lists:foldl(
 		fun	(Module, Acc) ->
 				Addr = ar_storage_module:module_address(Module),
@@ -261,7 +261,7 @@ map_partition_to_store_ids([StoreID | StoreIDs], PartitionToStoreIDs) ->
 get_store_id_partitions({Start, End}, Partitions) when Start >= End ->
 	Partitions;
 get_store_id_partitions({Start, End}, Partitions) ->
-	PartitionNumber = ar_node:get_partition_number(Start),
+	PartitionNumber = big_node:get_partition_number(Start),
 	get_store_id_partitions({Start + ?PARTITION_SIZE, End}, [PartitionNumber | Partitions]).
 
 open_files(StoreIDs) ->
@@ -439,7 +439,7 @@ log_read_range(_Mode, Candidate, WhichChunk, FoundChunks, StartTime) ->
 	ok.
 
 find_thread(RangeStart, RangeEnd, State) ->
-	PartitionNumber = ar_node:get_partition_number(RangeStart),
+	PartitionNumber = big_node:get_partition_number(RangeStart),
 	StoreIDs = maps:get(PartitionNumber, State#state.partition_to_store_ids, not_found),
 	StoreID = find_largest_intersection(StoreIDs, RangeStart, RangeEnd, 0, not_found),
 	Device = maps:get(StoreID, State#state.store_id_to_device, not_found),

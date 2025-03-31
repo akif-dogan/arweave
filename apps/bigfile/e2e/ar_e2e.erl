@@ -224,7 +224,7 @@ source_node_storage_modules(SourcePacking) ->
 	].
 	
 mine_block(Node, Wallet, DataSize, IsTemporary) ->
-	WeaveSize = ar_test_node:remote_call(Node, ar_node, get_current_weave_size, []),
+	WeaveSize = ar_test_node:remote_call(Node, big_node, get_current_weave_size, []),
 	Addr = big_wallet:to_address(Wallet),
 	{TX, Chunks} = generate_tx(Node, Wallet, WeaveSize, DataSize),
 	B = ar_test_node:post_and_mine(#{ miner => Node, await_on => Node }, [TX]),
@@ -393,8 +393,8 @@ assert_empty_partition(Node, PartitionNumber, Packing) ->
 
 assert_mine_and_validate(MinerNode, ValidatorNode, MinerPacking) ->
 	CurrentHeight = max(
-		ar_test_node:remote_call(ValidatorNode, ar_node, get_height, []),
-		ar_test_node:remote_call(MinerNode, ar_node, get_height, [])
+		ar_test_node:remote_call(ValidatorNode, big_node, get_height, []),
+		ar_test_node:remote_call(MinerNode, big_node, get_height, [])
 	),
 	ar_test_node:wait_until_height(ValidatorNode, CurrentHeight),
 	ar_test_node:wait_until_height(MinerNode, CurrentHeight),

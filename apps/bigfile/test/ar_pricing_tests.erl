@@ -317,7 +317,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	_BI1 = ar_test_node:wait_until_height(main, 1),
 	ar_test_node:assert_wait_until_height(peer1, 1),
 	?assertEqual(0, get_balance(MinerPub)),
-	B1 = ar_node:get_current_block(),
+	B1 = big_node:get_current_block(),
 	?assertEqual(10, B1#block.reward),
 	?assertEqual(10, get_reserved_balance(B1#block.reward_addr)),
 	?assertEqual(1, ar_difficulty:get_hash_rate_fixed_ratio(B1)),
@@ -332,7 +332,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	_BI2 = ar_test_node:wait_until_height(main, 2),
 	ar_test_node:assert_wait_until_height(peer1, 2),
 	?assertEqual(0, get_balance(MinerPub)),
-	B2 = ar_node:get_current_block(),
+	B2 = big_node:get_current_block(),
 	?assertEqual(10, B2#block.reward),
 	?assertEqual(20, get_reserved_balance(B2#block.reward_addr)),
 	?assertEqual(B1#block.price_per_gib_minute, B2#block.price_per_gib_minute),
@@ -346,7 +346,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	_BI3 = ar_test_node:wait_until_height(main, 3),
 	ar_test_node:assert_wait_until_height(peer1, 3),
 	?assertEqual(0, get_balance(MinerPub)),
-	B3 = ar_node:get_current_block(),
+	B3 = big_node:get_current_block(),
 	?assertEqual(10, B3#block.reward),
 	?assertEqual(30, get_reserved_balance(B3#block.reward_addr)),
 	?assertEqual(B3#block.price_per_gib_minute, B2#block.price_per_gib_minute),
@@ -360,7 +360,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI4 = ar_test_node:wait_until_height(main, 4),
 	ar_test_node:assert_wait_until_height(peer1, 4),
-	B4 = ar_node:get_current_block(),
+	B4 = big_node:get_current_block(),
 	%% We are at the height ?PRICE_2_6_8_TRANSITION_START + ?PRICE_2_6_8_TRANSITION_BLOCKS
 	%% so the new algorithm kicks in which estimates the expected block reward and takes
 	%% the missing amount from the endowment pool or takes on debt.
@@ -392,7 +392,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI5 = ar_test_node:wait_until_height(main, 5),
 	ar_test_node:assert_wait_until_height(peer1, 5),
-	B5 = ar_node:get_current_block(),
+	B5 = big_node:get_current_block(),
 	?assertEqual(20, get_balance(MinerPub)),
 	AvgBlockTime5 = ar_block_time_history:compute_block_interval(B4),
 	ExpectedReward5 = max(B4#block.price_per_gib_minute
@@ -423,7 +423,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI6 = ar_test_node:wait_until_height(main, 6),
 	ar_test_node:assert_wait_until_height(peer1, 6),
-	B6 = ar_node:get_current_block(),
+	B6 = big_node:get_current_block(),
 	{MinerShareDividend, MinerShareDivisor} = ?MINER_FEE_SHARE,
 	?assertEqual(30, get_balance(MinerPub)),
 	?assertEqual(10 + % inflation
@@ -452,7 +452,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI7 = ar_test_node:wait_until_height(main, 7),
 	ar_test_node:assert_wait_until_height(peer1, 7),
-	B7 = ar_node:get_current_block(),
+	B7 = big_node:get_current_block(),
 	?assertEqual(10 + % inflation
 			HalfKryderLatchReset * 2,
 			B7#block.reward
@@ -468,7 +468,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI8 = ar_test_node:wait_until_height(main, 8),
 	ar_test_node:assert_wait_until_height(peer1, 8),
-	B8 = ar_node:get_current_block(),
+	B8 = big_node:get_current_block(),
 	?assertEqual(30 + ExpectedReward5 + ExpectedReward4, get_balance(MinerPub)),
 	%% Release because at the previous block the endowment pool exceeded the threshold.
 	?assert(B8#block.reward_pool < B7#block.reward_pool),
@@ -491,7 +491,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI9 = ar_test_node:wait_until_height(main, 9),
 	ar_test_node:assert_wait_until_height(peer1, 9),
-	B9 = ar_node:get_current_block(),
+	B9 = big_node:get_current_block(),
 	?assertEqual(0, B9#block.kryder_plus_rate_multiplier_latch),
 	?assertEqual(2, B9#block.kryder_plus_rate_multiplier),
 	?assertEqual(1, B9#block.denomination),
@@ -503,7 +503,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI10 = ar_test_node:wait_until_height(main, 10),
 	ar_test_node:assert_wait_until_height(peer1, 10),
-	B10 = ar_node:get_current_block(),
+	B10 = big_node:get_current_block(),
 	?assertEqual(9 + ?REDENOMINATION_DELAY_BLOCKS, B10#block.redenomination_height),
 	?assertEqual(1, B10#block.denomination),
 	TX6 = ar_test_node:sign_tx(main, Key3, #{ denomination => 0 }),
@@ -522,7 +522,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI11 = ar_test_node:wait_until_height(main, 11),
 	ar_test_node:assert_wait_until_height(peer1, 11),
-	B11 = ar_node:get_current_block(),
+	B11 = big_node:get_current_block(),
 	?assertEqual(1, length(B11#block.txs)),
 	?assertEqual(1, B11#block.denomination),
 	?assertEqual(3, get_balance(Pub4)),
@@ -551,7 +551,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	?assertEqual(100 * 1000, get_balance(Pub5)),
 	?assertEqual(3 * 1000, get_balance(Pub4)),
 	?assertEqual((Balance11 - Reward11 - 100) * 1000, get_balance(Pub3)),
-	B12 = ar_node:get_current_block(),
+	B12 = big_node:get_current_block(),
 	?assertEqual(1, length(B12#block.txs)),
 	?assertEqual(2, B12#block.denomination),
 	?assertEqual(10 * 1000 + % inflation
@@ -594,7 +594,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI13 = ar_test_node:wait_until_height(main, 13),
 	ar_test_node:assert_wait_until_height(peer1, 13),
-	B13 = ar_node:get_current_block(),
+	B13 = big_node:get_current_block(),
 	Reward17_2 = erlang:ceil(Reward17 / 1000) * 1000,
 	AvgBlockTime13 = ar_block_time_history:compute_block_interval(B12),
 	BaseReward13 =
@@ -623,7 +623,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:mine(),
 	_BI14 = ar_test_node:wait_until_height(main, 14),
 	ar_test_node:assert_wait_until_height(peer1, 14),
-	B14 = ar_node:get_current_block(),
+	B14 = big_node:get_current_block(),
 	ScheduledPricePerGiBMinute13 = B13#block.scheduled_price_per_gib_minute,
 	?assertEqual(
 		max(ScheduledPricePerGiBMinute13 div 2, min(
@@ -661,7 +661,7 @@ get_balance(Pub) ->
 			path => "/wallet/" ++ binary_to_list(ar_util:encode(Address)) ++ "/balance"
 		}),
 	Balance = binary_to_integer(Reply),
-	B = ar_node:get_current_block(),
+	B = big_node:get_current_block(),
 	{ok, {{<<"200">>, _}, _, Reply2, _, _}} =
 		ar_http:req(#{
 			method => get,

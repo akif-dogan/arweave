@@ -3,7 +3,7 @@
 %% with this file, You can obtain one at
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
--module(ar_node).
+-module(big_node).
 
 -export([get_recent_block_hash_by_height/1, get_blocks/0, get_block_index/0,
 		get_current_block/0, get_current_diff/0,
