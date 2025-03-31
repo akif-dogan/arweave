@@ -7,7 +7,7 @@
 	update_account/6, is_account_banned/2]).
 
 -include("../include/big.hrl").
--include("../include/ar_pricing.hrl").
+-include("../include/big_pricing.hrl").
 -include("../include/big_consensus.hrl").
 -include("../include/ar_mining.hrl").
 
@@ -39,7 +39,7 @@ apply_txs(Accounts, Denomination, TXs) ->
 %% reward to the prover.
 update_accounts(B, PrevB, Accounts) ->
 	EndowmentPool = PrevB#block.reward_pool,
-	Rate = ar_pricing:usd_to_big_rate(PrevB),
+	Rate = big_pricing:usd_to_big_rate(PrevB),
 	PricePerGiBMinute = PrevB#block.price_per_gib_minute,
 	KryderPlusRateMultiplierLatch = PrevB#block.kryder_plus_rate_multiplier_latch,
 	KryderPlusRateMultiplier = PrevB#block.kryder_plus_rate_multiplier,
@@ -162,12 +162,12 @@ update_sender_balance(Accounts, Denomination,
 	Addr = big_wallet:to_address(From, SigType),
 	case maps:get(Addr, Accounts, not_found) of
 		{Balance, _LastTX} ->
-			Balance2 = ar_pricing:redenominate(Balance, 1, Denomination),
-			Spent = ar_pricing:redenominate(Qty + Reward, TXDenomination, Denomination),
+			Balance2 = big_pricing:redenominate(Balance, 1, Denomination),
+			Spent = big_pricing:redenominate(Qty + Reward, TXDenomination, Denomination),
 			update_account(Addr, Balance2 - Spent, ID, Denomination, true, Accounts);
 		{Balance, _LastTX, AccountDenomination, MiningPermission} ->
-			Balance2 = ar_pricing:redenominate(Balance, AccountDenomination, Denomination),
-			Spent = ar_pricing:redenominate(Qty + Reward, TXDenomination, Denomination),
+			Balance2 = big_pricing:redenominate(Balance, AccountDenomination, Denomination),
+			Spent = big_pricing:redenominate(Qty + Reward, TXDenomination, Denomination),
 			update_account(Addr, Balance2 - Spent, ID, Denomination, MiningPermission,
 					Accounts);
 		_ ->
@@ -184,15 +184,15 @@ update_recipient_balance(Accounts, Denomination,
 		}) ->
 	case maps:get(To, Accounts, not_found) of
 		not_found ->
-			Qty2 = ar_pricing:redenominate(Qty, TXDenomination, Denomination),
+			Qty2 = big_pricing:redenominate(Qty, TXDenomination, Denomination),
 			update_account(To, Qty2, <<>>, Denomination, true, Accounts);
 		{Balance, LastTX} ->
-			Qty2 = ar_pricing:redenominate(Qty, TXDenomination, Denomination),
-			Balance2 = ar_pricing:redenominate(Balance, 1, Denomination),
+			Qty2 = big_pricing:redenominate(Qty, TXDenomination, Denomination),
+			Balance2 = big_pricing:redenominate(Balance, 1, Denomination),
 			update_account(To, Balance2 + Qty2, LastTX, Denomination, true, Accounts);
 		{Balance, LastTX, AccountDenomination, MiningPermission} ->
-			Qty2 = ar_pricing:redenominate(Qty, TXDenomination, Denomination),
-			Balance2 = ar_pricing:redenominate(Balance, AccountDenomination, Denomination),
+			Qty2 = big_pricing:redenominate(Qty, TXDenomination, Denomination),
+			Balance2 = big_pricing:redenominate(Balance, AccountDenomination, Denomination),
 			update_account(To, Balance2 + Qty2, LastTX, Denomination, MiningPermission,
 					Accounts)
 	end.
@@ -204,11 +204,11 @@ get_miner_reward_and_endowment_pool(Args) ->
 	true = Height >= ar_fork:height_2_4(),
 	case ar_pricing_transition:is_v2_pricing_height(Height) of
 		true ->
-			ar_pricing:get_miner_reward_endowment_pool_debt_supply({EndowmentPool, DebtSupply,
+			big_pricing:get_miner_reward_endowment_pool_debt_supply({EndowmentPool, DebtSupply,
 					TXs, WeaveSize, Height, PricePerGiBMinute, KryderPlusRateMultiplierLatch,
 					KryderPlusRateMultiplier, Denomination, BlockInterval});
 		false ->
-			{MinerReward, EndowmentPool2} = ar_pricing:get_miner_reward_and_endowment_pool({
+			{MinerReward, EndowmentPool2} = big_pricing:get_miner_reward_and_endowment_pool({
 					EndowmentPool, TXs, RewardAddr, WeaveSize, Height, Timestamp, Rate}),
 			{MinerReward, EndowmentPool2, 0, 0, 1}
 	end.
@@ -315,10 +315,10 @@ ban_account(Addr, Accounts, Denomination) ->
 		not_found ->
 			maps:put(Addr, {1, <<>>, Denomination, false}, Accounts);
 		{Balance, LastTX} ->
-			Balance2 = ar_pricing:redenominate(Balance, 1, Denomination),
+			Balance2 = big_pricing:redenominate(Balance, 1, Denomination),
 			maps:put(Addr, {Balance2 + 1, LastTX, Denomination, false}, Accounts);
 		{Balance, LastTX, AccountDenomination, _MiningPermission} ->
-			Balance2 = ar_pricing:redenominate(Balance, AccountDenomination, Denomination),
+			Balance2 = big_pricing:redenominate(Balance, AccountDenomination, Denomination),
 			maps:put(Addr, {Balance2 + 1, LastTX, Denomination, false}, Accounts)
 	end.
 
@@ -336,7 +336,7 @@ update_accounts4(B, PrevB, Accounts, Args) ->
 			LockedRewards = ar_rewards:get_locked_rewards(PrevB),
 			Sample = lists:sublist(LockedRewards, ?DOUBLE_SIGNING_REWARD_SAMPLE_SIZE),
 			{Min, MinDenomination} = get_minimal_reward(Sample),
-			Min2 = ar_pricing:redenominate(Min, MinDenomination, Denomination),
+			Min2 = big_pricing:redenominate(Min, MinDenomination, Denomination),
 			ProverReward = min(Min2 * Dividend div Divisor, Sum),
 			{MinerReward, EndowmentPool, DebtSupply, KryderPlusRateMultiplierLatch,
 					KryderPlusRateMultiplier} = Args,
@@ -362,7 +362,7 @@ get_minimal_reward([{_Addr, _HashRate, Reward, RewardDenomination} | RewardHisto
 			infinity ->
 				infinity;
 			_ ->
-				ar_pricing:redenominate(Min, Denomination, RewardDenomination)
+				big_pricing:redenominate(Min, Denomination, RewardDenomination)
 		end,
 	case Reward < Min2 of
 		true ->
@@ -470,7 +470,7 @@ validate_block(difficulty, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) ->
 	end;
 
 validate_block(usd_to_big_rate, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) ->
-	{USDToBIGRate, ScheduledUSDToBIGRate} = ar_pricing:recalculate_usd_to_big_rate(OldB),
+	{USDToBIGRate, ScheduledUSDToBIGRate} = big_pricing:recalculate_usd_to_big_rate(OldB),
 	case NewB#block.usd_to_big_rate == USDToBIGRate
 			andalso NewB#block.scheduled_usd_to_big_rate == ScheduledUSDToBIGRate of
 		false ->
@@ -483,7 +483,7 @@ validate_block(denomination, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) -
 	#block{ height = Height, denomination = Denomination,
 			redenomination_height = RedenominationHeight } = NewB,
 	true = Height >= ar_fork:height_2_6(),
-	case ar_pricing:may_be_redenominate(OldB) of
+	case big_pricing:may_be_redenominate(OldB) of
 		{Denomination, RedenominationHeight} ->
 			validate_block(reward_history_hash, {NewB, OldB, Wallets, BlockAnchors,
 					RecentTXMap});
@@ -549,9 +549,9 @@ validate_block(next_vdf_difficulty, {NewB, OldB, Wallets, BlockAnchors, RecentTX
 validate_block(price_per_gib_minute, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) ->
 	#block{ denomination = Denomination } = NewB,
 	#block{ denomination = PrevDenomination } = OldB,
-	{Price, ScheduledPrice} = ar_pricing:recalculate_price_per_gib_minute(OldB),
-	Price2 = ar_pricing:redenominate(Price, PrevDenomination, Denomination),
-	ScheduledPrice2 = ar_pricing:redenominate(ScheduledPrice, PrevDenomination, Denomination),
+	{Price, ScheduledPrice} = big_pricing:recalculate_price_per_gib_minute(OldB),
+	Price2 = big_pricing:redenominate(Price, PrevDenomination, Denomination),
+	ScheduledPrice2 = big_pricing:redenominate(ScheduledPrice, PrevDenomination, Denomination),
 	case NewB#block.price_per_gib_minute == Price2
 			andalso NewB#block.scheduled_price_per_gib_minute == ScheduledPrice2 of
 		false ->
@@ -562,7 +562,7 @@ validate_block(price_per_gib_minute, {NewB, OldB, Wallets, BlockAnchors, RecentT
 
 validate_block(txs, {NewB = #block{ timestamp = Timestamp, height = Height, txs = TXs },
 		OldB, Wallets, BlockAnchors, RecentTXMap}) ->
-	Rate = ar_pricing:usd_to_big_rate(OldB),
+	Rate = big_pricing:usd_to_big_rate(OldB),
 	PricePerGiBMinute = OldB#block.price_per_gib_minute,
 	KryderPlusRateMultiplier = OldB#block.kryder_plus_rate_multiplier,
 	Denomination = OldB#block.denomination,

@@ -1,7 +1,7 @@
 -module(ar_pricing_tests).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_pricing.hrl").
+-include_lib("bigfile/include/big_pricing.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
@@ -38,7 +38,7 @@ test_price_per_gib_minute_pre_block_time_history() ->
 	B = #block{
 		reward_history = reward_history(1, 1), block_time_history = block_time_history(1, 1) },
 	?assertEqual(ar_pricing_transition:static_price(),
-		ar_pricing:get_price_per_gib_minute(Start, B),
+		big_pricing:get_price_per_gib_minute(Start, B),
 		"Before we have enough block time history").
 
 test_price_per_gib_minute_transition_phases() ->
@@ -50,60 +50,60 @@ test_price_per_gib_minute_transition_phases() ->
 		reward_history = reward_history(1, 1), block_time_history = block_time_history(1, 1) },
 	V2Price = 61440,
 	?assertEqual(V2Price,
-		ar_pricing:get_v2_price_per_gib_minute(10, B),
+		big_pricing:get_v2_price_per_gib_minute(10, B),
 		"V2 Price"),
 	%% Static price
 	?assertEqual(ar_pricing_transition:static_price(),
-		ar_pricing:get_price_per_gib_minute(4, B),
+		big_pricing:get_price_per_gib_minute(4, B),
 		"Static price"),
 	%% 2.6.8 start
 	?assertEqual(ar_pricing_transition:static_price(),
-		ar_pricing:get_price_per_gib_minute(5, B),
+		big_pricing:get_price_per_gib_minute(5, B),
 		"2.6.8 start price"),
 	%% 2.6.8 transition, pre-2.7.2
 	%% 1/20 interpolation from 8162 to 61440
 	?assertEqual(10825,
-		ar_pricing:get_price_per_gib_minute(6, B),
+		big_pricing:get_price_per_gib_minute(6, B),
 		"2.6.8 transition, pre-2.7.2 activation price"),
 	%% 2.6.8 transition, post-2.7.2, pre-cap
 	%% 5/20 interpolation from 8162 to 61440
 	?assertEqual(21481,
-		ar_pricing:get_price_per_gib_minute(10, B),
+		big_pricing:get_price_per_gib_minute(10, B),
 		"2.6.8 transition, at 2.7.2 activation price"),
 	%% 6/20 interpolation from 8162 to 61440
 	?assertEqual(24145,
-		ar_pricing:get_price_per_gib_minute(11, B),
+		big_pricing:get_price_per_gib_minute(11, B),
 		"2.6.8 transition, post 2.7.2 activation, pre-cap price"),
 	%% 2.6.8 transition, post-2.7.2, post-cap
 	?assertEqual(30_000,
-		ar_pricing:get_price_per_gib_minute(14, B),
+		big_pricing:get_price_per_gib_minute(14, B),
 		"2.6.8 transition, post 2.7.2 activation, post-cap price"),
 	%% 2.7.2 start
 	?assertEqual(30_000,
-		ar_pricing:get_price_per_gib_minute(15, B),
+		big_pricing:get_price_per_gib_minute(15, B),
 		"2.7.2 start price"),
 	%% 2.7.2 transition, before 2.6.8 end
 	%% 5/40 interpolation from 30000 to 61440
 	?assertEqual(33930,
-		ar_pricing:get_price_per_gib_minute(20, B),
+		big_pricing:get_price_per_gib_minute(20, B),
 		"2.7.2 transition price, before 2.6.8 end"),
 	%% 2.7.2 transition, at 2.6.8 end
 	%% 10/40 interpolation from 30000 to 61440
 	?assertEqual(37860,
-		ar_pricing:get_price_per_gib_minute(25, B),
+		big_pricing:get_price_per_gib_minute(25, B),
 		"2.7.2 transition price, at 2.6.8 end"),
 	%% 2.7.2 transition, after 2.6.8 end
 	%% 11/40 interpolation from 30000 to 61440
 	?assertEqual(38646,
-		ar_pricing:get_price_per_gib_minute(26, B),
+		big_pricing:get_price_per_gib_minute(26, B),
 		"2.7.2 transition price, after 2.6.8 end"),
 	%% 2.7.2 end
 	?assertEqual(V2Price,
-		ar_pricing:get_price_per_gib_minute(55, B),
+		big_pricing:get_price_per_gib_minute(55, B),
 		"2.7.2 end price"),
 	%% v2 price
 	?assertEqual(V2Price,
-		ar_pricing:get_price_per_gib_minute(56, B),
+		big_pricing:get_price_per_gib_minute(56, B),
 		"After 2.7.2 transition end").
 
 test_v2_price() ->
@@ -164,56 +164,56 @@ do_price_per_gib_minute_post_transition(Height,
 	B0 = #block{
 		reward_history = reward_history(1, 1), block_time_history = block_time_history(1, 1) },
 	?assertEqual(AllOneChunkBaseline,
-		ar_pricing:get_price_per_gib_minute(Height, B0),
+		big_pricing:get_price_per_gib_minute(Height, B0),
 		io_lib:format(
 			"hash_rate: low, reward: low, vdf: perfect, chunks: all_one, poa1_diff: ~B",
 			[PoA1DiffMultiplier])),
 	B1 = #block{
 		reward_history = reward_history(1, 10), block_time_history = block_time_history(1, 1) },
 	?assertEqual(AllOneChunkBaseline * 10,
-		ar_pricing:get_price_per_gib_minute(Height, B1),
+		big_pricing:get_price_per_gib_minute(Height, B1),
 		io_lib:format(
 			"hash_rate: low, reward: high, vdf: perfect, chunks: all_one, poa1_diff: ~B",
 			[PoA1DiffMultiplier])),
 	B2 = #block{
 		reward_history = reward_history(10, 1), block_time_history = block_time_history(1, 1) },
 	?assertEqual(AllOneChunkBaseline div 10,
-		ar_pricing:get_price_per_gib_minute(Height, B2),
+		big_pricing:get_price_per_gib_minute(Height, B2),
 		io_lib:format(
 			"hash_rate: high, reward: low, vdf: perfect, chunks: all_one, poa1_diff: ~B",
 			[PoA1DiffMultiplier])),
 	B3 = #block{
 		reward_history = reward_history(10, 10), block_time_history = block_time_history(1, 1) },
 	?assertEqual(AllOneChunkBaseline,
-		ar_pricing:get_price_per_gib_minute(Height, B3),
+		big_pricing:get_price_per_gib_minute(Height, B3),
 		io_lib:format(
 			"hash_rate: high, reward: high, vdf: perfect, chunks: all_one, poa1_diff: ~B",
 			[PoA1DiffMultiplier])),
 	B4 = #block{
 		reward_history = reward_history(1, 1), block_time_history = block_time_history(10, 1) },
 	?assertEqual(AllOneChunkBaseline div 10,
-		ar_pricing:get_price_per_gib_minute(Height, B4),
+		big_pricing:get_price_per_gib_minute(Height, B4),
 		io_lib:format(
 			"hash_rate: low, reward: low, vdf: slow, chunks: all_one, poa1_diff: ~B",
 			[PoA1DiffMultiplier])),
 	B5 = #block{
 		reward_history = reward_history(1, 1), block_time_history = block_time_history(1, 10) },
 	?assertEqual(AllOneChunkBaseline * 10,
-		ar_pricing:get_price_per_gib_minute(Height, B5),
+		big_pricing:get_price_per_gib_minute(Height, B5),
 		io_lib:format(
 			"hash_rate: low, reward: low, vdf: fast, chunks: all_one, poa1_diff: ~B",
 			[PoA1DiffMultiplier])),
 	B6 = #block{
 		reward_history = reward_history(1, 1), block_time_history = all_two_chunks() },
 	?assertEqual(AllTwoChunkBaseline,
-		ar_pricing:get_price_per_gib_minute(Height, B6),
+		big_pricing:get_price_per_gib_minute(Height, B6),
 		io_lib:format(
 			"hash_rate: low, reward: low, vdf: perfect, chunks: all_two, poa1_diff: ~B",
 			[PoA1DiffMultiplier])),
 	B7 = #block{
 		reward_history = reward_history(1, 1), block_time_history = mix_chunks() },
 	?assertEqual(MixedChunkBaseline,
-		ar_pricing:get_price_per_gib_minute(Height, B7),
+		big_pricing:get_price_per_gib_minute(Height, B7),
 		io_lib:format(
 			"hash_rate: low, reward: low, vdf: perfect, chunks: mix, poa1_diff: ~B",
 			[PoA1DiffMultiplier])).
@@ -267,7 +267,7 @@ recalculate_price_per_gib_minute_2_7_test_() ->
 		{ar_fork, height_2_7_1, fun() -> infinity end}],
 		fun() ->
 			B = recalculate_price_per_gib_minute_test_block(),
-			?assertEqual({15000, 8162}, ar_pricing:recalculate_price_per_gib_minute(B)),
+			?assertEqual({15000, 8162}, big_pricing:recalculate_price_per_gib_minute(B)),
 			ok
 		end).
 
@@ -278,7 +278,7 @@ recalculate_price_per_gib_minute_2_7_1_ema_test_() ->
 		{ar_fork, height_2_7_1, fun() -> -1 end}],
 		fun() ->
 			B = recalculate_price_per_gib_minute_test_block(),
-			?assertEqual({15000, 14316}, ar_pricing:recalculate_price_per_gib_minute(B)),
+			?assertEqual({15000, 14316}, big_pricing:recalculate_price_per_gib_minute(B)),
 			ok
 		end).
 
@@ -378,7 +378,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	?assertEqual(B4#block.price_per_gib_minute, B3#block.scheduled_price_per_gib_minute),
 	PricePerGiBMinute3 = B3#block.price_per_gib_minute,
 	?assertEqual(max(PricePerGiBMinute3 div 2, min(PricePerGiBMinute3 * 2,
-			ar_pricing:get_price_per_gib_minute(B3#block.height, B3))),
+			big_pricing:get_price_per_gib_minute(B3#block.height, B3))),
 			B4#block.scheduled_price_per_gib_minute),
 	%% The Kryder+ rate multiplier is 2 now so the fees should have doubled.
 	?assert(lists:member(ar_test_node:get_optimistic_tx_price(main, 1024), [Fee * 2, Fee * 2 + 1])),
@@ -438,7 +438,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ScheduledPricePerGiBMinute5 = B5#block.scheduled_price_per_gib_minute,
 	?assertEqual(
 		max(ScheduledPricePerGiBMinute5 div 2,
-			min(ar_pricing:get_price_per_gib_minute(B5#block.height, B5),
+			min(big_pricing:get_price_per_gib_minute(B5#block.height, B5),
 				ScheduledPricePerGiBMinute5 * 2)),
 			B6#block.scheduled_price_per_gib_minute),
 	assert_new_account_fee(),
@@ -627,7 +627,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ScheduledPricePerGiBMinute13 = B13#block.scheduled_price_per_gib_minute,
 	?assertEqual(
 		max(ScheduledPricePerGiBMinute13 div 2, min(
-			ar_pricing:get_price_per_gib_minute(B13#block.height, B13),
+			big_pricing:get_price_per_gib_minute(B13#block.height, B13),
 			ScheduledPricePerGiBMinute13 * 2
 		)), B14#block.scheduled_price_per_gib_minute).
 

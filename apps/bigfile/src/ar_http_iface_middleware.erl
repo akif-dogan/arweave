@@ -2705,11 +2705,11 @@ get_total_supply(RootHash, Cursor, Sum, Denomination) ->
 	end.
 
 get_balance_sum([{_, {Balance, _LastTX}} | Range], BlockDenomination) ->
-	ar_pricing:redenominate(Balance, 1, BlockDenomination)
+	big_pricing:redenominate(Balance, 1, BlockDenomination)
 			+ get_balance_sum(Range, BlockDenomination);
 get_balance_sum([{_, {Balance, _LastTX, Denomination, _MiningPermission}} | Range],
 		BlockDenomination) ->
-	ar_pricing:redenominate(Balance, Denomination, BlockDenomination)
+	big_pricing:redenominate(Balance, Denomination, BlockDenomination)
 			+ get_balance_sum(Range, BlockDenomination);
 get_balance_sum([], _BlockDenomination) ->
 	0.

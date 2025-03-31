@@ -6,7 +6,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_pricing.hrl").
+-include_lib("bigfile/include/big_pricing.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -73,7 +73,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 				RewardAddr = big_wallet:to_address(RewardKey),
 				HashRate = ar_difficulty:get_hash_rate_fixed_ratio(B0),
 				RewardHistory = [{RewardAddr, HashRate, 10, 1}],
-				PricePerGiBMinute = ar_pricing:get_price_per_gib_minute(0, 
+				PricePerGiBMinute = big_pricing:get_price_per_gib_minute(0, 
 						B0#block{ reward_history = RewardHistory, denomination = 1 }),
 				B0#block{ hash = crypto:strong_rand_bytes(32),
 						nonce = 0, recall_byte = 0, partition_number = 0,

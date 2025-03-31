@@ -11,7 +11,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/ar_header_sync.hrl").
--include_lib("bigfile/include/ar_pricing.hrl").
+-include_lib("bigfile/include/big_pricing.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").
 
 %%%===================================================================
@@ -120,9 +120,9 @@ handle_call({get_balance, Address}, _From, DAG) ->
 			Denomination = ar_diff_dag:get_sink_metadata(DAG),
 			case Entry of
 				{Balance, _LastTX} ->
-					{reply, ar_pricing:redenominate(Balance, 1, Denomination), DAG};
+					{reply, big_pricing:redenominate(Balance, 1, Denomination), DAG};
 				{Balance, _LastTX, BaseDenomination, _MiningPermission} ->
-					{reply, ar_pricing:redenominate(Balance, BaseDenomination, Denomination),
+					{reply, big_pricing:redenominate(Balance, BaseDenomination, Denomination),
 							DAG}
 			end
 	end;
@@ -139,9 +139,9 @@ handle_call({get_balance, RootHash, Address}, _From, DAG) ->
 					Denomination = ar_diff_dag:get_metadata(DAG, RootHash),
 					case Entry of
 						{Balance, _LastTX} ->
-							{reply, ar_pricing:redenominate(Balance, 1, Denomination), DAG};
+							{reply, big_pricing:redenominate(Balance, 1, Denomination), DAG};
 						{Balance, _LastTX, BaseDenomination, _MiningPermission} ->
-							{reply, ar_pricing:redenominate(Balance, BaseDenomination,
+							{reply, big_pricing:redenominate(Balance, BaseDenomination,
 									Denomination), DAG}
 					end
 			end
@@ -300,7 +300,7 @@ load_wallet_tree_from_peers(ID, Peers, Acc, Cursor, N) ->
 apply_block(B, PrevB, DAG) ->
 	Denomination2 = B#block.denomination,
 	RedenominationHeight2 = B#block.redenomination_height,
-	case ar_pricing:may_be_redenominate(PrevB) of
+	case big_pricing:may_be_redenominate(PrevB) of
 		{Denomination2, RedenominationHeight2} ->
 			apply_block2(B, PrevB, DAG);
 		_ ->
@@ -334,9 +334,9 @@ apply_block2(B, PrevB, Args, Tree, DAG) ->
 			KryderPlusRateMultiplier, Accounts} = Args,
 	Denomination = PrevB#block.denomination,
 	Denomination2 = B#block.denomination,
-	EndowmentPool2 = ar_pricing:redenominate(EndowmentPool, Denomination, Denomination2),
-	MinerReward2 = ar_pricing:redenominate(MinerReward, Denomination, Denomination2),
-	DebtSupply2 = ar_pricing:redenominate(DebtSupply, Denomination, Denomination2),
+	EndowmentPool2 = big_pricing:redenominate(EndowmentPool, Denomination, Denomination2),
+	MinerReward2 = big_pricing:redenominate(MinerReward, Denomination, Denomination2),
+	DebtSupply2 = big_pricing:redenominate(DebtSupply, Denomination, Denomination2),
 	case {B#block.reward_pool == EndowmentPool2, B#block.reward == MinerReward2,
 			B#block.debt_supply == DebtSupply2,
 			B#block.kryder_plus_rate_multiplier_latch == KryderPlusRateMultiplierLatch,

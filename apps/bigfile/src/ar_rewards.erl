@@ -165,7 +165,7 @@ get_total_reward_for_address(Addr, B) ->
 get_total_reward_for_address(_Addr, [], _Denomination, Total) ->
 	Total;
 get_total_reward_for_address(Addr, [{Addr, _, Reward, RewardDenomination} | LockedRewards], Denomination, Total) ->
-	Reward2 = ar_pricing:redenominate(Reward, RewardDenomination, Denomination),
+	Reward2 = big_pricing:redenominate(Reward, RewardDenomination, Denomination),
 	get_total_reward_for_address(Addr, LockedRewards, Denomination, Total + Reward2);
 get_total_reward_for_address(Addr, [_ | LockedRewards], Denomination, Total) ->
 	get_total_reward_for_address(Addr, LockedRewards, Denomination, Total).
@@ -184,7 +184,7 @@ get_totals([], _Denomination, HashRateTotal, RewardTotal) ->
 get_totals([{_Addr, HashRate, Reward, RewardDenomination} | History],
 		Denomination, HashRateTotal, RewardTotal) ->
 	HashRateTotal2 = HashRateTotal + HashRate,
-	Reward2 = ar_pricing:redenominate(Reward, RewardDenomination, Denomination),
+	Reward2 = big_pricing:redenominate(Reward, RewardDenomination, Denomination),
 	RewardTotal2 = RewardTotal + Reward2,
 	get_totals(History, Denomination, HashRateTotal2, RewardTotal2).
 
@@ -214,7 +214,7 @@ apply_rewards2([{Addr, _HashRate, Reward, RewardDenomination} | RewardsToApply],
 		true ->
 			apply_rewards2(RewardsToApply, Denomination, Accounts);
 		false ->
-			Reward2 = ar_pricing:redenominate(Reward, RewardDenomination,
+			Reward2 = big_pricing:redenominate(Reward, RewardDenomination,
 					Denomination),
 			Accounts2 = apply_reward(Accounts, Addr, Reward2, Denomination),
 			apply_rewards2(RewardsToApply, Denomination, Accounts2)
@@ -228,11 +228,11 @@ apply_reward(Accounts, RewardAddr, Amount, Denomination) ->
 		not_found ->
 			ar_node_utils:update_account(RewardAddr, Amount, <<>>, Denomination, true, Accounts);
 		{Balance, LastTX} ->
-			Balance2 = ar_pricing:redenominate(Balance, 1, Denomination),
+			Balance2 = big_pricing:redenominate(Balance, 1, Denomination),
 			ar_node_utils:update_account(RewardAddr, Balance2 + Amount, LastTX,
 				Denomination, true, Accounts);
 		{Balance, LastTX, AccountDenomination, MiningPermission} ->
-			Balance2 = ar_pricing:redenominate(Balance, AccountDenomination, Denomination),
+			Balance2 = big_pricing:redenominate(Balance, AccountDenomination, Denomination),
 			ar_node_utils:update_account(RewardAddr, Balance2 + Amount, LastTX,
 				Denomination, MiningPermission, Accounts)
 	end.

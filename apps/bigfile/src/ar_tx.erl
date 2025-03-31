@@ -9,7 +9,7 @@
 		get_addresses/1, get_weave_size_increase/2, utility/1]).
 
 -include("../include/big.hrl").
--include("../include/ar_pricing.hrl").
+-include("../include/big_pricing.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -530,7 +530,7 @@ verify_malleability2(Args) ->
 						true ->
 							true;
 						false ->
-							TruncatedReward = ar_pricing:redenominate(list_to_integer(
+							TruncatedReward = big_pricing:redenominate(list_to_integer(
 									tl(integer_to_list(TX#tx.reward))),
 									TX#tx.denomination,
 									Denomination),
@@ -607,7 +607,7 @@ is_tx_fee_sufficient(Args) ->
 	MinimumRequiredFee = ar_tx:get_tx_fee({DataSize, PricePerGiBMinute,
 			KryderPlusRateMultiplier, Addr, Accounts, Height + 1}),
 	Fee = TX#tx.reward,
-	ar_pricing:redenominate(Fee, TX#tx.denomination, Denomination) >= MinimumRequiredFee.
+	big_pricing:redenominate(Fee, TX#tx.denomination, Denomination) >= MinimumRequiredFee.
 
 get_tx_fee(Args) ->
 	{DataSize, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height} = Args,
@@ -636,7 +636,7 @@ get_static_2_6_8_tx_fee(DataSize, Addr, Accounts) ->
 get_tx_fee2(Args) ->
 	{DataSize, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height} = Args,
 	Args2 = {DataSize + ?TX_SIZE_BASE, PricePerGiBMinute, KryderPlusRateMultiplier, Height},
-	UploadFee = ar_pricing:get_tx_fee(Args2),
+	UploadFee = big_pricing:get_tx_fee(Args2),
 	case Addr == <<>> orelse maps:is_key(Addr, Accounts) of
 		true ->
 			UploadFee;
@@ -649,7 +649,7 @@ get_tx_fee2(Args) ->
 get_new_account_fee(BytePerMinutePrice, KryderPlusRateMultiplier, Height) ->
 	Args = {?NEW_ACCOUNT_FEE_DATA_SIZE_EQUIVALENT, BytePerMinutePrice,
 			KryderPlusRateMultiplier, Height},
-	ar_pricing:get_tx_fee(Args).
+	big_pricing:get_tx_fee(Args).
 
 verify_target_length(TX, Height) ->
 	case Height >= ar_fork:height_2_4() of

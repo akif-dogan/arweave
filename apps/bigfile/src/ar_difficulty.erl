@@ -25,7 +25,7 @@ get_hash_rate_fixed_ratio(B) ->
 			%% amount of CPU work put into mining a block. This is not what
 			%% we use it for. We use it as a denominator when computing
 			%% a share contributed by a single partition - see
-			%% ar_pricing:get_v2_price_per_gib_minute. Therefore, the hash
+			%% big_pricing:get_v2_price_per_gib_minute. Therefore, the hash
 			%% rate computed here needs to have the same "units" as
 			%% the hash rate we estimate for the partition -
 			%% the "normalized" hash rate where a recall range only

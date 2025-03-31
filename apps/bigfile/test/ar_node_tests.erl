@@ -1,7 +1,7 @@
 -module(ar_node_tests).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_pricing.hrl").
+-include_lib("bigfile/include/big_pricing.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("eunit/include/eunit.hrl").
 

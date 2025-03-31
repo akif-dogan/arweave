@@ -982,9 +982,9 @@ test_get_total_supply(_Args) ->
 	TotalSupply =
 		ar_patricia_tree:foldr(
 			fun	(_, {B, _}, Acc) ->
-					Acc + ar_pricing:redenominate(B, 1, BlockDenomination);
+					Acc + big_pricing:redenominate(B, 1, BlockDenomination);
 				(_, {B, _, Denomination, _}, Acc) ->
-					Acc + ar_pricing:redenominate(B, Denomination, BlockDenomination)
+					Acc + big_pricing:redenominate(B, Denomination, BlockDenomination)
 			end,
 			0,
 			ar_diff_dag:get_sink(sys:get_state(big_wallets))
