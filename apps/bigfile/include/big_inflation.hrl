@@ -1,5 +1,5 @@
--ifndef(AR_INFLATION_HRL).
--define(AR_INFLATION_HRL, true).
+-ifndef(BIG_INFLATION_HRL).
+-define(BIG_INFLATION_HRL, true).
 
 -include_lib("bigfile/include/big.hrl").
 
