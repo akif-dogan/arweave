@@ -438,7 +438,7 @@ handle_info({event, block, {rejected, Reason, _H, Peer}}, State) when Peer /= no
 
 	case {IssueBan, IssueWarning, Ignore} of
 		{true, false, false} ->
-			ar_blacklist_middleware:ban_peer(Peer, ?BAD_BLOCK_BAN_TIME),
+			big_blacklist_middleware:ban_peer(Peer, ?BAD_BLOCK_BAN_TIME),
 			remove_peer(banned, Peer);
 		{false, true, false} ->
 			issue_warning(Peer, block_rejected, Reason);
@@ -775,7 +775,7 @@ check_peer(Peer) ->
 	check_peer(Peer, not is_loopback_ip(Peer)).
 check_peer(Peer, IsPeerScopeValid) ->
 	IsBlacklisted = lists:member(Peer, ?PEER_PERMANENT_BLACKLIST),
-	IsBanned = ar_blacklist_middleware:is_peer_banned(Peer) == banned,
+	IsBanned = big_blacklist_middleware:is_peer_banned(Peer) == banned,
 	case IsPeerScopeValid andalso not IsBlacklisted andalso not IsBanned of
 		true ->
 			ok;
@@ -1222,7 +1222,7 @@ block_rejected_test_() ->
 	].
 
 test_block_rejected() ->
-	ar_blacklist_middleware:cleanup_ban(whereis(ar_blacklist_middleware)),
+	big_blacklist_middleware:cleanup_ban(whereis(big_blacklist_middleware)),
 	Peer = {127, 0, 0, 1, ar_test_node:get_unused_port()},
 	big_peers:add_peer(Peer, -1),
 
@@ -1230,7 +1230,7 @@ test_block_rejected() ->
 	timer:sleep(5000),
 
 	?assertEqual(#{Peer => #performance{}}, big_peers:get_peer_performances([Peer])),
-	?assertEqual(not_banned, ar_blacklist_middleware:is_peer_banned(Peer)),
+	?assertEqual(not_banned, big_blacklist_middleware:is_peer_banned(Peer)),
 
 	ar_events:send(block, {rejected, failed_to_fetch_first_chunk, <<>>, Peer}),
 	timer:sleep(5000),
@@ -1238,13 +1238,13 @@ test_block_rejected() ->
 	?assertEqual(
 		#{Peer => #performance{ average_success = 0.965 }},
 		big_peers:get_peer_performances([Peer])),
-	?assertEqual(not_banned, ar_blacklist_middleware:is_peer_banned(Peer)),
+	?assertEqual(not_banned, big_blacklist_middleware:is_peer_banned(Peer)),
 
 	ar_events:send(block, {rejected, invalid_previous_solution_hash, <<>>, Peer}),
 	timer:sleep(5000),
 
 	?assertEqual(#{Peer => #performance{}}, big_peers:get_peer_performances([Peer])),
-	?assertEqual(banned, ar_blacklist_middleware:is_peer_banned(Peer)).
+	?assertEqual(banned, big_blacklist_middleware:is_peer_banned(Peer)).
 
 rate_data_test() ->
 	ets:delete_all_objects(?MODULE),

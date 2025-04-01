@@ -24,8 +24,8 @@ start_node() ->
 	{B0, Wallet1, Wallet2, StaticWallet}.
 
 reset_node() ->
-	ar_blacklist_middleware:reset(),
-	ar_test_node:remote_call(peer1, ar_blacklist_middleware, reset, []),
+	big_blacklist_middleware:reset(),
+	ar_test_node:remote_call(peer1, big_blacklist_middleware, reset, []),
 	ar_test_node:connect_to_peer(peer1).
 
 setup_all_batch() ->
@@ -49,7 +49,7 @@ test_register(TestFun, Fixture) ->
 
 %% -------------------------------------------------------------------
 %% The spammer tests must run first. All the other tests will call
-%% ar_blacklist_middleware:reset() periodically and this will restart
+%% big_blacklist_middleware:reset() periodically and this will restart
 %% the 30-second throttle counter using timer:apply_after(30000, ...).
 %% However since most tests are less than 30 seconds, we end up with
 %% several pending timer:apply_after that can hit, and reset the
@@ -326,11 +326,11 @@ get_fun_msg_pair(send_tx_binary) ->
 %% to an ar_util:pmap/2 call fails the tests currently.
 -spec node_blacklisting_test_frame(fun(), any(), non_neg_integer(), non_neg_integer()) -> ok.
 node_blacklisting_test_frame(RequestFun, ErrorResponse, NRequests, ExpectedErrors) ->
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	ar_rate_limiter:off(),
 	Responses = lists:map(RequestFun, lists:seq(1, NRequests)),
 	?assertEqual(length(Responses), NRequests),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	ByResponseType = count_by_response_type(ErrorResponse, Responses),
 	Expected = #{
 		error_responses => ExpectedErrors,

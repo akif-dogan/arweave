@@ -19,8 +19,8 @@ start_node() ->
 	ar_test_node:connect_to_peer(peer1).
 
 reset_node() ->
-	ar_blacklist_middleware:reset(),
-	ar_test_node:remote_call(peer1, ar_blacklist_middleware, reset, []),
+	big_blacklist_middleware:reset(),
+	ar_test_node:remote_call(peer1, big_blacklist_middleware, reset, []),
 	ar_test_node:connect_to_peer(peer1),
 
 	Height = height(peer1),
@@ -174,7 +174,7 @@ test_cached_poa({Key, B, PrevB}) ->
 assert_banned(Peer) ->
 	case ar_util:do_until(
 		fun() ->
-			banned == ar_blacklist_middleware:is_peer_banned(Peer)
+			banned == big_blacklist_middleware:is_peer_banned(Peer)
 		end,
 		200,
 		2000
@@ -189,7 +189,7 @@ assert_banned(Peer) ->
 %% confidence the peer is not banned.
 assert_not_banned(Peer) ->
 	timer:sleep(2000),
-	?assertEqual(not_banned, ar_blacklist_middleware:is_peer_banned(Peer)).
+	?assertEqual(not_banned, big_blacklist_middleware:is_peer_banned(Peer)).
 
 %% ------------------------------------------------------------------------------------------
 %% post_2_6_test_
@@ -308,7 +308,7 @@ test_rejects_invalid_blocks() ->
 	InvalidH = crypto:strong_rand_bytes(48),
 	ok = ar_events:subscribe(block),
 	post_block(B1#block{ indep_hash = InvalidH }, invalid_hash),
-	%% Verify the IP address of self is NOT banned in ar_blacklist_middleware.
+	%% Verify the IP address of self is NOT banned in big_blacklist_middleware.
 	InvalidH2 = crypto:strong_rand_bytes(48),
 	post_block(B1#block{ indep_hash = InvalidH2 }, invalid_hash),
 	%% The valid block with the ID from the failed attempt can still go through.
@@ -361,7 +361,7 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B7 = sign_block(B1#block{
 			%% Change the solution hash so that the validator does not go down
 			%% the comparing the resigned solution with the cached solution path.
@@ -377,19 +377,19 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B8 = sign_block(B1#block{ last_retarget = 100000 }, B0, Key),
 	post_block(B8, invalid_last_retarget),
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B9 = sign_block(B1#block{ diff = 100000 }, B0, Key),
 	post_block(B9, invalid_difficulty),
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B10 = sign_block(B1#block{
 			%% Change the solution hash so that the validator does not go down
 			%% the comparing the resigned solution with the cached solution path.
@@ -399,7 +399,7 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B11_1 = sign_block(B1#block{ partition_number = 1 }, B0, Key),
 	%% We might get invalid_hash_preimage occasionally, because the partition number
 	%% changes H0 which changes the solution hash which may happen to be lower than
@@ -414,7 +414,7 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B12 = sign_block(B1#block{
 			nonce_limiter_info = (B1#block.nonce_limiter_info)#nonce_limiter_info{
 					last_step_checkpoints = [crypto:strong_rand_bytes(32)] } }, B0, Key),
@@ -425,13 +425,13 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B13 = sign_block(B1#block{ poa = (B1#block.poa)#poa{ data_path = <<>> } }, B0, Key),
 	post_block(B13, invalid_poa),
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B14 = sign_block(B1#block{
 			%% Change the solution hash so that the validator does not go down
 			%% the comparing the resigned solution with the cached solution path.
@@ -442,7 +442,7 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B15 = sign_block(B1#block{
 			%% Change the solution hash so that the validator does not go down
 			%% the comparing the resigned solution with the cached solution path.
@@ -453,7 +453,7 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset(),
+	big_blacklist_middleware:reset(),
 	B16 = sign_block(B1#block{
 			%% Change the solution hash so that the validator does not go down
 			%% the comparing the resigned solution with the cached solution path.
@@ -464,7 +464,7 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
 			send_new_block(Peer, B1#block{ indep_hash = crypto:strong_rand_bytes(48) })),
-	ar_blacklist_middleware:reset().
+	big_blacklist_middleware:reset().
 
 rejects_blocks_with_invalid_double_signing_proof_test_() ->
 	test_with_mocked_functions([{ar_fork, height_2_9, fun() -> 0 end}],

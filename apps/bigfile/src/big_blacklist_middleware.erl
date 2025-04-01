@@ -1,4 +1,4 @@
--module(ar_blacklist_middleware).
+-module(big_blacklist_middleware).
 
 -behaviour(cowboy_middleware).
 
@@ -7,7 +7,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_blacklist_middleware.hrl").
+-include_lib("bigfile/include/big_blacklist_middleware.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 execute(Req, Env) ->

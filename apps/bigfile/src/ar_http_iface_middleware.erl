@@ -1941,7 +1941,7 @@ handle_post_tx_accepted(Req, TX, Peer) ->
 	%% IP-based throttling, to avoid connectivity issues at the times
 	%% of excessive transaction volumes.
 	{A, B, C, D, _} = Peer,
-	ar_blacklist_middleware:decrement_ip_addr({A, B, C, D}, Req),
+	big_blacklist_middleware:decrement_ip_addr({A, B, C, D}, Req),
 	BodyReadTime = ar_http_req:body_read_time(Req),
 	big_peers:rate_gossiped_data(Peer, tx,
 		erlang:convert_time_unit(BodyReadTime, native, microsecond),
@@ -2373,7 +2373,7 @@ collect_missing_tx_indices([Prefix | Prefixes], Indices, N) ->
 
 post_block(request, {Req, Pid, Encoding}, ReceiveTimestamp) ->
 	Peer = ar_http_util:bigfile_peer(Req),
-	case ar_blacklist_middleware:is_peer_banned(Peer) of
+	case big_blacklist_middleware:is_peer_banned(Peer) of
 		not_banned ->
 			post_block(check_joined, Peer, {Req, Pid, Encoding}, ReceiveTimestamp);
 		banned ->

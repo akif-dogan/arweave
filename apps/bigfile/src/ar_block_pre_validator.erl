@@ -189,7 +189,7 @@ terminate(_Reason, _State) ->
 %%%===================================================================
 
 pre_validate_is_peer_banned(B, Peer) ->
-	case ar_blacklist_middleware:is_peer_banned(Peer) of
+	case big_blacklist_middleware:is_peer_banned(Peer) of
 		not_banned ->
 			pre_validate_previous_block(B, Peer);
 		banned ->

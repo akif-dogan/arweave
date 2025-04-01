@@ -7,7 +7,7 @@
 %%
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_blacklist_middleware.hrl").
+-include_lib("bigfile/include/big_blacklist_middleware.hrl").
 -include_lib("bigfile/include/big_block.hrl").
 -include_lib("bigfile/include/ar_chain_stats.hrl").
 -include_lib("bigfile/include/ar_chunk_storage.hrl").

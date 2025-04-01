@@ -12,7 +12,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -define(HTTP_IFACE_MIDDLEWARES, [
-	ar_blacklist_middleware,
+	big_blacklist_middleware,
 	ar_network_middleware,
 	cowboy_router,
 	ar_http_iface_middleware,
@@ -62,7 +62,7 @@ start() ->
 		end,
 		Semaphores
 	),
-	ok = ar_blacklist_middleware:start(),
+	ok = big_blacklist_middleware:start(),
 	ok = start_http_iface_listener(Config),
 	ok.
 
