@@ -7,7 +7,7 @@
 -export([get_info/0, get_recent/0]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_chain_stats.hrl").
+-include_lib("bigfile/include/big_chain_stats.hrl").
 
 get_info() ->
 	{Time, Current} =
@@ -82,7 +82,7 @@ get_recent_blocks() ->
 %% @doc Return the the most recent forks in reverse chronological order.
 get_recent_forks() ->
     CutOffTime = os:system_time(seconds) - ?RECENT_FORKS_AGE,
-    case ar_chain_stats:get_forks(CutOffTime) of
+    case big_chain_stats:get_forks(CutOffTime) of
         {error, _} -> error;
         Forks ->
             lists:foldl(

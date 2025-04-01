@@ -2,7 +2,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_chain_stats.hrl").
+-include_lib("bigfile/include/big_chain_stats.hrl").
 
 recent_blocks_test_() ->
 	[
@@ -120,7 +120,7 @@ test_get_recent_forks() ->
 
     Orphans1 = [<<"a">>],
     timer:sleep(5),
-    ar_chain_stats:log_fork(Orphans1, ForkRootB1),
+    big_chain_stats:log_fork(Orphans1, ForkRootB1),
     ExpectedFork1 = #fork{
         id = crypto:hash(sha256, list_to_binary(Orphans1)),
         height = 2,
@@ -130,7 +130,7 @@ test_get_recent_forks() ->
 
     Orphans2 = [<<"b">>, <<"c">>],
     timer:sleep(5),
-    ar_chain_stats:log_fork(Orphans2, ForkRootB1),
+    big_chain_stats:log_fork(Orphans2, ForkRootB1),
     ExpectedFork2 = #fork{
         id = crypto:hash(sha256, list_to_binary(Orphans2)),
         height = 2,
@@ -140,7 +140,7 @@ test_get_recent_forks() ->
 
     Orphans3 = [<<"b">>, <<"c">>, <<"d">>],
     timer:sleep(5),
-    ar_chain_stats:log_fork(Orphans3, ForkRootB1),
+    big_chain_stats:log_fork(Orphans3, ForkRootB1),
     ExpectedFork3 = #fork{
         id = crypto:hash(sha256, list_to_binary(Orphans3)),
         height = 2,
@@ -150,7 +150,7 @@ test_get_recent_forks() ->
 
     Orphans4 = [<<"e">>, <<"f">>, <<"g">>],
     timer:sleep(5),
-    ar_chain_stats:log_fork(Orphans4, ForkRootB2),
+    big_chain_stats:log_fork(Orphans4, ForkRootB2),
     ExpectedFork4 = #fork{
         id = crypto:hash(sha256, list_to_binary(Orphans4)),
         height = 3,
@@ -161,13 +161,13 @@ test_get_recent_forks() ->
     %% Same fork seen again - not sure this is possible, but since we're just tracking
     %% forks based on when they occur, it should be handled.
     timer:sleep(5),
-    ar_chain_stats:log_fork(Orphans3, ForkRootB1),
+    big_chain_stats:log_fork(Orphans3, ForkRootB1),
     assert_forks_json_equal(
 		[ExpectedFork3, ExpectedFork4, ExpectedFork3, ExpectedFork2, ExpectedFork1]),
 
     %% If the fork is empty, ignore it.
     timer:sleep(5),
-    ar_chain_stats:log_fork([], ForkRootB2),
+    big_chain_stats:log_fork([], ForkRootB2),
     assert_forks_json_equal(
         [ExpectedFork3, ExpectedFork4, ExpectedFork3, ExpectedFork2, ExpectedFork1]),
 	ok.

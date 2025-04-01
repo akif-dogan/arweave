@@ -1,9 +1,9 @@
--module(ar_chain_stats).
+-module(big_chain_stats).
 
 -behaviour(gen_server).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_chain_stats.hrl").
+-include_lib("bigfile/include/big_chain_stats.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -export([log_fork/2, get_forks/1]).

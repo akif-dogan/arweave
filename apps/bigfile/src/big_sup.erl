@@ -99,7 +99,7 @@ init([]) ->
 		?CHILD(ar_pool, worker),
 		?CHILD(ar_pool_job_poller, worker),
 		?CHILD(ar_pool_cm_job_poller, worker),
-		?CHILD(ar_chain_stats, worker)
+		?CHILD(big_chain_stats, worker)
 	],
 	{ok, Config} = application:get_env(bigfile, config),
 	DebugChildren = case Config#config.debug of

@@ -1368,7 +1368,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	ForkRootB = lists:last(PrevBlocks), %% The root of any detected fork
 	prometheus_gauge:set(block_time, B#block.timestamp - PrevB#block.timestamp),
 	record_economic_metrics(B, PrevB),
-	ar_chain_stats:log_fork(Orphans, ForkRootB),
+	big_chain_stats:log_fork(Orphans, ForkRootB),
 	record_vdf_metrics(B, PrevB),
 	return_orphaned_txs_to_mempool(CurrentH, ForkRootB#block.indep_hash),
 	lists:foldl(
