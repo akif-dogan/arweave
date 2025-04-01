@@ -273,7 +273,7 @@ send_and_log(Peer, H, Height, Format, Bin, RecallByte) ->
 	end.
 
 block_to_json(B) ->
-	BDS = ar_block:generate_block_data_segment(B),
+	BDS = big_block:generate_block_data_segment(B),
 	{BlockProps} = ar_serialize:block_to_json_struct(B),
 	PostProps = [
 		{<<"new_block">>, {BlockProps}},

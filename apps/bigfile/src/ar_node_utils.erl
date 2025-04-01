@@ -288,7 +288,7 @@ may_be_apply_double_signing_proof3(B, PrevB, Accounts) ->
 	#block{ height = Height } = B,
 	{Pub, Signature1, CDiff1, PrevCDiff1, Preimage1, Signature2, CDiff2, PrevCDiff2,
 			Preimage2} = B#block.double_signing_proof,
-	SignaturePreimage1 = ar_block:get_block_signature_preimage(CDiff1, PrevCDiff1,
+	SignaturePreimage1 = big_block:get_block_signature_preimage(CDiff1, PrevCDiff1,
 			Preimage1, Height),
 	Key = get_reward_key(Pub, B#block.height),
 	Addr = big_wallet:to_address(Key),
@@ -296,7 +296,7 @@ may_be_apply_double_signing_proof3(B, PrevB, Accounts) ->
 		false ->
 			{error, invalid_double_signing_proof_invalid_signature};
 		true ->
-			SignaturePreimage2 = ar_block:get_block_signature_preimage(CDiff2, PrevCDiff2,
+			SignaturePreimage2 = big_block:get_block_signature_preimage(CDiff2, PrevCDiff2,
 					Preimage2, Height),
 			case big_wallet:verify(Key, SignaturePreimage2, Signature2) of
 				false ->
@@ -389,7 +389,7 @@ do_validate(NewB, OldB, Wallets, BlockAnchors, RecentTXMap, PartitionUpperBound)
 
 validate_block(weave_size, {#block{ txs = TXs } = NewB, OldB, Wallets, BlockAnchors,
 		RecentTXMap, PartitionUpperBound}) ->
-	case ar_block:verify_weave_size(NewB, OldB, TXs) of
+	case big_block:verify_weave_size(NewB, OldB, TXs) of
 		false ->
 			{invalid, invalid_weave_size};
 		true ->
@@ -420,7 +420,7 @@ validate_block(previous_solution_hash, {NewB, OldB, Wallets, BlockAnchors, Recen
 
 validate_block(packing_2_5_threshold, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap,
 		PartitionUpperBound}) ->
-	ExpectedPackingThreshold = ar_block:get_packing_threshold(OldB, PartitionUpperBound),
+	ExpectedPackingThreshold = big_block:get_packing_threshold(OldB, PartitionUpperBound),
 	Valid =
 		case ExpectedPackingThreshold of
 			undefined ->
@@ -534,7 +534,7 @@ validate_block(next_vdf_difficulty, {NewB, OldB, Wallets, BlockAnchors, RecentTX
 			validate_block(price_per_gib_minute, {NewB, OldB, Wallets, BlockAnchors,
 					RecentTXMap});
 		true ->
-			ExpectedNextVDFDifficulty = ar_block:compute_next_vdf_difficulty(OldB),
+			ExpectedNextVDFDifficulty = big_block:compute_next_vdf_difficulty(OldB),
 			#nonce_limiter_info{ next_vdf_difficulty = NextVDFDifficulty } = 
 				NewB#block.nonce_limiter_info,
 			case ExpectedNextVDFDifficulty == NextVDFDifficulty of
@@ -580,7 +580,7 @@ validate_block(txs, {NewB = #block{ timestamp = Timestamp, height = Height, txs 
 	end;
 
 validate_block(block_field_sizes, {NewB, OldB, _Wallets, _BlockAnchors, _RecentTXMap}) ->
-	case ar_block:block_field_size_limit(NewB) of
+	case big_block:block_field_size_limit(NewB) of
 		false ->
 			{invalid, invalid_field_size};
 		true ->
@@ -588,7 +588,7 @@ validate_block(block_field_sizes, {NewB, OldB, _Wallets, _BlockAnchors, _RecentT
 	end;
 
 validate_block(tx_root, {NewB, OldB}) ->
-	case ar_block:verify_tx_root(NewB) of
+	case big_block:verify_tx_root(NewB) of
 		false ->
 			{invalid, invalid_tx_root};
 		true ->
@@ -596,7 +596,7 @@ validate_block(tx_root, {NewB, OldB}) ->
 	end;
 
 validate_block(block_index_root, {NewB, OldB}) ->
-	case ar_block:verify_block_hash_list_merkle(NewB, OldB) of
+	case big_block:verify_block_hash_list_merkle(NewB, OldB) of
 		false ->
 			{invalid, invalid_block_index_root};
 		true ->
@@ -604,7 +604,7 @@ validate_block(block_index_root, {NewB, OldB}) ->
 	end;
 
 validate_block(last_retarget, {NewB, OldB}) ->
-	case ar_block:verify_last_retarget(NewB, OldB) of
+	case big_block:verify_last_retarget(NewB, OldB) of
 		false ->
 			{invalid, invalid_last_retarget};
 		true ->
@@ -612,7 +612,7 @@ validate_block(last_retarget, {NewB, OldB}) ->
 	end;
 
 validate_block(cumulative_diff, {NewB, OldB}) ->
-	case ar_block:verify_cumulative_diff(NewB, OldB) of
+	case big_block:verify_cumulative_diff(NewB, OldB) of
 		false ->
 			{invalid, invalid_cumulative_difficulty};
 		true ->
@@ -758,22 +758,22 @@ test_block_validation() ->
 			update_accounts(B#block{ txs = [TX#tx{ reward = ?BIG(201) }] }, PrevB, Wallets)),
 	?assertEqual({invalid, invalid_tx_root},
 			validate_block(tx_root, {
-				InvDataRootB#block{ indep_hash = ar_block:indep_hash(InvDataRootB) }, PrevB})),
+				InvDataRootB#block{ indep_hash = big_block:indep_hash(InvDataRootB) }, PrevB})),
 	?assertEqual({invalid, invalid_difficulty},
 			validate_block(difficulty, {
 					InvLastRetargetB#block{
-						indep_hash = ar_block:indep_hash(InvLastRetargetB) },
+						indep_hash = big_block:indep_hash(InvLastRetargetB) },
 					PrevB, Wallets, BlockAnchors, RecentTXMap})),
 	?assertEqual({invalid, invalid_block_index_root},
 			validate_block(block_index_root, {
 				InvBlockIndexRootB#block{
-					indep_hash = ar_block:indep_hash(InvBlockIndexRootB) }, PrevB})),
+					indep_hash = big_block:indep_hash(InvBlockIndexRootB) }, PrevB})),
 	?assertEqual({invalid, invalid_last_retarget},
 			validate_block(last_retarget, {B#block{ last_retarget = 0 }, PrevB})),
 	?assertEqual(
 		{invalid, invalid_cumulative_difficulty},
 		validate_block(cumulative_diff, {
-				InvCDiffB#block{ indep_hash = ar_block:indep_hash(InvCDiffB) }, PrevB})),
+				InvCDiffB#block{ indep_hash = big_block:indep_hash(InvCDiffB) }, PrevB})),
 	BI2 = big_node:get_block_index(),
 	PartitionUpperBound2 = big_node:get_partition_upper_bound(BI2),
 	BlockAnchors2 = big_node:get_block_anchors(),

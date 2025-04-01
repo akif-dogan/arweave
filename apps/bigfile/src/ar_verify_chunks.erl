@@ -123,7 +123,7 @@ verify_chunk({ok, _Key, Metadata}, Intervals, State) ->
 		_TXRelativeOffset, ChunkSize} = Metadata,
 	{ChunkStorageInterval, _DataSyncInterval} = Intervals,
 
-	PaddedOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset),
+	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 	State2 = verify_chunk_storage(AbsoluteOffset, PaddedOffset, ChunkSize, ChunkStorageInterval, State),
 
 	State3 = verify_proof(Metadata, State2),
@@ -154,7 +154,7 @@ verify_packing(Metadata, State) ->
 	#state{packing=Packing, store_id=StoreID} = State,
 	{AbsoluteOffset, ChunkDataKey, TXRoot, _DataRoot, TXPath,
 			_TXRelativeOffset, ChunkSize} = Metadata,
-	PaddedOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset),
+	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 	StoredPackingCheck = ar_sync_record:is_recorded(AbsoluteOffset, ar_data_sync, StoreID),
 	ExpectedPacking =
 		case ar_chunk_storage:is_storage_supported(PaddedOffset, ChunkSize, Packing) of

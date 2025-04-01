@@ -254,9 +254,9 @@ add_task({TaskType, Candidate, _ExtraArgs} = Task, State) ->
 
 process_chunks(WhichChunk, Candidate, RangeStart, ChunkOffsets, State) ->
 	PackingDifficulty = Candidate#mining_candidate.packing_difficulty,
-	MaxNonce = ar_block:get_max_nonce(PackingDifficulty),
-	SubChunkSize = ar_block:get_sub_chunk_size(PackingDifficulty),
-	NoncesPerChunk = ar_block:get_nonces_per_chunk(PackingDifficulty),
+	MaxNonce = big_block:get_max_nonce(PackingDifficulty),
+	SubChunkSize = big_block:get_sub_chunk_size(PackingDifficulty),
+	NoncesPerChunk = big_block:get_nonces_per_chunk(PackingDifficulty),
 	process_chunks(WhichChunk, Candidate, RangeStart, 0, NoncesPerChunk, MaxNonce,
 			ChunkOffsets, SubChunkSize, 0, State).
 
@@ -420,7 +420,7 @@ handle_task({compute_h0, Candidate, _ExtraArgs}, State) ->
 handle_task({computed_h0, Candidate, _ExtraArgs}, State) ->
 	#mining_candidate{ session_key = SessionKey, h0 = H0, partition_number = Partition1,
 				partition_upper_bound = PartitionUpperBound } = Candidate,
-	{RecallRange1Start, RecallRange2Start} = ar_block:get_recall_range(H0,
+	{RecallRange1Start, RecallRange2Start} = big_block:get_recall_range(H0,
 			Partition1, PartitionUpperBound),
 	Partition2 = big_node:get_partition_number(RecallRange2Start),
 	Candidate2 = Candidate#mining_candidate{ partition_number2 = Partition2 },
@@ -439,7 +439,7 @@ handle_task({computed_h0, Candidate, _ExtraArgs}, State) ->
 					%% Release just the Range2 cache space we reserved with
 					%% try_to_reserve_cache_space/2
 					State2 = update_sub_chunk_cache_size(
-							-ar_block:get_nonces_per_recall_range(PackingDifficulty),
+							-big_block:get_nonces_per_recall_range(PackingDifficulty),
 							SessionKey, State),
 					do_not_cache(Candidate3, State2)
 			end;
@@ -447,7 +447,7 @@ handle_task({computed_h0, Candidate, _ExtraArgs}, State) ->
 			%% Release the Range1 *and* Range2 cache space we reserved with
 			%% try_to_reserve_cache_space/2
 			update_sub_chunk_cache_size(
-				-(2 * ar_block:get_nonces_per_recall_range(PackingDifficulty)),
+				-(2 * big_block:get_nonces_per_recall_range(PackingDifficulty)),
 				SessionKey, State)
 	end,
 	{noreply, State3};
@@ -568,7 +568,7 @@ handle_task({compute_h2_for_peer, Candidate, _ExtraArgs}, State) ->
 		packing_difficulty = PackingDifficulty
 	} = Candidate,
 
-	{_RecallRange1Start, RecallRange2Start} = ar_block:get_recall_range(H0,
+	{_RecallRange1Start, RecallRange2Start} = big_block:get_recall_range(H0,
 					Partition1, PartitionUpperBound),
 	Candidate2 = generate_cache_ref(Candidate),
 	%% Clear the list so we aren't copying it around all over the place
@@ -582,7 +582,7 @@ handle_task({compute_h2_for_peer, Candidate, _ExtraArgs}, State) ->
 			%% *even if* this puts us over the chunk cache limit. This may have to be
 			%% revisited later if we find that this causes unacceptable memory bloat.
 			State2 = update_sub_chunk_cache_size(
-				ar_block:get_nonces_per_recall_range(PackingDifficulty), SessionKey, State),
+				big_block:get_nonces_per_recall_range(PackingDifficulty), SessionKey, State),
 			%% First flag all nonces in the range as do_not_cache, then cache the specific
 			%% nonces included in the H1 list. This will make sure we don't cache the chunk2s
 			%% that are read for the missing nonces.
@@ -774,7 +774,7 @@ try_to_reserve_cache_space(SessionKey, State) ->
 		true ->
 			%% reserve for both h1 and h2
 			{true, update_sub_chunk_cache_size(
-					2 * ar_block:get_nonces_per_recall_range(PackingDifficulty),
+					2 * big_block:get_nonces_per_recall_range(PackingDifficulty),
 					SessionKey, State)};
 		false ->
 			false
@@ -782,7 +782,7 @@ try_to_reserve_cache_space(SessionKey, State) ->
 
 do_not_cache(Candidate, State) ->
 	#mining_candidate{ packing_difficulty = PackingDifficulty } = Candidate,
-	do_not_cache(0, ar_block:get_max_nonce(PackingDifficulty), Candidate, State).
+	do_not_cache(0, big_block:get_max_nonce(PackingDifficulty), Candidate, State).
 
 do_not_cache(Nonce, NonceMax, _Candidate, State)
 		when Nonce > NonceMax ->

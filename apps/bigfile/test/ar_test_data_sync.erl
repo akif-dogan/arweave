@@ -206,7 +206,7 @@ build_proofs(B, TX, Chunks) ->
 			B#block.height).
 
 build_proofs(TX, Chunks, TXs, BlockStartOffset, Height) ->
-	SizeTaggedTXs = ar_block:generate_size_tagged_list_from_txs(TXs, Height),
+	SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs, Height),
 	SizeTaggedDataRoots = [{Root, Offset} || {{_, Root}, Offset} <- SizeTaggedTXs],
 	{value, {_, TXOffset}} =
 		lists:search(fun({{TXID, _}, _}) -> TXID == TX#tx.id end, SizeTaggedTXs),

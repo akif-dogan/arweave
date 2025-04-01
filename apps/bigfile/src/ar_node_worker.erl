@@ -895,7 +895,7 @@ apply_block2(BShadow, PrevBlocks, Timestamp, State) ->
 	case MissingTXIDs of
 		[] ->
 			Height = BShadow#block.height,
-			SizeTaggedTXs = ar_block:generate_size_tagged_list_from_txs(TXs, Height),
+			SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs, Height),
 			B = BShadow#block{ txs = TXs, size_tagged_txs = SizeTaggedTXs },
 			apply_block3(B, PrevBlocks, Timestamp, State);
 		_ ->
@@ -1130,8 +1130,8 @@ pack_block_with_transactions(B, PrevB) ->
 		),
 	WeaveSize = PrevB#block.weave_size + BlockSize,
 	B2 = B#block{ txs = ValidTXs, block_size = BlockSize, weave_size = WeaveSize,
-			tx_root = ar_block:generate_tx_root_for_block(ValidTXs, Height),
-			size_tagged_txs = ar_block:generate_size_tagged_list_from_txs(ValidTXs, Height) },
+			tx_root = big_block:generate_tx_root_for_block(ValidTXs, Height),
+			size_tagged_txs = big_block:generate_size_tagged_list_from_txs(ValidTXs, Height) },
 	{ok, {EndowmentPool, Reward, DebtSupply, KryderPlusRateMultiplierLatch,
 			KryderPlusRateMultiplier2, Accounts2}} = ar_node_utils:update_accounts(B2, PrevB,
 					Accounts),
@@ -1577,8 +1577,8 @@ record_economic_metrics2(B, PrevB) ->
 record_vdf_metrics(#block{ height = Height } = B, PrevB) ->
 	case Height >= ar_fork:height_2_6() of
 		true ->
-			StepNumber = ar_block:vdf_step_number(B),
-			PrevBStepNumber = ar_block:vdf_step_number(PrevB),
+			StepNumber = big_block:vdf_step_number(B),
+			PrevBStepNumber = big_block:vdf_step_number(PrevB),
 			prometheus_gauge:set(block_vdf_time, StepNumber - PrevBStepNumber);
 		false ->
 			ok
@@ -1770,7 +1770,7 @@ read_recent_blocks2([{BH, _, _} | BI], SearchDepth, Skipped) ->
 				true ->
 					read_recent_blocks2(BI, SearchDepth, Skipped + 1);
 				false ->
-					SizeTaggedTXs = ar_block:generate_size_tagged_list_from_txs(TXs,
+					SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs,
 							B#block.height),
 					case read_recent_blocks3(BI, 2 * ?MAX_TX_ANCHOR_DEPTH - 1,
 							[B#block{ size_tagged_txs = SizeTaggedTXs, txs = TXs }]) of
@@ -1800,7 +1800,7 @@ read_recent_blocks3([{BH, _, _} | BI], BlocksToRead, Blocks) ->
 							[ar_util:encode(BH)]),
 					not_found;
 				false ->
-					SizeTaggedTXs = ar_block:generate_size_tagged_list_from_txs(TXs,
+					SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs,
 							B#block.height),
 					read_recent_blocks3(BI, BlocksToRead - 1,
 							[B#block{ size_tagged_txs = SizeTaggedTXs, txs = TXs } | Blocks])
@@ -1825,7 +1825,7 @@ set_poa_cache(B) ->
 	Nonce = B#block.nonce,
 	RecallByte1 = B#block.recall_byte,
 	RecallByte2 = B#block.recall_byte2,
-	Packing = ar_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
+	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
 	PoACache = compute_poa_cache(B, PoA1, RecallByte1, Nonce, Packing),
 	B2 = B#block{ poa_cache = PoACache },
 	%% Compute PoA2 cache if PoA2 is present.
@@ -1839,7 +1839,7 @@ set_poa_cache(B) ->
 
 compute_poa_cache(B, PoA, RecallByte, Nonce, Packing) ->
 	PackingDifficulty = B#block.packing_difficulty,
-	SubChunkIndex = ar_block:get_sub_chunk_index(PackingDifficulty, Nonce),
+	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
 	{BlockStart, BlockEnd, TXRoot} = ar_block_index:get_block_bounds(RecallByte),
 	BlockSize = BlockEnd - BlockStart,
 	ChunkID = ar_tx:generate_chunk_id(PoA#poa.chunk),
@@ -1886,7 +1886,7 @@ handle_found_solution(Args, PrevB, State) ->
 	Height = PrevHeight + 1,
 
 	Now = os:system_time(second),
-	MaxDeviation = ar_block:get_max_timestamp_deviation(),
+	MaxDeviation = big_block:get_max_timestamp_deviation(),
 	Timestamp =
 		case Now < PrevTimestamp - MaxDeviation of
 			true ->
@@ -1914,7 +1914,7 @@ handle_found_solution(Args, PrevB, State) ->
 						mining_address_banned, []),
 				{false, address_banned};
 			false ->
-				case ar_block:validate_replica_format(Height, PackingDifficulty, ReplicaFormat) of
+				case big_block:validate_replica_format(Height, PackingDifficulty, ReplicaFormat) of
 					false ->
 						ar_events:send(solution, {rejected,
 								#{ reason => invalid_packing_difficulty, source => Source }}),
@@ -2087,7 +2087,7 @@ handle_found_solution(Args, PrevB, State) ->
 					_ ->
 						LastStepCheckpoints
 				end,
-			NextVDFDifficulty = ar_block:compute_next_vdf_difficulty(PrevB),
+			NextVDFDifficulty = big_block:compute_next_vdf_difficulty(PrevB),
 			NonceLimiterInfo2 = NonceLimiterInfo#nonce_limiter_info{ seed = Seed,
 					next_seed = NextSeed, partition_upper_bound = PartitionUpperBound,
 					next_partition_upper_bound = NextPartitionUpperBound,
@@ -2118,7 +2118,7 @@ handle_found_solution(Args, PrevB, State) ->
 				diff = Diff,
 				height = Height,
 				hash = SolutionH,
-				hash_list_merkle = ar_block:compute_hash_list_merkle(PrevB),
+				hash_list_merkle = big_block:compute_hash_list_merkle(PrevB),
 				reward_addr = big_wallet:to_address(RewardKey),
 				tags = [],
 				cumulative_diff = CDiff,
@@ -2161,13 +2161,13 @@ handle_found_solution(Args, PrevB, State) ->
 				block_time_history = BlockTimeHistory2,
 				block_time_history_hash = ar_block_time_history:hash(BlockTimeHistory2)
 			},
-			SignedH = ar_block:generate_signed_hash(UnsignedB2),
+			SignedH = big_block:generate_signed_hash(UnsignedB2),
 			PrevCDiff = PrevB#block.cumulative_diff,
-			SignaturePreimage = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
+			SignaturePreimage = big_block:get_block_signature_preimage(CDiff, PrevCDiff,
 					<< (PrevB#block.hash)/binary, SignedH/binary >>, Height),
 			assert_key_type(RewardKey, Height),
 			Signature = big_wallet:sign(element(1, RewardKey), SignaturePreimage),
-			H = ar_block:indep_hash2(SignedH, Signature),
+			H = big_block:indep_hash2(SignedH, Signature),
 			B = UnsignedB2#block{ indep_hash = H, signature = Signature },
 			ar_watchdog:mined_block(H, Height, PrevH),
 			?LOG_INFO([{event, mined_block}, {indep_hash, ar_util:encode(H)},

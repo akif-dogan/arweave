@@ -266,7 +266,7 @@ sync_range({Start, End, Peer, TargetStoreID, RetryCount} = Args, State) ->
 							%% we may potentially skip some chunks by
 							%% continuing with Start2 + byte_size(Chunk) - the skip
 							%% chunks will be then requested later.
-							Start3 = ar_block:get_chunk_padded_offset(
+							Start3 = big_block:get_chunk_padded_offset(
 									Start2 + byte_size(Chunk)) + 1,
 							gen_server:cast(ar_data_sync:name(TargetStoreID),
 									{store_fetched_chunk, Peer, Start2 - 1, Proof}),

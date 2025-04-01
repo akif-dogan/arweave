@@ -183,14 +183,14 @@ fake_block_with_strong_cumulative_difficulty(B, PrevB, CDiff) ->
 	B2 = B#block{ cumulative_diff = CDiff },
 	Wallet = big_wallet:new(),
 	RewardAddr2 = big_wallet:to_address(Wallet),
-	H0 = ar_block:compute_h0(B, PrevB),
-	{RecallByte, _RecallRange2Start} = ar_block:get_recall_range(H0, PartitionNumber,
+	H0 = big_block:compute_h0(B, PrevB),
+	{RecallByte, _RecallRange2Start} = big_block:get_recall_range(H0, PartitionNumber,
 			PartitionUpperBound),
 	{ok, #{ data_path := DataPath, tx_path := TXPath,
 			chunk := Chunk } } = ar_data_sync:get_chunk(RecallByte + 1,
 					#{ pack => true, packing => {spora_2_6, RewardAddr2},
 					origin => test }),
-	{H1, Preimage} = ar_block:compute_h1(H0, 0, Chunk),
+	{H1, Preimage} = big_block:compute_h1(H0, 0, Chunk),
 	case binary:decode_unsigned(H1) > Diff of
 		true ->
 			PoA = #poa{ chunk = Chunk, data_path = DataPath, tx_path = TXPath },
@@ -214,11 +214,11 @@ fake_block_with_strong_cumulative_difficulty(B, PrevB, CDiff) ->
 						B3
 				end,
 			PrevCDiff = PrevB#block.cumulative_diff,
-			SignedH = ar_block:generate_signed_hash(B4),
-			SignaturePreimage = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
+			SignedH = big_block:generate_signed_hash(B4),
+			SignaturePreimage = big_block:get_block_signature_preimage(CDiff, PrevCDiff,
 				<< PrevSolutionH/binary, SignedH/binary >>, Height),
 			Signature = big_wallet:sign(element(1, Wallet), SignaturePreimage),
-			B4#block{ indep_hash = ar_block:indep_hash2(SignedH, Signature),
+			B4#block{ indep_hash = big_block:indep_hash2(SignedH, Signature),
 					signature = Signature };
 		false ->
 			fake_block_with_strong_cumulative_difficulty(B, PrevB, CDiff)

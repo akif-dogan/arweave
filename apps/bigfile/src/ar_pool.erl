@@ -311,7 +311,7 @@ collect_jobs(_Jobs, _PrevO, _N, _PartialDiff) ->
 process_partial_solution(Solution, Ref) ->
 	PoA1 = Solution#mining_solution.poa1,
 	PoA2 = Solution#mining_solution.poa2,
-	case ar_block:validate_proof_size(PoA1) andalso ar_block:validate_proof_size(PoA2) of
+	case big_block:validate_proof_size(PoA1) andalso big_block:validate_proof_size(PoA2) of
 		true ->
 			process_partial_solution_field_size(Solution, Ref);
 		false ->
@@ -412,7 +412,7 @@ process_partial_solution_partition_number(Solution, Ref) ->
 process_partial_solution_packing_difficulty(Solution, Ref) ->
 	#mining_solution{ packing_difficulty = PackingDifficulty } = Solution,
 	Height = big_node:get_height(),
-	case ar_block:validate_replica_format(Height, PackingDifficulty, 0) of
+	case big_block:validate_replica_format(Height, PackingDifficulty, 0) of
 		true ->
 			process_partial_solution_nonce(Solution, Ref);
 		false ->
@@ -420,7 +420,7 @@ process_partial_solution_packing_difficulty(Solution, Ref) ->
 	end.
 
 process_partial_solution_nonce(Solution, Ref) ->
-	Max = ar_block:get_max_nonce(Solution#mining_solution.packing_difficulty),
+	Max = big_block:get_max_nonce(Solution#mining_solution.packing_difficulty),
 	case Solution#mining_solution.nonce > Max of
 		false ->
 			process_partial_solution_quick_pow(Solution, Ref);
@@ -438,9 +438,9 @@ process_partial_solution_quick_pow(Solution, Ref) ->
 		solution_hash = SolutionH,
 		packing_difficulty = PackingDifficulty
 	} = Solution,
-	H0 = ar_block:compute_h0(NonceLimiterOutput, PartitionNumber, Seed, MiningAddress,
+	H0 = big_block:compute_h0(NonceLimiterOutput, PartitionNumber, Seed, MiningAddress,
 			PackingDifficulty),
-	case ar_block:compute_solution_h(H0, Preimage) of
+	case big_block:compute_solution_h(H0, Preimage) of
 		SolutionH ->
 			process_partial_solution_pow(Solution, Ref, H0);
 		_ ->
@@ -456,7 +456,7 @@ process_partial_solution_pow(Solution, Ref, H0) ->
 		preimage = Preimage,
 		poa2 = #poa{ chunk = Chunk2 }
 	} = Solution,
-	{H1, Preimage1} = ar_block:compute_h1(H0, Nonce, Chunk1),
+	{H1, Preimage1} = big_block:compute_h1(H0, Nonce, Chunk1),
 
 	case {H1 == SolutionH andalso Preimage1 == Preimage,
 			ar_mining_server:is_one_chunk_solution(Solution)} of
@@ -467,7 +467,7 @@ process_partial_solution_pow(Solution, Ref, H0) ->
 		{false, true} ->
 			#partial_solution_response{ status = <<"rejected_bad_poa">> };
 		{false, false} ->
-			{H2, Preimage2} = ar_block:compute_h2(H1, Chunk2, H0),
+			{H2, Preimage2} = big_block:compute_h2(H1, Chunk2, H0),
 			case H2 == SolutionH andalso Preimage2 == Preimage of
 				false ->
 					#partial_solution_response{ status = <<"rejected_wrong_hash">> };
@@ -502,14 +502,14 @@ process_partial_solution_poa(Solution, Ref, H0, H1) ->
 		packing_difficulty = PackingDifficulty,
 		replica_format = ReplicaFormat
 	} = Solution,
-	{RecallRange1Start, RecallRange2Start} = ar_block:get_recall_range(H0,
+	{RecallRange1Start, RecallRange2Start} = big_block:get_recall_range(H0,
 			PartitionNumber, PartitionUpperBound),
-	ComputedRecallByte1 = ar_block:get_recall_byte(RecallRange1Start, Nonce,
+	ComputedRecallByte1 = big_block:get_recall_byte(RecallRange1Start, Nonce,
 			PackingDifficulty),
 	{BlockStart1, BlockEnd1, TXRoot1} = ar_block_index:get_block_bounds(ComputedRecallByte1),
 	BlockSize1 = BlockEnd1 - BlockStart1,
-	Packing = ar_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
-	SubChunkIndex = ar_block:get_sub_chunk_index(PackingDifficulty, Nonce),
+	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
+	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
 	case RecallByte1 == ComputedRecallByte1 andalso
 			ar_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, PoA1,
 					Packing, SubChunkIndex, not_set}) of
@@ -523,7 +523,7 @@ process_partial_solution_poa(Solution, Ref, H0, H1) ->
 			PoA2Cache = undefined,
 			process_partial_solution_difficulty(Solution, Ref, PoACache, PoA2Cache);
 		{true, ChunkID} ->
-			ComputedRecallByte2 = ar_block:get_recall_byte(RecallRange2Start, Nonce,
+			ComputedRecallByte2 = big_block:get_recall_byte(RecallRange2Start, Nonce,
 					PackingDifficulty),
 			{BlockStart2, BlockEnd2, TXRoot2} = ar_block_index:get_block_bounds(
 					ComputedRecallByte2),
@@ -699,7 +699,7 @@ get_jobs_test() ->
 
 process_partial_solution_test_() ->
 	ar_test_node:test_with_mocked_functions([
-		{ar_block, compute_h0,
+		{big_block, compute_h0,
 			fun(O, P, S, M, PD) ->
 					crypto:hash(sha256, << O/binary, P:256, S/binary, M/binary, PD:8 >>) end},
 		{ar_block_index, get_block_bounds,
@@ -729,24 +729,24 @@ process_partial_solution_test_() ->
 test_process_partial_solution() ->
 	Zero = << 0:256 >>,
 	Zero48 = << 0:(8*48) >>,
-	H0 = ar_block:compute_h0(Zero, 0, Zero48, Zero, 0),
-	SolutionHQuick = ar_block:compute_solution_h(H0, Zero),
+	H0 = big_block:compute_h0(Zero, 0, Zero48, Zero, 0),
+	SolutionHQuick = big_block:compute_solution_h(H0, Zero),
 	C = << 0:(262144 * 8) >>,
-	{H1, Preimage1} = ar_block:compute_h1(H0, 1, C),
-	SolutionH = ar_block:compute_solution_h(H0, Preimage1),
-	{RecallRange1Start, RecallRange2Start} = ar_block:get_recall_range(H0, 0, 1),
+	{H1, Preimage1} = big_block:compute_h1(H0, 1, C),
+	SolutionH = big_block:compute_solution_h(H0, Preimage1),
+	{RecallRange1Start, RecallRange2Start} = big_block:get_recall_range(H0, 0, 1),
 	RecallByte1 = RecallRange1Start + 1 * ?DATA_CHUNK_SIZE,
-	{H2, Preimage2} = ar_block:compute_h2(H1, C, H0),
+	{H2, Preimage2} = big_block:compute_h2(H1, C, H0),
 	RecallByte2 = RecallRange2Start + 1 * ?DATA_CHUNK_SIZE,
 	PoA = #poa{ chunk = C },
 	CompositeSubChunk = << 0:(8192 * 8) >>,
 	CPoA = #poa{ chunk = CompositeSubChunk },
-	CH0 = ar_block:compute_h0(Zero, 0, Zero48, Zero, 1),
-	{CH1, CPreimage1} = ar_block:compute_h1(CH0, 30, CompositeSubChunk),
-	CSolutionH = ar_block:compute_solution_h(CH0, CPreimage1),
-	{CRecallRange1Start, CRecallRange2Start} = ar_block:get_recall_range(CH0, 0, 1),
+	CH0 = big_block:compute_h0(Zero, 0, Zero48, Zero, 1),
+	{CH1, CPreimage1} = big_block:compute_h1(CH0, 30, CompositeSubChunk),
+	CSolutionH = big_block:compute_solution_h(CH0, CPreimage1),
+	{CRecallRange1Start, CRecallRange2Start} = big_block:get_recall_range(CH0, 0, 1),
 	CRecallByte1 = CRecallRange1Start,
-	{CH2, CPreimage2} = ar_block:compute_h2(CH1, CompositeSubChunk, CH0),
+	{CH2, CPreimage2} = big_block:compute_h2(CH1, CompositeSubChunk, CH0),
 	CRecallByte2 = CRecallRange2Start,
 	TestCases = [
 		{"Bad proof size 0",
@@ -932,7 +932,7 @@ test_process_partial_solution() ->
 
 process_solution_test_() ->
 	ar_test_node:test_with_mocked_functions([
-		{ar_block, compute_h0,
+		{big_block, compute_h0,
 			fun(O, P, S, M, PD) ->
 				crypto:hash(sha256, << O/binary, P:256, S/binary, M/binary, PD:8 >>) end},
 		{ar_block_index, get_block_bounds,
@@ -1004,18 +1004,18 @@ test_process_solution() ->
 	Zero = << 0:256 >>,
 	Zero48 = << 0:(48*8) >>,
 	C = << 0:(262144 * 8) >>,
-	H0 = ar_block:compute_h0(Zero, 0, Zero48, Zero, 0),
-	{_H1, Preimage1} = ar_block:compute_h1(H0, 1, C),
-	SolutionH = ar_block:compute_solution_h(H0, Preimage1),
-	{RecallRange1Start, _RecallRange2Start} = ar_block:get_recall_range(H0, 0, 1),
+	H0 = big_block:compute_h0(Zero, 0, Zero48, Zero, 0),
+	{_H1, Preimage1} = big_block:compute_h1(H0, 1, C),
+	SolutionH = big_block:compute_solution_h(H0, Preimage1),
+	{RecallRange1Start, _RecallRange2Start} = big_block:get_recall_range(H0, 0, 1),
 	RecallByte1 = RecallRange1Start + 1 * ?DATA_CHUNK_SIZE,
 	PoA = #poa{ chunk = C },
 	CompositeSubChunk = << 0:(8192 * 8) >>,
 	CPoA = #poa{ chunk = CompositeSubChunk },
-	CH0 = ar_block:compute_h0(Zero, 0, Zero48, Zero, 2),
-	{_CH1, CPreimage1} = ar_block:compute_h1(CH0, 31, CompositeSubChunk),
-	CSolutionH = ar_block:compute_solution_h(CH0, CPreimage1),
-	{CRecallRange1Start, _CRecallRange2Start} = ar_block:get_recall_range(CH0, 0, 1),
+	CH0 = big_block:compute_h0(Zero, 0, Zero48, Zero, 2),
+	{_CH1, CPreimage1} = big_block:compute_h1(CH0, 31, CompositeSubChunk),
+	CSolutionH = big_block:compute_solution_h(CH0, CPreimage1),
+	{CRecallRange1Start, _CRecallRange2Start} = big_block:get_recall_range(CH0, 0, 1),
 	CRecallByte1 = CRecallRange1Start,
 	TestCases = [
 		{"VDF not found",

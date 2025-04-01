@@ -146,7 +146,7 @@ calculate_difficulty(OldDiff, TS, Last, Height) ->
 	TargetTime = ?RETARGET_BLOCKS * ar_testnet:target_block_time(Height),
 	TargetTimeUpperBound = TargetTime + ar_testnet:target_block_time(Height),
 	TargetTimeLowerBound = TargetTime - ar_testnet:target_block_time(Height),
-	ActualTime = max(TS - Last, ar_block:get_max_timestamp_deviation()),
+	ActualTime = max(TS - Last, big_block:get_max_timestamp_deviation()),
 
 	case ActualTime < TargetTimeUpperBound andalso ActualTime > TargetTimeLowerBound of
 		true ->
@@ -164,7 +164,7 @@ calculate_difficulty_at_2_5(OldDiff, TS, Last, Height, PrevTS) ->
 
 calculate_difficulty_with_drop(OldDiff, TS, Last, Height, PrevTS, InitialCoeff, Coeff) ->
 	TargetTime = ?RETARGET_BLOCKS * ar_testnet:target_block_time(Height),
-	ActualTime = max(TS - Last, ar_block:get_max_timestamp_deviation()),
+	ActualTime = max(TS - Last, big_block:get_max_timestamp_deviation()),
 	Step = 10 * 60,
 	%% Drop the difficulty InitialCoeff times right away, then drop extra Coeff times
 	%% for every 10 minutes passed.

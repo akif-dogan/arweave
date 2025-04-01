@@ -40,8 +40,8 @@ init(WalletList, Diff, GenesisDataSize) ->
 	TXs = [TX],
 	AccountTree = ar_patricia_tree:from_proplist([{A, {B, LTX}}
 			|| {A, B, LTX} <- WalletList2]),
-	WLH = element(1, ar_block:hash_wallet_list(AccountTree)),
-	SizeTaggedTXs = ar_block:generate_size_tagged_list_from_txs(TXs, 0),
+	WLH = element(1, big_block:hash_wallet_list(AccountTree)),
+	SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs, 0),
 	BlockSize = case SizeTaggedTXs of [] -> 0; _ -> element(2, lists:last(SizeTaggedTXs)) end,
 	SizeTaggedDataRoots = [{Root, Offset} || {{_, Root}, Offset} <- SizeTaggedTXs],
 	{TXRoot, _Tree} = ar_merkle:generate_tree(SizeTaggedDataRoots),
@@ -107,7 +107,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 			true ->
 				B1
 		end,
-	[B2#block{ indep_hash = ar_block:indep_hash(B2) }].
+	[B2#block{ indep_hash = big_block:indep_hash(B2) }].
 
 -ifdef(AR_TEST).
 get_initial_block_time_history() ->

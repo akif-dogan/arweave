@@ -1,4 +1,4 @@
--module(ar_block).
+-module(big_block).
 
 -export([block_field_size_limit/1, verify_timestamp/2,
 		get_max_timestamp_deviation/0, verify_last_retarget/2, verify_weave_size/3,
@@ -25,7 +25,7 @@
 
 -include("../include/big.hrl").
 -include("../include/big_consensus.hrl").
--include("../include/ar_block.hrl").
+-include("../include/big_block.hrl").
 -include("../include/ar_vdf.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
@@ -288,10 +288,10 @@ validate_proof_size(PoA) ->
 indep_hash(B) ->
 	case B#block.height >= ar_fork:height_2_6() of
 		true ->
-			H = ar_block:generate_signed_hash(B),
+			H = big_block:generate_signed_hash(B),
 			indep_hash2(H, B#block.signature);
 		false ->
-			BDS = ar_block:generate_block_data_segment(B),
+			BDS = big_block:generate_block_data_segment(B),
 			indep_hash(BDS, B)
 	end.
 
@@ -422,7 +422,7 @@ indep_hash(BDS, B) ->
 	case B#block.height >= ar_fork:height_2_4() of
 		true ->
 			ar_deep_hash:hash([BDS, B#block.hash, B#block.nonce,
-					ar_block:poa_to_list(B#block.poa)]);
+					big_block:poa_to_list(B#block.poa)]);
 		false ->
 			ar_deep_hash:hash([BDS, B#block.hash, B#block.nonce])
 	end.
@@ -773,7 +773,7 @@ get_packing_threshold(B, SearchSpaceUpperBound) ->
 		false ->
 			case Height + 1 > Fork_2_5 of
 				true ->
-					ar_block:shift_packing_2_5_threshold(PrevPackingThreshold);
+					big_block:shift_packing_2_5_threshold(PrevPackingThreshold);
 				false ->
 					undefined
 			end

@@ -635,7 +635,7 @@ time_diff(#block{ timestamp = TS }, #block{ timestamp = PrevTS }) ->
 	TS - PrevTS.
 
 vdf_diff(B, PrevB) ->
-	ar_block:vdf_step_number(B) - ar_block:vdf_step_number(PrevB).
+	big_block:vdf_step_number(B) - big_block:vdf_step_number(PrevB).
 
 chunk_count(#block{ recall_byte2 = undefined }) ->
 	1;

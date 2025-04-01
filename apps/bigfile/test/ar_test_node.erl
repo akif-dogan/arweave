@@ -364,7 +364,7 @@ valid_solution() ->
 
 mock_to_force_invalid_h1() ->
 	{
-		ar_block, compute_h1,
+		big_block, compute_h1,
 		fun(_H0, _Nonce, _Chunk1) ->
 			{invalid_solution(), invalid_solution()}
 		end
@@ -1280,13 +1280,13 @@ await_post_block(#block{ indep_hash = H } = B, ExpectedResults, Peer) ->
 
 sign_block(#block{ cumulative_diff = CDiff } = B, PrevB, {Priv, Pub}) ->
 	B2 = B#block{ reward_key = Pub, reward_addr = big_wallet:to_address(Pub) },
-	SignedH = ar_block:generate_signed_hash(B2),
+	SignedH = big_block:generate_signed_hash(B2),
 	PrevCDiff = PrevB#block.cumulative_diff,
-	SignaturePreimage = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
+	SignaturePreimage = big_block:get_block_signature_preimage(CDiff, PrevCDiff,
 			<< (B#block.previous_solution_hash)/binary, SignedH/binary >>,
 			B#block.height),
 	Signature = big_wallet:sign(Priv, SignaturePreimage),
-	H = ar_block:indep_hash2(SignedH, Signature),
+	H = big_block:indep_hash2(SignedH, Signature),
 	B2#block{ indep_hash = H, signature = Signature }.
 
 read_block_when_stored(H) ->

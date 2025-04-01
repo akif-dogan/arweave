@@ -675,7 +675,7 @@ handle_info({event, node_state, {checkpoint_block, B}}, State) ->
 		false ->
 			#state{ sessions = Sessions, session_by_key = SessionByKey,
 					current_session_key = CurrentSessionKey } = State,
-			StepNumber = ar_block:vdf_step_number(B),
+			StepNumber = big_block:vdf_step_number(B),
 			BaseInterval = StepNumber div ar_nonce_limiter:get_reset_frequency(),
 			{Sessions2, SessionByKey2} = prune_old_sessions(Sessions, SessionByKey,
 					BaseInterval),

@@ -218,7 +218,7 @@ compute_next_vdf_difficulty_2_7_test_()->
 		{ar_fork, height_2_7_1, fun() -> infinity end}],
 		fun() ->
 			B = compute_next_vdf_difficulty_test_block(),
-			10465 = ar_block:compute_next_vdf_difficulty(B),
+			10465 = big_block:compute_next_vdf_difficulty(B),
 			ok
 		end).
 
@@ -229,6 +229,6 @@ compute_next_vdf_difficulty_2_7_1_test_()->
 		{ar_fork, height_2_7_1, fun() -> -1 end}],
 		fun() ->
 			B = compute_next_vdf_difficulty_test_block(),
-			10046 = ar_block:compute_next_vdf_difficulty(B),
+			10046 = big_block:compute_next_vdf_difficulty(B),
 			ok
 		end).

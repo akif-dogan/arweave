@@ -112,7 +112,7 @@ handle_call(get_partitions, _From, #state{ partition_upper_bound = PartitionUppe
 handle_call({read_recall_range, WhichChunk, Worker, Candidate, RecallRangeStart},
 		_From, State) ->
 	#mining_candidate{ packing_difficulty = PackingDifficulty } = Candidate,
-	RangeEnd = RecallRangeStart + ar_block:get_recall_range_size(PackingDifficulty),
+	RangeEnd = RecallRangeStart + big_block:get_recall_range_size(PackingDifficulty),
 	ThreadFound = case find_thread(RecallRangeStart, RangeEnd, State) of
 		not_found ->
 			false;
@@ -309,7 +309,7 @@ chunks_read(standalone, Worker, WhichChunk, Candidate, RecallRangeStart, ChunkOf
 
 get_packed_intervals(Start, End, MiningAddress, PackingDifficulty, "default", Intervals) ->
 	ReplicaFormat = get_replica_format_from_packing_difficulty(PackingDifficulty),
-	Packing = ar_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
+	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
 	case ar_sync_record:get_next_synced_interval(Start, End, Packing, ar_data_sync, "default") of
 		not_found ->
 			Intervals;
@@ -391,7 +391,7 @@ read_range(Mode, WhichChunk, Candidate, RangeStart, StoreID) ->
 	StartTime = erlang:monotonic_time(),
 	#mining_candidate{ mining_address = MiningAddress,
 			packing_difficulty = PackingDifficulty } = Candidate,
-	RecallRangeSize = ar_block:get_recall_range_size(PackingDifficulty),
+	RecallRangeSize = big_block:get_recall_range_size(PackingDifficulty),
 	Intervals = get_packed_intervals(RangeStart, RangeStart + RecallRangeSize,
 			MiningAddress, PackingDifficulty, StoreID, ar_intervals:new()),
 	ChunkOffsets = ar_chunk_storage:get_range(RangeStart, RecallRangeSize, StoreID),

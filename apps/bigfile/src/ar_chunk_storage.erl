@@ -302,7 +302,7 @@ get_chunk_storage_path(DataDir, StoreID) ->
 %% match the chunk's start offset.
 -spec get_chunk_bucket_start(Offset :: non_neg_integer()) -> non_neg_integer().
 get_chunk_bucket_start(Offset) ->
-	PaddedEndOffset = ar_block:get_chunk_padded_offset(Offset),
+	PaddedEndOffset = big_block:get_chunk_padded_offset(Offset),
 	ar_util:floor_int(max(0, PaddedEndOffset - ?DATA_CHUNK_SIZE), ?DATA_CHUNK_SIZE).
 
 -spec get_chunk_bucket_end(Offset :: non_neg_integer()) -> non_neg_integer().

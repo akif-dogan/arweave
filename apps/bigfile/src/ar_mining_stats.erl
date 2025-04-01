@@ -419,7 +419,7 @@ optimal_partition_read_mibps(_Packing, undefined, _PartitionDataSize, _TotalData
 	0.0;	
 optimal_partition_read_mibps(Packing, VDFSpeed, PartitionDataSize, TotalDataSize, WeaveSize) ->
 	PackingDifficulty = ar_mining_server:get_packing_difficulty(Packing),
-	RecallRangeSize = ar_block:get_recall_range_size(PackingDifficulty) / ?MiB,
+	RecallRangeSize = big_block:get_recall_range_size(PackingDifficulty) / ?MiB,
 	(RecallRangeSize / VDFSpeed) *
 	min(1.0, (PartitionDataSize / ?PARTITION_SIZE)) *
 	(1 + min(1.0, (TotalDataSize / WeaveSize))).

@@ -2728,7 +2728,7 @@ process_request(get_block, [Type, ID, <<"hash_list">>], Req) ->
 					{400, #{}, jiffy:encode(#{ error => not_supported_since_fork_2_6 }), Req};
 				false ->
 					CurrentBI = big_node:get_block_index(),
-					HL = ar_block:generate_hash_list_for_block(B#block.indep_hash, CurrentBI),
+					HL = big_block:generate_hash_list_for_block(B#block.indep_hash, CurrentBI),
 					{200, #{}, ar_serialize:jsonify(lists:map(fun ar_util:encode/1, HL)), Req}
 			end
 	end;

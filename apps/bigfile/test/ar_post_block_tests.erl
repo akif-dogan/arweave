@@ -318,7 +318,7 @@ test_rejects_invalid_blocks() ->
 	?assertMatch({ok, {{<<"208">>, _}, _, _, _, _}}, send_new_block(Peer, B1)),
 	%% Correct hash, but invalid signature.
 	B2Preimage = B1#block{ signature = <<>> },
-	B2 = B2Preimage#block{ indep_hash = ar_block:indep_hash(B2Preimage) },
+	B2 = B2Preimage#block{ indep_hash = big_block:indep_hash(B2Preimage) },
 	post_block(B2, invalid_signature),
 	%% Nonce limiter output too far in the future.
 	Info1 = B1#block.nonce_limiter_info,
@@ -524,10 +524,10 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	post_block(B2_2, invalid_double_signing_proof_cdiff),
 	CDiff = B1#block.cumulative_diff,
 	PrevCDiff = B0#block.cumulative_diff,
-	SignedH = ar_block:generate_signed_hash(B1),
+	SignedH = big_block:generate_signed_hash(B1),
 	Preimage1 = << (B0#block.hash)/binary, SignedH/binary >>,
 	Preimage2 = << (B0#block.hash)/binary, (crypto:strong_rand_bytes(32))/binary >>,
-	SignaturePreimage = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
+	SignaturePreimage = big_block:get_block_signature_preimage(CDiff, PrevCDiff,
 			Preimage2, 0),
 	Signature2 = big_wallet:sign(Priv, SignaturePreimage),
 	%% We cannot ban ourselves.
@@ -541,9 +541,9 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	Key2 = element(1, big_wallet:load_key(MainConfig#config.mining_addr)),
 	Preimage3 = << (B0#block.hash)/binary, (crypto:strong_rand_bytes(32))/binary >>,
 	Preimage4 = << (B0#block.hash)/binary, (crypto:strong_rand_bytes(32))/binary >>,
-	SignaturePreimage3 = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
+	SignaturePreimage3 = big_block:get_block_signature_preimage(CDiff, PrevCDiff,
 			Preimage3, 0),
-	SignaturePreimage4 = ar_block:get_block_signature_preimage(CDiff, PrevCDiff,
+	SignaturePreimage4 = big_block:get_block_signature_preimage(CDiff, PrevCDiff,
 			Preimage4, 0),
 	Signature3 = big_wallet:sign(Key2, SignaturePreimage3),
 	Signature4 = big_wallet:sign(Key2, SignaturePreimage4),
@@ -749,7 +749,7 @@ test_resigned_solution() ->
 	?assertEqual(B#block.indep_hash, B4#block.previous_block),
 	B2H = B2#block.indep_hash,
 	?assertNotEqual(B2#block.indep_hash, B4#block.previous_block),
-	PrevStepNumber = ar_block:vdf_step_number(B),
+	PrevStepNumber = big_block:vdf_step_number(B),
 	PrevInterval = PrevStepNumber div ar_nonce_limiter:get_reset_frequency(),
 	Info4 = B4#block.nonce_limiter_info,
 	StepNumber = Info4#nonce_limiter_info.global_step_number,
@@ -758,11 +758,11 @@ test_resigned_solution() ->
 		case Interval == PrevInterval of
 			true ->
 				sign_block(B4#block{
-						hash_list_merkle = ar_block:compute_hash_list_merkle(B2),
+						hash_list_merkle = big_block:compute_hash_list_merkle(B2),
 						previous_block = B2H }, B2, Key);
 			false ->
 				sign_block(B4#block{ previous_block = B2H,
-						hash_list_merkle = ar_block:compute_hash_list_merkle(B2),
+						hash_list_merkle = big_block:compute_hash_list_merkle(B2),
 						nonce_limiter_info = Info4#nonce_limiter_info{ next_seed = B2H } },
 						B2, Key)
 		end,

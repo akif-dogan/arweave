@@ -234,7 +234,7 @@ do_join(Peers, B, BI) ->
 			|| _ <- lists:seq(1, Config#config.join_workers)]),
 	PeerQ = queue:from_list(Peers),
 	Trail = lists:sublist(tl(BI), 2 * ?MAX_TX_ANCHOR_DEPTH),
-	SizeTaggedTXs = ar_block:generate_size_tagged_list_from_txs(B#block.txs, B#block.height),
+	SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(B#block.txs, B#block.height),
 	Retries = lists:foldl(fun(Peer, Acc) -> maps:put(Peer, 10, Acc) end, #{}, Peers),
 	Blocks = [B#block{ size_tagged_txs = SizeTaggedTXs }
 			| get_block_trail(WorkerQ, PeerQ, Trail, Retries)],
@@ -429,7 +429,7 @@ get_blocks([], _FetchState) ->
 get_blocks([{H, _, _} | Trail], FetchState) ->
 	{B, TXMap, _} = maps:get(H, FetchState),
 	TXs = [maps:get(TXID, TXMap) || TXID <- B#block.txs],
-	SizeTaggedTXs = ar_block:generate_size_tagged_list_from_txs(TXs, B#block.height),
+	SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs, B#block.height),
 	[B#block{ txs = TXs, size_tagged_txs = SizeTaggedTXs } | get_blocks(Trail, FetchState)].
 
 request_block(H, WorkerQ, PeerQ) ->

@@ -450,7 +450,7 @@ calculate_cache_limits(NumActivePartitions, PackingDifficulty) ->
 	%% This allows the cache to store enough chunks for 4 concurrent VDF steps per partition.
 	IdealStepsPerPartition = 4,
 	IdealRangesPerStep = 2,
-	RecallRangeSize = ar_block:get_recall_range_size(PackingDifficulty),
+	RecallRangeSize = big_block:get_recall_range_size(PackingDifficulty),
 
 	MinimumCacheLimitMiB = max(
 		1,
@@ -470,7 +470,7 @@ calculate_cache_limits(NumActivePartitions, PackingDifficulty) ->
 	%% their cache in terms of sub-chunks where a spora_2_6 sub-chunk is the same as a chunk,
 	%% and a composite sub-chunk is much smaller than a chunk.
 	OverallCacheLimitSubChunks = (OverallCacheLimitMiB * ?MiB) div 
-		ar_block:get_sub_chunk_size(PackingDifficulty),
+		big_block:get_sub_chunk_size(PackingDifficulty),
 
 	%% We shard the chunk cache across every active worker. Only workers that mine a partition
 	%% included in the current weave are active.
@@ -479,7 +479,7 @@ calculate_cache_limits(NumActivePartitions, PackingDifficulty) ->
 	%% Allow enough compute_h0 tasks to be queued to completely refill the chunk cache.
 	VDFQueueLimit = max(
 		1,
-		PartitionCacheLimit div (2 * ar_block:get_nonces_per_recall_range(PackingDifficulty))
+		PartitionCacheLimit div (2 * big_block:get_nonces_per_recall_range(PackingDifficulty))
 	),
 
 	GarbageCollectionFrequency = 4 * VDFQueueLimit * 1000,
@@ -557,10 +557,10 @@ distribute_output([{Partition, MiningAddress, PackingDifficulty} | Partitions],
 	distribute_output(Partitions, Candidate, State).
 
 get_recall_bytes(H0, PartitionNumber, Nonce, PartitionUpperBound, PackingDifficulty) ->
-	{RecallRange1Start, RecallRange2Start} = ar_block:get_recall_range(H0,
+	{RecallRange1Start, RecallRange2Start} = big_block:get_recall_range(H0,
 			PartitionNumber, PartitionUpperBound),
-	RecallByte1 = ar_block:get_recall_byte(RecallRange1Start, Nonce, PackingDifficulty),
-	RecallByte2 = ar_block:get_recall_byte(RecallRange2Start, Nonce, PackingDifficulty),
+	RecallByte1 = big_block:get_recall_byte(RecallRange1Start, Nonce, PackingDifficulty),
+	RecallByte2 = big_block:get_recall_byte(RecallRange2Start, Nonce, PackingDifficulty),
 	{RecallByte1, RecallByte2}.
 
 prepare_and_post_solution(#mining_candidate{} = Candidate, State) ->
@@ -593,10 +593,10 @@ prepare_solution(Solution, State) ->
 		step_number = StepNumber, packing_difficulty = PackingDifficulty,
 		replica_format = ReplicaFormat
 	},
-	H0 = ar_block:compute_h0(NonceLimiterOutput, PartitionNumber,
+	H0 = big_block:compute_h0(NonceLimiterOutput, PartitionNumber,
 			Seed, MiningAddress, PackingDifficulty),
 	Chunk1 = PoA1#poa.chunk,
-	{H1, Preimage1} = ar_block:compute_h1(H0, Nonce, Chunk1),
+	{H1, Preimage1} = big_block:compute_h1(H0, Nonce, Chunk1),
 	Candidate2 = Candidate#mining_candidate{
 		h0 = H0,
 		h1 = H1,
@@ -608,7 +608,7 @@ prepare_solution(Solution, State) ->
 				Preimage = Preimage1,
 				Candidate2;
 			Chunk2 ->
-				{H2, Preimage} = ar_block:compute_h2(H1, Chunk2, H0),
+				{H2, Preimage} = big_block:compute_h2(H1, Chunk2, H0),
 				Candidate2#mining_candidate{ h2 = H2, chunk2 = Chunk2 }
 		end,
 	Solution2 = Solution#mining_solution{ merkle_rebase_threshold = RebaseThreshold },
@@ -759,7 +759,7 @@ prepare_solution(poa1, Candidate, Solution) ->
 					{partition_number, PartitionNumber}],
 			case Chunk1 of
 				not_set ->
-					Packing = ar_block:get_packing(PackingDifficulty, MiningAddress,
+					Packing = big_block:get_packing(PackingDifficulty, MiningAddress,
 							ReplicaFormat),
 					?LOG_WARNING([{event, failed_to_find_poa1_proofs_for_h2_solution},
 							{error, io_lib:format("~p", [Error])},
@@ -836,7 +836,7 @@ prepare_poa(PoAType, Candidate, CurrentPoA) ->
 		poa2 -> {RecallByte2, Chunk2}
 	end,
 	
-	Packing = ar_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
+	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
 	case is_poa_complete(CurrentPoA, PackingDifficulty) of
 		true ->
 			{ok, CurrentPoA};
@@ -1114,7 +1114,7 @@ get_sub_chunk(Chunk, 0, _Nonce) ->
 	Chunk;
 get_sub_chunk(Chunk, PackingDifficulty, Nonce) ->
 	SubChunkSize = ?COMPOSITE_PACKING_SUB_CHUNK_SIZE,
-	SubChunkIndex = ar_block:get_sub_chunk_index(PackingDifficulty, Nonce),
+	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
 	SubChunkStartOffset = SubChunkSize * SubChunkIndex,
 	binary:part(Chunk, SubChunkStartOffset, SubChunkSize).
 
@@ -1171,17 +1171,17 @@ validate_solution(Solution, DiffPair) ->
 		poa1 = PoA1, recall_byte1 = RecallByte1, seed = Seed,
 		solution_hash = SolutionHash,
 		packing_difficulty = PackingDifficulty, replica_format = ReplicaFormat } = Solution,
-	H0 = ar_block:compute_h0(NonceLimiterOutput, PartitionNumber, Seed, MiningAddress,
+	H0 = big_block:compute_h0(NonceLimiterOutput, PartitionNumber, Seed, MiningAddress,
 			PackingDifficulty),
-	{H1, _Preimage1} = ar_block:compute_h1(H0, Nonce, PoA1#poa.chunk),
-	{RecallRange1Start, RecallRange2Start} = ar_block:get_recall_range(H0,
+	{H1, _Preimage1} = big_block:compute_h1(H0, Nonce, PoA1#poa.chunk),
+	{RecallRange1Start, RecallRange2Start} = big_block:get_recall_range(H0,
 			PartitionNumber, PartitionUpperBound),
 	%% Assert recall_byte1 is computed correctly.
-	RecallByte1 = ar_block:get_recall_byte(RecallRange1Start, Nonce, PackingDifficulty),
+	RecallByte1 = big_block:get_recall_byte(RecallRange1Start, Nonce, PackingDifficulty),
 	{BlockStart1, BlockEnd1, TXRoot1} = ar_block_index:get_block_bounds(RecallByte1),
 	BlockSize1 = BlockEnd1 - BlockStart1,
-	Packing = ar_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
-	SubChunkIndex = ar_block:get_sub_chunk_index(PackingDifficulty, Nonce),
+	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
+	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
 	case ar_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, PoA1,
 			Packing, SubChunkIndex, not_set}) of
 		{true, ChunkID} ->
@@ -1202,14 +1202,14 @@ validate_solution(Solution, DiffPair) ->
 						false ->
 							#mining_solution{
 								recall_byte2 = RecallByte2, poa2 = PoA2 } = Solution,
-							{H2, _Preimage2} = ar_block:compute_h2(H1, PoA2#poa.chunk, H0),
+							{H2, _Preimage2} = big_block:compute_h2(H1, PoA2#poa.chunk, H0),
 							case ar_node_utils:h2_passes_diff_check(H2, DiffPair,
 									PackingDifficulty) of
 								false ->
 									{false, h2_diff_check};
 								true ->
 									SolutionHash = H2,
-									RecallByte2 = ar_block:get_recall_byte(RecallRange2Start,
+									RecallByte2 = big_block:get_recall_byte(RecallRange2Start,
 											Nonce, PackingDifficulty),
 									{BlockStart2, BlockEnd2, TXRoot2} =
 											ar_block_index:get_block_bounds(RecallByte2),

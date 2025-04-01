@@ -97,7 +97,7 @@ ar_retarget:is_current_block_retarget_block(Block).
 
 %% Good function names
 ar_tx:to_binary(TX).
-ar_block:generate_block_from_shadow(BShadow).
+big_block:generate_block_from_shadow(BShadow).
 ar_serialize:block_to_json_struct(Block).
 ```
 

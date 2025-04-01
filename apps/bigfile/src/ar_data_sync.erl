@@ -1245,8 +1245,8 @@ handle_cast({remove_range, End, Cursor, Ref, PID}, State) ->
 			PID ! {removed_range, Ref},
 			{noreply, State};
 		{ok, _Key, {AbsoluteOffset, _, _, _, _, _, ChunkSize}} ->
-			PaddedStartOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset - ChunkSize),
-			PaddedOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset),
+			PaddedStartOffset = big_block:get_chunk_padded_offset(AbsoluteOffset - ChunkSize),
+			PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 			%% 1) store updated sync record
 			%% 2) remove chunk
 			%% 3) update chunks_index
@@ -1879,7 +1879,7 @@ invalidate_bad_data_record({AbsoluteEndOffset, ChunkSize, StoreID, Type}) ->
 	end.
 
 invalidate_bad_data_record2({AbsoluteEndOffset, ChunkSize, StoreID, Type}) ->
-	PaddedEndOffset = ar_block:get_chunk_padded_offset(AbsoluteEndOffset),
+	PaddedEndOffset = big_block:get_chunk_padded_offset(AbsoluteEndOffset),
 	StartOffset = AbsoluteEndOffset - ChunkSize,
 	?LOG_WARNING([{event, invalidating_bad_data_record}, {type, Type},
 			{range_start, StartOffset}, {range_end, PaddedEndOffset},
@@ -2887,7 +2887,7 @@ write_not_blacklisted_chunk(Offset, ChunkDataKey, Chunk, ChunkSize, DataPath, Pa
 	ShouldStoreInChunkStorage = ar_chunk_storage:is_storage_supported(Offset, ChunkSize, Packing),
 	case ShouldStoreInChunkStorage of
 		true ->
-			PaddedOffset = ar_block:get_chunk_padded_offset(Offset),
+			PaddedOffset = big_block:get_chunk_padded_offset(Offset),
 			Result = ar_chunk_storage:put(PaddedOffset, Chunk, StoreID),
 			case Result of
 				{ok, NewPacking} ->
@@ -2929,8 +2929,8 @@ update_chunks_index2(Args, State) ->
 	Metadata = {ChunkDataKey, TXRoot, DataRoot, TXPath, Offset, ChunkSize},
 	case put_chunk_metadata(AbsoluteOffset, StoreID, Metadata) of
 		ok ->
-			StartOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset - ChunkSize),
-			PaddedOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset),
+			StartOffset = big_block:get_chunk_padded_offset(AbsoluteOffset - ChunkSize),
+			PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 			case ar_sync_record:add(PaddedOffset, StartOffset, Packing, ar_data_sync, StoreID) of
 				ok ->
 					ok;
@@ -3110,8 +3110,8 @@ store_chunk2(ChunkArgs, Args, State) ->
 	#sync_data_state{ store_id = StoreID } = State,
 	{Packing, Chunk, AbsoluteOffset, TXRoot, ChunkSize} = ChunkArgs,
 	{_Packing, DataPath, Offset, DataRoot, TXPath, OriginStoreID, OriginChunkDataKey} = Args,
-	PaddedOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset),
-	StartOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset - ChunkSize),
+	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
+	StartOffset = big_block:get_chunk_padded_offset(AbsoluteOffset - ChunkSize),
 	DataPathHash = crypto:hash(sha256, DataPath),
 	ShouldStoreInChunkStorage = ar_chunk_storage:is_storage_supported(AbsoluteOffset,
 			ChunkSize, Packing),
@@ -3302,8 +3302,8 @@ delete_disk_pool_chunk(Iterator, Args, State) ->
 				{ok, ChunkArgs} ->
 					case element(1, ChunkArgs) of
 						ChunkDataKey ->
-							PaddedOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset),
-							StartOffset = ar_block:get_chunk_padded_offset(
+							PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
+							StartOffset = big_block:get_chunk_padded_offset(
 									AbsoluteOffset - ChunkSize),
 							ok = ar_sync_record:delete(PaddedOffset, StartOffset, ar_data_sync,
 									StoreID),

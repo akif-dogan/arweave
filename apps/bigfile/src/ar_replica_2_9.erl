@@ -143,7 +143,7 @@ get_slice_index(AbsoluteChunkEndOffset) ->
 %% A chunk bucket a 0-based, 256-KiB wide, 256-KiB aligned range that fully contains a chunk.
 -spec get_entropy_bucket_start(non_neg_integer()) -> non_neg_integer().
 get_entropy_bucket_start(AbsoluteChunkEndOffset) ->
-	PaddedEndOffset = ar_block:get_chunk_padded_offset(AbsoluteChunkEndOffset),
+	PaddedEndOffset = big_block:get_chunk_padded_offset(AbsoluteChunkEndOffset),
 	PickOffset = max(0, PaddedEndOffset - ?DATA_CHUNK_SIZE),
 	BucketStart = PickOffset - PickOffset rem ?DATA_CHUNK_SIZE,
 

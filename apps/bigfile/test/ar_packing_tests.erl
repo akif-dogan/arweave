@@ -466,8 +466,8 @@ test_packs_chunks_depending_on_packing_threshold() ->
 			NonceLimiterInfo = B#block.nonce_limiter_info,
 			PartitionUpperBound =
 					NonceLimiterInfo#nonce_limiter_info.partition_upper_bound,
-			H0 = ar_block:compute_h0(B, PrevB),
-			{RecallRange1Start, _} = ar_block:get_recall_range(H0,
+			H0 = big_block:compute_h0(B, PrevB),
+			{RecallRange1Start, _} = big_block:get_recall_range(H0,
 					B#block.partition_number, PartitionUpperBound),
 			RecallByte =
 				case B#block.packing_difficulty of
@@ -486,7 +486,7 @@ test_packs_chunks_depending_on_packing_threshold() ->
 					ar_util:encode(PrevB#block.indep_hash), PartitionUpperBound,
 					BlockStart, BlockEnd, ar_util:encode(TXRoot)]),
 			?assertEqual(RecallByte, B#block.recall_byte),
-			SubChunkIndex = ar_block:get_sub_chunk_index(B#block.packing_difficulty,
+			SubChunkIndex = big_block:get_sub_chunk_index(B#block.packing_difficulty,
 					B#block.nonce),
 			{Packing, PoA2} =
 				case B#block.packing_difficulty of

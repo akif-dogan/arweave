@@ -191,7 +191,7 @@ test_vdf_server_push_fast_block() ->
 
 	Seed0 = B0#block.nonce_limiter_info#nonce_limiter_info.next_seed,
 	Seed1 = B1#block.nonce_limiter_info#nonce_limiter_info.next_seed,
-	StepNumber1 = ar_block:vdf_step_number(B1),
+	StepNumber1 = big_block:vdf_step_number(B1),
 
 	[{Seed0, _, LatestStepNumber0}] = ets:lookup(computed_output, Seed0),
 	[{Seed1, FirstStepNumber1, _}] = ets:lookup(computed_output, Seed1),
@@ -237,7 +237,7 @@ test_vdf_server_push_slow_block() ->
 
 	Seed0 = B0#block.nonce_limiter_info#nonce_limiter_info.next_seed,
 	Seed1 = B1#block.nonce_limiter_info#nonce_limiter_info.next_seed,
-	StepNumber1 = ar_block:vdf_step_number(B1),
+	StepNumber1 = big_block:vdf_step_number(B1),
 
 	[{Seed0, _, LatestStepNumber0}] = ets:lookup(computed_output, Seed0),
 	[{Seed1, FirstStepNumber1, LatestStepNumber1}] = ets:lookup(computed_output, Seed1),

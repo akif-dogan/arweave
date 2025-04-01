@@ -104,7 +104,7 @@ handle_cast(pre_validate, #state{ pqueue = Q, size = Size, ip_timestamps = IPTim
 										?LOG_INFO([{event, processing_block},
 												{peer, ar_util:format_peer(Peer)},
 												{height, B#block.height},
-												{step_number, ar_block:vdf_step_number(B)},
+												{step_number, big_block:vdf_step_number(B)},
 												{block, ar_util:encode(B#block.indep_hash)},
 												{miner_address,
 														ar_util:encode(B#block.reward_addr)},
@@ -222,8 +222,8 @@ pre_validate_previous_block(B, Peer) ->
 	end.
 
 pre_validate_proof_sizes(B, PrevB, Peer) ->
-	case ar_block:validate_proof_size(B#block.poa) andalso
-			ar_block:validate_proof_size(B#block.poa2) of
+	case big_block:validate_proof_size(B#block.poa) andalso
+			big_block:validate_proof_size(B#block.poa2) of
 		true ->
 			may_be_pre_validate_first_chunk_hash(B, PrevB, Peer);
 		false ->
@@ -345,7 +345,7 @@ pre_validate_indep_hash(#block{ indep_hash = H } = B, PrevB, Peer) ->
 
 pre_validate_timestamp(B, PrevB, Peer) ->
 	#block{ indep_hash = H } = B,
-	case ar_block:verify_timestamp(B, PrevB) of
+	case big_block:verify_timestamp(B, PrevB) of
 		true ->
 			pre_validate_existing_solution_hash(B, PrevB, Peer);
 		false ->
@@ -449,9 +449,9 @@ may_be_report_double_signing(B, B2) ->
 	case CDiff1 == CDiff2 orelse (CDiff1 > PrevCDiff2 andalso CDiff2 > PrevCDiff) of
 		true ->
 			Preimage1 = << PreviousSolutionH1/binary,
-					(ar_block:generate_signed_hash(B))/binary >>,
+					(big_block:generate_signed_hash(B))/binary >>,
 			Preimage2 = << PreviousSolutionH2/binary,
-					(ar_block:generate_signed_hash(B2))/binary >>,
+					(big_block:generate_signed_hash(B2))/binary >>,
 			Proof = {Key, Signature1, CDiff1, PrevCDiff, Preimage1, Signature2, CDiff2,
 					PrevCDiff2, Preimage2},
 			?LOG_INFO([{event, report_double_signing},
@@ -500,9 +500,9 @@ validate_poa_against_cached_poa(B, CacheB) ->
 
 pre_validate_nonce_limiter_global_step_number(B, PrevB, SolutionResigned, Peer) ->
 	BlockInfo = B#block.nonce_limiter_info,
-	StepNumber = ar_block:vdf_step_number(B),
+	StepNumber = big_block:vdf_step_number(B),
 	PrevBlockInfo = PrevB#block.nonce_limiter_info,
-	PrevStepNumber = ar_block:vdf_step_number(PrevB),
+	PrevStepNumber = big_block:vdf_step_number(PrevB),
 	CurrentStepNumber =
 		case ar_nonce_limiter:get_current_step_number(PrevB) of
 			not_found ->
@@ -546,7 +546,7 @@ pre_validate_previous_solution_hash(B, PrevB, SolutionResigned, Peer) ->
 
 pre_validate_last_retarget(B, PrevB, SolutionResigned, Peer) ->
 	true = B#block.height >= ar_fork:height_2_6(),
-	case ar_block:verify_last_retarget(B, PrevB) of
+	case big_block:verify_last_retarget(B, PrevB) of
 		true ->
 			pre_validate_difficulty(B, PrevB, SolutionResigned, Peer);
 		false ->
@@ -570,7 +570,7 @@ pre_validate_difficulty(B, PrevB, SolutionResigned, Peer) ->
 
 pre_validate_cumulative_difficulty(B, PrevB, SolutionResigned, Peer) ->
 	true = B#block.height >= ar_fork:height_2_6(),
-	case ar_block:verify_cumulative_diff(B, PrevB) of
+	case big_block:verify_cumulative_diff(B, PrevB) of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_cumulative_difficulty, Peer),
 			ar_events:send(block, {rejected, invalid_cumulative_difficulty,
@@ -581,7 +581,7 @@ pre_validate_cumulative_difficulty(B, PrevB, SolutionResigned, Peer) ->
 	end.
 
 pre_validate_packing_difficulty(B, PrevB, SolutionResigned, Peer) ->
-	case ar_block:validate_replica_format(B#block.height, B#block.packing_difficulty,
+	case big_block:validate_replica_format(B#block.height, B#block.packing_difficulty,
 			B#block.replica_format) of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_packing_difficulty, Peer),
@@ -601,8 +601,8 @@ pre_validate_packing_difficulty(B, PrevB, SolutionResigned, Peer) ->
 
 pre_validate_quick_pow(B, PrevB, SolutionResigned, Peer) ->
 	#block{ hash_preimage = HashPreimage } = B,
-	H0 = ar_block:compute_h0(B, PrevB),
-	SolutionHash = ar_block:compute_solution_h(H0, HashPreimage),
+	H0 = big_block:compute_h0(B, PrevB),
+	SolutionHash = big_block:compute_solution_h(H0, HashPreimage),
 	case ar_node_utils:block_passes_diff_check(SolutionHash, B) of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_hash_preimage, Peer),
@@ -621,7 +621,7 @@ pre_validate_nonce_limiter_seed_data(B, PrevB, SolutionResigned, Peer) ->
 			next_seed = NextSeed, partition_upper_bound = PartitionUpperBound,
 			vdf_difficulty = VDFDifficulty,
 			next_partition_upper_bound = NextPartitionUpperBound } = Info,
-	StepNumber = ar_block:vdf_step_number(B),
+	StepNumber = big_block:vdf_step_number(B),
 	ExpectedSeedData = ar_nonce_limiter:get_seed_data(StepNumber, PrevB),
 	case ExpectedSeedData == {Seed, NextSeed, PartitionUpperBound,
 			NextPartitionUpperBound, VDFDifficulty} of
@@ -648,7 +648,7 @@ pre_validate_partition_number(B, PrevB, PartitionUpperBound, SolutionResigned, P
 	end.
 
 pre_validate_nonce(B, PrevB, PartitionUpperBound, SolutionResigned, Peer) ->
-	Max = ar_block:get_max_nonce(B#block.packing_difficulty),
+	Max = big_block:get_max_nonce(B#block.packing_difficulty),
 	case B#block.nonce > Max of
 		true ->
 			post_block_reject_warn_and_error_dump(B, check_nonce, Peer),
@@ -664,9 +664,9 @@ pre_validate_nonce(B, PrevB, PartitionUpperBound, SolutionResigned, Peer) ->
 	end.
 
 pre_validate_pow_2_6(B, PrevB, PartitionUpperBound, Peer) ->
-	H0 = ar_block:compute_h0(B, PrevB),
+	H0 = big_block:compute_h0(B, PrevB),
 	Chunk1 = (B#block.poa)#poa.chunk,
-	{H1, Preimage1} = ar_block:compute_h1(H0, B#block.nonce, Chunk1),
+	{H1, Preimage1} = big_block:compute_h1(H0, B#block.nonce, Chunk1),
 	DiffPair = ar_difficulty:diff_pair(B),
 	case H1 == B#block.hash andalso ar_node_utils:h1_passes_diff_check(H1, DiffPair,
 				B#block.packing_difficulty)
@@ -677,7 +677,7 @@ pre_validate_pow_2_6(B, PrevB, PartitionUpperBound, Peer) ->
 			pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer);
 		false ->
 			Chunk2 = (B#block.poa2)#poa.chunk,
-			{H2, Preimage2} = ar_block:compute_h2(H1, Chunk2, H0),
+			{H2, Preimage2} = big_block:compute_h2(H1, Chunk2, H0),
 			case H2 == B#block.hash andalso ar_node_utils:h2_passes_diff_check(H2, DiffPair,
 						B#block.packing_difficulty)
 					andalso Preimage2 == B#block.hash_preimage of
@@ -691,9 +691,9 @@ pre_validate_pow_2_6(B, PrevB, PartitionUpperBound, Peer) ->
 	end.
 
 pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
-	{RecallRange1Start, RecallRange2Start} = ar_block:get_recall_range(H0,
+	{RecallRange1Start, RecallRange2Start} = big_block:get_recall_range(H0,
 			B#block.partition_number, PartitionUpperBound),
-	RecallByte1 = ar_block:get_recall_byte(RecallRange1Start, B#block.nonce,
+	RecallByte1 = big_block:get_recall_byte(RecallRange1Start, B#block.nonce,
 			B#block.packing_difficulty),
 	{BlockStart1, BlockEnd1, TXRoot1} = ar_block_index:get_block_bounds(RecallByte1),
 	BlockSize1 = BlockEnd1 - BlockStart1,
@@ -702,9 +702,9 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 	%% The packing difficulty >0 is only allowed after the 2.8 hard fork (validated earlier
 	%% here), and the composite packing is only possible for packing difficulty >= 1.
 	%% The new shared entropy format is supported starting from 2.9.
-	Packing = ar_block:get_packing(PackingDifficulty, B#block.reward_addr,
+	Packing = big_block:get_packing(PackingDifficulty, B#block.reward_addr,
 			B#block.replica_format),
-	SubChunkIndex = ar_block:get_sub_chunk_index(PackingDifficulty, Nonce),
+	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
 	ArgCache = {BlockStart1, RecallByte1, TXRoot1, BlockSize1, Packing, SubChunkIndex},
 	case RecallByte1 == B#block.recall_byte andalso
 			ar_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, B#block.poa,
@@ -727,7 +727,7 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 				true ->
 					pre_validate_nonce_limiter(B2, PrevB, Peer);
 				false ->
-					RecallByte2 = ar_block:get_recall_byte(RecallRange2Start, B#block.nonce,
+					RecallByte2 = big_block:get_recall_byte(RecallRange2Start, B#block.nonce,
 							B#block.packing_difficulty),
 					{BlockStart2, BlockEnd2, TXRoot2} = ar_block_index:get_block_bounds(
 							RecallByte2),
@@ -785,12 +785,12 @@ accept_block(B, Peer, Gossip) ->
 
 compute_hash(B, PrevCDiff) ->
 	true = B#block.height >= ar_fork:height_2_6(),
-	SignedH = ar_block:generate_signed_hash(B),
-	case ar_block:verify_signature(SignedH, PrevCDiff, B) of
+	SignedH = big_block:generate_signed_hash(B),
+	case big_block:verify_signature(SignedH, PrevCDiff, B) of
 		false ->
 			{error, invalid_signature};
 		true ->
-			{ok, ar_block:indep_hash2(SignedH, B#block.signature)}
+			{ok, big_block:indep_hash2(SignedH, B#block.signature)}
 	end.
 
 post_block_reject_warn_and_error_dump(B, Step, Peer) ->

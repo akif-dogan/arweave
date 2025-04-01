@@ -225,7 +225,7 @@ do_test_chunk_cache_size_with_mocks(H1s, H2s, RecallRange2s, FirstChunks) ->
 			end
 		},
 		{
-			ar_block, compute_h1,
+			big_block, compute_h1,
 			fun (_H0, _Nonce, _Chunk) ->
 				Count = increment_mock_counter(compute_h1),
 				Solution = get_mock_value(Count, H1s),
@@ -233,7 +233,7 @@ do_test_chunk_cache_size_with_mocks(H1s, H2s, RecallRange2s, FirstChunks) ->
 			end
 		},
 		{
-			ar_block, compute_h2,
+			big_block, compute_h2,
 			fun (_H0, _Nonce, _Chunk) ->
 				Count = increment_mock_counter(compute_h2),
 				Solution = get_mock_value(Count, H2s),
@@ -241,7 +241,7 @@ do_test_chunk_cache_size_with_mocks(H1s, H2s, RecallRange2s, FirstChunks) ->
 			end
 		},
 		{
-			ar_block, get_recall_range,
+			big_block, get_recall_range,
 			fun (_H0, _PartitionNumber, _PartitionUpperBound) ->
 				Count = increment_mock_counter(get_recall_range),
 				RecallRange2 = get_mock_value(Count, RecallRange2s),

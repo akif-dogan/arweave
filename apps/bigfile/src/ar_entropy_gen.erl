@@ -311,7 +311,7 @@ do_prepare_entropy(State) ->
                         PartitionEnd = (Partition + 1) * ?PARTITION_SIZE,
                         PaddedPartitionEnd =
                             ar_chunk_storage:get_chunk_bucket_end(
-                                ar_block:get_chunk_padded_offset(PartitionEnd)),
+                                big_block:get_chunk_padded_offset(PartitionEnd)),
                         %% In addition to limiting this iteration to the PaddedPartitionEnd,
                         %% we also want to limit it to the current storage module's range.
                         %% This allows us to handle both the storage module range as well

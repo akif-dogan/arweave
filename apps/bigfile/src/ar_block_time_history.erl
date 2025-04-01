@@ -119,7 +119,7 @@ update_history(B, PrevB) ->
 
 get_history_element(B, PrevB) ->
 	BlockInterval = max(1, B#block.timestamp - PrevB#block.timestamp),
-	VDFInterval = ar_block:vdf_step_number(B) - ar_block:vdf_step_number(PrevB),
+	VDFInterval = big_block:vdf_step_number(B) - big_block:vdf_step_number(PrevB),
 	ChunkCount =
 		case B#block.recall_byte2 of
 			undefined ->

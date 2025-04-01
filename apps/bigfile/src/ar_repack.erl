@@ -208,7 +208,7 @@ send_chunks_for_repacking(Args) ->
 send_chunk_for_repacking(AbsoluteOffset, ChunkMeta, Args) ->
 	{StoreID, RequiredPacking, ChunkMap} = Args,
 	Server = ar_chunk_storage:name(StoreID),
-	PaddedOffset = ar_block:get_chunk_padded_offset(AbsoluteOffset),
+	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 	{ChunkDataKey, TXRoot, DataRoot, TXPath,
 			RelativeOffset, ChunkSize} = ChunkMeta,
 	case ar_sync_record:is_recorded(PaddedOffset, ar_data_sync, StoreID) of
@@ -293,7 +293,7 @@ send_chunk_for_repacking(AbsoluteOffset, ChunkMeta, Args) ->
 
 chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 	{Packing, Chunk, Offset, _, ChunkSize} = ChunkArgs,
-	PaddedEndOffset = ar_block:get_chunk_padded_offset(Offset),
+	PaddedEndOffset = big_block:get_chunk_padded_offset(Offset),
 	StartOffset = PaddedEndOffset - ?DATA_CHUNK_SIZE,
 	IsStorageSupported =
 		ar_chunk_storage:is_storage_supported(PaddedEndOffset, ChunkSize, Packing),

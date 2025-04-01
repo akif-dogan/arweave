@@ -866,7 +866,7 @@ read_tx_data(TX) ->
 	end.
 
 write_wallet_list(Height, Tree) ->
-	{RootHash, _UpdatedTree, UpdateMap} = ar_block:hash_wallet_list(Tree),
+	{RootHash, _UpdatedTree, UpdateMap} = big_block:hash_wallet_list(Tree),
 	store_account_tree_update(Height, RootHash, UpdateMap),
 	erlang:garbage_collect(),
 	RootHash.
@@ -1376,13 +1376,13 @@ test_store_and_retrieve_wallet_list() ->
 	?assertEqual({0, TXID}, read_account(Addr, WalletListHash2)),
 	?assertEqual({0, TXID2}, read_account(Addr2, WalletListHash2)),
 	assert_wallet_trees_equal(ExpectedWL2, ActualWL2),
-	{WalletListHash, ActualWL3, _UpdateMap} = ar_block:hash_wallet_list(ActualWL),
+	{WalletListHash, ActualWL3, _UpdateMap} = big_block:hash_wallet_list(ActualWL),
 	Addr3 = << (binary:part(Addr, 0, 3))/binary, (crypto:strong_rand_bytes(29))/binary >>,
 	TXID3 = crypto:strong_rand_bytes(32),
 	TXID4 = crypto:strong_rand_bytes(32),
 	ActualWL4 = ar_patricia_tree:insert(Addr3, {100, TXID3},
 			ar_patricia_tree:insert(Addr2, {0, TXID4}, ActualWL3)),
-	{WalletListHash3, ActualWL5, UpdateMap2} = ar_block:hash_wallet_list(ActualWL4),
+	{WalletListHash3, ActualWL5, UpdateMap2} = big_block:hash_wallet_list(ActualWL4),
 	store_account_tree_update(1, WalletListHash3, UpdateMap2),
 	?assertEqual({100, TXID3}, read_account(Addr3, WalletListHash3)),
 	?assertEqual({0, TXID4}, read_account(Addr2, WalletListHash3)),
@@ -1462,7 +1462,7 @@ store_and_retrieve_wallet_list2(Tree, InsertedKeys, IsUpdate) ->
 			false ->
 				{write_wallet_list(0, Tree), Tree};
 			_ ->
-				{R, T, Map} = ar_block:hash_wallet_list(Tree),
+				{R, T, Map} = big_block:hash_wallet_list(Tree),
 				store_account_tree_update(0, R, Map),
 				{R, T}
 		end,

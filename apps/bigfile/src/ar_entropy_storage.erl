@@ -210,7 +210,7 @@ record_chunk(PaddedEndOffset,
              FileIndex,
              {IsPrepared, RewardAddr}) ->
     %% Sanity checks
-    true = PaddedEndOffset == ar_block:get_chunk_padded_offset(PaddedEndOffset),
+    true = PaddedEndOffset == big_block:get_chunk_padded_offset(PaddedEndOffset),
     %% End sanity checks
     StartOffset = ar_chunk_storage:get_chunk_bucket_start(PaddedEndOffset),
     {_ChunkFileStart, Filepath, _Position, _ChunkOffset} =
