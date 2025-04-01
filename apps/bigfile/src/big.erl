@@ -721,7 +721,7 @@ start(normal, _Args) ->
 	set_mining_address(Config),
 	ar_chunk_storage:run_defragmentation(),
 	%% Start BigFile.
-	ar_sup:start_link().
+	big_sup:start_link().
 
 set_mining_address(#config{ mining_addr = not_set } = C) ->
 	case big_wallet:get_or_create_wallet([{?RSA_SIGN_ALG, 65537}]) of

@@ -9,7 +9,7 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_sup.hrl").
+-include_lib("bigfile/include/big_sup.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").

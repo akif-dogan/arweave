@@ -23,7 +23,7 @@
 -include_lib("bigfile/include/ar_poa.hrl").
 -include_lib("bigfile/include/ar_pool.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").
--include_lib("bigfile/include/ar_sup.hrl").
+-include_lib("bigfile/include/big_sup.hrl").
 -include_lib("bigfile/include/ar_sync_buckets.hrl").
 -include_lib("bigfile/include/ar_vdf.hrl").
 -include_lib("bigfile/include/ar_verify_chunks.hrl").

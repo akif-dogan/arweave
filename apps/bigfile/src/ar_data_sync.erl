@@ -21,7 +21,7 @@
 -export([enqueue_intervals/3, remove_expired_disk_pool_data_roots/0]).
 
 -include("../include/big.hrl").
--include("../include/ar_sup.hrl").
+-include("../include/big_sup.hrl").
 -include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 -include("../include/ar_poa.hrl").

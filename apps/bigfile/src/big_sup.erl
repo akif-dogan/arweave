@@ -3,7 +3,7 @@
 %% with this file, You can obtain one at
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
--module(ar_sup).
+-module(big_sup).
 
 -behaviour(supervisor).
 
@@ -14,7 +14,7 @@
 -export([init/1]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_sup.hrl").
+-include_lib("bigfile/include/big_sup.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 
 %% ===================================================================

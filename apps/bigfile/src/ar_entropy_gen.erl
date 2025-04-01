@@ -8,7 +8,7 @@
 -export([start_link/2, init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
 -include("../include/big.hrl").
--include("../include/ar_sup.hrl").
+-include("../include/big_sup.hrl").
 -include("../include/big_config.hrl").
 -include("../include/big_consensus.hrl").
 

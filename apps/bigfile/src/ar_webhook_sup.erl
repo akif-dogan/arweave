@@ -13,7 +13,7 @@
 %% Supervisor callbacks
 -export([init/1]).
 
--include_lib("bigfile/include/ar_sup.hrl").
+-include_lib("bigfile/include/big_sup.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 
 %% ===================================================================
