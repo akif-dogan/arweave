@@ -511,7 +511,7 @@ process_partial_solution_poa(Solution, Ref, H0, H1) ->
 	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
 	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
 	case RecallByte1 == ComputedRecallByte1 andalso
-			ar_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, PoA1,
+			big_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, PoA1,
 					Packing, SubChunkIndex, not_set}) of
 		error ->
 			?LOG_ERROR([{event, pool_failed_to_validate_proof_of_access}]),
@@ -529,7 +529,7 @@ process_partial_solution_poa(Solution, Ref, H0, H1) ->
 					ComputedRecallByte2),
 			BlockSize2 = BlockEnd2 - BlockStart2,
 			case RecallByte2 == ComputedRecallByte2 andalso
-					ar_poa:validate({BlockStart2, RecallByte2, TXRoot2, BlockSize2,
+					big_poa:validate({BlockStart2, RecallByte2, TXRoot2, BlockSize2,
 									PoA2, Packing, SubChunkIndex, not_set}) of
 				error ->
 					?LOG_ERROR([{event, pool_failed_to_validate_proof_of_access}]),
@@ -706,7 +706,7 @@ process_partial_solution_test_() ->
 			fun(_Byte) ->
 				{10, 110, << 1:256 >>}
 			end},
-		{ar_poa, validate,
+		{big_poa, validate,
 			fun(Args) ->
 				PoA = #poa{ tx_path = << 0:(2176 * 8) >>, data_path = << 0:(349504 * 8) >> },
 				PoA2 = PoA#poa{ chunk = << 0:(262144 * 8) >> },
@@ -939,7 +939,7 @@ process_solution_test_() ->
 			fun(_Byte) ->
 				{10, 110, << 1:256 >>}
 			end},
-		{ar_poa, validate,
+		{big_poa, validate,
 			fun(Args) ->
 				PoA = #poa{ tx_path = << 0:(2176 * 8) >>, data_path = << 0:(349504 * 8) >> },
 				PoA2 = PoA#poa{ chunk = << 0:(262144 * 8) >> },

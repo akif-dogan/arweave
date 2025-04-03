@@ -1,4 +1,4 @@
--module(ar_verify_chunks).
+-module(big_verify_chunks).
 
 -behaviour(gen_server).
 
@@ -7,7 +7,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
--include_lib("bigfile/include/ar_verify_chunks.hrl").
+-include_lib("bigfile/include/big_verify_chunks.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -record(state, {
@@ -139,7 +139,7 @@ verify_proof(Metadata, State) ->
 
 	case big_data_sync:read_data_path(ChunkDataKey, StoreID) of
 		{ok, DataPath} ->
-			case ar_poa:validate_paths(TXRoot, TXPath, DataPath, AbsoluteOffset - 1) of
+			case big_poa:validate_paths(TXRoot, TXPath, DataPath, AbsoluteOffset - 1) of
 				{false, _Proof} ->
 					invalidate_chunk(validate_paths_error, AbsoluteOffset, ChunkSize, State);
 				{true, _Proof} ->
@@ -334,13 +334,13 @@ verify_proof_test_() ->
 		),
 		ar_test_node:test_with_mocked_functions([
 			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
-			{ar_poa, validate_paths, fun(_, _, _, _) -> {true, <<>>} end}
+			{big_poa, validate_paths, fun(_, _, _, _) -> {true, <<>>} end}
 		],
 			fun test_verify_proof_valid_paths/0
 		),
 		ar_test_node:test_with_mocked_functions([
 			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
-			{ar_poa, validate_paths, fun(_, _, _, _) -> {false, <<>>} end}
+			{big_poa, validate_paths, fun(_, _, _, _) -> {false, <<>>} end}
 		],
 			fun test_verify_proof_invalid_paths/0
 		)
@@ -350,7 +350,7 @@ verify_chunk_test_() ->
 	[
 		ar_test_node:test_with_mocked_functions([
 			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
-			{ar_poa, validate_paths, fun(_, _, _, _) -> {true, <<>>} end}
+			{big_poa, validate_paths, fun(_, _, _, _) -> {true, <<>>} end}
 		],
 			fun test_verify_chunk/0
 		)

@@ -29,8 +29,8 @@ init([]) ->
 			Workers = lists:map(
 				fun(StorageModule) ->
 					StoreID = ar_storage_module:id(StorageModule),
-					Name = ar_verify_chunks:name(StoreID),
-					?CHILD_WITH_ARGS(ar_verify_chunks, worker, Name, [Name, StoreID])
+					Name = big_verify_chunks:name(StoreID),
+					?CHILD_WITH_ARGS(big_verify_chunks, worker, Name, [Name, StoreID])
 				end,
 				Config#config.storage_modules
 			),

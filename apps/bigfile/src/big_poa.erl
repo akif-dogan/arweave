@@ -1,12 +1,12 @@
 %%% @doc This module implements all mechanisms required to validate a proof of access
 %%% for a chunk of data received from the network.
--module(ar_poa).
+-module(big_poa).
 
 -export([get_data_path_validation_ruleset/2, get_data_path_validation_ruleset/3,
 		 validate_pre_fork_2_5/4, validate/1, validate_paths/4, validate_paths/7,
 		 get_padded_offset/1, get_padded_offset/2]).
 
--include_lib("bigfile/include/ar_poa.hrl").
+-include_lib("bigfile/include/big_poa.hrl").
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").

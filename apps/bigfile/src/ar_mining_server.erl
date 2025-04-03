@@ -1182,7 +1182,7 @@ validate_solution(Solution, DiffPair) ->
 	BlockSize1 = BlockEnd1 - BlockStart1,
 	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
 	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
-	case ar_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, PoA1,
+	case big_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, PoA1,
 			Packing, SubChunkIndex, not_set}) of
 		{true, ChunkID} ->
 			PoACache = {{BlockStart1, RecallByte1, TXRoot1, BlockSize1, Packing,
@@ -1214,7 +1214,7 @@ validate_solution(Solution, DiffPair) ->
 									{BlockStart2, BlockEnd2, TXRoot2} =
 											ar_block_index:get_block_bounds(RecallByte2),
 									BlockSize2 = BlockEnd2 - BlockStart2,
-									case ar_poa:validate({BlockStart2, RecallByte2, TXRoot2,
+									case big_poa:validate({BlockStart2, RecallByte2, TXRoot2,
 											BlockSize2, PoA2,
 											Packing, SubChunkIndex, not_set}) of
 										{true, Chunk2ID} ->

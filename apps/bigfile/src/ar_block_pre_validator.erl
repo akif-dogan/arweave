@@ -477,7 +477,7 @@ get_last_step_prev_output(B) ->
 validate_poa_against_cached_poa(B, CacheB) ->
 	#block{ poa_cache = {ArgCache, ChunkID}, poa2_cache = Cache2 } = CacheB,
 	Args = erlang:append_element(erlang:insert_element(5, ArgCache, B#block.poa), ChunkID),
-	case ar_poa:validate(Args) of
+	case big_poa:validate(Args) of
 		{true, ChunkID} ->
 			B2 = B#block{ poa_cache = {ArgCache, ChunkID} },
 			case B#block.recall_byte2 of
@@ -487,7 +487,7 @@ validate_poa_against_cached_poa(B, CacheB) ->
 					{ArgCache2, Chunk2ID} = Cache2,
 					Args2 = erlang:append_element(
 							erlang:insert_element(5, ArgCache2, B#block.poa2), Chunk2ID),
-					case ar_poa:validate(Args2) of
+					case big_poa:validate(Args2) of
 						{true, Chunk2ID} ->
 							{true, B2#block{ poa2_cache = Cache2 }};
 						_ ->
@@ -707,7 +707,7 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
 	ArgCache = {BlockStart1, RecallByte1, TXRoot1, BlockSize1, Packing, SubChunkIndex},
 	case RecallByte1 == B#block.recall_byte andalso
-			ar_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, B#block.poa,
+			big_poa:validate({BlockStart1, RecallByte1, TXRoot1, BlockSize1, B#block.poa,
 					Packing, SubChunkIndex, not_set}) of
 		error ->
 			?LOG_ERROR([{event, failed_to_validate_proof_of_access},
@@ -735,7 +735,7 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 					ArgCache2 = {BlockStart2, RecallByte2, TXRoot2, BlockSize2, Packing,
 							SubChunkIndex},
 					case RecallByte2 == B#block.recall_byte2 andalso
-							ar_poa:validate({BlockStart2, RecallByte2, TXRoot2, BlockSize2,
+							big_poa:validate({BlockStart2, RecallByte2, TXRoot2, BlockSize2,
 									B#block.poa2, Packing, SubChunkIndex, not_set}) of
 						error ->
 							?LOG_ERROR([{event, failed_to_validate_proof_of_access},

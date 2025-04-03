@@ -641,7 +641,7 @@ get_sub_chunk_index(_PackingDifficulty, Nonce) ->
 get_chunk_padded_offset(Offset) ->
 	case Offset > ?STRICT_DATA_SPLIT_THRESHOLD of
 		true ->
-			ar_poa:get_padded_offset(Offset, ?STRICT_DATA_SPLIT_THRESHOLD);
+			big_poa:get_padded_offset(Offset, ?STRICT_DATA_SPLIT_THRESHOLD);
 		false ->
 			Offset
 	end.

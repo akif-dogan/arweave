@@ -464,7 +464,7 @@ assert_chunk(Node, RequestPacking, Packing, Block, EndOffset, ChunkSize) ->
 	Proof = ar_serialize:json_map_to_poa_map(
 		jiffy:decode(EncodedProof, [return_maps])
 	),
-	{true, _} = ar_test_node:remote_call(Node, ar_poa, validate_paths, [
+	{true, _} = ar_test_node:remote_call(Node, big_poa, validate_paths, [
 		Block#block.tx_root,
 		maps:get(tx_path, Proof),
 		maps:get(data_path, Proof),

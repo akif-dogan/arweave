@@ -507,7 +507,7 @@ test_packs_chunks_depending_on_packing_threshold() ->
 						{{composite, B#block.reward_addr, B#block.packing_difficulty},
 								PoA#poa{ unpacked_chunk = UnpackedChunk2 }}
 				end,
-			?assertMatch({true, _}, ar_poa:validate({BlockStart, RecallByte, TXRoot,
+			?assertMatch({true, _}, big_poa:validate({BlockStart, RecallByte, TXRoot,
 					BlockEnd - BlockStart, PoA2, Packing, SubChunkIndex, not_set})),
 			B
 		end,

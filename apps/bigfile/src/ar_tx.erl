@@ -226,7 +226,7 @@ get_weave_size_increase(DataSize, Height) ->
 	case Height >= ar_fork:height_2_5() of
 		true ->
 			%% The smallest multiple of ?DATA_CHUNK_SIZE larger than or equal to data_size.
-			ar_poa:get_padded_offset(DataSize, 0);
+			big_poa:get_padded_offset(DataSize, 0);
 		false ->
 			DataSize
 	end.

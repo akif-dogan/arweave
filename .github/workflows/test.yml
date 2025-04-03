@@ -203,7 +203,7 @@ jobs:
             ar_fork_recovery_tests,
             ar_tx,
             ar_packing_tests,
-            ar_poa,
+            big_poa,
             ar_vdf_server_tests,
             ar_post_block_tests,
             ar_reject_chunks_tests
@@ -295,7 +295,7 @@ jobs:
             ar_tx_db,
             ar_unbalanced_merkle,
             ar_util,
-            ar_verify_chunks,
+            big_verify_chunks,
             big_wallet,
             ar_webhook,
             big_pool

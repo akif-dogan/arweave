@@ -24,7 +24,7 @@
 -include("../include/big_sup.hrl").
 -include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
--include("../include/ar_poa.hrl").
+-include("../include/big_poa.hrl").
 -include("../include/big_data_discovery.hrl").
 -include("../include/big_data_sync.hrl").
 -include("../include/ar_sync_buckets.hrl").
@@ -1115,7 +1115,7 @@ handle_cast({store_fetched_chunk, Peer, Byte, Proof} = Cast, State) ->
 	{BlockStartOffset, BlockEndOffset, TXRoot} = ar_block_index:get_block_bounds(SeekByte),
 	BlockSize = BlockEndOffset - BlockStartOffset,
 	Offset = SeekByte - BlockStartOffset,
-	ValidateDataPathRuleset = ar_poa:get_data_path_validation_ruleset(BlockStartOffset,
+	ValidateDataPathRuleset = big_poa:get_data_path_validation_ruleset(BlockStartOffset,
 			get_merkle_rebase_threshold()),
 	case validate_proof(TXRoot, BlockStartOffset, Offset, BlockSize, Proof,
 			ValidateDataPathRuleset) of
@@ -1939,7 +1939,7 @@ validate_fetched_chunk(Args) ->
 		false ->
 			case ar_block_index:get_block_bounds(Offset - 1) of
 				{BlockStart, BlockEnd, TXRoot} ->
-					ValidateDataPathRuleset = ar_poa:get_data_path_validation_ruleset(
+					ValidateDataPathRuleset = big_poa:get_data_path_validation_ruleset(
 							BlockStart, get_merkle_rebase_threshold()),
 					ChunkOffset = Offset - BlockStart - 1,
 					case validate_proof2(TXRoot, TXPath, DataPath, BlockStart, BlockEnd,
@@ -1969,7 +1969,7 @@ validate_fetched_chunk(Args) ->
 get_chunk_seek_offset(Offset) ->
 	case Offset > ?STRICT_DATA_SPLIT_THRESHOLD of
 		true ->
-			ar_poa:get_padded_offset(Offset, ?STRICT_DATA_SPLIT_THRESHOLD)
+			big_poa:get_padded_offset(Offset, ?STRICT_DATA_SPLIT_THRESHOLD)
 					- (?DATA_CHUNK_SIZE)
 					+ 1;
 		false ->
@@ -2718,7 +2718,7 @@ validate_proof(TXRoot, BlockStartOffset, Offset, BlockSize, Proof, ValidateDataP
 	#{ data_path := DataPath, tx_path := TXPath, chunk := Chunk, packing := Packing } = Proof,
 
 	BlockEndOffset = BlockStartOffset + BlockSize,
-	case ar_poa:validate_paths(TXRoot, TXPath, DataPath, BlockStartOffset,
+	case big_poa:validate_paths(TXRoot, TXPath, DataPath, BlockStartOffset,
 			BlockEndOffset, Offset, ValidateDataPathRuleset) of
 		{false, _} ->
 			false;
@@ -2760,7 +2760,7 @@ validate_proof2(
 		TXRoot, TXPath, DataPath, BlockStartOffset,
 		BlockEndOffset, BlockRelativeOffset, ValidateDataPathRuleset,
 		ExpectedChunkSize, RequestOrigin) ->
-	{IsValid, ChunkProof} = ar_poa:validate_paths(
+	{IsValid, ChunkProof} = big_poa:validate_paths(
 			TXRoot, TXPath, DataPath, BlockStartOffset,
 			BlockEndOffset, BlockRelativeOffset, ValidateDataPathRuleset),
 	case IsValid of
