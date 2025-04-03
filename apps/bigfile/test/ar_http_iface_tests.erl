@@ -627,7 +627,7 @@ test_add_external_tx_with_tags(_) ->
 	B1 = read_block_when_stored(B1Hash, true),
 	TXID = TaggedTX#tx.id,
 	?assertEqual([TXID], [TX2#tx.id || TX2 <- B1#block.txs]),
-	?assertEqual(TaggedTX, ar_storage:read_tx(hd(B1#block.txs))).
+	?assertEqual(TaggedTX, big_storage:read_tx(hd(B1#block.txs))).
 
 %% @doc Test getting transactions
 test_find_external_tx(_) ->
@@ -911,8 +911,8 @@ test_send_missing_tx_with_the_block({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 	lists:foreach(fun(TX) -> ar_test_node:assert_post_tx_to_peer(peer1, TX) end, EverySecondTX),
 	ar_test_node:mine(),
 	BI = wait_until_height(main, LocalHeight + 1),
-	B = ar_storage:read_block(hd(BI)),
-	B2 = B#block{ txs = ar_storage:read_tx(B#block.txs) },
+	B = big_storage:read_block(hd(BI)),
+	B2 = B#block{ txs = big_storage:read_tx(B#block.txs) },
 	ar_test_node:connect_to_peer(peer1),
 	ar_bridge ! {event, block, {new, B2, #{ recall_byte => undefined }}},
 	assert_wait_until_height(peer1, RemoteHeight + 1).
@@ -928,7 +928,7 @@ test_fallback_to_block_endpoint_if_cannot_send_tx({_B0, Wallet1, _Wallet2, _Stat
 	lists:foreach(fun(TX) -> ar_test_node:assert_post_tx_to_peer(peer1, TX) end, EverySecondTX),
 	ar_test_node:mine(),
 	BI = wait_until_height(main, LocalHeight + 1),
-	B = ar_storage:read_block(hd(BI)),
+	B = big_storage:read_block(hd(BI)),
 	ar_test_node:connect_to_peer(peer1),
 	ar_bridge ! {event, block, {new, B, #{ recall_byte => undefined }}},
 	assert_wait_until_height(peer1, RemoteHeight + 1).

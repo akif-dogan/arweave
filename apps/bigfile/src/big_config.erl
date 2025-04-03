@@ -932,14 +932,14 @@ validate_storage_modules(#config{ storage_modules = StorageModules }) ->
 			false
 	end.
 validate_repack_in_place(Config) ->
-	Modules = [ar_storage_module:id(M) || M <- Config#config.storage_modules],
+	Modules = [big_storage_module:id(M) || M <- Config#config.storage_modules],
 	validate_repack_in_place(Config#config.repack_in_place_storage_modules, Modules).
 
 validate_repack_in_place([], _Modules) ->
 	true;
 validate_repack_in_place([{Module, ToPacking} | L], Modules) ->
 	{_BucketSize, _Bucket, Packing} = Module,
-	ID = ar_storage_module:id(Module),
+	ID = big_storage_module:id(Module),
 	ModuleInUse = lists:member(ID, Modules),
 	FromPackingType = ar_mining_server:get_packing_type(Packing),
 	ToPackingType = ar_mining_server:get_packing_type(ToPacking),

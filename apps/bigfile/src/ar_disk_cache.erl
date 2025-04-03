@@ -44,12 +44,12 @@ lookup_block_filename(H) when is_binary(H)->
 	FileName = binary_to_list(ar_util:encode(H)),
 	FilePath = filename:join(PathBlock, FileName),
 	FilePathJSON = iolist_to_binary([FilePath, ".json"]),
-	case ar_storage:is_file(FilePathJSON) of
+	case big_storage:is_file(FilePathJSON) of
 		true ->
 			{ok, {FilePathJSON, json}};
 		_ ->
 			FilePathBin = iolist_to_binary([FilePath, ".bin"]),
-			case ar_storage:is_file(FilePathBin) of
+			case big_storage:is_file(FilePathBin) of
 				true ->
 					{ok, {FilePathBin, binary}};
 				_ ->
@@ -69,7 +69,7 @@ lookup_tx_filename(Hash) when is_binary(Hash) ->
 	end,
 	FileName = binary_to_list(ar_util:encode(Hash)) ++ ".json",
 	File = filename:join(PathTX, FileName),
-	case ar_storage:is_file(File) of
+	case big_storage:is_file(File) of
 		true ->
 			{ok, File};
 		_ ->
@@ -84,7 +84,7 @@ write_block_shadow(B) ->
 	?LOG_DEBUG([{event, write_block_shadow},
 		{hash, ar_util:encode(B#block.indep_hash)}, {size, Size}]),
 	gen_server:cast(?MODULE, {record_written_data, Size}),
-	case ar_storage:write_file_atomic(File, Bin) of
+	case big_storage:write_file_atomic(File, Bin) of
 		ok ->
 			ok;
 		{error, Reason} = Error ->
@@ -299,7 +299,7 @@ write_tx(TX) ->
 	Size = byte_size(Data),
 	?LOG_DEBUG([{event, write_tx}, {txid, ar_util:encode(TX#tx.id)}, {size, Size}]),
 	gen_server:cast(?MODULE, {record_written_data, Size}),
-	case ar_storage:write_file_atomic(File, Data) of
+	case big_storage:write_file_atomic(File, Data) of
 		ok ->
 			ok;
 		{error, Reason} = Error ->

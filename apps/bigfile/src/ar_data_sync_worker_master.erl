@@ -537,8 +537,8 @@ test_format_peer() ->
 test_enqueue_main_task() ->
 	Peer1 = {1, 2, 3, 4, 1984},
 	Peer2 = {5, 6, 7, 8, 1985},
-	StoreID1 = ar_storage_module:id({?PARTITION_SIZE, 1, default}),
-	StoreID2 = ar_storage_module:id({?PARTITION_SIZE, 2, default}),
+	StoreID1 = big_storage_module:id({?PARTITION_SIZE, 1, default}),
+	StoreID2 = big_storage_module:id({?PARTITION_SIZE, 2, default}),
 	State0 = #state{},
 
 	Ref = make_ref(),
@@ -559,7 +559,7 @@ test_enqueue_main_task() ->
 test_enqueue_peer_task() ->
 	PeerA = {1, 2, 3, 4, 1984},
 	PeerB = {5, 6, 7, 8, 1985},
-	StoreID1 = ar_storage_module:id({?PARTITION_SIZE, 1, default}),
+	StoreID1 = big_storage_module:id({?PARTITION_SIZE, 1, default}),
 
 	PeerATasks = #peer_tasks{ peer = PeerA },
 	PeerBTasks = #peer_tasks{ peer = PeerB },
@@ -588,7 +588,7 @@ test_enqueue_peer_task() ->
 test_process_main_queue() ->
 	Peer1 = {1, 2, 3, 4, 1984},
 	Peer2 = {5, 6, 7, 8, 1985},
-	StoreID1 = ar_storage_module:id({?PARTITION_SIZE, 1, default}),
+	StoreID1 = big_storage_module:id({?PARTITION_SIZE, 1, default}),
 	State0 = #state{
 		workers = queue:from_list([worker1, worker2, worker3]), worker_count = 3
 	},

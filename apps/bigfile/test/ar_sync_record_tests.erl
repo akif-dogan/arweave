@@ -20,7 +20,7 @@ test_sync_record() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	try
 		Partition = {?PARTITION_SIZE, 0, {composite, RewardAddr, 1}},
-		PartitionID = ar_storage_module:id(Partition),
+		PartitionID = big_storage_module:id(Partition),
 		StorageModules = [Partition],
 		ar_test_node:start(B0, RewardAddr, Config, StorageModules),
 		Options = #{ format => etf, random_subset => false },
@@ -149,7 +149,7 @@ test_sync_record_with_replica_2_9() when ?BLOCK_2_9_SYNCING ->
 	{ok, Config} = application:get_env(bigfile, config),
 	try
 		Partition = {?PARTITION_SIZE, 0, {replica_2_9, RewardAddr}},
-		PartitionID = ar_storage_module:id(Partition),
+		PartitionID = big_storage_module:id(Partition),
 		StorageModules = [Partition],
 		ar_test_node:start(B0, RewardAddr, Config, StorageModules),
 		Options = #{ format => etf, random_subset => false },

@@ -154,7 +154,7 @@ get_block_index2(Peer, Start, Height, BI) ->
 	end.
 
 get_block(Peers, H) ->
-	case ar_storage:read_block(H) of
+	case big_storage:read_block(H) of
 		unavailable ->
 			get_block(Peers, H, 10);
 		BShadow ->

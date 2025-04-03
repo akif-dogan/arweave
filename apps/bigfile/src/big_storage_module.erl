@@ -1,4 +1,4 @@
--module(ar_storage_module).
+-module(big_storage_module).
 
 -export([id/1, label/1, address_label/2, module_address/1,
 		module_packing_difficulty/1, packing_label/1, label_by_id/1, get_by_id/1,
@@ -52,17 +52,17 @@ id({BucketSize, Bucket, Packing}) ->
 
 %% @doc Return the obscure unique label for the given storage module.
 label({BucketSize, Bucket, Packing} = StorageModule) ->
-	StoreID = ar_storage_module:id(StorageModule),
+	StoreID = big_storage_module:id(StorageModule),
 	case ets:lookup(?MODULE, {label, StoreID}) of
 		[] ->
 			PackingLabel =
 				case Packing of
 					{spora_2_6, Addr} ->
-						ar_storage_module:address_label(Addr, spora_2_6);
+						big_storage_module:address_label(Addr, spora_2_6);
 					{composite, Addr, PackingDifficulty} ->
-						ar_storage_module:address_label(Addr, {composite, PackingDifficulty});
+						big_storage_module:address_label(Addr, {composite, PackingDifficulty});
 					{replica_2_9, Addr} ->
-						ar_storage_module:address_label(Addr, replica_2_9);
+						big_storage_module:address_label(Addr, replica_2_9);
 					_ ->
 						atom_to_list(Packing)
 				end,
@@ -93,7 +93,7 @@ address_label(Addr, ReplicaType) ->
 			integer_to_list(Label)
 	end.
 
--spec module_address(ar_storage_module:storage_module()) -> binary() | undefined.
+-spec module_address(big_storage_module:storage_module()) -> binary() | undefined.
 module_address({_, _, {spora_2_6, Addr}}) ->
 	Addr;
 module_address({_, _, {composite, Addr, _PackingDifficulty}}) ->
@@ -103,7 +103,7 @@ module_address({_, _, {replica_2_9, Addr}}) ->
 module_address(_StorageModule) ->
 	undefined.
 
--spec module_packing_difficulty(ar_storage_module:storage_module()) -> integer().
+-spec module_packing_difficulty(big_storage_module:storage_module()) -> integer().
 module_packing_difficulty({_, _, {composite, _Addr, PackingDifficulty}}) ->
 	true = PackingDifficulty /= ?REPLICA_2_9_PACKING_DIFFICULTY,
 	PackingDifficulty;
@@ -113,13 +113,13 @@ module_packing_difficulty(_StorageModule) ->
 	0.
 
 packing_label({spora_2_6, Addr}) ->
-	AddrLabel = ar_storage_module:address_label(Addr, spora_2_6),
+	AddrLabel = big_storage_module:address_label(Addr, spora_2_6),
 	list_to_atom("spora_2_6_" ++ AddrLabel);
 packing_label({composite, Addr, PackingDifficulty}) ->
-	AddrLabel = ar_storage_module:address_label(Addr, {composite, PackingDifficulty}),
+	AddrLabel = big_storage_module:address_label(Addr, {composite, PackingDifficulty}),
 	list_to_atom("composite_" ++ AddrLabel);
 packing_label({replica_2_9, Addr}) ->
-	AddrLabel = ar_storage_module:address_label(Addr, replica_2_9),
+	AddrLabel = big_storage_module:address_label(Addr, replica_2_9),
 	list_to_atom("replica_2_9_" ++ AddrLabel);
 packing_label(Packing) ->
 	Packing.
@@ -149,7 +149,7 @@ get_by_id(ID) ->
 get_by_id(_ID, []) ->
 	not_found;
 get_by_id(ID, [Module | Modules]) ->
-	case ar_storage_module:id(Module) == ID of
+	case big_storage_module:id(Module) == ID of
 		true ->
 			Module;
 		false ->
@@ -159,9 +159,9 @@ get_by_id(ID, [Module | Modules]) ->
 get_all_module_ranges() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	RepackInPlaceModulesStoreIDs = [
-			{{BucketSize, Bucket, TargetPacking}, ar_storage_module:id(Module)}
+			{{BucketSize, Bucket, TargetPacking}, big_storage_module:id(Module)}
 		|| {{BucketSize, Bucket, _Packing} = Module, TargetPacking} <- Config#config.repack_in_place_storage_modules],
-	ModuleStoreIDs = [{Module, ar_storage_module:id(Module)}
+	ModuleStoreIDs = [{Module, big_storage_module:id(Module)}
 			|| Module <- Config#config.storage_modules],
 
 	[{module_range(Module), Packing, StoreID} || {{_, _, Packing} = Module, StoreID} <-
@@ -179,7 +179,7 @@ get_range(ID) ->
 			module_range(Module)
 	end.
 
--spec module_range(ar_storage_module:storage_module()) ->
+-spec module_range(big_storage_module:storage_module()) ->
 	{non_neg_integer(), non_neg_integer()}.
 module_range(Module) ->
 	{_BucketSize, _Bucket, Packing} = Module,
@@ -419,8 +419,8 @@ sort_storage_modules_by_left_bound(StorageModules, MaybeStoreID) ->
 				true ->
 					case Start1 == Start2 of
 						true ->
-							StoreID1 = ar_storage_module:id(M1),
-							StoreID2 = ar_storage_module:id(M2),
+							StoreID1 = big_storage_module:id(M1),
+							StoreID2 = big_storage_module:id(M2),
 							StoreID1 == MaybeStoreID orelse StoreID2 /= MaybeStoreID;
 						false ->
 							true
@@ -445,7 +445,7 @@ get_cover2(Start, End, [{BucketSize, Bucket, _Packing} = StorageModule | Storage
 	Start2 = BucketSize * Bucket,
 	End2 = Start2 + BucketSize,
 	End3 = min(End, End2),
-	StoreID = ar_storage_module:id(StorageModule),
+	StoreID = big_storage_module:id(StorageModule),
 	case get_cover2(End3, End, StorageModules) of
 		not_found ->
 			not_found;

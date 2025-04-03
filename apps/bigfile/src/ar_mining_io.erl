@@ -62,10 +62,10 @@ get_partitions(PartitionUpperBound) ->
 	Max = big_node:get_max_partition_number(PartitionUpperBound),
 	AllPartitions = lists:foldl(
 		fun	(Module, Acc) ->
-				Addr = ar_storage_module:module_address(Module),
+				Addr = big_storage_module:module_address(Module),
 				PackingDifficulty = 
-					ar_storage_module:module_packing_difficulty(Module),
-				{Start, End} = ar_storage_module:module_range(Module, 0),
+					big_storage_module:module_packing_difficulty(Module),
+				{Start, End} = big_storage_module:module_range(Module, 0),
 				Partitions = get_store_id_partitions({Start, End}, []),
 				lists:foldl(
 					fun(PartitionNumber, AccInner) ->
@@ -240,13 +240,13 @@ start_io_thread(Mode, StoreIDs) ->
 map_partition_to_store_ids([], PartitionToStoreIDs) ->
 	PartitionToStoreIDs;
 map_partition_to_store_ids([StoreID | StoreIDs], PartitionToStoreIDs) ->
-	case ar_storage_module:get_by_id(StoreID) of
+	case big_storage_module:get_by_id(StoreID) of
 		not_found ->
 			%% Occasionally happens in tests.
 			?LOG_ERROR([{event, mining_storage_module_not_found}, {store_id, StoreID}]),
 			map_partition_to_store_ids(StoreIDs, PartitionToStoreIDs);
 		StorageModule ->
-			{Start, End} = ar_storage_module:module_range(StorageModule, 0),
+			{Start, End} = big_storage_module:module_range(StorageModule, 0),
 			Partitions = get_store_id_partitions({Start, End}, []),
 			PartitionToStoreIDs2 = lists:foldl(
 				fun(Partition, Acc) ->

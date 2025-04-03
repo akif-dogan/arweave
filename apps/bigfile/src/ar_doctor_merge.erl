@@ -19,7 +19,7 @@ merge(Args) ->
     [DataDir, StorageModuleConfig | SrcDirs] = Args,
 
     StorageModule = big_config:parse_storage_module(StorageModuleConfig),
-    StoreID = ar_storage_module:id(StorageModule),
+    StoreID = big_storage_module:id(StorageModule),
 
     ok = merge(DataDir, StorageModule, StoreID, SrcDirs),
     true.

@@ -61,7 +61,7 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 	%% spora node, and then sync data to the unpacked node. It's the syncing process that
 	%% writes data to the overlap.
 	ExpectedPartitionSize = case FromPackingType of
-		unpacked -> ?PARTITION_SIZE +  ar_storage_module:get_overlap(unpacked);
+		unpacked -> ?PARTITION_SIZE +  big_storage_module:get_overlap(unpacked);
 		_ -> ?PARTITION_SIZE
 	end,
 
@@ -74,11 +74,11 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 	DataDir = Config#config.data_dir,
 	lists:foreach(fun({SourceModule, Packing}) ->
 		{BucketSize, Bucket, _Packing} = SourceModule,
-		SourceID = ar_storage_module:id(SourceModule),
+		SourceID = big_storage_module:id(SourceModule),
 		SourcePath = big_chunk_storage:get_storage_module_path(DataDir, SourceID),
 
 		TargetModule = {BucketSize, Bucket, Packing},
-		TargetID = ar_storage_module:id(TargetModule),
+		TargetID = big_storage_module:id(TargetModule),
 		TargetPath = big_chunk_storage:get_storage_module_path(DataDir, TargetID),
 		file:rename(SourcePath, TargetPath)
 	end, RepackInPlaceStorageModules),

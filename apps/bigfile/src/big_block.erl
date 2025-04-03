@@ -796,7 +796,7 @@ generate_tx_root_for_block(B) when is_record(B, block) ->
 	generate_tx_root_for_block(B#block.txs, B#block.height).
 
 generate_tx_root_for_block(TXIDs = [TXID | _], Height) when is_binary(TXID) ->
-	generate_tx_root_for_block(ar_storage:read_tx(TXIDs), Height);
+	generate_tx_root_for_block(big_storage:read_tx(TXIDs), Height);
 generate_tx_root_for_block([], _Height) ->
 	<<>>;
 generate_tx_root_for_block(TXs = [TX | _], Height) when is_record(TX, tx) ->
@@ -822,10 +822,10 @@ test_hash_list_gen() ->
 	ar_test_node:start(B0),
 	ar_test_node:mine(),
 	BI1 = ar_test_node:wait_until_height(main, 1),
-	B1 = ar_storage:read_block(hd(BI1)),
+	B1 = big_storage:read_block(hd(BI1)),
 	ar_test_node:mine(),
 	BI2 = ar_test_node:wait_until_height(main, 2),
-	B2 = ar_storage:read_block(hd(BI2)),
+	B2 = big_storage:read_block(hd(BI2)),
 	?assertEqual([B0#block.indep_hash], generate_hash_list_for_block(B1, BI2)),
 	?assertEqual([H || {H, _, _} <- BI1],
 			generate_hash_list_for_block(B2#block.indep_hash, BI2)).

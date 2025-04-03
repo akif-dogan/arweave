@@ -57,13 +57,13 @@ start_link(Name, {StoreID, RepackInPlacePacking}) ->
 
 %% @doc Return the name of the server serving the given StoreID.
 name(StoreID) ->
-	list_to_atom("ar_chunk_storage_" ++ ar_storage_module:label_by_id(StoreID)).
+	list_to_atom("ar_chunk_storage_" ++ big_storage_module:label_by_id(StoreID)).
 
 register_workers() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	ConfiguredWorkers = lists:map(
 		fun(StorageModule) ->
-			StoreID = ar_storage_module:id(StorageModule),
+			StoreID = big_storage_module:id(StorageModule),
 
 			ChunkStorageName = big_chunk_storage:name(StoreID),
 			?CHILD_WITH_ARGS(big_chunk_storage, worker,
@@ -77,7 +77,7 @@ register_workers() ->
 
 	RepackInPlaceWorkers = lists:map(
 		fun({StorageModule, Packing}) ->
-			StoreID = ar_storage_module:id(StorageModule),
+			StoreID = big_storage_module:id(StorageModule),
 			%% Note: the config validation will prevent a StoreID from being used in both
 			%% `storage_modules` and `repack_in_place_storage_modules`, so there's
 			%% no risk of a `Name` clash with the workers spawned above.
@@ -117,7 +117,7 @@ is_storage_supported(Offset, ChunkSize, Packing) ->
 %% @doc Store the chunk under the given end offset,
 %% bytes Offset - ?DATA_CHUNK_SIZE, Offset - ?DATA_CHUNK_SIZE + 1, .., Offset - 1.
 put(PaddedOffset, Chunk, StoreID) ->
-	Packing = ar_storage_module:get_packing(StoreID),
+	Packing = big_storage_module:get_packing(StoreID),
 	put(PaddedOffset, Chunk, Packing, StoreID).
 
 put(PaddedOffset, Chunk, Packing, StoreID) ->
@@ -349,7 +349,7 @@ init({"default" = StoreID, _}) ->
 		FileIndex
 	),
 	warn_custom_chunk_group_size(StoreID),
-	StoreIDLabel = ar_storage_module:label_by_id(StoreID),
+	StoreIDLabel = big_storage_module:label_by_id(StoreID),
 	{ok, #state{
 		file_index = FileIndex2, store_id = StoreID, store_id_label = StoreIDLabel }};
 init({StoreID, RepackInPlacePacking}) ->
@@ -369,8 +369,8 @@ init({StoreID, RepackInPlacePacking}) ->
 		FileIndex
 	),
 	warn_custom_chunk_group_size(StoreID),
-	{RangeStart, RangeEnd} = ar_storage_module:get_range(StoreID),
-	StoreIDLabel = ar_storage_module:label_by_id(StoreID),
+	{RangeStart, RangeEnd} = big_storage_module:get_range(StoreID),
+	StoreIDLabel = big_storage_module:label_by_id(StoreID),
 
 	State = #state{
 		file_index = FileIndex2,
@@ -386,7 +386,7 @@ init({StoreID, RepackInPlacePacking}) ->
 			State#state{
 				repack_cursor = none,
 				repack_status = off,
-				target_packing = ar_storage_module:get_packing(StoreID)
+				target_packing = big_storage_module:get_packing(StoreID)
 			};
 		Packing ->
 			RepackCursor = ar_repack:read_cursor(StoreID, Packing, RangeStart),
@@ -629,8 +629,8 @@ get_filepath(Name, StoreID) ->
 	filename:join([ChunkDir, Name]).
 
 store_chunk(PaddedEndOffset, Chunk, Packing, StoreID, FileIndex, EntropyContext) ->
-	StoreIDLabel = ar_storage_module:label_by_id(StoreID),
-	PackingLabel = ar_storage_module:packing_label(Packing),
+	StoreIDLabel = big_storage_module:label_by_id(StoreID),
+	PackingLabel = big_storage_module:packing_label(Packing),
 	store_chunk(PaddedEndOffset, Chunk, Packing, StoreID, 
 		StoreIDLabel, PackingLabel, FileIndex, EntropyContext).	
 
@@ -921,7 +921,7 @@ list_files(DataDir, StoreID) ->
 files_to_defrag(StorageModules, DataDir, ByteSizeThreshold, Sizes) ->
 	AllFiles = lists:flatmap(
 		fun(StorageModule) ->
-			list_files(DataDir, ar_storage_module:id(StorageModule))
+			list_files(DataDir, big_storage_module:id(StorageModule))
 		end, StorageModules),
 	lists:filter(
 		fun(Filepath) ->
@@ -1005,7 +1005,7 @@ modules_to_defrag(#config{storage_modules = Modules}) -> Modules.
 get_packing_label(Packing, State) ->
 	case maps:get(Packing, State#state.packing_labels, not_found) of
 		not_found ->
-			Label = ar_storage_module:packing_label(Packing),
+			Label = big_storage_module:packing_label(Packing),
 			Map = maps:put(Packing, Label, State#state.packing_labels),
 			{Label, State#state{ packing_labels = Map }};
 		Label ->
@@ -1098,7 +1098,7 @@ well_aligned_test_() ->
 
 test_well_aligned() ->
 	clear("default"),
-	Packing = ar_storage_module:get_packing("default"),
+	Packing = big_storage_module:get_packing("default"),
 	C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C3 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
@@ -1148,7 +1148,7 @@ not_aligned_test_() ->
 
 test_not_aligned() ->
 	clear("default"),
-	Packing = ar_storage_module:get_packing("default"),
+	Packing = big_storage_module:get_packing("default"),
 	C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C3 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
@@ -1216,7 +1216,7 @@ cross_file_aligned_test_() ->
 
 test_cross_file_aligned() ->
 	clear("default"),
-	Packing = ar_storage_module:get_packing("default"),
+	Packing = big_storage_module:get_packing("default"),
 	C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	big_chunk_storage:put(get_chunk_group_size(), C1, Packing, "default"),
@@ -1247,7 +1247,7 @@ cross_file_not_aligned_test_() ->
 
 test_cross_file_not_aligned() ->
 	clear("default"),
-	Packing = ar_storage_module:get_packing("default"),
+	Packing = big_storage_module:get_packing("default"),
 	C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C3 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),

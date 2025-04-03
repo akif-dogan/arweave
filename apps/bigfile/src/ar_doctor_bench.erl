@@ -51,7 +51,7 @@ bench_read(Args) ->
 	application:set_env(bigfile, config, Config2),
 
 	ar_kv_sup:start_link(),
-	ar_storage_sup:start_link(),
+	big_storage_sup:start_link(),
 	ar_sync_record_sup:start_link(),
 	ar_chunk_storage_sup:start_link(),
 	ar_mining_io:start_link(standalone),
@@ -84,7 +84,7 @@ parse_storage_modules([], StorageModules, Address) ->
 	{StorageModules, Address};
 parse_storage_modules([StorageModuleConfig | StorageModuleConfigs], StorageModules, Address) ->
 	{ok, StorageModule} = big_config:parse_storage_module(StorageModuleConfig),
-	Address2 = ar_storage_module:module_address(StorageModule),
+	Address2 = big_storage_module:module_address(StorageModule),
 	case Address2 == Address orelse Address == undefined of
 		true ->
 			ok;
@@ -97,9 +97,9 @@ parse_storage_modules([StorageModuleConfig | StorageModuleConfigs], StorageModul
 		Address2).
 	
 read_storage_module(_DataDir, StorageModule, StopTime) ->
-	StoreID = ar_storage_module:id(StorageModule),
+	StoreID = big_storage_module:id(StorageModule),
 	big_chunk_storage:open_files(StoreID),
-	{StartOffset, EndOffset} = ar_storage_module:module_range(StorageModule),	
+	{StartOffset, EndOffset} = big_storage_module:module_range(StorageModule),	
 
 	OutputFileName = string:replace(?OUTPUT_FILENAME, "<storage_module>", StoreID),
 
@@ -131,7 +131,7 @@ random_read(StorageModule, StartOffset, EndOffset, StopTime, OutputFileName, Sum
 			random_read(StorageModule, StartOffset, EndOffset, StopTime, OutputFileName,
 				SumChunks + Chunks, SumElapsedTime + ElapsedTime);
 		false ->
-			StoreID = ar_storage_module:id(StorageModule),
+			StoreID = big_storage_module:id(StorageModule),
 			{StoreID, SumChunks, SumElapsedTime}
 	end.
 	
@@ -143,8 +143,8 @@ read(_StorageModule, _StartOffset, _EndOffset, _Size, NumChunks, 0) ->
 read(StorageModule, StartOffset, EndOffset, Size, NumChunks, NumReads) ->
 	Offset = rand:uniform(EndOffset - Size - StartOffset + 1) + StartOffset,
 	Candidate = #mining_candidate{
-		mining_address = ar_storage_module:module_address(StorageModule),
-		packing_difficulty = ar_storage_module:module_packing_difficulty(StorageModule)
+		mining_address = big_storage_module:module_address(StorageModule),
+		packing_difficulty = big_storage_module:module_packing_difficulty(StorageModule)
 	},
 	RangeExists = ar_mining_io:read_recall_range(chunk1, self(), Candidate, Offset),
 	case RangeExists of

@@ -220,7 +220,7 @@ find_local_account_tree(Blocks, SearchDepth, Skipped) ->
 				{true, lists:last(Blocks)}
 		end,
 	ID = B#block.wallet_list,
-	case ar_storage:read_wallet_list(ID) of
+	case big_storage:read_wallet_list(ID) of
 		{ok, Tree} ->
 			{Skipped, Tree};
 		_ ->
@@ -237,7 +237,7 @@ initialize_state(Blocks, Tree) ->
 	{DAG3, LastB} = lists:foldl(
 		fun (B, start) ->
 				{RootHash, UpdatedTree, UpdateMap} = big_block:hash_wallet_list(Tree),
-				gen_server:cast(ar_storage, {store_account_tree_update, B#block.height,
+				gen_server:cast(big_storage, {store_account_tree_update, B#block.height,
 						RootHash, UpdateMap}),
 				RootHash = B#block.wallet_list,
 				DAG = ar_diff_dag:new(RootHash, UpdatedTree, B#block.denomination),
@@ -359,7 +359,7 @@ apply_block2(B, PrevB, Args, Tree, DAG) ->
 				true ->
 					RootHash = PrevB#block.wallet_list,
 					DAG2 = maybe_add_node(DAG, RootHash2, RootHash, Accounts, Denomination2),
-					gen_server:cast(ar_storage, {store_account_tree_update, B#block.height,
+					gen_server:cast(big_storage, {store_account_tree_update, B#block.height,
 							RootHash2, UpdateMap}),
 					{{ok, RootHash2}, DAG2};
 				false ->
@@ -373,7 +373,7 @@ set_current(DAG, RootHash, Height, PruneDepth) ->
 		RootHash,
 		fun(Tree, Meta) ->
 			{RootHash, UpdatedTree, UpdateMap} = big_block:hash_wallet_list(Tree),
-			gen_server:cast(ar_storage, {store_account_tree_update, Height, RootHash,
+			gen_server:cast(big_storage, {store_account_tree_update, Height, RootHash,
 					UpdateMap}),
 			{RootHash, UpdatedTree, Meta}
 		end

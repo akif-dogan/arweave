@@ -41,15 +41,15 @@ start_link(Name, {StoreID, Packing}) ->
 
 %% @doc Return the name of the server serving the given StoreID.
 name(StoreID) ->
-	list_to_atom("ar_entropy_gen_" ++ ar_storage_module:label_by_id(StoreID)).
+	list_to_atom("ar_entropy_gen_" ++ big_storage_module:label_by_id(StoreID)).
 
 
 register_workers(Module) ->
     {ok, Config} = application:get_env(bigfile , config),
     ConfiguredWorkers = lists:filtermap(
         fun(StorageModule) ->
-            StoreID = ar_storage_module:id(StorageModule),
-            Packing = ar_storage_module:get_packing(StoreID),
+            StoreID = big_storage_module:id(StorageModule),
+            Packing = big_storage_module:get_packing(StoreID),
 
             case is_entropy_packing(Packing) of
                 true ->
@@ -66,7 +66,7 @@ register_workers(Module) ->
     
     RepackInPlaceWorkers = lists:filtermap(
         fun({StorageModule, Packing}) ->
-            StoreID = ar_storage_module:id(StorageModule),
+            StoreID = big_storage_module:id(StorageModule),
             %% Note: the config validation will prevent a StoreID from being used in both
             %% `storage_modules` and `repack_in_place_storage_modules`, so there's
             %% no risk of a `Name` clash with the workers spawned above.
@@ -85,12 +85,12 @@ register_workers(Module) ->
 
     ConfiguredWorkers ++ RepackInPlaceWorkers.
 
--spec initialize_context(ar_storage_module:store_id(), big_chunk_storage:packing()) ->
+-spec initialize_context(big_storage_module:store_id(), big_chunk_storage:packing()) ->
     {IsPrepared :: boolean(), RewardAddr :: none | big_wallet:address()}.
 initialize_context(StoreID, Packing) ->
     case Packing of
         {replica_2_9, Addr} ->
-            {RangeStart, RangeEnd} = ar_storage_module:get_range(StoreID),
+            {RangeStart, RangeEnd} = big_storage_module:get_range(StoreID),
             Cursor = read_cursor(StoreID, RangeStart + 1),
             case Cursor =< RangeEnd of
                 true ->
@@ -123,7 +123,7 @@ init({StoreID, Packing}) ->
     {replica_2_9, _} = Packing,
     %% End sanity checks
 
-    {RangeStart, RangeEnd} = ar_storage_module:get_range(StoreID),
+    {RangeStart, RangeEnd} = big_storage_module:get_range(StoreID),
 
     Cursor = read_cursor(StoreID, RangeStart + 1),
     ?LOG_INFO([{event, read_prepare_replica_2_9_cursor}, {store_id, StoreID},
@@ -147,7 +147,7 @@ init({StoreID, Packing}) ->
     
     BucketEndOffset = big_chunk_storage:get_chunk_bucket_end(Cursor),
     RepackCursor =
-        case Packing == ar_storage_module:get_packing(StoreID) of
+        case Packing == big_storage_module:get_packing(StoreID) of
             true ->
                 none;
             false ->

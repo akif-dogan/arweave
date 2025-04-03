@@ -32,7 +32,7 @@ test_block_to_binary([], _TXFixtureDir) ->
 	ok;
 test_block_to_binary([Fixture | Fixtures], TXFixtureDir) ->
 	{ok, Bin} = file:read_file(Fixture),
-	B = ar_storage:migrate_block_record(binary_to_term(Bin)),
+	B = big_storage:migrate_block_record(binary_to_term(Bin)),
 	?debugFmt("Block ~s, height ~B.~n", [ar_util:encode(B#block.indep_hash),
 			B#block.height]),
 	test_block_to_binary(B),
@@ -47,7 +47,7 @@ test_block_to_binary([Fixture | Fixtures], TXFixtureDir) ->
 		lists:foldl(
 			fun(TXFixture, Acc) ->
 				{ok, TXBin} = file:read_file(filename:join(TXFixtureDir, TXFixture)),
-				TX = ar_storage:migrate_tx_record(binary_to_term(TXBin)),
+				TX = big_storage:migrate_tx_record(binary_to_term(TXBin)),
 				maps:put(TX#tx.id, TX, Acc)
 			end,
 			#{},

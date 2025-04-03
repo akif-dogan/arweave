@@ -552,7 +552,7 @@ maybe_call_transaction_data_synced_webhook(Start, End, TXID, MaybeStoreID, State
 	State#state{ tx_offset_cache = Cache2 }.
 
 is_synced_by_storage_modules(Start, End, StoreID) ->
-	case ar_storage_module:get_cover(Start, End, StoreID) of
+	case big_storage_module:get_cover(Start, End, StoreID) of
 		not_found ->
 			false;
 		Intervals ->

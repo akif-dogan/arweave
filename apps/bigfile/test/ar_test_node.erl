@@ -103,7 +103,7 @@ new_custom_size_rsa_wallet(Size) ->
 	Filename = big_wallet:wallet_filepath(wallet_address, Pub, KeyType),
 	case filelib:ensure_dir(Filename) of
 		ok ->
-			case ar_storage:write_file_atomic(Filename, Key) of
+			case big_storage:write_file_atomic(Filename, Key) of
 				ok ->
 					{{KeyType, Priv, Pub}, {KeyType, Pub}};
 				Error2 ->
@@ -909,7 +909,7 @@ wait_until_syncs_genesis_data() ->
 	%% Once the data is stored in the disk pool, make the storage modules
 	%% copy the missing data over from each other. This procedure is executed on startup
 	%% but the disk pool did not have any data at the time.
-	[gen_server:cast(list_to_atom("ar_data_sync_" ++ ar_storage_module:label(Module)),
+	[gen_server:cast(list_to_atom("ar_data_sync_" ++ big_storage_module:label(Module)),
 			sync_data) || Module <- Config#config.storage_modules],
 	[wait_until_syncs_data(N * Size, (N + 1) * Size, WeaveSize, Packing)
 			|| {Size, N, Packing} <- Config#config.storage_modules],
@@ -1295,13 +1295,13 @@ read_block_when_stored(H) ->
 read_block_when_stored(H, IncludeTXs) ->
 	{ok, B} = ar_util:do_until(
 		fun() ->
-			case ar_storage:read_block(H) of
+			case big_storage:read_block(H) of
 				unavailable ->
 					unavailable;
 				B2 ->
 					ar_util:do_until(
 						fun() ->
-							TXs = ar_storage:read_tx(B2#block.txs),
+							TXs = big_storage:read_tx(B2#block.txs),
 							case lists:any(fun(TX) -> TX == unavailable end, TXs) of
 								true ->
 									false;

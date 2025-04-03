@@ -109,7 +109,7 @@ new_keyfile(KeyType, WalletName) ->
 	Filename = wallet_filepath(WalletName, Pub, KeyType),
 	case filelib:ensure_dir(Filename) of
 		ok ->
-			case ar_storage:write_file_atomic(Filename, Key) of
+			case big_storage:write_file_atomic(Filename, Key) of
 				ok ->
 					{{KeyType, Priv, Pub}, {KeyType, Pub}};
 				Error2 ->

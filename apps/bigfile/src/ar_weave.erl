@@ -190,12 +190,12 @@ create_mainnet_genesis_txs() ->
 			TX = ar_tx:new(Data, 0, LastTx),
 			Reward = 0,
 			SignedTX = ar_tx:sign_v1(TX#tx{reward = Reward}, Priv, Pub),
-			ar_storage:write_tx(SignedTX),
+			big_storage:write_tx(SignedTX),
 			SignedTX
 		end,
 		?GENESIS_BLOCK_MESSAGES
 	),
-	ar_storage:write_file_atomic(
+	big_storage:write_file_atomic(
 		"genesis_wallets.csv",
 		lists:map(fun(T) -> binary_to_list(ar_util:encode(T#tx.id)) ++ "," end, TXs)
 	),

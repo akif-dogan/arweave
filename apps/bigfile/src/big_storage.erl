@@ -1,4 +1,4 @@
--module(ar_storage).
+-module(big_storage).
 
 -behaviour(gen_server).
 
@@ -430,7 +430,7 @@ read_account(Addr, RootHash, Left, Right, DataDir, RightFileFound) ->
 		false ->
 			read_account(Addr, RootHash, Left, Pos, DataDir, false);
 		true ->
-			{ok, L} = ar_storage:read_term(Filepath),
+			{ok, L} = big_storage:read_term(Filepath),
 			read_account2(Addr, RootHash, Pos, Left, Right, DataDir, L, RightFileFound)
 	end.
 
@@ -1163,7 +1163,7 @@ get_same_disk_storage_modules_total_size(TotalSize, [], _DataDir, _Device) ->
 	TotalSize;
 get_same_disk_storage_modules_total_size(TotalSize,
 		[{Size, _Bucket, _Packing} = Module | StorageModules], DataDir, Device) ->
-	Path = filename:join([DataDir, "storage_modules", ar_storage_module:id(Module)]),
+	Path = filename:join([DataDir, "storage_modules", big_storage_module:id(Module)]),
 	filelib:ensure_dir(Path ++ "/"),
 	{ok, Info} = file:read_file_info(Path),
 	TotalSize2 =

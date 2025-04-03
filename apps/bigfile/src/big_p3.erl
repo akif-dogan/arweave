@@ -238,7 +238,7 @@ get_or_try_to_create_account(DecodedAddress) ->
 	end.
 
 try_to_create_account(DecodedAddress) ->
-	case ar_storage:read_tx(big_wallets:get_last_tx(DecodedAddress)) of
+	case big_storage:read_tx(big_wallets:get_last_tx(DecodedAddress)) of
 		unavailable ->
 			{error, not_found};
 		TX ->
@@ -319,11 +319,11 @@ get_block_txs(Height) ->
 	BlockHash = ar_block_index:get_element_by_height(Height),
 	case ar_block_cache:get(block_cache, BlockHash) of
 		not_found ->
-			case ar_storage:read_block(BlockHash) of
+			case big_storage:read_block(BlockHash) of
 				unavailable ->
 					unavailable;
 				B ->
-					ar_storage:read_tx(B#block.txs)
+					big_storage:read_tx(B#block.txs)
 			end;
 		B ->
 			B#block.txs

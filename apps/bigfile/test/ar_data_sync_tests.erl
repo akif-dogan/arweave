@@ -14,7 +14,7 @@ recovers_from_corruption_test_() ->
 test_recovers_from_corruption() ->
 	ar_test_data_sync:setup_nodes(),
 	{ok, Config} = application:get_env(bigfile, config),
-	StoreID = ar_storage_module:id(hd(ar_storage_module:get_all(262144 * 3))),
+	StoreID = big_storage_module:id(hd(big_storage_module:get_all(262144 * 3))),
 	?debugFmt("Corrupting ~s...", [StoreID]),
 	[big_chunk_storage:write_chunk(PaddedEndOffset, << 0:(262144*8) >>, #{}, StoreID)
 			|| PaddedEndOffset <- lists:seq(262144, 262144 * 3, 262144)],
@@ -162,7 +162,7 @@ test_mines_off_only_last_chunks() ->
 					{ok, Config} = application:get_env(bigfile, config),
 					lists:foreach(
 						fun(O) ->
-							[big_chunk_storage:delete(O, ar_storage_module:id(Module))
+							[big_chunk_storage:delete(O, big_storage_module:id(Module))
 									|| Module <- Config#config.storage_modules]
 						end,
 						lists:seq(?DATA_CHUNK_SIZE, ?STRICT_DATA_SPLIT_THRESHOLD,
@@ -212,7 +212,7 @@ test_mines_off_only_second_last_chunks() ->
 					{ok, Config} = application:get_env(bigfile, config),
 					lists:foreach(
 						fun(O) ->
-							[big_chunk_storage:delete(O, ar_storage_module:id(Module))
+							[big_chunk_storage:delete(O, big_storage_module:id(Module))
 									|| Module <- Config#config.storage_modules]
 						end,
 						lists:seq(?DATA_CHUNK_SIZE, ?STRICT_DATA_SPLIT_THRESHOLD,
@@ -231,7 +231,7 @@ disk_pool_rotation_test_() ->
 test_disk_pool_rotation() ->
 	Addr = big_wallet:to_address(big_wallet:new_keyfile()),
 	%% Will store the three genesis chunks.
-	%% The third one falls inside the "overlap" (see ar_storage_module.erl)
+	%% The third one falls inside the "overlap" (see big_storage_module.erl)
 	StorageModules = [{2 * ?DATA_CHUNK_SIZE, 0,
 			ar_test_node:get_default_storage_module_packing(Addr, 0)}],
 	Wallet = ar_test_data_sync:setup_nodes(

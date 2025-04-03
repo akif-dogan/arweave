@@ -210,7 +210,7 @@ accepts_gossips_and_mines(B0, TXFuns) ->
 	),
 	lists:foreach(
 		fun(TX) ->
-			?assertEqual(TX, ar_test_node:remote_call(peer1, ar_storage, read_tx, [TX#tx.id]))
+			?assertEqual(TX, ar_test_node:remote_call(peer1, big_storage, read_tx, [TX#tx.id]))
 		end,
 		TXs
 	),
@@ -222,7 +222,7 @@ accepts_gossips_and_mines(B0, TXFuns) ->
 	),
 	lists:foreach(
 		fun(TX) ->
-			?assertEqual(TX, ar_storage:read_tx(TX#tx.id))
+			?assertEqual(TX, big_storage:read_tx(TX#tx.id))
 		end,
 		TXs
 	).
@@ -264,7 +264,7 @@ polls_for_transactions_and_gossips_and_mines(B0, TXFuns) ->
 		),
 		lists:foreach(
 			fun(TX) ->
-				?assertEqual(TX, ar_test_node:remote_call(peer1, ar_storage, read_tx, [TX#tx.id]))
+				?assertEqual(TX, ar_test_node:remote_call(peer1, big_storage, read_tx, [TX#tx.id]))
 			end,
 			TXs
 		),
@@ -276,7 +276,7 @@ polls_for_transactions_and_gossips_and_mines(B0, TXFuns) ->
 		),
 		lists:foreach(
 			fun(TX) ->
-				?assertEqual(TX, ar_storage:read_tx(TX#tx.id))
+				?assertEqual(TX, big_storage:read_tx(TX#tx.id))
 			end,
 			TXs
 		)
@@ -604,7 +604,7 @@ mines_blocks_under_the_size_limit(B0, TXGroups) ->
 assert_wait_until_txs_are_stored(TXIDs) ->
 	ar_util:do_until(
 		fun() ->
-			lists:all(fun(TX) -> is_record(TX, tx) end, ar_storage:read_tx(TXIDs))
+			lists:all(fun(TX) -> is_record(TX, tx) end, big_storage:read_tx(TXIDs))
 		end,
 		200,
 		60_000
@@ -638,7 +638,7 @@ mines_format_2_txs_without_size_limit() ->
 	[{H, _, _} | _] = wait_until_height(main, 1),
 	B = read_block_when_stored(H),
 	?assertEqual(?BLOCK_TX_COUNT_LIMIT, length(B#block.txs)),
-	TotalSize = lists:sum([(ar_storage:read_tx(TXID))#tx.data_size || TXID <- B#block.txs]),
+	TotalSize = lists:sum([(big_storage:read_tx(TXID))#tx.data_size || TXID <- B#block.txs]),
 	?assert(TotalSize > ?BLOCK_TX_DATA_SIZE_LIMIT).
 
 test_drops_v1_txs_exceeding_mempool_limit() ->

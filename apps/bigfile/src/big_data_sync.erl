@@ -46,7 +46,7 @@
 %%%===================================================================
 
 name(StoreID) ->
-	list_to_atom("ar_data_sync_" ++ ar_storage_module:label_by_id(StoreID)).
+	list_to_atom("ar_data_sync_" ++ big_storage_module:label_by_id(StoreID)).
 
 start_link(Name, StoreID) ->
 	gen_server:start_link({local, Name}, ?MODULE, StoreID, []).
@@ -56,8 +56,8 @@ register_workers() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	StorageModuleWorkers = lists:map(
 		fun(StorageModule) ->
-			StoreID = ar_storage_module:id(StorageModule),
-			StoreLabel = ar_storage_module:label(StorageModule),
+			StoreID = big_storage_module:id(StorageModule),
+			StoreLabel = big_storage_module:label(StorageModule),
 			Name = list_to_atom("ar_data_sync_" ++ StoreLabel),
 			?CHILD_WITH_ARGS(big_data_sync, worker, Name, [Name, {StoreID, none}])
 		end,
@@ -67,7 +67,7 @@ register_workers() ->
 		ar_data_sync_default, [ar_data_sync_default, {"default", none}]),
 	RepackInPlaceWorkers = lists:map(
 		fun({StorageModule, TargetPacking}) ->
-			StoreID = ar_storage_module:id(StorageModule),
+			StoreID = big_storage_module:id(StorageModule),
 			Name = big_data_sync:name(StoreID),
 			?CHILD_WITH_ARGS(big_data_sync, worker, Name, [Name, {StoreID, TargetPacking}])
 		end,
@@ -344,13 +344,13 @@ is_estimated_long_term_chunk(DataRootOffsetReply, EndOffset) ->
 					%% the space ahead (the data may be rearranged during after a reorg).
 					is_offset_vicinity_covered(AbsoluteEndOffset);
 				false ->
-					ar_storage_module:has_any(AbsoluteEndOffset)
+					big_storage_module:has_any(AbsoluteEndOffset)
 			end
 	end.
 
 is_offset_vicinity_covered(Offset) ->
 	Size = big_node:get_recent_max_block_size(),
-	ar_storage_module:has_range(max(0, Offset - Size * 2), Offset + Size * 2).
+	big_storage_module:has_range(max(0, Offset - Size * 2), Offset + Size * 2).
 
 %% @doc Notify the server about the new pending data root (added to mempool).
 %% The server may accept pending chunks and store them in the disk pool.
@@ -429,7 +429,7 @@ get_chunk(Offset, #{ packing := Packing } = Options) ->
 	IsRecorded =
 		case {RequestOrigin, Pack} of
 			{miner, _} ->
-				StorageModules = ar_storage_module:get_all(Offset),
+				StorageModules = big_storage_module:get_all(Offset),
 				ar_sync_record:is_recorded_any(Offset, big_data_sync, StorageModules);
 			{_, false} ->
 				ar_sync_record:is_recorded(Offset, {big_data_sync, Packing});
@@ -455,8 +455,8 @@ get_chunk(Offset, #{ packing := Packing } = Options) ->
 			{error, chunk_not_found};
 		Reply ->
 			UnpackedReply = ar_sync_record:is_recorded(Offset, {big_data_sync, unpacked}),
-			Modules = ar_storage_module:get_all(Offset),
-			ModuleIDs = [ar_storage_module:id(Module) || Module <- Modules],
+			Modules = big_storage_module:get_all(Offset),
+			ModuleIDs = [big_storage_module:id(Module) || Module <- Modules],
 			RootRecords = [ets:lookup(sync_records, {big_data_sync, ID})
 					|| ID <- ModuleIDs],
 			log_chunk_error(RequestOrigin, chunk_record_not_found,
@@ -769,12 +769,12 @@ init({StoreID, RepackInPlacePacking}) ->
 	case RepackInPlacePacking of
 		none ->
 			gen_server:cast(self(), process_store_chunk_queue),
-			{RangeStart, RangeEnd} = ar_storage_module:get_range(StoreID),
+			{RangeStart, RangeEnd} = big_storage_module:get_range(StoreID),
 			State2 = State#sync_data_state{
 				store_id = StoreID,
 				range_start = RangeStart,
 				range_end = RangeEnd,
-				packing = ar_storage_module:get_packing(StoreID),
+				packing = big_storage_module:get_packing(StoreID),
 				sync_status = init_sync_status(StoreID),
 				%% weave_size and disk_pool_threshold will be set on join
 				weave_size = 0,
@@ -816,7 +816,7 @@ handle_cast({join, RecentBI}, State) ->
 			PreviousWeaveSize = element(2, hd(CurrentBI)),
 			{ok, OrphanedDataRoots} = remove_orphaned_data(State, Offset, PreviousWeaveSize),
 			{ok, Config} = application:get_env(bigfile, config),
-			[gen_server:cast(name(ar_storage_module:id(Module)),
+			[gen_server:cast(name(big_storage_module:id(Module)),
 					{cut, Offset}) || Module <- Config#config.storage_modules],
 			ok = big_chunk_storage:cut(Offset, StoreID),
 			ok = ar_sync_record:cut(Offset, big_data_sync, StoreID),
@@ -994,7 +994,7 @@ handle_cast({collect_peer_intervals, Start, End}, State) ->
 				%% a bucket size worth of chunks. This number is slightly arbitrary and we
 				%% should feel free to adjust as necessary.
 				IntervalsQueueSize = gb_sets:size(Q),
-				StoreIDLabel = ar_storage_module:label_by_id(StoreID),
+				StoreIDLabel = big_storage_module:label_by_id(StoreID),
 				prometheus_gauge:set(sync_intervals_queue_size, [StoreIDLabel], IntervalsQueueSize),
 				case IntervalsQueueSize > (?NETWORK_DATA_BUCKET_SIZE / ?DATA_CHUNK_SIZE) of
 					true ->
@@ -1566,9 +1566,9 @@ do_sync_data(State) ->
 	gen_server:cast(self(), sync_data2),
 	%% Find all storage_modules that might include the target chunks (e.g. neighboring
 	%% storage_modules with an overlap, or unpacked copies used for packing, etc...)
-	OtherStorageModules = [ar_storage_module:id(Module)
-			|| Module <- ar_storage_module:get_all(RangeStart, RangeEnd),
-			ar_storage_module:id(Module) /= StoreID],
+	OtherStorageModules = [big_storage_module:id(Module)
+			|| Module <- big_storage_module:get_all(RangeStart, RangeEnd),
+			big_storage_module:id(Module) /= StoreID],
 	?LOG_INFO([{event, sync_data}, {store_id, StoreID}, {range_start, RangeStart},
 			{range_end, RangeEnd}, {disk_pool_threshold, DiskPoolThreshold},
 			{default_intervals, length(Intervals)},
@@ -1596,7 +1596,7 @@ do_sync_data2(#sync_data_state{
 			other_storage_modules_with_unsynced_intervals = [OtherStoreID | OtherStoreIDs]
 		} = State) ->
 	Intervals =
-		case ar_storage_module:get_packing(OtherStoreID) of
+		case big_storage_module:get_packing(OtherStoreID) of
 			{replica_2_9, _} when ?BLOCK_2_9_SYNCING ->
 				%% Do not unpack the 2.9 data by default, finding unpacked data
 				%% may be cheaper.
@@ -1789,8 +1789,8 @@ read_chunk_with_metadata(
 		Offset, SeekOffset, StoredPacking, StoreID, ReadChunk, RequestOrigin) ->
 	case get_chunk_by_byte(SeekOffset, StoreID) of
 		{error, Err} ->
-			Modules = ar_storage_module:get_all(SeekOffset),
-			ModuleIDs = [ar_storage_module:id(Module) || Module <- Modules],
+			Modules = big_storage_module:get_all(SeekOffset),
+			ModuleIDs = [big_storage_module:id(Module) || Module <- Modules],
 			log_chunk_error(RequestOrigin, failed_to_fetch_chunk_metadata,
 				[{seek_offset, SeekOffset},
 				{store_id, StoreID},
@@ -1816,8 +1816,8 @@ read_chunk_with_metadata(
 				end,
 			case ReadFun(AbsoluteOffset, ChunkDataKey, StoreID) of
 				not_found ->
-					Modules = ar_storage_module:get_all(SeekOffset),
-					ModuleIDs = [ar_storage_module:id(Module) || Module <- Modules],
+					Modules = big_storage_module:get_all(SeekOffset),
+					ModuleIDs = [big_storage_module:id(Module) || Module <- Modules],
 					log_chunk_error(RequestOrigin, failed_to_read_chunk_data_path,
 						[{seek_offset, SeekOffset},
 						{absolute_offset, AbsoluteOffset},
@@ -1840,8 +1840,8 @@ read_chunk_with_metadata(
 					case ar_sync_record:is_recorded(Offset, StoredPacking, big_data_sync,
 							StoreID) of
 						false ->
-							Modules = ar_storage_module:get_all(SeekOffset),
-							ModuleIDs = [ar_storage_module:id(Module) || Module <- Modules],
+							Modules = big_storage_module:get_all(SeekOffset),
+							ModuleIDs = [big_storage_module:id(Module) || Module <- Modules],
 							RootRecords = [ets:lookup(sync_records, {big_data_sync, ID})
 									|| ID <- ModuleIDs],
 							log_chunk_error(chunk_metadata_read_sync_record_race_condition,
@@ -2085,8 +2085,8 @@ remove_range(Start, End, Ref, ReplyTo) ->
 					end
 			end
 		end,
-	StorageModules = ar_storage_module:get_all(Start, End),
-	StoreIDs = ["default" | [ar_storage_module:id(M) || M <- StorageModules]],
+	StorageModules = big_storage_module:get_all(Start, End),
+	StoreIDs = ["default" | [big_storage_module:id(M) || M <- StorageModules]],
 	RefL = [make_ref() || _ <- StoreIDs],
 	PID = spawn(fun() -> ReplyFun(ReplyFun, sets:from_list(RefL)) end),
 	lists:foreach(
@@ -2250,7 +2250,7 @@ record_disk_pool_chunks_count() ->
 	end.
 
 read_data_sync_state() ->
-	case ar_storage:read_term(data_sync_state) of
+	case big_storage:read_term(data_sync_state) of
 		{ok, #{ block_index := RecentBI } = M} ->
 			maps:merge(M, #{
 				weave_size => case RecentBI of [] -> 0; _ -> element(2, hd(RecentBI)) end,
@@ -2588,7 +2588,7 @@ store_sync_state(#sync_data_state{ store_id = "default" } = State) ->
 	StoredState = #{ block_index => BI, disk_pool_data_roots => DiskPoolDataRoots,
 			%% Storing it for backwards-compatibility.
 			strict_data_split_threshold => ?STRICT_DATA_SPLIT_THRESHOLD },
-	case ar_storage:write_term(data_sync_state, StoredState) of
+	case big_storage:write_term(data_sync_state, StoredState) of
 		{error, enospc} ->
 			?LOG_WARNING([{event, failed_to_dump_state}, {reason, disk_full},
 					{store_id, "default"}]),
@@ -2903,8 +2903,8 @@ write_not_blacklisted_chunk(Offset, ChunkDataKey, Chunk, ChunkSize, DataPath, Pa
 		false ->
 			case put_chunk_data(ChunkDataKey, StoreID, {Chunk, DataPath}) of
 				ok ->
-					PackingLabel = ar_storage_module:packing_label(Packing),
-					StoreIDLabel = ar_storage_module:label_by_id(StoreID),
+					PackingLabel = big_storage_module:packing_label(Packing),
+					StoreIDLabel = big_storage_module:label_by_id(StoreID),
 					prometheus_counter:inc(chunks_stored, [PackingLabel, StoreIDLabel]),
 					{ok, Packing};
 				Error ->
@@ -3116,7 +3116,7 @@ store_chunk2(ChunkArgs, Args, State) ->
 	ShouldStoreInChunkStorage = big_chunk_storage:is_storage_supported(AbsoluteOffset,
 			ChunkSize, Packing),
 	CleanRecord =
-		case {ShouldStoreInChunkStorage, ar_storage_module:get_packing(StoreID)} of
+		case {ShouldStoreInChunkStorage, big_storage_module:get_packing(StoreID)} of
 			{true, {replica_2_9, _}} ->
 				%% The 2.9 chunk storage is write-once.
 				ok;
@@ -3197,7 +3197,7 @@ get_required_chunk_packing(Offset, ChunkSize, State) ->
 		true ->
 			unpacked;
 		false ->
-			case ar_storage_module:get_packing(StoreID) of
+			case big_storage_module:get_packing(StoreID) of
 				{replica_2_9, _Addr} ->
 					unpacked_padded;
 				Packing ->
@@ -3547,12 +3547,12 @@ process_disk_pool_matured_chunk_offset(Iterator, TXRoot, TXPath, AbsoluteOffset,
 	end.
 
 find_storage_module_for_disk_pool_chunk(Offset) ->
-	case ar_storage_module:get_all(Offset) of
+	case big_storage_module:get_all(Offset) of
 		[] ->
 			not_found;
 		Modules ->
 			SortedModules = sort_storage_modules_for_disk_pool_chunk(Modules),
-			ar_storage_module:id(hd(SortedModules))
+			big_storage_module:id(hd(SortedModules))
 	end.
 
 %% @doc Ensure we store the disk pool chunk in the most useful storage module.

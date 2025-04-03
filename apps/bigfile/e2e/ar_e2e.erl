@@ -353,7 +353,7 @@ assert_does_not_sync_range(Node, StartOffset, EndOffset) ->
 			[Node, StartOffset, EndOffset]))).
 
 assert_partition_size(Node, PartitionNumber, Packing) ->
-	Overlap = ar_storage_module:get_overlap(Packing),
+	Overlap = big_storage_module:get_overlap(Packing),
 	assert_partition_size(Node, PartitionNumber, Packing, ?PARTITION_SIZE + Overlap).
 assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 	?LOG_INFO("~p: Asserting partition ~p,~p is size ~p",

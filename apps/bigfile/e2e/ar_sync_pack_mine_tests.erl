@@ -146,7 +146,7 @@ test_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
 	SinkPacking = start_sink_node(SinkNode, SourceNode, B0, SinkPackingType),
 
 	RangeStart = ?PARTITION_SIZE,
-	RangeEnd = 2*?PARTITION_SIZE + ar_storage_module:get_overlap(SinkPacking),
+	RangeEnd = 2*?PARTITION_SIZE + big_storage_module:get_overlap(SinkPacking),
 	RangeSize = RangeEnd - RangeStart,
 
 	%% Partition 1 and half of partition 2 are below the disk pool threshold
@@ -187,11 +187,11 @@ test_unpacked_and_packed_sync_pack_mine(
 		SinkNode, SourceNode, B0, PackingType1, PackingType2),
 
 	RangeStart1 = ?PARTITION_SIZE,
-	RangeEnd1 = 2*?PARTITION_SIZE + ar_storage_module:get_overlap(SinkPacking1),
+	RangeEnd1 = 2*?PARTITION_SIZE + big_storage_module:get_overlap(SinkPacking1),
 	RangeSize1 = RangeEnd1 - RangeStart1,
 
 	RangeStart2 = ?PARTITION_SIZE,
-	RangeEnd2 = 2*?PARTITION_SIZE + ar_storage_module:get_overlap(SinkPacking2),
+	RangeEnd2 = 2*?PARTITION_SIZE + big_storage_module:get_overlap(SinkPacking2),
 	RangeSize2 = RangeEnd2 - RangeStart2,
 
 	%% Data exists as both packed and unmpacked, so will exist in the global sync record
@@ -229,7 +229,7 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 	
 	Module = {?PARTITION_SIZE, 1, SinkPacking},
-	StoreID = ar_storage_module:id(Module),
+	StoreID = big_storage_module:id(Module),
 	StorageModules = [ Module ],
 
 
@@ -247,7 +247,7 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 	),
 
 	RangeStart = ?PARTITION_SIZE,
-	RangeEnd = 2*?PARTITION_SIZE + ar_storage_module:get_overlap(SinkPacking),
+	RangeEnd = 2*?PARTITION_SIZE + big_storage_module:get_overlap(SinkPacking),
 	RangeSize = RangeEnd - RangeStart,
 
 	ar_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
@@ -293,7 +293,7 @@ test_entropy_last_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPacki
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 	
 	Module = {?PARTITION_SIZE, 1, SinkPacking},
-	StoreID = ar_storage_module:id(Module),
+	StoreID = big_storage_module:id(Module),
 	StorageModules = [ Module ],
 
 	%% 1. Run node with no replica_2_9 workers so that it only syncs chunks
@@ -310,7 +310,7 @@ test_entropy_last_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPacki
 	),
 
 	RangeStart = ?PARTITION_SIZE,
-	RangeEnd = 2*?PARTITION_SIZE + ar_storage_module:get_overlap(SinkPacking),
+	RangeEnd = 2*?PARTITION_SIZE + big_storage_module:get_overlap(SinkPacking),
 	RangeSize = RangeEnd - RangeStart,
 
 	ar_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
@@ -347,7 +347,7 @@ test_small_module_aligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, S
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 
 	Module = {floor(0.5 * ?PARTITION_SIZE), 2, SinkPacking},
-	StoreID = ar_storage_module:id(Module),
+	StoreID = big_storage_module:id(Module),
 	StorageModules = [ Module ],
 
 	%% Sync the second half of partition 1
@@ -363,7 +363,7 @@ test_small_module_aligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, S
 	),
 
 	RangeStart = floor(1 * ?PARTITION_SIZE),
-	RangeEnd = floor(1.5 * ?PARTITION_SIZE) + ar_storage_module:get_overlap(SinkPacking),
+	RangeEnd = floor(1.5 * ?PARTITION_SIZE) + big_storage_module:get_overlap(SinkPacking),
 	RangeSize = RangeEnd - RangeStart,
 
 	%% Make sure the expected data was synced
@@ -395,7 +395,7 @@ test_small_module_unaligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType},
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 
 	Module = {floor(0.5 * ?PARTITION_SIZE), 3, SinkPacking},
-	StoreID = ar_storage_module:id(Module),
+	StoreID = big_storage_module:id(Module),
 	StorageModules = [ Module ],
 
 	%% Sync the second half of partition 1
@@ -411,7 +411,7 @@ test_small_module_unaligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType},
 	),
 
 	RangeStart = floor(1.5 * ?PARTITION_SIZE),
-	RangeEnd = floor(2 * ?PARTITION_SIZE) + ar_storage_module:get_overlap(SinkPacking),
+	RangeEnd = floor(2 * ?PARTITION_SIZE) + big_storage_module:get_overlap(SinkPacking),
 	RangeSize = RangeEnd - RangeStart,
 
 	%% Make sure the expected data was synced	

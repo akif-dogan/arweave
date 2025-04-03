@@ -71,7 +71,7 @@ init([]) ->
 		?CHILD_SUP(ar_events_sup, supervisor),
 		?CHILD_SUP(ar_http_sup, supervisor),
 		?CHILD_SUP(ar_kv_sup, supervisor),
-		?CHILD_SUP(ar_storage_sup, supervisor),
+		?CHILD_SUP(big_storage_sup, supervisor),
 		?CHILD(big_peers, worker),
 		?CHILD(ar_disk_cache, worker),
 		?CHILD(ar_watchdog, worker),

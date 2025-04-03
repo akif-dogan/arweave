@@ -1087,7 +1087,7 @@ get_tx(Peers, TXID) ->
 	end.
 
 get_tx_from_disk_or_peer(Peers, TXID) ->
-	case ar_storage:read_tx(TXID) of
+	case big_storage:read_tx(TXID) of
 		unavailable ->
 			case get_tx_from_remote_peer(Peers, TXID) of
 				not_found ->

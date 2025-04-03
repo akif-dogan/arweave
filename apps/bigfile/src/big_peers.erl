@@ -562,7 +562,7 @@ format_stats(current, Peer, Perf) ->
 			Perf#performance.average_success]).
 
 load_peers() ->
-	case ar_storage:read_term(peers) of
+	case big_storage:read_term(peers) of
 		not_found ->
 			ok;
 		{ok, {_TotalRating, Records}} ->
@@ -955,7 +955,7 @@ store_peers() ->
 				   , {total, Total}
 				   , {records, length(Records)}
 				   , {tags, length(Tags)}]),
-			ar_storage:write_term(peers, {Total, Records, Tags})
+			big_storage:write_term(peers, {Total, Records, Tags})
 	end.
 
 %%--------------------------------------------------------------------

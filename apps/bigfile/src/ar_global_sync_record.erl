@@ -80,7 +80,7 @@ init([]) ->
 					%% replica.2.9 entropy footprint
 					Acc;
 				_ ->
-					StoreID = ar_storage_module:id(Module),
+					StoreID = big_storage_module:id(Module),
 					ar_intervals:union(ar_sync_record:get(big_data_sync, StoreID), Acc)
 			end
 		end,
@@ -127,7 +127,7 @@ handle_cast(Cast, State) ->
 	{noreply, State}.
 
 handle_info({event, sync_record, {add_range, Start, End, big_data_sync, StoreID}}, State) ->
-	case ar_storage_module:get_packing(StoreID) of
+	case big_storage_module:get_packing(StoreID) of
 		{replica_2_9, _} when ?BLOCK_2_9_SYNCING ->
 			%% Ignore replica.2.9 packing. This is a temporary solution until
 			%% we can support data syncing in batches corresponding to the

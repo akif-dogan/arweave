@@ -26,7 +26,7 @@ test_syncs_headers() ->
 		fun(Height) ->
 			{ok, B} = ar_util:do_until(
 				fun() ->
-					case ar_test_node:remote_call(peer1, ar_storage, read_block, [Height, BI]) of
+					case ar_test_node:remote_call(peer1, big_storage, read_block, [Height, BI]) of
 						unavailable ->
 							unavailable;
 						B2 ->
@@ -36,10 +36,10 @@ test_syncs_headers() ->
 				200,
 				30000
 			),
-			MainB = ar_storage:read_block(Height, big_node:get_block_index()),
+			MainB = big_storage:read_block(Height, big_node:get_block_index()),
 			?assertEqual(B, MainB),
-			TXs = ar_test_node:remote_call(peer1, ar_storage, read_tx, [B#block.txs]),
-			MainTXs = ar_storage:read_tx(B#block.txs),
+			TXs = ar_test_node:remote_call(peer1, big_storage, read_tx, [B#block.txs]),
+			MainTXs = big_storage:read_tx(B#block.txs),
 			?assertEqual(TXs, MainTXs)
 		end,
 		lists:reverse(lists:seq(0, ?MAX_TX_ANCHOR_DEPTH + 5))
@@ -57,8 +57,8 @@ test_syncs_headers() ->
 	%% The cleanup is not expected to kick in yet.
 	NoSpaceB = read_block_when_stored(NoSpaceH),
 	?assertMatch(#block{}, NoSpaceB),
-	?assertMatch(#tx{}, ar_storage:read_tx(NoSpaceTX#tx.id)),
-	?assertMatch({ok, _}, ar_storage:read_wallet_list(NoSpaceB#block.wallet_list)),
+	?assertMatch(#tx{}, big_storage:read_tx(NoSpaceTX#tx.id)),
+	?assertMatch({ok, _}, big_storage:read_wallet_list(NoSpaceB#block.wallet_list)),
 	ets:new(test_syncs_header, [set, named_table]),
 	ets:insert(test_syncs_header, {height, NoSpaceHeight + 1}),
 	true = ar_util:do_until(
@@ -72,8 +72,8 @@ test_syncs_headers() ->
 			[{_, Height}] = ets:lookup(test_syncs_header, height),
 			[_ | _] = wait_until_height(main, Height),
 			ets:insert(test_syncs_header, {height, Height + 1}),
-			unavailable == ar_storage:read_block(NoSpaceH)
-				andalso ar_storage:read_tx(NoSpaceTX#tx.id) == unavailable
+			unavailable == big_storage:read_block(NoSpaceH)
+				andalso big_storage:read_tx(NoSpaceTX#tx.id) == unavailable
 		end,
 		100,
 		10000
@@ -83,8 +83,8 @@ test_syncs_headers() ->
 	%% The latest block must not be cleaned up.
 	LatestB = read_block_when_stored(LatestH),
 	?assertMatch(#block{}, LatestB),
-	?assertMatch(#tx{}, ar_storage:read_tx(lists:nth(1, LatestB#block.txs))),
-	?assertMatch({ok, _}, ar_storage:read_wallet_list(LatestB#block.wallet_list)),
+	?assertMatch(#tx{}, big_storage:read_tx(lists:nth(1, LatestB#block.txs))),
+	?assertMatch({ok, _}, big_storage:read_wallet_list(LatestB#block.wallet_list)),
 	ar_disksup:resume().
 
 post_random_blocks(Wallet, TargetHeight, B0) ->

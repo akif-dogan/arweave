@@ -23,7 +23,7 @@ start_link(Name, {StoreID, _}) ->
 
 %% @doc Return the name of the server serving the given StoreID.
 name(StoreID) ->
-    list_to_atom("ar_entropy_storage_" ++ ar_storage_module:label_by_id(StoreID)).
+    list_to_atom("ar_entropy_storage_" ++ big_storage_module:label_by_id(StoreID)).
 
 init(StoreID) ->
     ?LOG_INFO([{event, ar_entropy_storage_init}, {name, name(StoreID)}, {store_id, StoreID}]),
@@ -115,15 +115,15 @@ update_sync_records(IsComplete, PaddedEndOffset, StoreID, RewardAddr) ->
     BucketStart = big_chunk_storage:get_chunk_bucket_start(PaddedEndOffset),
     ar_sync_record:add_async(replica_2_9_entropy, BucketEnd, BucketStart, ID, StoreID),
     prometheus_counter:inc(replica_2_9_entropy_stored,
-                           [ar_storage_module:label_by_id(StoreID)],
+                           [big_storage_module:label_by_id(StoreID)],
                            ?DATA_CHUNK_SIZE),
     case IsComplete of
         true ->
             Packing = {replica_2_9, RewardAddr},
             StartOffset = PaddedEndOffset - ?DATA_CHUNK_SIZE,
             prometheus_counter:inc(chunks_stored,
-                                   [ar_storage_module:packing_label(Packing),
-                                    ar_storage_module:label_by_id(StoreID)]),
+                                   [big_storage_module:packing_label(Packing),
+                                    big_storage_module:label_by_id(StoreID)]),
             ar_sync_record:add_async(replica_2_9_entropy_with_chunk,
                                      PaddedEndOffset,
                                      StartOffset,
@@ -550,10 +550,10 @@ test_replica_2_9() ->
     try
         ar_test_node:start(#{reward_addr => RewardAddr, storage_modules => StorageModules}),
         StoreID1 =
-            ar_storage_module:id(
+            big_storage_module:id(
                 lists:nth(1, StorageModules)),
         StoreID2 =
-            ar_storage_module:id(
+            big_storage_module:id(
                 lists:nth(2, StorageModules)),
         C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
         %% The replica_2_9 storage does not support updates and three chunks are written

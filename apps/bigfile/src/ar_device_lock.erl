@@ -90,7 +90,7 @@ set_device_lock_metric(StoreID, Mode, Status) ->
 		complete -> 2;
 		_ -> -2		
 	end,
-	StoreIDLabel = ar_storage_module:label_by_id(StoreID),
+	StoreIDLabel = big_storage_module:label_by_id(StoreID),
 	prometheus_gauge:set(device_lock_status, [StoreIDLabel, Mode], StatusCode).
 
 %%%===================================================================
@@ -164,7 +164,7 @@ initialize_state(State) ->
 			|| El <- Config#config.repack_in_place_storage_modules],
 	StoreIDToDevice = lists:foldl(
 		fun(Module, Acc) ->
-			StoreID = ar_storage_module:id(Module),
+			StoreID = big_storage_module:id(Module),
 			Device = get_system_device(Module),
 			?LOG_INFO([
 				{event, storage_module_device}, {store_id, StoreID}, {device, Device}]),
@@ -185,7 +185,7 @@ initialize_state(State) ->
 
 get_system_device(StorageModule) ->
 	{ok, Config} = application:get_env(bigfile, config),
-	StoreID = ar_storage_module:id(StorageModule),
+	StoreID = big_storage_module:id(StorageModule),
 	Path = big_chunk_storage:get_chunk_storage_path(Config#config.data_dir, StoreID),
 	Device = ar_util:get_system_device(Path),
 	case Device of

@@ -1,4 +1,4 @@
--module(ar_storage_sup).
+-module(big_storage_sup).
 
 -behaviour(supervisor).
 
@@ -21,9 +21,9 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    ets:new(ar_storage, [set, public, named_table, {read_concurrency, true}]),
-	ets:new(ar_storage_module, [set, public, named_table]),
+    ets:new(big_storage, [set, public, named_table, {read_concurrency, true}]),
+	ets:new(big_storage_module, [set, public, named_table]),
 	{ok, {{one_for_one, 5, 10}, [
-		?CHILD(ar_storage, worker),
+		?CHILD(big_storage, worker),
 		?CHILD(ar_device_lock, worker)
 	]}}.

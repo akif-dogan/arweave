@@ -101,7 +101,7 @@ init([]) ->
 		{false, false, true} ->
 			ar_join:start(big_peers:get_trusted_peers());
 		{true, _, _} ->
-			case ar_storage:read_block_index() of
+			case big_storage:read_block_index() of
 				not_found ->
 					block_index_not_found([]);
 				BI ->
@@ -130,7 +130,7 @@ init([]) ->
 			[B0] = ar_weave:init([{Config#config.mining_addr, InitialBalance, <<>>}],
 					ar_retarget:switch_to_linear_diff(Config#config.diff)),
 			RootHash0 = B0#block.wallet_list,
-			RootHash0 = ar_storage:write_wallet_list(0, B0#block.account_tree),
+			RootHash0 = big_storage:write_wallet_list(0, B0#block.account_tree),
 			start_from_state([B0]);
 		_ ->
 			ok
@@ -396,7 +396,7 @@ handle_info({event, node_state, _Event}, State) ->
 
 handle_info({event, nonce_limiter, initialized}, State) ->
 	[{_, {Height, Blocks, BI}}] = ets:lookup(node_state, join_state),
-	ar_storage:store_block_index(BI),
+	big_storage:store_block_index(BI),
 	RecentBI = lists:sublist(BI, ?BLOCK_INDEX_HEAD_LEN),
 	Current = element(1, hd(RecentBI)),
 	RecentBlocks = lists:sublist(Blocks, ?STORE_BLOCKS_BEHIND_CURRENT),
@@ -407,12 +407,12 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 			|| {{Addr, HashRate, Reward, Denomination}, {H, _, _}}
 			<- lists:zip(B#block.reward_history,
 					lists:sublist(BI, length(B#block.reward_history)))],
-	ar_storage:store_reward_history_part2(RewardHistory),
+	big_storage:store_reward_history_part2(RewardHistory),
 	BlockTimeHistory = [{H, {BlockInterval, VDFInterval, ChunkCount}}
 			|| {{BlockInterval, VDFInterval, ChunkCount}, {H, _, _}}
 			<- lists:zip(B#block.block_time_history,
 					lists:sublist(BI, length(B#block.block_time_history)))],
-	ar_storage:store_block_time_history_part2(BlockTimeHistory),
+	big_storage:store_block_time_history_part2(BlockTimeHistory),
 	Height = B#block.height,
 	ar_disk_cache:write_block(B),
 	big_data_sync:join(RecentBI),
@@ -997,7 +997,7 @@ pick_txs(TXIDs) ->
 						%% the only reason to find some of these transactions on disk
 						%% is they had been written prior to the call, what means they are
 						%% from an orphaned fork, more than one block behind.
-						case ar_storage:read_tx(TXID) of
+						case big_storage:read_tx(TXID) of
 							unavailable ->
 								{Found, [TXID | Missing]};
 							TX ->
@@ -1413,9 +1413,9 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 		tl(lists:reverse(PrevBlocks))
 	),
 
-	ar_storage:update_block_index(B#block.height, OrphanCount, AddedBIElements),
-	ar_storage:store_reward_history_part(AddedBlocks),
-	ar_storage:store_block_time_history_part(AddedBlocks, ForkRootB),
+	big_storage:update_block_index(B#block.height, OrphanCount, AddedBIElements),
+	big_storage:store_reward_history_part(AddedBlocks),
+	big_storage:store_block_time_history_part(AddedBlocks, ForkRootB),
 	ets:insert(node_state, [
 		{recent_block_index,	RecentBI2},
 		{recent_max_block_size, get_max_block_size(RecentBI2)},
@@ -1729,8 +1729,8 @@ start_from_state(BI, Height) ->
 
 			BlockTimeHistoryBI = lists:sublist(BI2,
 					ar_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
-			case {ar_storage:read_reward_history(RewardHistoryBI),
-					ar_storage:read_block_time_history(Height2, BlockTimeHistoryBI)} of
+			case {big_storage:read_reward_history(RewardHistoryBI),
+					big_storage:read_block_time_history(Height2, BlockTimeHistoryBI)} of
 				{not_found, _} ->
 					?LOG_ERROR([{event, start_from_state_error},
 							{reason, reward_history_not_found},
@@ -1763,9 +1763,9 @@ read_recent_blocks2(_BI, Depth, Skipped) when Skipped > Depth orelse
 read_recent_blocks2([], _SearchDepth, Skipped) ->
 	{Skipped, []};
 read_recent_blocks2([{BH, _, _} | BI], SearchDepth, Skipped) ->
-	case ar_storage:read_block(BH) of
+	case big_storage:read_block(BH) of
 		B = #block{} ->
-			TXs = ar_storage:read_tx(B#block.txs),
+			TXs = big_storage:read_tx(B#block.txs),
 			case lists:any(fun(TX) -> TX == unavailable end, TXs) of
 				true ->
 					read_recent_blocks2(BI, SearchDepth, Skipped + 1);
@@ -1791,9 +1791,9 @@ read_recent_blocks3([], _BlocksToRead, Blocks) ->
 read_recent_blocks3(_BI, 0, Blocks) ->
 	lists:reverse(Blocks);
 read_recent_blocks3([{BH, _, _} | BI], BlocksToRead, Blocks) ->
-	case ar_storage:read_block(BH) of
+	case big_storage:read_block(BH) of
 		B = #block{} ->
-			TXs = ar_storage:read_tx(B#block.txs),
+			TXs = big_storage:read_tx(B#block.txs),
 			case lists:any(fun(TX) -> TX == unavailable end, TXs) of
 				true ->
 					big:console("Failed to find all transaction headers for the block ~s.~n",
@@ -1847,7 +1847,7 @@ compute_poa_cache(B, PoA, RecallByte, Nonce, Packing) ->
 
 dump_mempool(TXs, MempoolSize) ->
 	SerializedTXs = maps:map(fun(_, {TX, St}) -> {ar_serialize:tx_to_binary(TX), St} end, TXs),
-	case ar_storage:write_term(mempool, {SerializedTXs, MempoolSize}) of
+	case big_storage:write_term(mempool, {SerializedTXs, MempoolSize}) of
 		ok ->
 			ok;
 		{error, Reason} ->

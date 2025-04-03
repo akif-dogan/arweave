@@ -321,7 +321,7 @@ assert_present_txs(GoodTXIDs) ->
 		fun() ->
 			lists:all(
 				fun(TXID) ->
-					is_record(ar_storage:read_tx(TXID), tx)
+					is_record(big_storage:read_tx(TXID), tx)
 				end,
 				GoodTXIDs
 			)
@@ -331,7 +331,7 @@ assert_present_txs(GoodTXIDs) ->
 	),
 	lists:foreach(
 		fun(TXID) ->
-			?assertMatch({ok, {_, _}}, ar_storage:get_tx_confirmation_data(TXID))
+			?assertMatch({ok, {_, _}}, big_storage:get_tx_confirmation_data(TXID))
 		end,
 		GoodTXIDs
 	).
@@ -344,7 +344,7 @@ assert_removed_txs(BadTXIDs) ->
 			lists:all(
 				fun(TXID) ->
 					{error, not_found} == big_data_sync:get_tx_data(TXID)
-							%% Do not use ar_storage:read_tx because the
+							%% Do not use big_storage:read_tx because the
 							%% transaction is temporarily kept in the disk cache,
 							%% even when blacklisted.
 							andalso ar_kv:get(tx_db, TXID) == not_found
@@ -358,7 +358,7 @@ assert_removed_txs(BadTXIDs) ->
 	%% We have to keep the confirmation data even for blacklisted transactions.
 	lists:foreach(
 		fun(TXID) ->
-			?assertMatch({ok, {_, _}}, ar_storage:get_tx_confirmation_data(TXID))
+			?assertMatch({ok, {_, _}}, big_storage:get_tx_confirmation_data(TXID))
 		end,
 		BadTXIDs
 	).

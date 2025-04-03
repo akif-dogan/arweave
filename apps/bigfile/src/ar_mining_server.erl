@@ -126,7 +126,7 @@ log_prepare_solution_failure2(Solution, FailureReason, AdditionalLogData) ->
 			{solution_hash, ar_util:safe_encode(SolutionH)},
 			{packing_difficulty, PackingDifficulty} | AdditionalLogData]).
 
--spec get_packing_difficulty(Packing :: ar_storage_module:packing()) ->
+-spec get_packing_difficulty(Packing :: big_storage_module:packing()) ->
 	PackingDifficulty :: non_neg_integer().
 get_packing_difficulty({composite, _, Difficulty}) ->
 	Difficulty;
@@ -135,7 +135,7 @@ get_packing_difficulty({replica_2_9, _}) ->
 get_packing_difficulty(_) ->
 	0.
 
--spec get_packing_type(Packing :: ar_storage_module:packing()) ->
+-spec get_packing_type(Packing :: big_storage_module:packing()) ->
 	PackingType :: atom().
 get_packing_type({composite, _, _}) ->
 	composite;
@@ -750,8 +750,8 @@ prepare_solution(poa1, Candidate, Solution) ->
 		{ok, PoA1} ->
 			Solution#mining_solution{ poa1 = PoA1 };
 		{error, Error} ->
-			Modules = ar_storage_module:get_all(RecallByte1 + 1),
-			ModuleIDs = [ar_storage_module:id(Module) || Module <- Modules],
+			Modules = big_storage_module:get_all(RecallByte1 + 1),
+			ModuleIDs = [big_storage_module:id(Module) || Module <- Modules],
 			LogData = [{recall_byte, RecallByte1},
 					{modules_covering_recall_byte, ModuleIDs},
 					{fetch_proofs_error, io_lib:format("~p", [Error])},
@@ -764,9 +764,9 @@ prepare_solution(poa1, Candidate, Solution) ->
 					?LOG_WARNING([{event, failed_to_find_poa1_proofs_for_h2_solution},
 							{error, io_lib:format("~p", [Error])},
 							{tags, [solution_proofs]} | LogData]),
-					case ar_storage_module:get(RecallByte1 + 1, Packing) of
+					case big_storage_module:get(RecallByte1 + 1, Packing) of
 						{_BucketSize, _Bucket, Packing} = StorageModule ->
-							StoreID = ar_storage_module:id(StorageModule),
+							StoreID = big_storage_module:id(StorageModule),
 							case big_chunk_storage:get(RecallByte1, StoreID) of
 								not_found ->
 									log_prepare_solution_failure(Solution,
@@ -807,8 +807,8 @@ prepare_solution(poa2, Candidate, Solution) ->
 		{ok, PoA2} ->
 			prepare_solution(poa1, Candidate, Solution#mining_solution{ poa2 = PoA2 });
 		{error, _Error} ->
-			Modules = ar_storage_module:get_all(RecallByte2 + 1),
-			ModuleIDs = [ar_storage_module:id(Module) || Module <- Modules],
+			Modules = big_storage_module:get_all(RecallByte2 + 1),
+			ModuleIDs = [big_storage_module:id(Module) || Module <- Modules],
 			LogData = [{recall_byte2, RecallByte2}, {modules_covering_recall_byte, ModuleIDs}],
 			%% If we are a coordinated miner and not an exit node - the exit
 			%% node will fetch the proofs.
@@ -845,8 +845,8 @@ prepare_poa(PoAType, Candidate, CurrentPoA) ->
 				{ok, PoA} ->
 					{ok, PoA};
 				{error, Error} ->
-					Modules = ar_storage_module:get_all(RecallByte + 1),
-					ModuleIDs = [ar_storage_module:id(Module) || Module <- Modules],
+					Modules = big_storage_module:get_all(RecallByte + 1),
+					ModuleIDs = [big_storage_module:id(Module) || Module <- Modules],
 					?LOG_INFO([{event, failed_to_find_poa_proofs_locally},
 							{poa, PoAType},
 							{error, io_lib:format("~p", [Error])},

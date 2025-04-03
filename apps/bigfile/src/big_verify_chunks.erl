@@ -30,7 +30,7 @@ start_link(Name, StorageModule) ->
 
 -spec name(binary()) -> atom().
 name(StoreID) ->
-	list_to_atom("ar_verify_chunks_" ++ ar_storage_module:label_by_id(StoreID)).
+	list_to_atom("ar_verify_chunks_" ++ big_storage_module:label_by_id(StoreID)).
 
 %%%===================================================================
 %%% Generic server callbacks.
@@ -38,11 +38,11 @@ name(StoreID) ->
 
 init(StoreID) ->
 	?LOG_INFO([{event, verify_chunk_storage_started}, {store_id, StoreID}]),
-	{StartOffset, EndOffset} = ar_storage_module:get_range(StoreID),
+	{StartOffset, EndOffset} = big_storage_module:get_range(StoreID),
 	gen_server:cast(self(), verify),
 	{ok, #state{
 		store_id = StoreID,
-		packing = ar_storage_module:get_packing(StoreID),
+		packing = big_storage_module:get_packing(StoreID),
 		start_offset = StartOffset,
 		end_offset = EndOffset,
 		cursor = StartOffset,
@@ -173,13 +173,13 @@ verify_packing(Metadata, State) ->
 			ok;
 		{{true, StoredPacking}, _} ->
 			?LOG_WARNING([{event, verify_chunk_storage_unexpected_packing},
-				{expected_packing, ar_storage_module:packing_label(Packing)},
-				{stored_packing, ar_storage_module:packing_label(StoredPacking)},
+				{expected_packing, big_storage_module:packing_label(Packing)},
+				{stored_packing, big_storage_module:packing_label(StoredPacking)},
 				{offset, AbsoluteOffset}]),
 			invalidate_chunk(unexpected_packing, AbsoluteOffset, ChunkSize, State);
 		{Reply, _} ->
 			?LOG_WARNING([{event, verify_chunk_storage_missing_packing_info},
-				{expected_packing, ar_storage_module:packing_label(Packing)},
+				{expected_packing, big_storage_module:packing_label(Packing)},
 				{packing_reply, io_lib:format("~p", [Reply])},
 				{offset, AbsoluteOffset}]),
 			invalidate_chunk(missing_packing_info, AbsoluteOffset, ChunkSize, State)

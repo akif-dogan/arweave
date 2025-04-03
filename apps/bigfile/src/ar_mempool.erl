@@ -17,7 +17,7 @@ reset() ->
 	]).
 
 load_from_disk() ->
-	case ar_storage:read_term(mempool) of
+	case big_storage:read_term(mempool) of
 		{ok, {SerializedTXs, _MempoolSize}} ->
 			TXs = maps:map(fun(_, {TX, St}) -> {deserialize_tx(TX), St} end, SerializedTXs),
 
@@ -394,7 +394,7 @@ deserialize_tx(Bin) when is_binary(Bin) ->
 	{ok, TX} = ar_serialize:binary_to_tx(Bin),
 	TX;
 deserialize_tx(TX) ->
-	ar_storage:migrate_tx_record(TX).
+	big_storage:migrate_tx_record(TX).
 
 
 

@@ -65,7 +65,7 @@ init([]) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "ar_header_sync_db"), ?MODULE),
 	{SyncRecord, Height, CurrentBI} =
-		case ar_storage:read_term(header_sync_state) of
+		case big_storage:read_term(header_sync_state) of
 			not_found ->
 				{ar_intervals:new(), -1, []};
 			{ok, StoredState} ->
@@ -218,7 +218,7 @@ handle_cast({failed_to_get_block, H, H2, TXRoot, Height, Backoff},
 	{noreply, State#state{ retry_queue = Queue2 }};
 
 handle_cast({remove_tx, TXID}, State) ->
-	{ok, _Size} = ar_storage:delete_blacklisted_tx(TXID),
+	{ok, _Size} = big_storage:delete_blacklisted_tx(TXID),
 	ar_tx_blacklist:notify_about_removed_tx(TXID),
 	{noreply, State};
 
@@ -248,7 +248,7 @@ handle_call(_Msg, _From, State) ->
 
 handle_info({event, tx, {preparing_unblacklisting, TXID}}, State) ->
 	#state{ sync_record = SyncRecord, retry_record = RetryRecord } = State,
-	case ar_storage:get_tx_confirmation_data(TXID) of
+	case big_storage:get_tx_confirmation_data(TXID) of
 		{ok, {Height, _BH}} ->
 			?LOG_DEBUG([{event, mark_block_with_blacklisted_tx_for_resyncing},
 					{tx, ar_util:encode(TXID)}, {height, Height}]),
@@ -347,7 +347,7 @@ store_sync_state(State) ->
 	SyncedCount = ar_intervals:sum(SyncRecord),
 	prometheus_gauge:set(synced_blocks, SyncedCount),
 	ets:insert(?MODULE, {synced_blocks, SyncedCount}),
-	ar_storage:write_term(header_sync_state, {SyncRecord, LastHeight, BI}).
+	big_storage:write_term(header_sync_state, {SyncRecord, LastHeight, BI}).
 
 get_base_height([{H, _, _} | CurrentBI], CurrentHeight, RecentBI) ->
 	case lists:search(fun({BH, _, _}) -> BH == H end, RecentBI) of
@@ -372,7 +372,7 @@ add_block(B, State) ->
 	end.
 
 add_block2(B, #state{ is_disk_space_sufficient = false } = State) ->
-	case ar_storage:update_confirmation_index(B) of
+	case big_storage:update_confirmation_index(B) of
 		ok ->
 			{ok, State};
 		Error ->
@@ -382,7 +382,7 @@ add_block2(B, #state{ is_disk_space_sufficient = false } = State) ->
 	end;
 add_block2(B, #state{ sync_record = SyncRecord, retry_record = RetryRecord } = State) ->
 	#block{ indep_hash = H, previous_block = PrevH, height = Height } = B,
-	case ar_storage:write_full_block(B, B#block.txs) of
+	case big_storage:write_full_block(B, B#block.txs) of
 		ok ->
 			case ar_intervals:is_inside(SyncRecord, Height) of
 				true ->
@@ -483,7 +483,7 @@ check_fork(Height, H, TXRoot) ->
 
 download_block(H, H2, TXRoot) ->
 	Peers = big_peers:get_peers(current),
-	case ar_storage:read_block(H) of
+	case big_storage:read_block(H) of
 		unavailable ->
 			download_block(Peers, H, H2, TXRoot);
 		B ->

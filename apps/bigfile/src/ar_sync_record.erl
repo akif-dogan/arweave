@@ -162,14 +162,14 @@ is_recorded(Offset, {ID, Packing}) ->
 			{{true, Packing}, "default"};
 		false ->
 			StorageModules = [Module
-					|| {_, _, ModulePacking} = Module <- ar_storage_module:get_all(Offset),
+					|| {_, _, ModulePacking} = Module <- big_storage_module:get_all(Offset),
 						ModulePacking == Packing],
 			is_recorded_any_by_type(Offset, ID, StorageModules)
 	end;
 is_recorded(Offset, ID) ->
 	case is_recorded(Offset, ID, "default") of
 		false ->
-			StorageModules = ar_storage_module:get_all(Offset),
+			StorageModules = big_storage_module:get_all(Offset),
 			is_recorded_any(Offset, ID, StorageModules);
 		Reply ->
 			{Reply, "default"}
@@ -274,7 +274,7 @@ init(StoreID) ->
 				{filename:join(?ROCKS_DB_DIR, "ar_sync_record_db"),
 					undefined, undefined, undefined};
 			_ ->
-				{Size, Index, _Packing} = ar_storage_module:get_by_id(StoreID),
+				{Size, Index, _Packing} = big_storage_module:get_by_id(StoreID),
 				{filename:join(["storage_modules", StoreID, ?ROCKS_DB_DIR,
 						"ar_sync_record_db"]), Size, Index,
 							big_node:get_partition_number(Size * Index)}
@@ -429,7 +429,7 @@ terminate(Reason, State) ->
 %%%===================================================================
 
 name(StoreID) ->
-	list_to_atom("ar_sync_record_" ++ ar_storage_module:label_by_id(StoreID)).
+	list_to_atom("ar_sync_record_" ++ big_storage_module:label_by_id(StoreID)).
 
 add2(End, Start, ID, State) ->
 	#state{ sync_record_by_id = SyncRecordByID, state_db = StateDB,
@@ -513,7 +513,7 @@ delete2(End, Start, ID, State) ->
 	{Reply, State3}.
 
 is_recorded_any_by_type(Offset, ID, [StorageModule | StorageModules]) ->
-	StoreID = ar_storage_module:id(StorageModule),
+	StoreID = big_storage_module:id(StorageModule),
 	{_, _, Packing} = StorageModule,
 	case is_recorded(Offset, Packing, ID, StoreID) of
 		true ->
@@ -525,7 +525,7 @@ is_recorded_any_by_type(_Offset, _ID, []) ->
 	false.
 
 is_recorded_any(Offset, ID, [StorageModule | StorageModules]) ->
-	StoreID = ar_storage_module:id(StorageModule),
+	StoreID = big_storage_module:id(StorageModule),
 	case is_recorded(Offset, ID, StoreID) of
 		false ->
 			is_recorded_any(Offset, ID, StorageModules);

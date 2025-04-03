@@ -290,7 +290,7 @@ handle(<<"GET">>, [<<"tx">>, Hash, << "data.", _/binary >>], Req, _Pid) ->
 				{error, invalid} ->
 					{400, #{}, <<"Invalid hash.">>, Req};
 				{ok, ID} ->
-					case ar_storage:read_tx(ID) of
+					case big_storage:read_tx(ID) of
 						unavailable ->
 							{404, #{ <<"content-type">> => <<"text/html; charset=utf-8">> }, sendfile("genesis_data/not_found.html"), Req};
 						#tx{} = TX ->
@@ -1216,7 +1216,7 @@ handle(<<"GET">>, [<<"tx">>, Hash, Field], Req, _Pid) ->
 					{error, invalid} ->
 						{reply, {400, #{}, <<"Invalid hash.">>, Req}};
 					{ok, ID} ->
-						{ar_storage:read_tx(ID), ID}
+						{big_storage:read_tx(ID), ID}
 				end,
 			case ReadTX of
 				{unavailable, TXID} ->
@@ -1565,7 +1565,7 @@ handle_get_tx_status(EncodedTXID, Req) ->
 				true ->
 					{202, #{}, <<"Pending">>, Req};
 				false ->
-					case ar_storage:get_tx_confirmation_data(TXID) of
+					case big_storage:get_tx_confirmation_data(TXID) of
 						{ok, {Height, BH}} ->
 							PseudoTags = [
 								{<<"block_height">>, Height},
@@ -1600,7 +1600,7 @@ handle_get_tx(Hash, Req, Encoding) ->
 			{400, #{}, <<"Invalid hash.">>, Req};
 		{ok, ID} ->
 			ok = ar_semaphore:acquire(get_tx, infinity),
-			case ar_storage:read_tx(ID) of
+			case big_storage:read_tx(ID) of
 				unavailable ->
 					maybe_tx_is_pending_response(ID, Req);
 				#tx{} = TX ->
@@ -1652,7 +1652,7 @@ maybe_tx_is_pending_response(ID, Req) ->
 serve_tx_data(Req, #tx{ format = 1 } = TX) ->
 	{200, #{}, ar_util:encode(TX#tx.data), Req};
 serve_tx_data(Req, #tx{ format = 2, id = ID, data_size = DataSize } = TX) ->
-	DataFilename = ar_storage:tx_data_filepath(TX),
+	DataFilename = big_storage:tx_data_filepath(TX),
 	case filelib:is_file(DataFilename) of
 		true ->
 			{200, #{}, sendfile(DataFilename), Req};
@@ -1687,7 +1687,7 @@ serve_tx_html_data(Req, _TX, invalid) ->
 	{421, #{}, <<>>, Req}.
 
 serve_format_2_html_data(Req, ContentType, TX) ->
-	case ar_storage:read_tx_data(TX) of
+	case big_storage:read_tx_data(TX) of
 		{ok, Data} ->
 			{200, #{ <<"content-type">> => ContentType }, Data, Req};
 		{error, enoent} ->
@@ -1849,7 +1849,7 @@ handle_get_block(H, Req, Pid, Encoding) ->
 	end.
 
 handle_get_block2(H, Req, Encoding) ->
-	case ar_storage:read_block(H) of
+	case big_storage:read_block(H) of
 		unavailable ->
 			{404, #{}, <<"Block not found.">>, Req};
 		#block{} = B ->
@@ -2749,7 +2749,7 @@ process_request(get_block, [Type, ID, <<"wallet_list">>], Req) ->
 						Req};
 				{true, _} ->
 					ok = ar_semaphore:acquire(get_wallet_list, infinity),
-					case ar_storage:read_wallet_list(B#block.wallet_list) of
+					case big_storage:read_wallet_list(B#block.wallet_list) of
 						{ok, Tree} ->
 							{200, #{}, ar_serialize:jsonify(
 								ar_serialize:wallet_list_to_json_struct(
@@ -2759,7 +2759,7 @@ process_request(get_block, [Type, ID, <<"wallet_list">>], Req) ->
 							{404, #{}, <<"Block not found.">>, Req}
 					end;
 				_ ->
-					WLFilepath = ar_storage:wallet_list_filepath(B#block.wallet_list),
+					WLFilepath = big_storage:wallet_list_filepath(B#block.wallet_list),
 					case filelib:is_file(WLFilepath) of
 						true ->
 							{200, #{}, sendfile(WLFilepath), Req};
@@ -2821,7 +2821,7 @@ handle_get_block_wallet_balance(EncodedHeight, EncodedAddr, Req) ->
 							B =
 								case ar_block_cache:get(block_cache, H) of
 									not_found ->
-										ar_storage:read_block(H);
+										big_storage:read_block(H);
 									B2 ->
 										B2
 								end,
@@ -2856,7 +2856,7 @@ handle_get_block_wallet_balance2(Addr, RootHash, Req) ->
 	end.
 
 handle_get_block_wallet_balance3(Addr, RootHash, Req) ->
-	case ar_storage:read_account(Addr, RootHash) of
+	case big_storage:read_account(Addr, RootHash) of
 		not_found ->
 			{404, #{}, jiffy:encode(#{ error => account_data_not_found }), Req};
 		{Balance, _LastTX} ->
@@ -2921,13 +2921,13 @@ find_block(<<"height">>, RawHeight) ->
 				not_found ->
 					unavailable;
 				{H, _, _} ->
-					ar_storage:read_block(H)
+					big_storage:read_block(H)
 			end
 	end;
 find_block(<<"hash">>, ID) ->
 	case ar_util:safe_decode(ID) of
 		{ok, H} ->
-			ar_storage:read_block(H);
+			big_storage:read_block(H);
 		_ ->
 			unavailable
 	end.

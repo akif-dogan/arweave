@@ -284,7 +284,7 @@ simple_retarget_test_() ->
 		true = ar_util:do_until(
 			fun() ->
 				[BH | _] = big_node:get_blocks(),
-				B = ar_storage:read_block(BH),
+				B = big_storage:read_block(BH),
 				B#block.diff > B0#block.diff
 			end,
 			1000,

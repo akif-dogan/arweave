@@ -406,7 +406,7 @@ get_storage_modules_paths() ->
 	DataDir = Config#config.data_dir,
 	SMDirs = lists:map(
 		fun(StorageModule) ->
-			StoreID = ar_storage_module:id(StorageModule),
+			StoreID = big_storage_module:id(StorageModule),
 			{StoreID, filename:join([DataDir, "storage_modules", StoreID])}
 		end,
 		Config#config.storage_modules

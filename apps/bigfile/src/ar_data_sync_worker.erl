@@ -290,6 +290,6 @@ sync_range({Start, End, Peer, TargetStoreID, RetryCount} = Args, State) ->
 	end.
 
 get_target_packing(StoreID, true) ->
-	ar_storage_module:get_packing(StoreID);
+	big_storage_module:get_packing(StoreID);
 get_target_packing(_StoreID, false) ->
 	any.

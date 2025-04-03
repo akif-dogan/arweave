@@ -182,7 +182,7 @@ test_vdf_server_push_fast_block() ->
 	%% Mine a block that will be ahead of main in the VDF chain
 	ar_test_node:mine(peer1),
 	BI = assert_wait_until_height(peer1, 1),
-	B1 = ar_test_node:remote_call(peer1, ar_storage, read_block, [hd(BI)]),
+	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	%% Post the block to main which will cause it to validate VDF for the block under
 	%% the B0 session and then begin using the B1 VDF session going forward
 	ok = ar_events:subscribe(block),
@@ -227,7 +227,7 @@ test_vdf_server_push_slow_block() ->
 	%% Mine a block that will be ahead of main in the VDF chain
 	ar_test_node:mine(peer1),
 	BI = assert_wait_until_height(peer1, 1),
-	B1 = ar_test_node:remote_call(peer1, ar_storage, read_block, [hd(BI)]),
+	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 
 	%% Post the block to main which will cause it to validate VDF for the block under
 	%% the B0 session and then begin using the B1 VDF session going forward
@@ -280,7 +280,7 @@ test_vdf_client_fast_block() ->
 	%% Mine a block that will be ahead of main in the VDF chain
 	ar_test_node:mine(peer1),
 	BI = assert_wait_until_height(peer1, 1),
-	B1 = ar_test_node:remote_call(peer1, ar_storage, read_block, [hd(BI)]),
+	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	ar_test_node:stop(peer1),
 
 	%% Restart peer1 as a VDF client
@@ -327,7 +327,7 @@ test_vdf_client_fast_block_pull_interface() ->
 	%% Mine a block that will be ahead of main in the VDF chain
 	ar_test_node:mine(peer1),
 	BI = assert_wait_until_height(peer1, 1),
-	B1 = ar_test_node:remote_call(peer1, ar_storage, read_block, [hd(BI)]),
+	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	ar_test_node:stop(peer1),
 
 	%% Restart peer1 as a VDF client
@@ -372,7 +372,7 @@ test_vdf_client_slow_block() ->
 	%% Mine a block that will be ahead of main in the VDF chain
 	ar_test_node:mine(peer1),
 	BI = assert_wait_until_height(peer1, 1),
-	B1 = ar_test_node:remote_call(peer1, ar_storage, read_block, [hd(BI)]),
+	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	ar_test_node:stop(peer1),
 
 	%% Restart peer1 as a VDF client
@@ -410,7 +410,7 @@ test_vdf_client_slow_block_pull_interface() ->
 	%% Mine a block that will be ahead of main in the VDF chain
 	ar_test_node:mine(peer1),
 	BI = assert_wait_until_height(peer1, 1),
-	B1 = ar_test_node:remote_call(peer1, ar_storage, read_block, [hd(BI)]),
+	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	ar_test_node:stop(peer1),
 
 	%% Restart peer1 as a VDF client

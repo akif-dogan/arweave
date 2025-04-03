@@ -43,12 +43,12 @@ register_workers() ->
 register_read_workers() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	StoreIDs = [
-		ar_storage_module:id(StorageModule) || StorageModule <- Config#config.storage_modules
+		big_storage_module:id(StorageModule) || StorageModule <- Config#config.storage_modules
 	] ++ ["default"],
 	{Workers, WorkerMap} = 
 		lists:foldl(
 			fun(StoreID, {AccWorkers, AccWorkerMap}) ->
-				Label = ar_storage_module:label_by_id(StoreID),
+				Label = big_storage_module:label_by_id(StoreID),
 				Name = list_to_atom("ar_data_sync_worker_" ++ Label),
 
 				Worker = ?CHILD_WITH_ARGS(ar_data_sync_worker, worker, Name, [Name]),
@@ -313,7 +313,7 @@ test_process_queue() ->
 test_register_workers() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	StoreIDs = [
-		ar_storage_module:id(StorageModule) || StorageModule <- Config#config.storage_modules],
+		big_storage_module:id(StorageModule) || StorageModule <- Config#config.storage_modules],
 	lists:foreach(
 		fun(StoreID) ->
 			?assertEqual(true, ready_for_work(StoreID))
