@@ -1,4 +1,4 @@
--module(ar_verify_chunks_sup).
+-module(big_verify_chunks_sup).
 
 -behaviour(supervisor).
 

@@ -3,7 +3,7 @@
 %% with this file, You can obtain one at
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 %%
--module(ar_webhook).
+-module(big_webhook).
 
 -behaviour(gen_server).
 

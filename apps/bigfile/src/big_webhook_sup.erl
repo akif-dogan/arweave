@@ -3,7 +3,7 @@
 %% with this file, You can obtain one at
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
--module(ar_webhook_sup).
+-module(big_webhook_sup).
 
 -behaviour(supervisor).
 
@@ -32,9 +32,9 @@ init([]) ->
 	Children = lists:map(
 		fun
 			(Hook) when is_record(Hook, config_webhook) ->
-				Handler = {ar_webhook, Hook#config_webhook.url},
-				{Handler, {ar_webhook, start_link, [Hook]},
-					permanent, ?SHUTDOWN_TIMEOUT, worker, [ar_webhook]};
+				Handler = {big_webhook, Hook#config_webhook.url},
+				{Handler, {big_webhook, start_link, [Hook]},
+					permanent, ?SHUTDOWN_TIMEOUT, worker, [big_webhook]};
 			(Hook) ->
 				?LOG_ERROR([{event, failed_to_parse_webhook_config},
 					{webhook_config, io_lib:format("~p", [Hook])}])

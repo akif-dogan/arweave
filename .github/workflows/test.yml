@@ -297,7 +297,7 @@ jobs:
             ar_util,
             big_verify_chunks,
             big_wallet,
-            ar_webhook,
+            big_webhook,
             big_pool
           ]
     steps:
