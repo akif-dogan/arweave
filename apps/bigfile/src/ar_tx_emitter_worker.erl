@@ -85,7 +85,7 @@ tx_to_propagated_tx(#tx{ format = 2 } = TX, Peer, TrustedPeers) ->
 record_propagation_status(not_sent) ->
 	ok;
 record_propagation_status(Data) ->
-	StatusClass = ar_metrics:get_status_class(Data),
+	StatusClass = big_metrics:get_status_class(Data),
 	prometheus_counter:inc(propagated_transactions_total, [StatusClass]),
 	StatusClass.
 

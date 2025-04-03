@@ -1,4 +1,4 @@
--module(ar_metrics).
+-module(big_metrics).
 
 -include_lib("bigfile/include/big.hrl").
 

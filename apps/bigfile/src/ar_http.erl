@@ -100,7 +100,7 @@ req(Args, ReestablishedConnection) ->
 			prometheus_histogram:observe(ar_http_request_duration_seconds, [
 					method_to_list(Method),
 					ar_http_iface_server:label_http_path(list_to_binary(Path)),
-					ar_metrics:get_status_class(Response)
+					big_metrics:get_status_class(Response)
 				], EndTime - StartTime)
 	end,
 	Response.
@@ -276,7 +276,7 @@ reply_error([PendingRequest | PendingRequests], Reason) ->
 record_response_status(Method, Path, Response) ->
 	prometheus_counter:inc(gun_requests_total, [method_to_list(Method),
 			ar_http_iface_server:label_http_path(list_to_binary(Path)),
-			ar_metrics:get_status_class(Response)]).
+			big_metrics:get_status_class(Response)]).
 
 method_to_list(get) ->
 	"GET";

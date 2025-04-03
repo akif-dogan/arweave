@@ -267,7 +267,7 @@ send_and_log(Peer, H, Height, Format, Bin, RecallByte) ->
 				{height, Height},
 				{block, ar_util:encode(H)},
 				{peer, ar_util:format_peer(Peer)},
-				{reply, ar_metrics:get_status_class(Reply)}]);
+				{reply, big_metrics:get_status_class(Reply)}]);
 		false ->
 			ok
 	end.

@@ -414,7 +414,7 @@ get_chunk_binary(Peer, Offset, RequestedPacking) ->
 	prometheus_histogram:observe(
 		http_client_get_chunk_duration_seconds,
 		[
-			ar_metrics:get_status_class(Response),
+			big_metrics:get_status_class(Response),
 			ar_util:format_peer(Peer)
 		],
 		erlang:monotonic_time() - StartTime),

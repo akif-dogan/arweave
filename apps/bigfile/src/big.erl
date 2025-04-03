@@ -716,7 +716,7 @@ start(normal, _Args) ->
 	prometheus_registry:register_collector(prometheus_process_collector),
 	prometheus_registry:register_collector(ar_metrics_collector),
 	%% Register custom metrics.
-	ar_metrics:register(),
+	big_metrics:register(),
 	%% Start other apps which we depend on.
 	set_mining_address(Config),
 	big_chunk_storage:run_defragmentation(),
