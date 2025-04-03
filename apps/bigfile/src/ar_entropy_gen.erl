@@ -85,7 +85,7 @@ register_workers(Module) ->
 
     ConfiguredWorkers ++ RepackInPlaceWorkers.
 
--spec initialize_context(ar_storage_module:store_id(), ar_chunk_storage:packing()) ->
+-spec initialize_context(ar_storage_module:store_id(), big_chunk_storage:packing()) ->
     {IsPrepared :: boolean(), RewardAddr :: none | big_wallet:address()}.
 initialize_context(StoreID, Packing) ->
     case Packing of
@@ -103,7 +103,7 @@ initialize_context(StoreID, Packing) ->
     end.
 
 
--spec is_entropy_packing(ar_chunk_storage:packing()) -> boolean().
+-spec is_entropy_packing(big_chunk_storage:packing()) -> boolean().
 is_entropy_packing(unpacked_padded) ->
 	true;
 is_entropy_packing({replica_2_9, _}) ->
@@ -145,7 +145,7 @@ init({StoreID, Packing}) ->
                 complete
         end,
     
-    BucketEndOffset = ar_chunk_storage:get_chunk_bucket_end(Cursor),
+    BucketEndOffset = big_chunk_storage:get_chunk_bucket_end(Cursor),
     RepackCursor =
         case Packing == ar_storage_module:get_packing(StoreID) of
             true ->
@@ -212,18 +212,18 @@ do_prepare_entropy(State) ->
         store_id = StoreID, repack_cursor = RepackCursor
     } = State,
 
-    BucketEndOffset = ar_chunk_storage:get_chunk_bucket_end(Start),
-    PaddedRangeEnd = ar_chunk_storage:get_chunk_bucket_end(RangeEnd),
+    BucketEndOffset = big_chunk_storage:get_chunk_bucket_end(Start),
+    PaddedRangeEnd = big_chunk_storage:get_chunk_bucket_end(RangeEnd),
 
     %% Sanity checks:
-    BucketEndOffset = ar_chunk_storage:get_chunk_bucket_end(BucketEndOffset),
+    BucketEndOffset = big_chunk_storage:get_chunk_bucket_end(BucketEndOffset),
     true = (
-        ar_chunk_storage:get_chunk_bucket_start(Start) ==
-        ar_chunk_storage:get_chunk_bucket_start(BucketEndOffset)
+        big_chunk_storage:get_chunk_bucket_start(Start) ==
+        big_chunk_storage:get_chunk_bucket_start(BucketEndOffset)
     ),
     true = (
         max(0, BucketEndOffset - ?DATA_CHUNK_SIZE) == 
-        ar_chunk_storage:get_chunk_bucket_start(BucketEndOffset)
+        big_chunk_storage:get_chunk_bucket_start(BucketEndOffset)
     ),
     %% End of sanity checks.
 
@@ -240,7 +240,7 @@ do_prepare_entropy(State) ->
                         {store_id, StoreID}]),
                 big:console("The storage module ~s is prepared for 2.9 replication.~n",
                         [StoreID]),
-                ar_chunk_storage:set_entropy_complete(StoreID),
+                big_chunk_storage:set_entropy_complete(StoreID),
                 complete;
             false ->
                 false
@@ -259,9 +259,9 @@ do_prepare_entropy(State) ->
                     _ ->
                         SectorSize = ar_replica_2_9:get_sector_size(),
                         RangeStart2 = 
-                            ar_chunk_storage:get_chunk_bucket_start(RangeStart + 1),
+                            big_chunk_storage:get_chunk_bucket_start(RangeStart + 1),
                         RepackCursor2 =
-                            ar_chunk_storage:get_chunk_bucket_start(RepackCursor + 1),
+                            big_chunk_storage:get_chunk_bucket_start(RepackCursor + 1),
                         RepackSectorShift = (RepackCursor2 - RangeStart2) rem SectorSize,
                         SectorShift = (BucketEndOffset - RangeStart2) rem SectorSize,
                         case SectorShift > RepackSectorShift of
@@ -310,7 +310,7 @@ do_prepare_entropy(State) ->
                         %% (+ chunk padding) of it.
                         PartitionEnd = (Partition + 1) * ?PARTITION_SIZE,
                         PaddedPartitionEnd =
-                            ar_chunk_storage:get_chunk_bucket_end(
+                            big_chunk_storage:get_chunk_bucket_end(
                                 big_block:get_chunk_padded_offset(PartitionEnd)),
                         %% In addition to limiting this iteration to the PaddedPartitionEnd,
                         %% we also want to limit it to the current storage module's range.
@@ -428,7 +428,7 @@ flush_entropy_messages() ->
 	end.
 
 read_cursor(StoreID, Default) ->
-    Filepath = ar_chunk_storage:get_filepath("prepare_replica_2_9_cursor", StoreID),
+    Filepath = big_chunk_storage:get_filepath("prepare_replica_2_9_cursor", StoreID),
     case file:read_file(Filepath) of
         {ok, Bin} ->
             case catch binary_to_term(Bin) of Cursor when is_integer(Cursor) ->
@@ -441,7 +441,7 @@ read_cursor(StoreID, Default) ->
     end.
 
 store_cursor(Cursor, StoreID) ->
-    Filepath = ar_chunk_storage:get_filepath("prepare_replica_2_9_cursor", StoreID),
+    Filepath = big_chunk_storage:get_filepath("prepare_replica_2_9_cursor", StoreID),
     file:write_file(Filepath, term_to_binary(Cursor)).
     
 %%%===================================================================

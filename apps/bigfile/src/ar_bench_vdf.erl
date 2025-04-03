@@ -2,11 +2,11 @@
 
 -export([run_benchmark/0]).
 
--include_lib("bigfile/include/ar_vdf.hrl").
+-include_lib("bigfile/include/big_vdf.hrl").
 
 run_benchmark() ->
 	Input = crypto:strong_rand_bytes(32),
-	{Time, _} = timer:tc(fun() -> ar_vdf:compute2(1, Input, ?VDF_DIFFICULTY) end),
+	{Time, _} = timer:tc(fun() -> big_vdf:compute2(1, Input, ?VDF_DIFFICULTY) end),
 	io:format("~n~nVDF step computed in ~.2f seconds.~n~n", [Time / 1000000]),
 	case Time > 1150000 of
 		true ->

@@ -719,7 +719,7 @@ start(normal, _Args) ->
 	ar_metrics:register(),
 	%% Start other apps which we depend on.
 	set_mining_address(Config),
-	ar_chunk_storage:run_defragmentation(),
+	big_chunk_storage:run_defragmentation(),
 	%% Start BigFile.
 	big_sup:start_link().
 

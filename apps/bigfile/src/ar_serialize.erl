@@ -35,7 +35,7 @@
 
 -include("../include/big.hrl").
 -include("../include/big_consensus.hrl").
--include("../include/ar_vdf.hrl").
+-include("../include/big_vdf.hrl").
 -include("../include/big_mining.hrl").
 -include("../include/ar_pool.hrl").
 

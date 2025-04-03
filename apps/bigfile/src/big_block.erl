@@ -26,7 +26,7 @@
 -include("../include/big.hrl").
 -include("../include/big_consensus.hrl").
 -include("../include/big_block.hrl").
--include("../include/ar_vdf.hrl").
+-include("../include/big_vdf.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 

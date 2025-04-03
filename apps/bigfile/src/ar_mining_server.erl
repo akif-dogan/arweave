@@ -154,7 +154,7 @@ init([]) ->
 	%% Trap exit to avoid corrupting any open files on quit.
 	process_flag(trap_exit, true),
 	ok = ar_events:subscribe(nonce_limiter),
-	ar_chunk_storage:open_files("default"),
+	big_chunk_storage:open_files("default"),
 
 	Partitions = ar_mining_io:get_partitions(infinity),
 	Packing = ar_mining_io:get_packing(),
@@ -767,7 +767,7 @@ prepare_solution(poa1, Candidate, Solution) ->
 					case ar_storage_module:get(RecallByte1 + 1, Packing) of
 						{_BucketSize, _Bucket, Packing} = StorageModule ->
 							StoreID = ar_storage_module:id(StorageModule),
-							case ar_chunk_storage:get(RecallByte1, StoreID) of
+							case big_chunk_storage:get(RecallByte1, StoreID) of
 								not_found ->
 									log_prepare_solution_failure(Solution,
 											chunk1_for_h2_solution_not_found,

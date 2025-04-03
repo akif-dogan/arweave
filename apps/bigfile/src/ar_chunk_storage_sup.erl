@@ -23,7 +23,7 @@ start_link() ->
 init([]) ->
 	ets:new(chunk_storage_file_index, [set, public, named_table, {read_concurrency, true}]),
 
-	Workers = ar_chunk_storage:register_workers() ++
+	Workers = big_chunk_storage:register_workers() ++
 		ar_entropy_gen:register_workers(ar_entropy_gen) ++
 		ar_entropy_gen:register_workers(ar_entropy_storage),
 	{ok, {{one_for_one, 5, 10}, Workers}}.

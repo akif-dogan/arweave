@@ -271,7 +271,7 @@ open_files(StoreIDs) ->
 				"default" ->
 					ok;
 				_ ->
-					ar_chunk_storage:open_files(StoreID)
+					big_chunk_storage:open_files(StoreID)
 			end
 		end,
 		StoreIDs).
@@ -394,7 +394,7 @@ read_range(Mode, WhichChunk, Candidate, RangeStart, StoreID) ->
 	RecallRangeSize = big_block:get_recall_range_size(PackingDifficulty),
 	Intervals = get_packed_intervals(RangeStart, RangeStart + RecallRangeSize,
 			MiningAddress, PackingDifficulty, StoreID, ar_intervals:new()),
-	ChunkOffsets = ar_chunk_storage:get_range(RangeStart, RecallRangeSize, StoreID),
+	ChunkOffsets = big_chunk_storage:get_range(RangeStart, RecallRangeSize, StoreID),
 	ChunkOffsets2 = filter_by_packing(ChunkOffsets, Intervals, StoreID),
 	log_read_range(Mode, Candidate, WhichChunk, length(ChunkOffsets), StartTime),
 	ChunkOffsets2.
@@ -454,7 +454,7 @@ find_thread(RangeStart, RangeEnd, State) ->
 find_largest_intersection(not_found, _RangeStart, _RangeEnd, _Max, _MaxKey) ->
 	not_found;
 find_largest_intersection([StoreID | StoreIDs], RangeStart, RangeEnd, Max, MaxKey) ->
-	I = ar_sync_record:get_intersection_size(RangeEnd, RangeStart, ar_chunk_storage, StoreID),
+	I = ar_sync_record:get_intersection_size(RangeEnd, RangeStart, big_chunk_storage, StoreID),
 	case I > Max of
 		true ->
 			find_largest_intersection(StoreIDs, RangeStart, RangeEnd, I, StoreID);

@@ -258,10 +258,10 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 	%% 1. Delete the chunk from disk as well as all sync records.
 	%% 2. Delete the chunk only from disk, but keep it in the sync records.
 	DeleteOffset1 = RangeStart + ?DATA_CHUNK_SIZE,
-	ar_test_node:remote_call(SinkNode, ar_chunk_storage, delete,
+	ar_test_node:remote_call(SinkNode, big_chunk_storage, delete,
 		[DeleteOffset1, StoreID]),
 	DeleteOffset2 = DeleteOffset1 + ?DATA_CHUNK_SIZE,
-	ar_test_node:remote_call(SinkNode, ar_chunk_storage, delete_chunk,
+	ar_test_node:remote_call(SinkNode, big_chunk_storage, delete_chunk,
 		[DeleteOffset2, StoreID]),
 
 	%% 2. Run node with sync jobs so that it syncs and packs data

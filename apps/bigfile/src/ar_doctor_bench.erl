@@ -98,7 +98,7 @@ parse_storage_modules([StorageModuleConfig | StorageModuleConfigs], StorageModul
 	
 read_storage_module(_DataDir, StorageModule, StopTime) ->
 	StoreID = ar_storage_module:id(StorageModule),
-	ar_chunk_storage:open_files(StoreID),
+	big_chunk_storage:open_files(StoreID),
 	{StartOffset, EndOffset} = ar_storage_module:module_range(StorageModule),	
 
 	OutputFileName = string:replace(?OUTPUT_FILENAME, "<storage_module>", StoreID),
@@ -182,7 +182,7 @@ random_dev_pread(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
 	big:console("*Random* device pread ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 random_dev_pread(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
-	Filepath = hd(ar_chunk_storage:list_files(DataDir, StoreID)),
+	Filepath = hd(big_chunk_storage:list_files(DataDir, StoreID)),
 	Device = get_mounted_device(Filepath),
 	{ok, File} = file:open(Device, [read, raw, binary]),
 	Files = [{Device, File, ?PARTITION_SIZE} || _ <- lists:seq(1, ?NUM_FILES)],
@@ -240,7 +240,7 @@ dd_devs_read(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
 	big:console("*dd* multi devs read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 dd_devs_read(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
-	Filepath = hd(ar_chunk_storage:list_files(DataDir, StoreID)),
+	Filepath = hd(big_chunk_storage:list_files(DataDir, StoreID)),
 	Device = get_mounted_device(Filepath),
 	Devices = [{Device, not_set, ?PARTITION_SIZE} || _ <- lists:seq(1, ?NUM_FILES)],
 	StartTime = erlang:monotonic_time(),
@@ -255,7 +255,7 @@ dd_dev_read(_DataDir, _StoreID, 0, SumBytes, SumElapsedTime) ->
 	ReadRate = (SumBytes * 1000 div ?MiB) div SumElapsedTime,
 	big:console("*dd* single dev read ~B MiB in ~B ms (~B MiB/s)~n", [SumBytes div ?MiB, SumElapsedTime, ReadRate]);
 dd_dev_read(DataDir, StoreID, Count, SumBytes, SumElapsedTime) ->
-	Filepath = hd(ar_chunk_storage:list_files(DataDir, StoreID)),
+	Filepath = hd(big_chunk_storage:list_files(DataDir, StoreID)),
 	Device = get_mounted_device(Filepath),
 	StartTime = erlang:monotonic_time(),
 	dd(Device, ?PARTITION_SIZE, ?RECALL_RANGE_SIZE, ?NUM_FILES),
@@ -270,7 +270,7 @@ get_mounted_device(FilePath) ->
 	string:trim(Device, both, "\n").
 	
 open_files(DataDir, StoreID) ->
-	AllFilepaths = ar_chunk_storage:list_files(DataDir, StoreID),
+	AllFilepaths = big_chunk_storage:list_files(DataDir, StoreID),
 	Filepaths = lists:sublist(ar_util:shuffle_list(AllFilepaths), ?NUM_FILES),
 	lists:foldl(
 		fun(Filepath, Acc) ->

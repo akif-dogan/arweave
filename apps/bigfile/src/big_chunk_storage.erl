@@ -1,5 +1,5 @@
-%% The blob storage optimized for fast reads.
--module(ar_chunk_storage).
+
+-module(big_chunk_storage).
 
 -behaviour(gen_server).
 
@@ -22,7 +22,7 @@
 -include("../include/big_sup.hrl").
 -include("../include/big_config.hrl").
 -include("../include/big_consensus.hrl").
--include("../include/ar_chunk_storage.hrl").
+-include("../include/big_chunk_storage.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("kernel/include/file.hrl").
@@ -65,14 +65,14 @@ register_workers() ->
 		fun(StorageModule) ->
 			StoreID = ar_storage_module:id(StorageModule),
 
-			ChunkStorageName = ar_chunk_storage:name(StoreID),
-			?CHILD_WITH_ARGS(ar_chunk_storage, worker,
+			ChunkStorageName = big_chunk_storage:name(StoreID),
+			?CHILD_WITH_ARGS(big_chunk_storage, worker,
 				ChunkStorageName, [ChunkStorageName, {StoreID, none}])
 		end,
 		Config#config.storage_modules
 	),
 	
-	DefaultChunkStorageWorker = ?CHILD_WITH_ARGS(ar_chunk_storage, worker,
+	DefaultChunkStorageWorker = ?CHILD_WITH_ARGS(big_chunk_storage, worker,
 		ar_chunk_storage_default, [ar_chunk_storage_default, {"default", none}]),
 
 	RepackInPlaceWorkers = lists:map(
@@ -81,8 +81,8 @@ register_workers() ->
 			%% Note: the config validation will prevent a StoreID from being used in both
 			%% `storage_modules` and `repack_in_place_storage_modules`, so there's
 			%% no risk of a `Name` clash with the workers spawned above.
-			ChunkStorageName = ar_chunk_storage:name(StoreID),
-			?CHILD_WITH_ARGS(ar_chunk_storage, worker,
+			ChunkStorageName = big_chunk_storage:name(StoreID),
+			?CHILD_WITH_ARGS(big_chunk_storage, worker,
 				ChunkStorageName, [ChunkStorageName, {StoreID, Packing}])
 		end,
 		Config#config.repack_in_place_storage_modules
@@ -105,8 +105,8 @@ is_storage_supported(Offset, ChunkSize, Packing) ->
 	case Offset > ?STRICT_DATA_SPLIT_THRESHOLD of
 		true ->
 			%% All chunks above ?STRICT_DATA_SPLIT_THRESHOLD are placed in 256 KiB buckets
-			%% so technically can be stored in ar_chunk_storage. However, to avoid
-			%% managing padding in ar_chunk_storage for unpacked chunks smaller than 256 KiB
+			%% so technically can be stored in big_chunk_storage. However, to avoid
+			%% managing padding in big_chunk_storage for unpacked chunks smaller than 256 KiB
 			%% (we do not need fast random access to unpacked chunks after
 			%% ?STRICT_DATA_SPLIT_THRESHOLD anyways), we put them to RocksDB.
 			Packing /= unpacked orelse ChunkSize == (?DATA_CHUNK_SIZE);
@@ -165,7 +165,7 @@ get(Byte) ->
 
 %% @doc Return {AbsoluteEndOffset, Chunk} for the chunk containing the given byte.
 get(Byte, StoreID) ->
-	case ar_sync_record:get_interval(Byte + 1, ar_chunk_storage, StoreID) of
+	case ar_sync_record:get_interval(Byte + 1, big_chunk_storage, StoreID) of
 		not_found ->
 			not_found;
 		{_End, IntervalStart} ->
@@ -207,7 +207,7 @@ get_range(Start, Size) ->
 %% at most Start + Size + ?DATA_CHUNK_SIZE - 1.
 get_range(Start, Size, StoreID) ->
 	?assert(Size < get_chunk_group_size()),
-	case ar_sync_record:get_next_synced_interval(Start, infinity, ar_chunk_storage, StoreID) of
+	case ar_sync_record:get_next_synced_interval(Start, infinity, big_chunk_storage, StoreID) of
 		{_End, IntervalStart} when Start + Size > IntervalStart ->
 			Start2 = max(Start, IntervalStart),
 			Size2 = Start + Size - Start2,
@@ -250,7 +250,7 @@ close_files(StoreID) ->
 
 %% @doc Soft-delete everything above the given end offset.
 cut(Offset, StoreID) ->
-	ar_sync_record:cut(Offset, ar_chunk_storage, StoreID).
+	ar_sync_record:cut(Offset, big_chunk_storage, StoreID).
 
 %% @doc Remove the chunk with the given end offset.
 delete(Offset) ->
@@ -298,7 +298,7 @@ get_chunk_storage_path(DataDir, StoreID) ->
 
 %% @doc Return the start and end offset of the bucket containing the given offset.
 %% A chunk bucket is a 0-based, 256-KiB wide, 256-KiB aligned range that
-%% ar_chunk_storage uses to index chunks. The bucket start does NOT necessarily
+%% big_chunk_storage uses to index chunks. The bucket start does NOT necessarily
 %% match the chunk's start offset.
 -spec get_chunk_bucket_start(Offset :: non_neg_integer()) -> non_neg_integer().
 get_chunk_bucket_start(Offset) ->
@@ -317,7 +317,7 @@ set_repacking_complete(StoreID) ->
 
 read_offset(PaddedOffset, StoreID) ->
 	{_ChunkFileStart, Filepath, Position, _ChunkOffset} =
-			ar_chunk_storage:locate_chunk_on_disk(PaddedOffset, StoreID),
+			big_chunk_storage:locate_chunk_on_disk(PaddedOffset, StoreID),
 	case file:open(Filepath, [read, raw]) of
 		{ok, F} ->
 			Result = file:pread(F, Position, ?OFFSET_SIZE),
@@ -510,7 +510,7 @@ handle_call({put, PaddedEndOffset, Chunk, Packing}, _From, State)
 handle_call({delete, PaddedEndOffset}, _From, State) ->
 	#state{	store_id = StoreID } = State,
 	StartOffset = PaddedEndOffset - ?DATA_CHUNK_SIZE,
-	case ar_sync_record:delete(PaddedEndOffset, StartOffset, ar_chunk_storage, StoreID) of
+	case ar_sync_record:delete(PaddedEndOffset, StartOffset, big_chunk_storage, StoreID) of
 		ok ->
 			case ar_entropy_storage:delete_record(PaddedEndOffset, StoreID) of
 				ok ->
@@ -534,7 +534,7 @@ handle_call(reset, _, #state{ store_id = StoreID, file_index = FileIndex } = Sta
 		end,
 		FileIndex
 	),
-	ok = ar_sync_record:cut(0, ar_chunk_storage, StoreID),
+	ok = ar_sync_record:cut(0, big_chunk_storage, StoreID),
 	erlang:erase(),
 	{reply, ok, State#state{ file_index = #{} }};
 
@@ -674,7 +674,7 @@ sync_record_id(unpacked_padded) ->
 	%% The old id (ar_chunk_storage_replica_2_9_unpacked) should not be used.
 	ar_chunk_storage_replica_2_9_1_unpacked;
 sync_record_id(_Packing) ->
-	ar_chunk_storage.
+	big_chunk_storage.
 
 get_chunk_file_start(EndOffset) ->
 	StartOffset = EndOffset - ?DATA_CHUNK_SIZE,
@@ -1102,46 +1102,46 @@ test_well_aligned() ->
 	C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C3 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
-	{ok, unpacked} = ar_chunk_storage:put(2 * ?DATA_CHUNK_SIZE, C1, Packing, "default"),
+	{ok, unpacked} = big_chunk_storage:put(2 * ?DATA_CHUNK_SIZE, C1, Packing, "default"),
 	assert_get(C1, 2 * ?DATA_CHUNK_SIZE),
-	?assertEqual(not_found, ar_chunk_storage:get(2 * ?DATA_CHUNK_SIZE)),
-	?assertEqual(not_found, ar_chunk_storage:get(2 * ?DATA_CHUNK_SIZE + 1)),
-	ar_chunk_storage:delete(2 * ?DATA_CHUNK_SIZE),
+	?assertEqual(not_found, big_chunk_storage:get(2 * ?DATA_CHUNK_SIZE)),
+	?assertEqual(not_found, big_chunk_storage:get(2 * ?DATA_CHUNK_SIZE + 1)),
+	big_chunk_storage:delete(2 * ?DATA_CHUNK_SIZE),
 	assert_get(not_found, 2 * ?DATA_CHUNK_SIZE),
-	ar_chunk_storage:put(?DATA_CHUNK_SIZE, C2, Packing, "default"),
+	big_chunk_storage:put(?DATA_CHUNK_SIZE, C2, Packing, "default"),
 	assert_get(C2, ?DATA_CHUNK_SIZE),
 	assert_get(not_found, 2 * ?DATA_CHUNK_SIZE),
-	ar_chunk_storage:put(2 * ?DATA_CHUNK_SIZE, C1, Packing, "default"),
+	big_chunk_storage:put(2 * ?DATA_CHUNK_SIZE, C1, Packing, "default"),
 	assert_get(C1, 2 * ?DATA_CHUNK_SIZE),
 	assert_get(C2, ?DATA_CHUNK_SIZE),
 	?assertEqual([{?DATA_CHUNK_SIZE, C2}, {2 * ?DATA_CHUNK_SIZE, C1}],
-			ar_chunk_storage:get_range(0, 2 * ?DATA_CHUNK_SIZE)),
+			big_chunk_storage:get_range(0, 2 * ?DATA_CHUNK_SIZE)),
 	?assertEqual([{?DATA_CHUNK_SIZE, C2}, {2 * ?DATA_CHUNK_SIZE, C1}],
-			ar_chunk_storage:get_range(1, 2 * ?DATA_CHUNK_SIZE)),
+			big_chunk_storage:get_range(1, 2 * ?DATA_CHUNK_SIZE)),
 	?assertEqual([{?DATA_CHUNK_SIZE, C2}, {2 * ?DATA_CHUNK_SIZE, C1}],
-			ar_chunk_storage:get_range(1, 2 * ?DATA_CHUNK_SIZE - 1)),
+			big_chunk_storage:get_range(1, 2 * ?DATA_CHUNK_SIZE - 1)),
 	?assertEqual([{?DATA_CHUNK_SIZE, C2}, {2 * ?DATA_CHUNK_SIZE, C1}],
-			ar_chunk_storage:get_range(0, 3 * ?DATA_CHUNK_SIZE)),
+			big_chunk_storage:get_range(0, 3 * ?DATA_CHUNK_SIZE)),
 	?assertEqual([{?DATA_CHUNK_SIZE, C2}, {2 * ?DATA_CHUNK_SIZE, C1}],
-			ar_chunk_storage:get_range(0, ?DATA_CHUNK_SIZE + 1)),
-	ar_chunk_storage:put(3 * ?DATA_CHUNK_SIZE, C3, Packing, "default"),
+			big_chunk_storage:get_range(0, ?DATA_CHUNK_SIZE + 1)),
+	big_chunk_storage:put(3 * ?DATA_CHUNK_SIZE, C3, Packing, "default"),
 	assert_get(C2, ?DATA_CHUNK_SIZE),
 	assert_get(C1, 2 * ?DATA_CHUNK_SIZE),
 	assert_get(C3, 3 * ?DATA_CHUNK_SIZE),
-	?assertEqual(not_found, ar_chunk_storage:get(3 * ?DATA_CHUNK_SIZE)),
-	?assertEqual(not_found, ar_chunk_storage:get(3 * ?DATA_CHUNK_SIZE + 1)),
-	ar_chunk_storage:put(2 * ?DATA_CHUNK_SIZE, C2, Packing, "default"),
+	?assertEqual(not_found, big_chunk_storage:get(3 * ?DATA_CHUNK_SIZE)),
+	?assertEqual(not_found, big_chunk_storage:get(3 * ?DATA_CHUNK_SIZE + 1)),
+	big_chunk_storage:put(2 * ?DATA_CHUNK_SIZE, C2, Packing, "default"),
 	assert_get(C2, ?DATA_CHUNK_SIZE),
 	assert_get(C2, 2 * ?DATA_CHUNK_SIZE),
 	assert_get(C3, 3 * ?DATA_CHUNK_SIZE),
-	ar_chunk_storage:delete(?DATA_CHUNK_SIZE),
+	big_chunk_storage:delete(?DATA_CHUNK_SIZE),
 	assert_get(not_found, ?DATA_CHUNK_SIZE),
-	?assertEqual([], ar_chunk_storage:get_range(0, ?DATA_CHUNK_SIZE)),
+	?assertEqual([], big_chunk_storage:get_range(0, ?DATA_CHUNK_SIZE)),
 	assert_get(C2, 2 * ?DATA_CHUNK_SIZE),
 	assert_get(C3, 3 * ?DATA_CHUNK_SIZE),
 	?assertEqual([{2 * ?DATA_CHUNK_SIZE, C2}, {3 * ?DATA_CHUNK_SIZE, C3}],
-			ar_chunk_storage:get_range(0, 4 * ?DATA_CHUNK_SIZE)),
-	?assertEqual([], ar_chunk_storage:get_range(7 * ?DATA_CHUNK_SIZE, 13 * ?DATA_CHUNK_SIZE)).
+			big_chunk_storage:get_range(0, 4 * ?DATA_CHUNK_SIZE)),
+	?assertEqual([], big_chunk_storage:get_range(7 * ?DATA_CHUNK_SIZE, 13 * ?DATA_CHUNK_SIZE)).
 
 not_aligned_test_() ->
 	{timeout, 20, fun test_not_aligned/0}.
@@ -1152,64 +1152,64 @@ test_not_aligned() ->
 	C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C3 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
-	ar_chunk_storage:put(2 * ?DATA_CHUNK_SIZE + 7, C1, Packing, "default"),
+	big_chunk_storage:put(2 * ?DATA_CHUNK_SIZE + 7, C1, Packing, "default"),
 	assert_get(C1, 2 * ?DATA_CHUNK_SIZE + 7),
-	ar_chunk_storage:delete(2 * ?DATA_CHUNK_SIZE + 7),
+	big_chunk_storage:delete(2 * ?DATA_CHUNK_SIZE + 7),
 	assert_get(not_found, 2 * ?DATA_CHUNK_SIZE + 7),
-	ar_chunk_storage:put(2 * ?DATA_CHUNK_SIZE + 7, C1, Packing, "default"),
+	big_chunk_storage:put(2 * ?DATA_CHUNK_SIZE + 7, C1, Packing, "default"),
 	assert_get(C1, 2 * ?DATA_CHUNK_SIZE + 7),
-	?assertEqual(not_found, ar_chunk_storage:get(2 * ?DATA_CHUNK_SIZE + 7)),
-	?assertEqual(not_found, ar_chunk_storage:get(?DATA_CHUNK_SIZE + 7 - 1)),
-	?assertEqual(not_found, ar_chunk_storage:get(?DATA_CHUNK_SIZE)),
-	?assertEqual(not_found, ar_chunk_storage:get(?DATA_CHUNK_SIZE - 1)),
-	?assertEqual(not_found, ar_chunk_storage:get(0)),
-	?assertEqual(not_found, ar_chunk_storage:get(1)),
-	ar_chunk_storage:put(?DATA_CHUNK_SIZE + 3, C2, Packing, "default"),
+	?assertEqual(not_found, big_chunk_storage:get(2 * ?DATA_CHUNK_SIZE + 7)),
+	?assertEqual(not_found, big_chunk_storage:get(?DATA_CHUNK_SIZE + 7 - 1)),
+	?assertEqual(not_found, big_chunk_storage:get(?DATA_CHUNK_SIZE)),
+	?assertEqual(not_found, big_chunk_storage:get(?DATA_CHUNK_SIZE - 1)),
+	?assertEqual(not_found, big_chunk_storage:get(0)),
+	?assertEqual(not_found, big_chunk_storage:get(1)),
+	big_chunk_storage:put(?DATA_CHUNK_SIZE + 3, C2, Packing, "default"),
 	assert_get(C2, ?DATA_CHUNK_SIZE + 3),
-	?assertEqual(not_found, ar_chunk_storage:get(0)),
-	?assertEqual(not_found, ar_chunk_storage:get(1)),
-	?assertEqual(not_found, ar_chunk_storage:get(2)),
-	ar_chunk_storage:delete(2 * ?DATA_CHUNK_SIZE + 7),
+	?assertEqual(not_found, big_chunk_storage:get(0)),
+	?assertEqual(not_found, big_chunk_storage:get(1)),
+	?assertEqual(not_found, big_chunk_storage:get(2)),
+	big_chunk_storage:delete(2 * ?DATA_CHUNK_SIZE + 7),
 	assert_get(C2, ?DATA_CHUNK_SIZE + 3),
 	assert_get(not_found, 2 * ?DATA_CHUNK_SIZE + 7),
-	ar_chunk_storage:put(3 * ?DATA_CHUNK_SIZE + 7, C3, Packing, "default"),
+	big_chunk_storage:put(3 * ?DATA_CHUNK_SIZE + 7, C3, Packing, "default"),
 	assert_get(C3, 3 * ?DATA_CHUNK_SIZE + 7),
-	ar_chunk_storage:put(3 * ?DATA_CHUNK_SIZE + 7, C1, Packing, "default"),
+	big_chunk_storage:put(3 * ?DATA_CHUNK_SIZE + 7, C1, Packing, "default"),
 	assert_get(C1, 3 * ?DATA_CHUNK_SIZE + 7),
-	ar_chunk_storage:put(4 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2, C2, Packing, "default"),
+	big_chunk_storage:put(4 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2, C2, Packing, "default"),
 	assert_get(C2, 4 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2),
 	?assertEqual(
 		not_found,
-		ar_chunk_storage:get(4 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2)
+		big_chunk_storage:get(4 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2)
 	),
-	?assertEqual(not_found, ar_chunk_storage:get(3 * ?DATA_CHUNK_SIZE + 7)),
-	?assertEqual(not_found, ar_chunk_storage:get(3 * ?DATA_CHUNK_SIZE + 8)),
-	ar_chunk_storage:put(5 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2 + 1, C2, Packing, "default"),
+	?assertEqual(not_found, big_chunk_storage:get(3 * ?DATA_CHUNK_SIZE + 7)),
+	?assertEqual(not_found, big_chunk_storage:get(3 * ?DATA_CHUNK_SIZE + 8)),
+	big_chunk_storage:put(5 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2 + 1, C2, Packing, "default"),
 	assert_get(C2, 5 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2 + 1),
 	assert_get(not_found, 2 * ?DATA_CHUNK_SIZE + 7),
-	ar_chunk_storage:delete(4 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2),
+	big_chunk_storage:delete(4 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2),
 	assert_get(not_found, 4 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2),
 	assert_get(C2, 5 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2 + 1),
 	assert_get(C1, 3 * ?DATA_CHUNK_SIZE + 7),
 	?assertEqual([{3 * ?DATA_CHUNK_SIZE + 7, C1}],
-			ar_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 7, 2 * ?DATA_CHUNK_SIZE)),
+			big_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 7, 2 * ?DATA_CHUNK_SIZE)),
 	?assertEqual([{3 * ?DATA_CHUNK_SIZE + 7, C1}],
-			ar_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 6, 2 * ?DATA_CHUNK_SIZE)),
+			big_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 6, 2 * ?DATA_CHUNK_SIZE)),
 	?assertEqual([{3 * ?DATA_CHUNK_SIZE + 7, C1},
 			{5 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2 + 1, C2}],
 			%% The end offset of the second chunk is bigger than Start + Size but
 			%% it is included because Start + Size is bigger than the start offset
 			%% of the bucket where the last chunk is placed.
-			ar_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 7, 2 * ?DATA_CHUNK_SIZE + 1)),
+			big_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 7, 2 * ?DATA_CHUNK_SIZE + 1)),
 	?assertEqual([{3 * ?DATA_CHUNK_SIZE + 7, C1},
 			{5 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2 + 1, C2}],
-			ar_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 7, 3 * ?DATA_CHUNK_SIZE)),
+			big_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 7, 3 * ?DATA_CHUNK_SIZE)),
 	?assertEqual([{3 * ?DATA_CHUNK_SIZE + 7, C1},
 			{5 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2 + 1, C2}],
-			ar_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 7 - 1, 3 * ?DATA_CHUNK_SIZE)),
+			big_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE + 7 - 1, 3 * ?DATA_CHUNK_SIZE)),
 	?assertEqual([{3 * ?DATA_CHUNK_SIZE + 7, C1},
 			{5 * ?DATA_CHUNK_SIZE + ?DATA_CHUNK_SIZE div 2 + 1, C2}],
-			ar_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE, 4 * ?DATA_CHUNK_SIZE)).
+			big_chunk_storage:get_range(2 * ?DATA_CHUNK_SIZE, 4 * ?DATA_CHUNK_SIZE)).
 
 cross_file_aligned_test_() ->
 	{timeout, 20, fun test_cross_file_aligned/0}.
@@ -1219,27 +1219,27 @@ test_cross_file_aligned() ->
 	Packing = ar_storage_module:get_packing("default"),
 	C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
-	ar_chunk_storage:put(get_chunk_group_size(), C1, Packing, "default"),
+	big_chunk_storage:put(get_chunk_group_size(), C1, Packing, "default"),
 	assert_get(C1, get_chunk_group_size()),
-	?assertEqual(not_found, ar_chunk_storage:get(get_chunk_group_size())),
-	?assertEqual(not_found, ar_chunk_storage:get(get_chunk_group_size() + 1)),
-	?assertEqual(not_found, ar_chunk_storage:get(0)),
-	?assertEqual(not_found, ar_chunk_storage:get(get_chunk_group_size() - ?DATA_CHUNK_SIZE - 1)),
-	ar_chunk_storage:put(get_chunk_group_size() + ?DATA_CHUNK_SIZE, C2, Packing, "default"),
+	?assertEqual(not_found, big_chunk_storage:get(get_chunk_group_size())),
+	?assertEqual(not_found, big_chunk_storage:get(get_chunk_group_size() + 1)),
+	?assertEqual(not_found, big_chunk_storage:get(0)),
+	?assertEqual(not_found, big_chunk_storage:get(get_chunk_group_size() - ?DATA_CHUNK_SIZE - 1)),
+	big_chunk_storage:put(get_chunk_group_size() + ?DATA_CHUNK_SIZE, C2, Packing, "default"),
 	assert_get(C2, get_chunk_group_size() + ?DATA_CHUNK_SIZE),
 	assert_get(C1, get_chunk_group_size()),
 	?assertEqual([{get_chunk_group_size(), C1}, {get_chunk_group_size() + ?DATA_CHUNK_SIZE, C2}],
-			ar_chunk_storage:get_range(get_chunk_group_size() - ?DATA_CHUNK_SIZE,
+			big_chunk_storage:get_range(get_chunk_group_size() - ?DATA_CHUNK_SIZE,
 					2 * ?DATA_CHUNK_SIZE)),
 	?assertEqual([{get_chunk_group_size(), C1}, {get_chunk_group_size() + ?DATA_CHUNK_SIZE, C2}],
-			ar_chunk_storage:get_range(get_chunk_group_size() - 2 * ?DATA_CHUNK_SIZE - 1,
+			big_chunk_storage:get_range(get_chunk_group_size() - 2 * ?DATA_CHUNK_SIZE - 1,
 					4 * ?DATA_CHUNK_SIZE)),
-	?assertEqual(not_found, ar_chunk_storage:get(0)),
-	?assertEqual(not_found, ar_chunk_storage:get(get_chunk_group_size() - ?DATA_CHUNK_SIZE - 1)),
-	ar_chunk_storage:delete(get_chunk_group_size()),
+	?assertEqual(not_found, big_chunk_storage:get(0)),
+	?assertEqual(not_found, big_chunk_storage:get(get_chunk_group_size() - ?DATA_CHUNK_SIZE - 1)),
+	big_chunk_storage:delete(get_chunk_group_size()),
 	assert_get(not_found, get_chunk_group_size()),
 	assert_get(C2, get_chunk_group_size() + ?DATA_CHUNK_SIZE),
-	ar_chunk_storage:put(get_chunk_group_size(), C2, Packing, "default"),
+	big_chunk_storage:put(get_chunk_group_size(), C2, Packing, "default"),
 	assert_get(C2, get_chunk_group_size()).
 
 cross_file_not_aligned_test_() ->
@@ -1251,41 +1251,41 @@ test_cross_file_not_aligned() ->
 	C1 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	C3 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
-	ar_chunk_storage:put(get_chunk_group_size() + 1, C1, Packing, "default"),
+	big_chunk_storage:put(get_chunk_group_size() + 1, C1, Packing, "default"),
 	assert_get(C1, get_chunk_group_size() + 1),
-	?assertEqual(not_found, ar_chunk_storage:get(get_chunk_group_size() + 1)),
-	?assertEqual(not_found, ar_chunk_storage:get(get_chunk_group_size() - ?DATA_CHUNK_SIZE)),
-	ar_chunk_storage:put(2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2, C2, Packing, "default"),
+	?assertEqual(not_found, big_chunk_storage:get(get_chunk_group_size() + 1)),
+	?assertEqual(not_found, big_chunk_storage:get(get_chunk_group_size() - ?DATA_CHUNK_SIZE)),
+	big_chunk_storage:put(2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2, C2, Packing, "default"),
 	assert_get(C2, 2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2),
-	?assertEqual(not_found, ar_chunk_storage:get(get_chunk_group_size() + 1)),
-	ar_chunk_storage:put(2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2, C3, Packing, "default"),
+	?assertEqual(not_found, big_chunk_storage:get(get_chunk_group_size() + 1)),
+	big_chunk_storage:put(2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2, C3, Packing, "default"),
 	assert_get(C2, 2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2),
 	assert_get(C3, 2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2),
 	?assertEqual([{2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2, C3},
 			{2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2, C2}],
-			ar_chunk_storage:get_range(2 * get_chunk_group_size()
+			big_chunk_storage:get_range(2 * get_chunk_group_size()
 					- ?DATA_CHUNK_SIZE div 2 - ?DATA_CHUNK_SIZE, ?DATA_CHUNK_SIZE * 2)),
-	?assertEqual(not_found, ar_chunk_storage:get(get_chunk_group_size() + 1)),
+	?assertEqual(not_found, big_chunk_storage:get(get_chunk_group_size() + 1)),
 	?assertEqual(
 		not_found,
-		ar_chunk_storage:get(get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2 - 1)
+		big_chunk_storage:get(get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2 - 1)
 	),
-	ar_chunk_storage:delete(2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2),
+	big_chunk_storage:delete(2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2),
 	assert_get(not_found, 2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2),
 	assert_get(C2, 2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2),
 	assert_get(C1, get_chunk_group_size() + 1),
-	ar_chunk_storage:delete(get_chunk_group_size() + 1),
+	big_chunk_storage:delete(get_chunk_group_size() + 1),
 	assert_get(not_found, get_chunk_group_size() + 1),
 	assert_get(not_found, 2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2),
 	assert_get(C2, 2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2),
-	ar_chunk_storage:delete(2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2),
+	big_chunk_storage:delete(2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2),
 	assert_get(not_found, 2 * get_chunk_group_size() + ?DATA_CHUNK_SIZE div 2),
-	ar_chunk_storage:delete(get_chunk_group_size() + 1),
-	ar_chunk_storage:delete(100 * get_chunk_group_size() + 1),
-	ar_chunk_storage:put(2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2, C1, Packing, "default"),
+	big_chunk_storage:delete(get_chunk_group_size() + 1),
+	big_chunk_storage:delete(100 * get_chunk_group_size() + 1),
+	big_chunk_storage:put(2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2, C1, Packing, "default"),
 	assert_get(C1, 2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2),
 	?assertEqual(not_found,
-			ar_chunk_storage:get(2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2)).
+			big_chunk_storage:get(2 * get_chunk_group_size() - ?DATA_CHUNK_SIZE div 2)).
 
 clear(StoreID) ->
 	ok = gen_server:call(name(StoreID), reset).
@@ -1301,19 +1301,19 @@ assert_get(Expected, Offset, StoreID) ->
 			_ ->
 				{Offset, Expected}
 		end,
-	?assertEqual(ExpectedResult, ar_chunk_storage:get(Offset - 1, StoreID)),
-	?assertEqual(ExpectedResult, ar_chunk_storage:get(Offset - 2, StoreID)),
-	?assertEqual(ExpectedResult, ar_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE, StoreID)),
-	?assertEqual(ExpectedResult, ar_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE + 1, StoreID)),
-	?assertEqual(ExpectedResult, ar_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE + 2, StoreID)),
+	?assertEqual(ExpectedResult, big_chunk_storage:get(Offset - 1, StoreID)),
+	?assertEqual(ExpectedResult, big_chunk_storage:get(Offset - 2, StoreID)),
+	?assertEqual(ExpectedResult, big_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE, StoreID)),
+	?assertEqual(ExpectedResult, big_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE + 1, StoreID)),
+	?assertEqual(ExpectedResult, big_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE + 2, StoreID)),
 	?assertEqual(ExpectedResult,
-			ar_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE div 2, StoreID)),
+			big_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE div 2, StoreID)),
 	?assertEqual(ExpectedResult,
-			ar_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE div 2 + 1, StoreID)),
+			big_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE div 2 + 1, StoreID)),
 	?assertEqual(ExpectedResult,
-			ar_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE div 2 - 1, StoreID)),
+			big_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE div 2 - 1, StoreID)),
 	?assertEqual(ExpectedResult,
-			ar_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE div 3, StoreID)).
+			big_chunk_storage:get(Offset - ?DATA_CHUNK_SIZE div 3, StoreID)).
 
 defrag_command_test() ->
 	RandomID = crypto:strong_rand_bytes(16),

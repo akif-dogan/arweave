@@ -8,7 +8,7 @@
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_mining.hrl").
--include_lib("bigfile/include/ar_vdf.hrl").
+-include_lib("bigfile/include/big_vdf.hrl").
 
 -import(ar_test_node, [assert_wait_until_height/2, post_block/2, send_new_block/2]).
 

@@ -1,10 +1,10 @@
--module(ar_vdf).
+-module(big_vdf).
 
 -export([compute/3, compute2/3, verify/8, verify2/8,
 		debug_sha_verify_no_reset/6, debug_sha_verify/8, debug_sha2/3,
 		step_number_to_salt_number/1, checkpoint_buffer_to_checkpoints/1]).
 
--include_lib("bigfile/include/ar_vdf.hrl").
+-include_lib("bigfile/include/big_vdf.hrl").
 -include_lib("bigfile/include/big.hrl").
 
 step_number_to_salt_number(0) ->
@@ -90,7 +90,7 @@ hash(0, _Salt, Input) ->
 hash(N, Salt, Input) ->
 	hash(N - 1, Salt, crypto:hash(sha256, << Salt/binary, Input/binary >>)).
 
-%% @doc An Erlang implementation of ar_vdf:compute2/3. Used in tests.
+%% @doc An Erlang implementation of big_vdf:compute2/3. Used in tests.
 debug_sha2(StepNumber, Output, IterationCount) ->
 	Salt = step_number_to_salt_number(StepNumber - 1),
 	{Output2, Checkpoints} =
@@ -106,7 +106,7 @@ debug_sha2(StepNumber, Output, IterationCount) ->
 	timer:sleep(500),
 	{ok, Output2, Checkpoints}.
 
-%% @doc An Erlang implementation of ar_vdf:verify/7. Used in tests.
+%% @doc An Erlang implementation of big_vdf:verify/7. Used in tests.
 debug_sha_verify_no_reset(StepNumber, Output, NumCheckpointsBetweenHashes, Hashes, _ThreadCount, IterationCount) ->
 	Salt = step_number_to_salt_number(StepNumber),
 	debug_verify_no_reset(Salt, Output, NumCheckpointsBetweenHashes, Hashes, [], IterationCount).
@@ -134,7 +134,7 @@ debug_verify_no_reset(Salt, Output, Size, Hashes, Steps, IterationCount) ->
 			false
 	end.
 
-%% @doc An Erlang implementation of ar_vdf:verify/7. Used in tests.
+%% @doc An Erlang implementation of big_vdf:verify/7. Used in tests.
 debug_sha_verify(StepNumber, Output, NumCheckpointsBetweenHashes, Hashes, ResetStepNumber, ResetSeed, _ThreadCount, IterationCount) ->
 	StartSalt = step_number_to_salt_number(StepNumber),
 	ResetSalt = step_number_to_salt_number(ResetStepNumber - 1),

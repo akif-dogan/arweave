@@ -639,7 +639,7 @@ read_chunk(Offset, ChunkDataKey, StoreID) ->
 				{Chunk, DataPath} ->
 					{ok, {Chunk, DataPath}};
 				DataPath ->
-					case ar_chunk_storage:get(Offset - 1, StoreID) of
+					case big_chunk_storage:get(Offset - 1, StoreID) of
 						not_found ->
 							not_found;
 						{_EndOffset, Chunk} ->
@@ -818,7 +818,7 @@ handle_cast({join, RecentBI}, State) ->
 			{ok, Config} = application:get_env(bigfile, config),
 			[gen_server:cast(name(ar_storage_module:id(Module)),
 					{cut, Offset}) || Module <- Config#config.storage_modules],
-			ok = ar_chunk_storage:cut(Offset, StoreID),
+			ok = big_chunk_storage:cut(Offset, StoreID),
 			ok = ar_sync_record:cut(Offset, ar_data_sync, StoreID),
 			ar_events:send(sync_record, {global_cut, Offset}),
 			reset_orphaned_data_roots_disk_pool_timestamps(OrphanedDataRoots)
@@ -853,7 +853,7 @@ handle_cast({cut, Start}, #sync_data_state{ store_id = StoreID,
 					erlang:halt();
 				true ->
 					ok = delete_chunk_metadata_range(Start, End, State),
-					ok = ar_chunk_storage:cut(Start, StoreID),
+					ok = big_chunk_storage:cut(Start, StoreID),
 					ok = ar_sync_record:cut(Start, ar_data_sync, StoreID)
 			end
 	end,
@@ -878,7 +878,7 @@ handle_cast({add_tip_block, BlockTXPairs, BI}, State) ->
 	),
 	add_block_data_roots_to_disk_pool(AddedDataRoots),
 	reset_orphaned_data_roots_disk_pool_timestamps(OrphanedDataRoots),
-	ok = ar_chunk_storage:cut(BlockStartOffset, StoreID),
+	ok = big_chunk_storage:cut(BlockStartOffset, StoreID),
 	ok = ar_sync_record:cut(BlockStartOffset, ar_data_sync, StoreID),
 	ar_events:send(sync_record, {global_cut, BlockStartOffset}),
 	DiskPoolThreshold = get_disk_pool_threshold(BI),
@@ -1259,7 +1259,7 @@ handle_cast({remove_range, End, Cursor, Ref, PID}, State) ->
 			RemoveFromChunkStorage =
 				case RemoveFromSyncRecord of
 					ok ->
-						ar_chunk_storage:delete(PaddedOffset, StoreID);
+						big_chunk_storage:delete(PaddedOffset, StoreID);
 					Error ->
 						Error
 				end,
@@ -1908,7 +1908,7 @@ remove_invalid_sync_records(PaddedEndOffset, StartOffset, StoreID) ->
 		case {Remove1, IsSmallChunkBeforeThreshold} of
 			{ok, false} ->
 				ar_sync_record:delete(PaddedEndOffset, StartOffset,
-						ar_chunk_storage, StoreID);
+						big_chunk_storage, StoreID);
 			_ ->
 				Remove1
 		end,
@@ -2884,11 +2884,11 @@ write_chunk(Offset, ChunkDataKey, Chunk, ChunkSize, DataPath, Packing, State) ->
 write_not_blacklisted_chunk(Offset, ChunkDataKey, Chunk, ChunkSize, DataPath, Packing,
 		State) ->
 	#sync_data_state{ store_id = StoreID } = State,
-	ShouldStoreInChunkStorage = ar_chunk_storage:is_storage_supported(Offset, ChunkSize, Packing),
+	ShouldStoreInChunkStorage = big_chunk_storage:is_storage_supported(Offset, ChunkSize, Packing),
 	case ShouldStoreInChunkStorage of
 		true ->
 			PaddedOffset = big_block:get_chunk_padded_offset(Offset),
-			Result = ar_chunk_storage:put(PaddedOffset, Chunk, StoreID),
+			Result = big_chunk_storage:put(PaddedOffset, Chunk, StoreID),
 			case Result of
 				{ok, NewPacking} ->
 					case put_chunk_data(ChunkDataKey, StoreID, DataPath) of
@@ -3113,7 +3113,7 @@ store_chunk2(ChunkArgs, Args, State) ->
 	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 	StartOffset = big_block:get_chunk_padded_offset(AbsoluteOffset - ChunkSize),
 	DataPathHash = crypto:hash(sha256, DataPath),
-	ShouldStoreInChunkStorage = ar_chunk_storage:is_storage_supported(AbsoluteOffset,
+	ShouldStoreInChunkStorage = big_chunk_storage:is_storage_supported(AbsoluteOffset,
 			ChunkSize, Packing),
 	CleanRecord =
 		case {ShouldStoreInChunkStorage, ar_storage_module:get_packing(StoreID)} of

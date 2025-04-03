@@ -260,7 +260,7 @@ jobs:
             ar_block_cache,
             ar_chain_stats,
             ar_chunk_copy,
-            ar_chunk_storage,
+            big_chunk_storage,
             ar_data_sync_worker_master,
             ar_deep_hash,
             ar_device_lock,

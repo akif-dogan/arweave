@@ -75,11 +75,11 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 	lists:foreach(fun({SourceModule, Packing}) ->
 		{BucketSize, Bucket, _Packing} = SourceModule,
 		SourceID = ar_storage_module:id(SourceModule),
-		SourcePath = ar_chunk_storage:get_storage_module_path(DataDir, SourceID),
+		SourcePath = big_chunk_storage:get_storage_module_path(DataDir, SourceID),
 
 		TargetModule = {BucketSize, Bucket, Packing},
 		TargetID = ar_storage_module:id(TargetModule),
-		TargetPath = ar_chunk_storage:get_storage_module_path(DataDir, TargetID),
+		TargetPath = big_chunk_storage:get_storage_module_path(DataDir, TargetID),
 		file:rename(SourcePath, TargetPath)
 	end, RepackInPlaceStorageModules),
 

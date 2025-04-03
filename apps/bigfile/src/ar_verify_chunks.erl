@@ -157,7 +157,7 @@ verify_packing(Metadata, State) ->
 	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 	StoredPackingCheck = ar_sync_record:is_recorded(AbsoluteOffset, ar_data_sync, StoreID),
 	ExpectedPacking =
-		case ar_chunk_storage:is_storage_supported(PaddedOffset, ChunkSize, Packing) of
+		case big_chunk_storage:is_storage_supported(PaddedOffset, ChunkSize, Packing) of
 			true ->
 				Packing;
 			false ->
@@ -189,9 +189,9 @@ verify_packing(Metadata, State) ->
 verify_chunk_storage(AbsoluteOffset, PaddedOffset, ChunkSize, {End, Start}, State)
 		when PaddedOffset - ?DATA_CHUNK_SIZE >= Start andalso PaddedOffset =< End ->
 	#state{store_id = StoreID} = State,
-	case ar_chunk_storage:read_offset(PaddedOffset, StoreID) of
+	case big_chunk_storage:read_offset(PaddedOffset, StoreID) of
 		{ok, << 0:24 >>} ->
-			%% The chunk is recorded in the ar_chunk_storage sync record, but not stored.
+			%% The chunk is recorded in the big_chunk_storage sync record, but not stored.
 			invalidate_chunk(no_chunk_in_chunk_storage, AbsoluteOffset, ChunkSize, State);
 		_ ->
 			ok
@@ -199,7 +199,7 @@ verify_chunk_storage(AbsoluteOffset, PaddedOffset, ChunkSize, {End, Start}, Stat
 	State;
 verify_chunk_storage(AbsoluteOffset, PaddedOffset, ChunkSize, _Interval, State) ->
 	#state{ packing = Packing } = State,
-	case ar_chunk_storage:is_storage_supported(PaddedOffset, ChunkSize, Packing) of
+	case big_chunk_storage:is_storage_supported(PaddedOffset, ChunkSize, Packing) of
 		true ->
 			invalidate_chunk(chunk_storage_gap, AbsoluteOffset, ChunkSize, State);
 		false ->
@@ -241,7 +241,7 @@ query_intervals(State) ->
 
 align_intervals(Cursor, StoreID) ->
 	ChunkStorageInterval = ar_sync_record:get_next_synced_interval(
-		Cursor, infinity, ar_chunk_storage, StoreID),
+		Cursor, infinity, big_chunk_storage, StoreID),
 	DataSyncInterval = ar_sync_record:get_next_synced_interval(
 		Cursor, infinity, ar_data_sync, StoreID),
 	align_intervals(Cursor, ChunkStorageInterval, DataSyncInterval).
@@ -299,7 +299,7 @@ report_progress(State) ->
 	ar_verify_chunks_reporter:update(StoreID, Report2),
 	State#state{ verify_report = Report2 }.
 
-%% ar_chunk_storage does not store small chunks before strict_split_data_threshold
+%% big_chunk_storage does not store small chunks before strict_split_data_threshold
 %% (before 30607159107830 = partitions 0-7 and a half of 8
 %% 
 
@@ -316,13 +316,13 @@ intervals_test_() ->
 verify_chunk_storage_test_() ->
 	[
 		ar_test_node:test_with_mocked_functions(
-			[{ar_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
+			[{big_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
 			fun test_verify_chunk_storage_in_interval/0),
 		ar_test_node:test_with_mocked_functions(
-			[{ar_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
+			[{big_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
 			fun test_verify_chunk_storage_should_store/0),
 		ar_test_node:test_with_mocked_functions(
-			[{ar_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
+			[{big_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
 			fun test_verify_chunk_storage_should_not_store/0)
 	].
 

@@ -11,7 +11,7 @@
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_header_sync.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").
--include_lib("bigfile/include/ar_chunk_storage.hrl").
+-include_lib("bigfile/include/big_chunk_storage.hrl").
 
 %%% This module syncs block and transaction headers and maintains a persisted record of synced
 %%% headers. Headers are synced from latest to earliest.

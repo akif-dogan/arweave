@@ -186,7 +186,7 @@ initialize_state(State) ->
 get_system_device(StorageModule) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	StoreID = ar_storage_module:id(StorageModule),
-	Path = ar_chunk_storage:get_chunk_storage_path(Config#config.data_dir, StoreID),
+	Path = big_chunk_storage:get_chunk_storage_path(Config#config.data_dir, StoreID),
 	Device = ar_util:get_system_device(Path),
 	case Device of
 		"" -> StoreID;  % If the command fails or returns an empty string, return StoreID

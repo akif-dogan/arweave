@@ -147,7 +147,7 @@ get_entropy_bucket_start(AbsoluteChunkEndOffset) ->
 	PickOffset = max(0, PaddedEndOffset - ?DATA_CHUNK_SIZE),
 	BucketStart = PickOffset - PickOffset rem ?DATA_CHUNK_SIZE,
 
-    true = BucketStart == ar_chunk_storage:get_chunk_bucket_start(PaddedEndOffset),
+    true = BucketStart == big_chunk_storage:get_chunk_bucket_start(PaddedEndOffset),
     
 	BucketStart.
 

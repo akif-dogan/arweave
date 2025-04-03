@@ -18,7 +18,7 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_vdf.hrl").
+-include_lib("bigfile/include/big_vdf.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -938,11 +938,11 @@ start_worker(State) ->
 	State#state{ worker = Worker, worker_monitor_ref = Ref }.
 
 compute(StepNumber, PrevOutput, VDFDifficulty) ->
-	{ok, Output, Checkpoints} = ar_vdf:compute2(StepNumber, PrevOutput, VDFDifficulty),
+	{ok, Output, Checkpoints} = big_vdf:compute2(StepNumber, PrevOutput, VDFDifficulty),
 	debug_double_check(
 		"compute",
 		{ok, Output, Checkpoints},
-		fun ar_vdf:debug_sha2/3,
+		fun big_vdf:debug_sha2/3,
 		[StepNumber, PrevOutput, VDFDifficulty]).
 
 verify(StartStepNumber, PrevOutput, NumCheckpointsBetweenHashes, Hashes, ResetStepNumber,
@@ -977,12 +977,12 @@ verify(StartStepNumber, PrevOutput, NumCheckpointsBetweenHashes, Hashes, ResetSt
 verify_no_reset(StartStepNumber, PrevOutput, NumCheckpointsBetweenHashes, Hashes, ThreadCount,
 		VDFDifficulty) ->
 	Garbage = crypto:strong_rand_bytes(32),
-	Result = ar_vdf:verify2(StartStepNumber, PrevOutput, NumCheckpointsBetweenHashes, Hashes,
+	Result = big_vdf:verify2(StartStepNumber, PrevOutput, NumCheckpointsBetweenHashes, Hashes,
 			0, Garbage, ThreadCount, VDFDifficulty),
 	debug_double_check(
 		"verify_no_reset",
 		Result,
-		fun ar_vdf:debug_sha_verify_no_reset/6,
+		fun big_vdf:debug_sha_verify_no_reset/6,
 		[StartStepNumber, PrevOutput, NumCheckpointsBetweenHashes, Hashes, ThreadCount,
 				VDFDifficulty]).
 

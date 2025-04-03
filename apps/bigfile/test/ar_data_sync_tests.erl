@@ -16,7 +16,7 @@ test_recovers_from_corruption() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	StoreID = ar_storage_module:id(hd(ar_storage_module:get_all(262144 * 3))),
 	?debugFmt("Corrupting ~s...", [StoreID]),
-	[ar_chunk_storage:write_chunk(PaddedEndOffset, << 0:(262144*8) >>, #{}, StoreID)
+	[big_chunk_storage:write_chunk(PaddedEndOffset, << 0:(262144*8) >>, #{}, StoreID)
 			|| PaddedEndOffset <- lists:seq(262144, 262144 * 3, 262144)],
 	ar_test_node:mine(),
 	ar_test_node:assert_wait_until_height(main, 1).
@@ -162,7 +162,7 @@ test_mines_off_only_last_chunks() ->
 					{ok, Config} = application:get_env(bigfile, config),
 					lists:foreach(
 						fun(O) ->
-							[ar_chunk_storage:delete(O, ar_storage_module:id(Module))
+							[big_chunk_storage:delete(O, ar_storage_module:id(Module))
 									|| Module <- Config#config.storage_modules]
 						end,
 						lists:seq(?DATA_CHUNK_SIZE, ?STRICT_DATA_SPLIT_THRESHOLD,
@@ -212,7 +212,7 @@ test_mines_off_only_second_last_chunks() ->
 					{ok, Config} = application:get_env(bigfile, config),
 					lists:foreach(
 						fun(O) ->
-							[ar_chunk_storage:delete(O, ar_storage_module:id(Module))
+							[big_chunk_storage:delete(O, ar_storage_module:id(Module))
 									|| Module <- Config#config.storage_modules]
 						end,
 						lists:seq(?DATA_CHUNK_SIZE, ?STRICT_DATA_SPLIT_THRESHOLD,

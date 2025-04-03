@@ -19,7 +19,7 @@
 -include("../include/big_config.hrl").
 -include("../include/big_pricing.hrl").
 -include("../include/ar_data_sync.hrl").
--include("../include/ar_vdf.hrl").
+-include("../include/big_vdf.hrl").
 -include("../include/big_mining.hrl").
 
 -include_lib("eunit/include/eunit.hrl").

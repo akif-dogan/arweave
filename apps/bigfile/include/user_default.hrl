@@ -10,7 +10,7 @@
 -include_lib("bigfile/include/big_blacklist_middleware.hrl").
 -include_lib("bigfile/include/big_block.hrl").
 -include_lib("bigfile/include/big_chain_stats.hrl").
--include_lib("bigfile/include/ar_chunk_storage.hrl").
+-include_lib("bigfile/include/big_chunk_storage.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/ar_data_discovery.hrl").
@@ -25,6 +25,6 @@
 -include_lib("bigfile/include/big_pricing.hrl").
 -include_lib("bigfile/include/big_sup.hrl").
 -include_lib("bigfile/include/ar_sync_buckets.hrl").
--include_lib("bigfile/include/ar_vdf.hrl").
+-include_lib("bigfile/include/big_vdf.hrl").
 -include_lib("bigfile/include/ar_verify_chunks.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").
