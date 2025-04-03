@@ -13,14 +13,14 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_data_sync.hrl").
+-include_lib("bigfile/include/big_data_sync.hrl").
 
 -record(state, {
 	name = undefined,
 	request_packed_chunks = false
 }).
 
- %% # of messages to cast to ar_data_sync at once. Each message carries at least 1 chunk worth
+ %% # of messages to cast to big_data_sync at once. Each message carries at least 1 chunk worth
  %% of data (256 KiB). Since there are dozens or hundreds of workers, if each one posts too
  %% many messages at once it can overload the available memory.
 -define(READ_RANGE_MESSAGES_PER_BATCH, 40).
@@ -89,9 +89,9 @@ read_range({Start, End, _OriginStoreID, _TargetStoreID})
 		when Start >= End ->
 	ok;
 read_range({Start, End, _OriginStoreID, TargetStoreID} = Args) ->
-	case ar_data_sync:is_chunk_cache_full() of
+	case big_data_sync:is_chunk_cache_full() of
 		false ->
-			case ar_data_sync:is_disk_space_sufficient(TargetStoreID) of
+			case big_data_sync:is_disk_space_sufficient(TargetStoreID) of
 				true ->
 					?LOG_DEBUG([{event, read_range}, {pid, self()},
 						{size_mb, (End - Start) / ?MiB}, {args, Args}]),
@@ -114,9 +114,9 @@ read_range2(_MessagesRemaining,
 	ok;
 read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 	CheckIsRecordedAlready =
-		case ar_sync_record:is_recorded(Start + 1, ar_data_sync, TargetStoreID) of
+		case ar_sync_record:is_recorded(Start + 1, big_data_sync, TargetStoreID) of
 			{true, _} ->
-				case ar_sync_record:get_next_unsynced_interval(Start, End, ar_data_sync,
+				case ar_sync_record:get_next_unsynced_interval(Start, End, big_data_sync,
 						TargetStoreID) of
 					not_found ->
 						ok;
@@ -134,7 +134,7 @@ read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 			recast ->
 				ok;
 			false ->
-				case ar_sync_record:is_recorded(Start + 1, ar_data_sync, OriginStoreID) of
+				case ar_sync_record:is_recorded(Start + 1, big_data_sync, OriginStoreID) of
 					{true, Packing} ->
 						{true, Packing};
 					SyncRecordReply ->
@@ -151,7 +151,7 @@ read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 			ok ->
 				ok;
 			{true, Packing2} ->
-				{Packing2, ar_data_sync:get_chunk_by_byte(Start + 1, OriginStoreID)}
+				{Packing2, big_data_sync:get_chunk_by_byte(Start + 1, OriginStoreID)}
 		end,
 	case ReadChunkMetadata of
 		ok ->
@@ -172,10 +172,10 @@ read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 			ok;
 		{Packing3, {ok, _Key, {AbsoluteOffset, ChunkDataKey, TXRoot, DataRoot, TXPath,
 				RelativeOffset, ChunkSize}}} ->
-			ReadChunk = ar_data_sync:read_chunk(AbsoluteOffset, ChunkDataKey, OriginStoreID),
+			ReadChunk = big_data_sync:read_chunk(AbsoluteOffset, ChunkDataKey, OriginStoreID),
 			case ReadChunk of
 				not_found ->
-					ar_data_sync:invalidate_bad_data_record(
+					big_data_sync:invalidate_bad_data_record(
 						AbsoluteOffset, ChunkSize, OriginStoreID, read_range_chunk_not_found),
 					read_range2(MessagesRemaining-1,
 							{Start + ChunkSize, End, OriginStoreID, TargetStoreID});
@@ -187,10 +187,10 @@ read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 					read_range2(MessagesRemaining,
 							{Start + ChunkSize, End, OriginStoreID, TargetStoreID});
 				{ok, {Chunk, DataPath}} ->
-					case ar_sync_record:is_recorded(AbsoluteOffset, ar_data_sync,
+					case ar_sync_record:is_recorded(AbsoluteOffset, big_data_sync,
 							OriginStoreID) of
 						{true, Packing3} ->
-							ar_data_sync:increment_chunk_cache_size(),
+							big_data_sync:increment_chunk_cache_size(),
 							UnpackedChunk =
 								case Packing3 of
 									unpacked ->
@@ -201,7 +201,7 @@ read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 							Args = {DataRoot, AbsoluteOffset, TXPath, TXRoot, DataPath,
 									Packing3, RelativeOffset, ChunkSize, Chunk,
 									UnpackedChunk, TargetStoreID, ChunkDataKey},
-							gen_server:cast(ar_data_sync:name(TargetStoreID),
+							gen_server:cast(big_data_sync:name(TargetStoreID),
 									{pack_and_store_chunk, Args}),
 							read_range2(MessagesRemaining-1,
 								{Start + ChunkSize, End, OriginStoreID, TargetStoreID});
@@ -229,7 +229,7 @@ sync_range({Start, End, Peer, _TargetStoreID, 0}, _State) ->
 	{error, timeout};
 sync_range({Start, End, Peer, TargetStoreID, RetryCount} = Args, State) ->
 	IsChunkCacheFull =
-		case ar_data_sync:is_chunk_cache_full() of
+		case big_data_sync:is_chunk_cache_full() of
 			true ->
 				ar_util:cast_after(500, self(), {sync_range, Args}),
 				true;
@@ -239,7 +239,7 @@ sync_range({Start, End, Peer, TargetStoreID, RetryCount} = Args, State) ->
 	IsDiskSpaceSufficient =
 		case IsChunkCacheFull of
 			false ->
-				case ar_data_sync:is_disk_space_sufficient(TargetStoreID) of
+				case big_data_sync:is_disk_space_sufficient(TargetStoreID) of
 					true ->
 						true;
 					_ ->
@@ -268,9 +268,9 @@ sync_range({Start, End, Peer, TargetStoreID, RetryCount} = Args, State) ->
 							%% chunks will be then requested later.
 							Start3 = big_block:get_chunk_padded_offset(
 									Start2 + byte_size(Chunk)) + 1,
-							gen_server:cast(ar_data_sync:name(TargetStoreID),
+							gen_server:cast(big_data_sync:name(TargetStoreID),
 									{store_fetched_chunk, Peer, Start2 - 1, Proof}),
-							ar_data_sync:increment_chunk_cache_size(),
+							big_data_sync:increment_chunk_cache_size(),
 							sync_range({Start3, End, Peer, TargetStoreID, RetryCount}, State);
 						{error, timeout} ->
 							?LOG_DEBUG([{event, timeout_fetching_chunk},

@@ -133,7 +133,7 @@ update_sync_records(IsComplete, PaddedEndOffset, StoreID, RewardAddr) ->
                                      PaddedEndOffset,
                                      StartOffset,
                                      {replica_2_9, RewardAddr},
-                                     ar_data_sync,
+                                     big_data_sync,
                                      StoreID);
         false ->
             ok
@@ -362,7 +362,7 @@ record_entropy(ChunkEntropy, BucketEndOffset, StoreID, RewardAddr) ->
                     {error, _} = Error ->
                         Error;
                     {_, UnpackedChunk} ->
-                        ar_sync_record:delete(EndOffset, StartOffset, ar_data_sync, StoreID),
+                        ar_sync_record:delete(EndOffset, StartOffset, big_data_sync, StoreID),
                         ar_packing_server:encipher_replica_2_9_chunk(UnpackedChunk, ChunkEntropy)
                 end;
             false ->

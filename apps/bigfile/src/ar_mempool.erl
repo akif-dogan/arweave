@@ -401,7 +401,7 @@ deserialize_tx(TX) ->
 may_be_drop_from_disk_pool(#tx{ format = 1 }) ->
 	ok;
 may_be_drop_from_disk_pool(TX) ->
-	ar_data_sync:maybe_drop_data_root_from_disk_pool(TX#tx.data_root, TX#tx.data_size,
+	big_data_sync:maybe_drop_data_root_from_disk_pool(TX#tx.data_root, TX#tx.data_size,
 			TX#tx.id).
 
 find_low_priority_txs() ->

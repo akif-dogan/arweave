@@ -187,7 +187,7 @@ fake_block_with_strong_cumulative_difficulty(B, PrevB, CDiff) ->
 	{RecallByte, _RecallRange2Start} = big_block:get_recall_range(H0, PartitionNumber,
 			PartitionUpperBound),
 	{ok, #{ data_path := DataPath, tx_path := TXPath,
-			chunk := Chunk } } = ar_data_sync:get_chunk(RecallByte + 1,
+			chunk := Chunk } } = big_data_sync:get_chunk(RecallByte + 1,
 					#{ pack => true, packing => {spora_2_6, RewardAddr2},
 					origin => test }),
 	{H1, Preimage} = big_block:compute_h1(H0, 0, Chunk),
@@ -204,7 +204,7 @@ fake_block_with_strong_cumulative_difficulty(B, PrevB, CDiff) ->
 			B4 =
 				case ar_fork:height_2_8() of
 					0 ->
-						{ok, #{ chunk := UnpackedChunk } } = ar_data_sync:get_chunk(
+						{ok, #{ chunk := UnpackedChunk } } = big_data_sync:get_chunk(
 								RecallByte + 1, #{ pack => true, packing => unpacked,
 								origin => test }),
 						B3#block{ packing_difficulty = 1,

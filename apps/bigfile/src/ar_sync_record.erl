@@ -12,7 +12,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
--include_lib("bigfile/include/ar_data_sync.hrl").
+-include_lib("bigfile/include/big_data_sync.hrl").
 -include_lib("bigfile/include/big_data_discovery.hrl").
 
 %% The kv storage key to the sync records.
@@ -648,8 +648,8 @@ replay_write_ahead_log(SyncRecordByID, SyncRecordByIDType, N, WAL, StateDB, Stor
 			end
 	end.
 
-emit_add_range(Start, End, ar_data_sync, StoreID) ->
-	ar_events:send(sync_record, {add_range, Start, End, ar_data_sync, StoreID});
+emit_add_range(Start, End, big_data_sync, StoreID) ->
+	ar_events:send(sync_record, {add_range, Start, End, big_data_sync, StoreID});
 emit_add_range(_Start, _End, _ID, _StoreID) ->
 	ok.
 
@@ -711,7 +711,7 @@ store_state(State) ->
 			{Error2, State};
 		ok ->
 			maps:map(
-				fun	({ar_data_sync, Packing}, TypeRecord) ->
+				fun	({big_data_sync, Packing}, TypeRecord) ->
 						ar_mining_stats:set_storage_module_data_size(
 							StoreID, Packing, PartitionNumber, StorageModuleSize,
 							StorageModuleIndex,

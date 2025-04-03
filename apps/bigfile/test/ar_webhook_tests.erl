@@ -263,7 +263,7 @@ assert_transaction_data_removed(TXID) ->
 	).
 
 append_second_chunk_to_file(TXID, Filename) ->
-	{ok, {EndOffset, Size}} = ar_data_sync:get_tx_offset(TXID),
+	{ok, {EndOffset, Size}} = big_data_sync:get_tx_offset(TXID),
 	SecondChunkStart = EndOffset - Size + ?DATA_CHUNK_SIZE,
 	SecondChunkEnd = SecondChunkStart + ?DATA_CHUNK_SIZE,
 	{ok, F} = file:open(Filename, [append]),

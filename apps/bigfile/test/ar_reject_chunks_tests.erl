@@ -5,7 +5,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_data_sync.hrl").
+-include_lib("bigfile/include/big_data_sync.hrl").
 
 -import(ar_test_node, [sign_v1_tx/2, wait_until_height/2, assert_wait_until_height/2,
 		read_block_when_stored/1, test_with_mocked_functions/2]).

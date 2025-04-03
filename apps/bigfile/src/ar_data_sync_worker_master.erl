@@ -12,7 +12,7 @@
 -include_lib("bigfile/include/big_sup.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_data_sync.hrl").
+-include_lib("bigfile/include/big_data_sync.hrl").
 -include_lib("bigfile/include/big_peers.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
@@ -246,7 +246,7 @@ max_peer_queue(Performance, TotalThroughput, WorkerCount) ->
 
 %% @doc Cut a peer's queue to store roughly 15 minutes worth of tasks. This prevents
 %% a slow peer from filling up the ar_data_sync_worker_master queues, stalling the
-%% workers and preventing ar_data_sync from pushing new tasks.
+%% workers and preventing big_data_sync from pushing new tasks.
 cut_peer_queue(_MaxQueue, PeerTasks, #state{ scheduled_task_count = 0 } = State) ->
 	{PeerTasks, State};
 cut_peer_queue(undefined, PeerTasks, State) ->

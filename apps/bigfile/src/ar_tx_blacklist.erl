@@ -588,7 +588,7 @@ request_data_takedown(State) ->
 		TXID when is_binary(TXID)  ->
 			case ets:lookup(ar_tx_blacklist, TXID) of
 				[{TXID}] ->
-					case ar_data_sync:get_tx_offset(TXID) of
+					case big_data_sync:get_tx_offset(TXID) of
 						{ok, {End, Size}} ->
 							Start = End - Size,
 							ets:insert(ar_tx_blacklist, [{TXID, End, Start}]),
@@ -645,7 +645,7 @@ blacklist_offsets(End, Start, State) ->
 		{tags, [tx_blacklist]},
 		{s, Start},
 		{e, End}]),
-	ar_data_sync:request_data_removal(Start, End, Ref, self()),
+	big_data_sync:request_data_removal(Start, End, Ref, self()),
 	State#ar_tx_blacklist_state{
 		data_takedown_request_timestamp = os:system_time(millisecond)
 	}.
@@ -659,7 +659,7 @@ blacklist_offsets(TXID, End, Start, State) ->
 		{tx, ar_util:encode(TXID)},
 		{s, Start},
 		{e, End}]),
-	ar_data_sync:request_tx_data_removal(TXID, Ref, self()),
+	big_data_sync:request_tx_data_removal(TXID, Ref, self()),
 	State#ar_tx_blacklist_state{
 		data_takedown_request_timestamp = os:system_time(millisecond)
 	}.

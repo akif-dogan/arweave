@@ -343,7 +343,7 @@ assert_removed_txs(BadTXIDs) ->
 		fun() ->
 			lists:all(
 				fun(TXID) ->
-					{error, not_found} == ar_data_sync:get_tx_data(TXID)
+					{error, not_found} == big_data_sync:get_tx_data(TXID)
 							%% Do not use ar_storage:read_tx because the
 							%% transaction is temporarily kept in the disk cache,
 							%% even when blacklisted.

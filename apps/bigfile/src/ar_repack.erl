@@ -73,7 +73,7 @@ repack(Cursor, RangeStart, RangeEnd, Packing, StoreID) ->
 			{range_end, RangeEnd},
 			{packing, ar_serialize:encode_packing(Packing, true)}]),
 	case ar_sync_record:get_next_synced_interval(Cursor, RightBound,
-			ar_data_sync, StoreID) of
+			big_data_sync, StoreID) of
 		not_found ->
 			?LOG_DEBUG([{event, repack_in_place_no_synced_interval},
 					{tags, [repack_in_place]},
@@ -176,7 +176,7 @@ read_chunk_metadata_range(Start, Size, End, StoreID, RepackFurtherArgs) ->
 	Server = big_chunk_storage:name(StoreID),
 	End2 = min(Start + Size, End),
 	
-	case ar_data_sync:get_chunk_metadata_range(Start+1, End2, StoreID) of
+	case big_data_sync:get_chunk_metadata_range(Start+1, End2, StoreID) of
 		{ok, MetadataMap} ->
 			MetadataMap;
 		{error, Error} ->
@@ -211,7 +211,7 @@ send_chunk_for_repacking(AbsoluteOffset, ChunkMeta, Args) ->
 	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 	{ChunkDataKey, TXRoot, DataRoot, TXPath,
 			RelativeOffset, ChunkSize} = ChunkMeta,
-	case ar_sync_record:is_recorded(PaddedOffset, ar_data_sync, StoreID) of
+	case ar_sync_record:is_recorded(PaddedOffset, big_data_sync, StoreID) of
 		{true, unpacked_padded} ->
 			%% unpacked_padded is a special internal packing used
 			%% for temporary storage of unpacked and padded chunks
@@ -299,7 +299,7 @@ chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 		big_chunk_storage:is_storage_supported(PaddedEndOffset, ChunkSize, Packing),
 
 	RemoveFromSyncRecordResult = ar_sync_record:delete(PaddedEndOffset,
-			StartOffset, ar_data_sync, StoreID),
+			StartOffset, big_data_sync, StoreID),
 	RemoveFromSyncRecordResult2 =
 		case RemoveFromSyncRecordResult of
 			ok ->
@@ -311,7 +311,7 @@ chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 
 	case {RemoveFromSyncRecordResult2, IsStorageSupported} of
 		{ok, false} ->
-			gen_server:cast(ar_data_sync:name(StoreID), {store_chunk, ChunkArgs, Args}),
+			gen_server:cast(big_data_sync:name(StoreID), {store_chunk, ChunkArgs, Args}),
 			{ok, FileIndex};
 		{ok, true} ->
 			StoreResults = big_chunk_storage:store_chunk(PaddedEndOffset, Chunk, Packing,
@@ -320,7 +320,7 @@ chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 				{ok, FileIndex2, NewPacking} ->
 					ar_sync_record:add_async(repacked_chunk,
 							PaddedEndOffset, StartOffset,
-							NewPacking, ar_data_sync, StoreID),
+							NewPacking, big_data_sync, StoreID),
 					{ok, FileIndex2};
 				Error3 ->
 					?LOG_ERROR([{event, failed_to_store_repacked_chunk},
@@ -342,7 +342,7 @@ chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 	end.
 
 read_chunk_and_data_path(StoreID, ChunkDataKey, AbsoluteOffset, MaybeChunk) ->
-	case ar_data_sync:get_chunk_data(ChunkDataKey, StoreID) of
+	case big_data_sync:get_chunk_data(ChunkDataKey, StoreID) of
 		not_found ->
 			?LOG_WARNING([{event, chunk_not_found_in_chunk_data_db},
 					{tags, [repack_in_place]},

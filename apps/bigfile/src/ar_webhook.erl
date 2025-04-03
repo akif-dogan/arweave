@@ -188,7 +188,7 @@ handle_info({event, tx, {orphaned, TX}},
 handle_info({event, tx, _}, State) ->
 	{noreply, State};
 
-handle_info({event, sync_record, {add_range, Start, End, ar_data_sync, StoreID}},
+handle_info({event, sync_record, {add_range, Start, End, big_data_sync, StoreID}},
 		#state{ listen_to_transaction_data_stream = true } = State) ->
 	case StoreID of
 		"default" ->
@@ -362,7 +362,7 @@ process_updated_tx_data([{TXID, Start, End} | Data], StoreID, State) ->
 get_tx_offset_data(Start, End, Cache) ->
 	case cache_get_tx_offset_data(Start, End, Cache) of
 		[] ->
-			case ar_data_sync:get_tx_offset_data_in_range(Start, End) of
+			case big_data_sync:get_tx_offset_data_in_range(Start, End) of
 				{ok, []} ->
 					not_found;
 				{ok, Data} ->
@@ -562,7 +562,7 @@ is_synced_by_storage_modules(Start, End, StoreID) ->
 is_synced_by_storage_modules([]) ->
 	true;
 is_synced_by_storage_modules([{Start, End, StoreID} | Intervals]) ->
-	case ar_sync_record:get_next_unsynced_interval(Start, End, ar_data_sync, StoreID) of
+	case ar_sync_record:get_next_unsynced_interval(Start, End, big_data_sync, StoreID) of
 		not_found ->
 			is_synced_by_storage_modules(Intervals);
 		_I ->

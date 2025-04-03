@@ -156,7 +156,7 @@ test_mines_off_only_last_chunks() ->
 				0 ->
 					%% Wait until the new chunks fall below the new upper bound and
 					%% remove the original big chunks. The protocol will increase the upper
-					%% bound based on the nonce limiter entropy reset, but ar_data_sync waits
+					%% bound based on the nonce limiter entropy reset, but big_data_sync waits
 					%% for ?SEARCH_SPACE_UPPER_BOUND_DEPTH confirmations before packing the
 					%% chunks.
 					{ok, Config} = application:get_env(bigfile, config),
@@ -206,7 +206,7 @@ test_mines_off_only_second_last_chunks() ->
 				true ->
 					%% Wait until the new chunks fall below the new upper bound and
 					%% remove the original big chunks. The protocol will increase the upper
-					%% bound based on the nonce limiter entropy reset, but ar_data_sync waits
+					%% bound based on the nonce limiter entropy reset, but big_data_sync waits
 					%% for ?SEARCH_SPACE_UPPER_BOUND_DEPTH confirmations before packing the
 					%% chunks.
 					{ok, Config} = application:get_env(bigfile, config),
@@ -490,7 +490,7 @@ enqueue_intervals_test() ->
 test_enqueue_intervals(Intervals, ChunksPerPeer, QIntervalsRanges, ExpectedQIntervalRanges, ExpectedChunks, Label) ->
 	QIntervals = ar_intervals:from_list(QIntervalsRanges),
 	Q = gb_sets:new(),
-	{QResult, QIntervalsResult} = ar_data_sync:enqueue_intervals(Intervals, ChunksPerPeer, {Q, QIntervals}),
+	{QResult, QIntervalsResult} = big_data_sync:enqueue_intervals(Intervals, ChunksPerPeer, {Q, QIntervals}),
 	ExpectedQIntervals = lists:foldl(fun({End, Start}, Acc) ->
 			ar_intervals:add(Acc, End, Start)
 		end, QIntervals, ExpectedQIntervalRanges),

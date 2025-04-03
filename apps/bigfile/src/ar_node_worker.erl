@@ -18,7 +18,7 @@
 -include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 -include("../include/big_pricing.hrl").
--include("../include/ar_data_sync.hrl").
+-include("../include/big_data_sync.hrl").
 -include("../include/big_vdf.hrl").
 -include("../include/big_mining.hrl").
 
@@ -415,7 +415,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 	ar_storage:store_block_time_history_part2(BlockTimeHistory),
 	Height = B#block.height,
 	ar_disk_cache:write_block(B),
-	ar_data_sync:join(RecentBI),
+	big_data_sync:join(RecentBI),
 	ar_header_sync:join(Height, RecentBI, Blocks),
 	ar_tx_blacklist:start_taking_down(),
 	BlockTXPairs = [block_txs_pair(Block) || Block <- Blocks],
@@ -1403,7 +1403,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	OrphanCount = length(Orphans),
 	ar_block_index:update(AddedBIElements, OrphanCount),
 	RecentBI2 = lists:sublist(RecentBI, ?BLOCK_INDEX_HEAD_LEN),
-	ar_data_sync:add_tip_block(BlockTXPairs, RecentBI2),
+	big_data_sync:add_tip_block(BlockTXPairs, RecentBI2),
 	ar_header_sync:add_tip_block(B, RecentBI2),
 	lists:foreach(
 		fun(PrevB3) ->

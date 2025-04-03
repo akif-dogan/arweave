@@ -10,7 +10,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/ar_header_sync.hrl").
--include_lib("bigfile/include/ar_data_sync.hrl").
+-include_lib("bigfile/include/big_data_sync.hrl").
 -include_lib("bigfile/include/big_chunk_storage.hrl").
 
 %%% This module syncs block and transaction headers and maintains a persisted record of synced
@@ -366,7 +366,7 @@ add_block(B, State) ->
 				true ->
 					ok;
 				false ->
-					ar_data_sync:add_block(B, B#block.size_tagged_txs)
+					big_data_sync:add_block(B, B#block.size_tagged_txs)
 			end,
 			add_block2(B, State)
 	end.

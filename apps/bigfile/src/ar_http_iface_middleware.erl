@@ -7,7 +7,7 @@
 -include("../include/big.hrl").
 -include("../include/big_config.hrl").
 -include("../include/big_mining.hrl").
--include("../include/ar_data_sync.hrl").
+-include("../include/big_data_sync.hrl").
 -include("../include/big_data_discovery.hrl").
 
 -include("../include/ar_pool.hrl").
@@ -377,7 +377,7 @@ handle(<<"GET">>, [<<"tx">>, EncodedID, <<"offset">>], Req, _Pid) ->
 				{error, invalid} ->
 					{400, #{}, jiffy:encode(#{ error => invalid_address }), Req};
 				{ok, ID} ->
-					case ar_data_sync:get_tx_offset(ID) of
+					case big_data_sync:get_tx_offset(ID) of
 						{ok, {Offset, Size}} ->
 							ResponseBody = jiffy:encode(#{
 								offset => integer_to_binary(Offset),
@@ -421,7 +421,7 @@ handle(<<"POST">>, [<<"chunk">>], Req, Pid) ->
 					not_set ->
 						ok;
 					{ok, {DataRoot, DataSize}} ->
-						case ar_data_sync:has_data_root(DataRoot, DataSize) of
+						case big_data_sync:has_data_root(DataRoot, DataSize) of
 							true ->
 								ok;
 							false ->
@@ -1658,7 +1658,7 @@ serve_tx_data(Req, #tx{ format = 2, id = ID, data_size = DataSize } = TX) ->
 			{200, #{}, sendfile(DataFilename), Req};
 		false ->
 			ok = ar_semaphore:acquire(get_tx_data, infinity),
-			case ar_data_sync:get_tx_data(ID) of
+			case big_data_sync:get_tx_data(ID) of
 				{ok, Data} ->
 					{200, #{}, ar_util:encode(Data), Req};
 				{error, tx_data_too_big} ->
@@ -1692,7 +1692,7 @@ serve_format_2_html_data(Req, ContentType, TX) ->
 			{200, #{ <<"content-type">> => ContentType }, Data, Req};
 		{error, enoent} ->
 			ok = ar_semaphore:acquire(get_tx_data, infinity),
-			case ar_data_sync:get_tx_data(TX#tx.id) of
+			case big_data_sync:get_tx_data(TX#tx.id) of
 				{ok, Data} ->
 					{200, #{ <<"content-type">> => ContentType }, Data, Req};
 				{error, tx_data_too_big} ->
@@ -1931,7 +1931,7 @@ handle_post_tx(Req, Peer, TX) ->
 		{invalid, invalid_data_root_size} ->
 			handle_post_tx_invalid_data_root_response();
 		{valid, TX2} ->
-			ar_data_sync:add_data_root_to_disk_pool(TX2#tx.data_root, TX2#tx.data_size,
+			big_data_sync:add_data_root_to_disk_pool(TX2#tx.data_root, TX2#tx.data_size,
 					TX#tx.id),
 			handle_post_tx_accepted(Req, TX, Peer)
 	end.
@@ -2004,7 +2004,7 @@ handle_get_chunk(OffsetBinary, Req, Encoding) ->
 								true
 						end,
 					{ReadPacking, CheckRecords} =
-						case ar_sync_record:is_recorded(Offset, ar_data_sync) of
+						case ar_sync_record:is_recorded(Offset, big_data_sync) of
 							false ->
 								{none, {reply, {404, #{}, <<>>, Req}}};
 							{true, _} ->
@@ -2038,7 +2038,7 @@ handle_get_chunk(OffsetBinary, Req, Encoding) ->
 							Args = #{ packing => ReadPacking,
 									bucket_based_offset => IsBucketBasedOffset,
 									origin => http },
-							case ar_data_sync:get_chunk(Offset, Args) of
+							case big_data_sync:get_chunk(Offset, Args) of
 								{ok, Proof} ->
 									Proof2 = maps:remove(unpacked_chunk,
 											Proof#{ packing => ReadPacking }),
@@ -2103,7 +2103,7 @@ handle_get_chunk_proof2(Offset, Req, Encoding) ->
 		end,
 	ok = ar_semaphore:acquire(get_chunk, infinity),
 	CheckRecords =
-		case ar_sync_record:is_recorded(Offset, ar_data_sync) of
+		case ar_sync_record:is_recorded(Offset, big_data_sync) of
 			false ->
 				{none, {reply, {404, #{}, <<>>, Req}}};
 			{{true, _Packing}, _StoreID} ->
@@ -2114,7 +2114,7 @@ handle_get_chunk_proof2(Offset, Req, Encoding) ->
 			Reply;
 		ok ->
 			Args = #{ bucket_based_offset => IsBucketBasedOffset },
-			case ar_data_sync:get_chunk_proof(Offset, Args) of
+			case big_data_sync:get_chunk_proof(Offset, Args) of
 				{ok, Proof} ->
 					Reply =
 						case Encoding of
@@ -2220,7 +2220,7 @@ handle_post_chunk(check_chunk_proof_ratio, Proof, Req) ->
 	DataPath = maps:get(data_path, Proof),
 	Chunk = maps:get(chunk, Proof),
 	DataSize = maps:get(data_size, Proof),
-	case ar_data_sync:is_chunk_proof_ratio_attractive(byte_size(Chunk), DataSize, DataPath) of
+	case big_data_sync:is_chunk_proof_ratio_attractive(byte_size(Chunk), DataSize, DataPath) of
 		false ->
 			{400, #{}, jiffy:encode(#{ error => chunk_proof_ratio_not_attractive }), Req};
 		true ->
@@ -2231,7 +2231,7 @@ handle_post_chunk(validate_proof, Proof, Req) ->
 	#{ chunk := Chunk, data_path := DataPath, data_size := TXSize, offset := Offset,
 			data_root := DataRoot } = Proof,
 	spawn(fun() ->
-			Parent ! ar_data_sync:add_chunk(DataRoot, DataPath, Chunk, Offset, TXSize) end),
+			Parent ! big_data_sync:add_chunk(DataRoot, DataPath, Chunk, Offset, TXSize) end),
 	receive
 		ok ->
 			{200, #{}, <<>>, Req};

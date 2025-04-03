@@ -108,13 +108,13 @@ verify_chunks({End, _Start}, _Intervals, #state{cursor = Cursor} = State) when C
 verify_chunks({IntervalEnd, IntervalStart}, Intervals, State) ->
 	#state{cursor = Cursor, store_id = StoreID} = State,
 	Cursor2 = max(IntervalStart, Cursor),
-	ChunkData = ar_data_sync:get_chunk_by_byte(Cursor2+1, StoreID),
+	ChunkData = big_data_sync:get_chunk_by_byte(Cursor2+1, StoreID),
 	State2 = verify_chunk(ChunkData, Intervals, State#state{ cursor = Cursor2 }),
 	verify_chunks({IntervalEnd, IntervalStart}, Intervals, State2).
 
 verify_chunk({error, Reason}, _Intervals, State) ->
 	#state{ cursor = Cursor } = State,
-	NextCursor = ar_data_sync:advance_chunks_index_cursor(Cursor),
+	NextCursor = big_data_sync:advance_chunks_index_cursor(Cursor),
 	RangeSkipped = NextCursor - Cursor,
 	State2 = log_error(get_chunk_error, Cursor, RangeSkipped, [{reason, Reason}], State),
 	State2#state{ cursor = NextCursor };
@@ -137,7 +137,7 @@ verify_proof(Metadata, State) ->
 	{AbsoluteOffset, ChunkDataKey, TXRoot, _DataRoot, TXPath,
 		_TXRelativeOffset, ChunkSize} = Metadata,
 
-	case ar_data_sync:read_data_path(ChunkDataKey, StoreID) of
+	case big_data_sync:read_data_path(ChunkDataKey, StoreID) of
 		{ok, DataPath} ->
 			case ar_poa:validate_paths(TXRoot, TXPath, DataPath, AbsoluteOffset - 1) of
 				{false, _Proof} ->
@@ -155,7 +155,7 @@ verify_packing(Metadata, State) ->
 	{AbsoluteOffset, ChunkDataKey, TXRoot, _DataRoot, TXPath,
 			_TXRelativeOffset, ChunkSize} = Metadata,
 	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
-	StoredPackingCheck = ar_sync_record:is_recorded(AbsoluteOffset, ar_data_sync, StoreID),
+	StoredPackingCheck = ar_sync_record:is_recorded(AbsoluteOffset, big_data_sync, StoreID),
 	ExpectedPacking =
 		case big_chunk_storage:is_storage_supported(PaddedOffset, ChunkSize, Packing) of
 			true ->
@@ -211,7 +211,7 @@ invalidate_chunk(Type, Offset, ChunkSize, State) ->
 
 invalidate_chunk(Type, Offset, ChunkSize, Logs, State) ->
 	#state{ store_id = StoreID } = State,
-	ar_data_sync:invalidate_bad_data_record(Offset, ChunkSize, StoreID, Type),
+	big_data_sync:invalidate_bad_data_record(Offset, ChunkSize, StoreID, Type),
 	log_error(Type, Offset, ChunkSize, Logs, State).
 
 log_error(Type, Offset, ChunkSize, Logs, State) ->
@@ -243,7 +243,7 @@ align_intervals(Cursor, StoreID) ->
 	ChunkStorageInterval = ar_sync_record:get_next_synced_interval(
 		Cursor, infinity, big_chunk_storage, StoreID),
 	DataSyncInterval = ar_sync_record:get_next_synced_interval(
-		Cursor, infinity, ar_data_sync, StoreID),
+		Cursor, infinity, big_data_sync, StoreID),
 	align_intervals(Cursor, ChunkStorageInterval, DataSyncInterval).
 
 align_intervals(_Cursor, not_found, not_found) ->
@@ -329,17 +329,17 @@ verify_chunk_storage_test_() ->
 verify_proof_test_() ->
 	[
 		ar_test_node:test_with_mocked_functions([
-			{ar_data_sync, read_data_path, fun(_, _) -> not_found end}],
+			{big_data_sync, read_data_path, fun(_, _) -> not_found end}],
 			fun test_verify_proof_no_datapath/0
 		),
 		ar_test_node:test_with_mocked_functions([
-			{ar_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
+			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
 			{ar_poa, validate_paths, fun(_, _, _, _) -> {true, <<>>} end}
 		],
 			fun test_verify_proof_valid_paths/0
 		),
 		ar_test_node:test_with_mocked_functions([
-			{ar_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
+			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
 			{ar_poa, validate_paths, fun(_, _, _, _) -> {false, <<>>} end}
 		],
 			fun test_verify_proof_invalid_paths/0
@@ -349,7 +349,7 @@ verify_proof_test_() ->
 verify_chunk_test_() ->
 	[
 		ar_test_node:test_with_mocked_functions([
-			{ar_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
+			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
 			{ar_poa, validate_paths, fun(_, _, _, _) -> {true, <<>>} end}
 		],
 			fun test_verify_chunk/0
@@ -598,7 +598,7 @@ test_verify_chunk() ->
 			{Interval, not_found},
 			#state{packing=unpacked})),
 	ExpectedState = #state{ 
-		cursor = 33554432, %% = 2 * 2^24. From ar_data_sync:advance_chunks_index_cursor/1
+		cursor = 33554432, %% = 2 * 2^24. From big_data_sync:advance_chunks_index_cursor/1
 		packing = unpacked,
 		verify_report = #verify_report{
 			total_error_bytes = 33554432,

@@ -1131,7 +1131,7 @@ sub_chunk_belongs_to_chunk(_SubChunk, _Chunk) ->
 
 read_poa(RecallByte, Packing) ->
 	Options = #{ pack => true, packing => Packing, origin => miner },
-	case ar_data_sync:get_chunk(RecallByte + 1, Options) of
+	case big_data_sync:get_chunk(RecallByte + 1, Options) of
 		{ok, Proof} ->
 			#{ chunk := Chunk, tx_path := TXPath, data_path := DataPath } = Proof,
 			case get_packing_type(Packing) of
@@ -1154,7 +1154,7 @@ read_poa(RecallByte, Packing) ->
 
 read_unpacked_chunk(RecallByte, Proof) ->
 	Options = #{ pack => true, packing => unpacked, origin => miner },
-	case ar_data_sync:get_chunk(RecallByte + 1, Options) of
+	case big_data_sync:get_chunk(RecallByte + 1, Options) of
 		{ok, #{ chunk := UnpackedChunk, tx_path := TXPath, data_path := DataPath }} ->
 			{ok, #poa{ option = 1, chunk = maps:get(chunk, Proof),
 				unpacked_chunk = ar_packing_server:pad_chunk(UnpackedChunk),

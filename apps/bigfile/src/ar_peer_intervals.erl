@@ -14,7 +14,7 @@ fetch(Start, End, StoreID, _AllPeersIntervals) when Start >= End ->
 	%% We've reached the end of the range, next time through we'll start with a clear cache.
 	?LOG_DEBUG([{event, fetch_peer_intervals_end}, {pid, StoreID}, {store_id, StoreID},
 		{start, Start}]),
-	gen_server:cast(ar_data_sync:name(StoreID), {update_all_peers_intervals, #{}});
+	gen_server:cast(big_data_sync:name(StoreID), {update_all_peers_intervals, #{}});
 fetch(Start, End, StoreID, AllPeersIntervals) ->
 	spawn_link(fun() ->
 		try
@@ -32,7 +32,7 @@ fetch(Start, End, StoreID, AllPeersIntervals) ->
 				end,
 
 			%% The updated AllPeersIntervals cache is returned so it can be added to the State
-			Parent = ar_data_sync:name(StoreID),
+			Parent = big_data_sync:name(StoreID),
 			case ar_intervals:is_empty(UnsyncedIntervals) of
 				true ->
 					ok;
@@ -63,7 +63,7 @@ get_unsynced_intervals(Start, End, StoreID) ->
 get_unsynced_intervals(Start, End, Intervals, _StoreID) when Start >= End ->
 	Intervals;
 get_unsynced_intervals(Start, End, Intervals, StoreID) ->
-	case ar_sync_record:get_next_synced_interval(Start, End, ar_data_sync, StoreID) of
+	case ar_sync_record:get_next_synced_interval(Start, End, big_data_sync, StoreID) of
 		not_found ->
 			ar_intervals:add(Intervals, End, Start);
 		{End2, Start2} ->

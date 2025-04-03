@@ -502,7 +502,7 @@ lookup_block_filename(H) ->
 %% @doc Delete the blacklisted tx with the given hash from disk. Return {ok, BytesRemoved} if
 %% the removal is successful or the file does not exist. The reported number of removed
 %% bytes does not include the migrated v1 data. The removal of migrated v1 data is requested
-%% from ar_data_sync asynchronously. The v2 headers are not removed.
+%% from big_data_sync asynchronously. The v2 headers are not removed.
 delete_blacklisted_tx(Hash) ->
 	case ar_kv:get(tx_db, Hash) of
 		{ok, V} ->
@@ -701,7 +701,7 @@ write_tx_data(DataRoot, DataTree, Data, SizeTaggedChunks, TXID) ->
 			({Chunk, Offset}, Acc) ->
 				DataPath = ar_merkle:generate_path(DataRoot, Offset - 1, DataTree),
 				TXSize = byte_size(Data),
-				case ar_data_sync:add_chunk(DataRoot, DataPath, Chunk, Offset - 1, TXSize) of
+				case big_data_sync:add_chunk(DataRoot, DataPath, Chunk, Offset - 1, TXSize) of
 					ok ->
 						Acc;
 					temporary ->
@@ -846,7 +846,7 @@ read_migrated_v1_tx_file(Filename) ->
 	end.
 
 read_tx_data_from_kv_storage(ID) ->
-	case ar_data_sync:get_tx_data(ID) of
+	case big_data_sync:get_tx_data(ID) of
 		{ok, Data} ->
 			{ok, Data};
 		{error, not_found} ->
