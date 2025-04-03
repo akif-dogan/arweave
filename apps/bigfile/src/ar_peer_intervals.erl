@@ -4,7 +4,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_data_discovery.hrl").
+-include_lib("bigfile/include/big_data_discovery.hrl").
 
 %%%===================================================================
 %%% Public interface.
@@ -28,7 +28,7 @@ fetch(Start, End, StoreID, AllPeersIntervals) ->
 					true ->
 						Config#config.local_peers;
 					false ->
-						ar_data_discovery:get_bucket_peers(Bucket)
+						big_data_discovery:get_bucket_peers(Bucket)
 				end,
 
 			%% The updated AllPeersIntervals cache is returned so it can be added to the State

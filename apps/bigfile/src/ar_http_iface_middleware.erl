@@ -8,7 +8,7 @@
 -include("../include/big_config.hrl").
 -include("../include/big_mining.hrl").
 -include("../include/ar_data_sync.hrl").
--include("../include/ar_data_discovery.hrl").
+-include("../include/big_data_discovery.hrl").
 
 -include("../include/ar_pool.hrl").
 

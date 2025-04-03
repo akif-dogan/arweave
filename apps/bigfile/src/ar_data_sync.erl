@@ -25,7 +25,7 @@
 -include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 -include("../include/ar_poa.hrl").
--include("../include/ar_data_discovery.hrl").
+-include("../include/big_data_discovery.hrl").
 -include("../include/ar_data_sync.hrl").
 -include("../include/ar_sync_buckets.hrl").
 

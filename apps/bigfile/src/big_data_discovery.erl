@@ -1,4 +1,4 @@
--module(ar_data_discovery).
+-module(big_data_discovery).
 
 -behaviour(gen_server).
 
@@ -7,7 +7,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_data_discovery.hrl").
+-include_lib("bigfile/include/big_data_discovery.hrl").
 
 -record(state, {
 	peer_queue,

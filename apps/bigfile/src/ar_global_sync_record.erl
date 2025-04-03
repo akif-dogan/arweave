@@ -4,7 +4,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_data_discovery.hrl").
+-include_lib("bigfile/include/big_data_discovery.hrl").
 
 -export([start_link/0, get_serialized_sync_record/1, get_serialized_sync_buckets/0]).
 

@@ -13,7 +13,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/ar_data_sync.hrl").
--include_lib("bigfile/include/ar_data_discovery.hrl").
+-include_lib("bigfile/include/big_data_discovery.hrl").
 
 %% The kv storage key to the sync records.
 -define(SYNC_RECORDS_KEY, <<"sync_records">>).
