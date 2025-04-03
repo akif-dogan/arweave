@@ -2,7 +2,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_p3.hrl").
+-include_lib("bigfile/include/big_p3.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -export([raw_request/2, raw_request/3, http_request/1]).
@@ -34,13 +34,13 @@ test_not_found() ->
 	Config = empty_p3_config(),
 	?assertEqual(
 		{reply, {true, not_p3_service}, Config},
-		ar_p3:handle_call({allow_request, raw_request(<<"GET">>, <<"/price/1000">>)}, [], Config)),
+		big_p3:handle_call({allow_request, raw_request(<<"GET">>, <<"/price/1000">>)}, [], Config)),
 	?assertEqual(
 		{reply, {true, not_p3_service}, Config},
-		ar_p3:handle_call({allow_request, raw_request(<<"GET">>, <<"/info">>)}, [],Config)),
+		big_p3:handle_call({allow_request, raw_request(<<"GET">>, <<"/info">>)}, [],Config)),
 	?assertEqual(
 		{reply, {true, not_p3_service}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			raw_request(<<"GET">>, <<"/invalid_endpoint">>)}, [], Config)).
 
 test_valid_request() ->
@@ -58,7 +58,7 @@ test_valid_request() ->
 		crypto:strong_rand_bytes(32)
 	),
 	Config = sample_p3_config(),
-	{_, {_, Transaction1}, _} = Result1 = ar_p3:handle_call({allow_request, 
+	{_, {_, Transaction1}, _} = Result1 = big_p3:handle_call({allow_request, 
 					signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 						#{
 							?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -71,7 +71,7 @@ test_valid_request() ->
 		"Valid 'modSeq' header"),
 	?assertEqual(<<"GET /price/1000">>, Transaction1#p3_transaction.description),
 	
-	{_, {_, Transaction2}, _} = Result2 = ar_p3:handle_call({allow_request, 
+	{_, {_, Transaction2}, _} = Result2 = big_p3:handle_call({allow_request, 
 					signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 						#{
 							?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -93,7 +93,7 @@ test_zero_rate() ->
 		?BIGFILE_BIG
 	),
 	ZeroRateConfig = sample_p3_config(crypto:strong_rand_bytes(32), 0, 2, 0),
-	{_, {_, Transaction1}, _} = Result1 = ar_p3:handle_call({allow_request, 
+	{_, {_, Transaction1}, _} = Result1 = big_p3:handle_call({allow_request, 
 					signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 						#{
 							?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -107,7 +107,7 @@ test_zero_rate() ->
 	?assertEqual(<<"GET /price/1000">>, Transaction1#p3_transaction.description),
 	?assertEqual(
 		{reply, {false, invalid_header}, ZeroRateConfig},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			raw_request(<<"GET">>, <<"/price/1000">>)}, [], ZeroRateConfig),
 		"Unsigned request should fail").
 
@@ -128,7 +128,7 @@ test_checksum_request() ->
 	Config = sample_p3_config(),
 	?assertEqual(
 		{reply, {false, insufficient_funds}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -137,7 +137,7 @@ test_checksum_request() ->
 		"Valid checksum"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -165,7 +165,7 @@ test_bad_headers() ->
 	Config = sample_p3_config(),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -175,7 +175,7 @@ test_bad_headers() ->
 		"Empty 'modSeq' header"),
 	?assertEqual(
 		{reply, {false, stale_mod_seq}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -185,7 +185,7 @@ test_bad_headers() ->
 		"Bad 'modSeq' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ADDRESS_HEADER => EncodedAddress
@@ -193,7 +193,7 @@ test_bad_headers() ->
 		"Missing 'endpoint' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<>>,
@@ -202,7 +202,7 @@ test_bad_headers() ->
 		"Empty 'endpoint' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/chunk/{offset}">>,
@@ -211,7 +211,7 @@ test_bad_headers() ->
 		"Bad 'endpoint' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => "/price/{bytes}",
@@ -220,7 +220,7 @@ test_bad_headers() ->
 		"Bad 'endpoint' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>
@@ -228,7 +228,7 @@ test_bad_headers() ->
 		"Missing 'address' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -237,7 +237,7 @@ test_bad_headers() ->
 		"Empty 'address' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -246,7 +246,7 @@ test_bad_headers() ->
 		"Decoded 'address' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -255,7 +255,7 @@ test_bad_headers() ->
 		"Wrong 'address' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -265,7 +265,7 @@ test_bad_headers() ->
 		"Mismatch 'price' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			raw_request(<<"GET">>, <<"/price/1000">>,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -274,7 +274,7 @@ test_bad_headers() ->
 		"Missing 'signature' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			raw_request(<<"GET">>, <<"/price/1000">>,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -284,7 +284,7 @@ test_bad_headers() ->
 		"Empty 'signature' header"),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			raw_request(<<"GET">>, <<"/price/1000">>,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -301,7 +301,7 @@ test_bad_headers() ->
 	ValidHeaders = maps:get(headers, ValidRequest),
 	?assertEqual(
 		{reply, {false, invalid_header}, Config},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			ValidRequest#{
 				headers => ValidHeaders#{
 					?P3_SIGNATURE_HEADER => ar_util:decode(maps:get(?P3_SIGNATURE_HEADER, ValidHeaders))
@@ -324,7 +324,7 @@ test_bad_config() ->
 	NoPaymentsConfig = Config#p3_config{ payments = #{} },
 	?assertEqual(
 		{reply, {false, invalid_header}, NoPaymentsConfig},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -341,7 +341,7 @@ test_bad_config() ->
 		} },
 	?assertEqual(
 		{reply, {false, invalid_header}, MismatchedPaymentsConfig},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -358,7 +358,7 @@ test_bad_config() ->
 			} } },
 	?assertEqual(
 		{reply, {false, invalid_header}, NoRateConfig},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -375,7 +375,7 @@ test_bad_config() ->
 			} } },
 	?assertEqual(
 		{reply, {false, invalid_header}, MismatchRateConfig},
-		ar_p3:handle_call({allow_request, 
+		big_p3:handle_call({allow_request, 
 			signed_request(<<"GET">>, <<"/price/1000">>, PrivKey,
 				#{
 					?P3_ENDPOINT_HEADER => <<"/price/{bytes}">>,
@@ -439,7 +439,7 @@ test_reverse_charge() ->
 		-20,
 		Request),
 	?assertEqual({ok, -20}, ar_p3_db:get_balance(Address1)),
-	ar_p3:reverse_charge(Charge1),
+	big_p3:reverse_charge(Charge1),
 	?assertEqual({ok, 0}, ar_p3_db:get_balance(Address1)),
 
 	{ok, Charge2} = ar_p3_db:post_charge(
@@ -448,7 +448,7 @@ test_reverse_charge() ->
 		0,
 		Request),
 	?assertEqual({ok, 0}, ar_p3_db:get_balance(Address1)),
-	ar_p3:reverse_charge(Charge2),
+	big_p3:reverse_charge(Charge2),
 	?assertEqual({ok, 0}, ar_p3_db:get_balance(Address1)).
 
 mocked_test_timeout() ->
@@ -456,7 +456,7 @@ mocked_test_timeout() ->
 		fun test_timeout/0).
 
 test_timeout() ->
-	?assertEqual({error, timeout}, ar_p3:allow_request(raw_request(<<"GET">>, <<"/price/1000">>))).
+	?assertEqual({error, timeout}, big_p3:allow_request(raw_request(<<"GET">>, <<"/price/1000">>))).
 
 e2e_deposit_before_charge() ->
 	Wallet1 = {Priv1, Pub1} = big_wallet:new(),

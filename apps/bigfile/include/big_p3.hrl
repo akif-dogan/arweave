@@ -1,5 +1,5 @@
--ifndef(AR_P3_HRL).
--define(AR_P3_HRL, true).
+-ifndef(BIG_P3_HRL).
+-define(BIG_P3_HRL, true).
 
 -include_lib("big.hrl").
 

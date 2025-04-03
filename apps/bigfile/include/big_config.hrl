@@ -2,7 +2,7 @@
 -define(BIG_CONFIG_HRL, true).
 
 -include_lib("big.hrl").
--include_lib("ar_p3.hrl").
+-include_lib("big_p3.hrl").
 
 -record(config_webhook, {
 	events = [],

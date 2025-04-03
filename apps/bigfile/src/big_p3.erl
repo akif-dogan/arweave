@@ -1,10 +1,10 @@
--module(ar_p3).
+-module(big_p3).
 
 -behaviour(gen_server).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_p3.hrl").
+-include_lib("bigfile/include/big_p3.hrl").
 
 -export([start_link/0, allow_request/1, reverse_charge/1, get_balance/3, get_rates_json/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
@@ -345,6 +345,6 @@ apply_deposit(TX) ->
 	PublicKey = {TX#tx.signature_type, TX#tx.owner},
 	{ok, _} = ar_p3_db:get_or_create_account(Sender, PublicKey, ?BIGFILE_BIG),
 	{ok, _} = ar_p3_db:post_deposit(Sender, TX#tx.quantity, TX#tx.id),
-	?LOG_INFO([{event, ar_p3}, {op, deposit}, {sender, Sender},
+	?LOG_INFO([{event, big_p3}, {op, deposit}, {sender, Sender},
 		{target, TX#tx.target}, {quantity, TX#tx.quantity}]),
 	ok.

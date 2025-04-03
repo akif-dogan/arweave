@@ -102,13 +102,13 @@ handle(Peer, Req, Pid) ->
 			do_nothing
 	end,
 	%% We break the P3 handling into two steps:
-	%% 1. Before the request is processed, ar_p3:allow_request checks whether this is a
+	%% 1. Before the request is processed, big_p3:allow_request checks whether this is a
 	%%    P3 request and if so it validates the header and applies the charge
 	%% 2. After the request is processed, handle_p3_response checks if the requet failed,
 	%%	  if so it reverses the charge
 	%%
 	%% This two-step process is needed to ensure clients aren't charged for failed requests.
-	Response2 = case ar_p3:allow_request(Req) of
+	Response2 = case big_p3:allow_request(Req) of
 		{true, P3Data} ->
 			Response = handle4(Method, SplitPath, Req, Pid),
 			handle_p3_error(Response, P3Data),
@@ -134,7 +134,7 @@ handle_p3_error(Response, P3Data) ->
 		{_, not_p3_service} ->
 			do_nothing;
 		_ when Status >= 400 ->
-			{ok, _} = ar_p3:reverse_charge(P3Data);
+			{ok, _} = big_p3:reverse_charge(P3Data);
 		_ ->
 			do_nothing
 	end,
@@ -1263,12 +1263,12 @@ handle(<<"GET">>, [<<"balance">>, Addr, Network, Token], Req, _Pid) ->
 			{400, #{}, <<"Invalid address.">>, Req};
 		{ok, AddrOK} ->
 			%% The only expected error is due to an invalid address (handled above).
-			{ok, Balance} = ar_p3:get_balance(AddrOK, Network, Token),
+			{ok, Balance} = big_p3:get_balance(AddrOK, Network, Token),
 			{200, #{}, integer_to_binary(Balance), Req}
 	end;
 
 handle(<<"GET">>, [<<"rates">>], Req, _Pid) ->
-	{200, #{}, ar_p3:get_rates_json(), Req};
+	{200, #{}, big_p3:get_rates_json(), Req};
 
 %% Return the current block hieght, or 500.
 handle(Method, [<<"height">>], Req, _Pid)
