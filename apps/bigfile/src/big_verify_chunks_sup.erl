@@ -34,7 +34,7 @@ init([]) ->
 				end,
 				Config#config.storage_modules
 			),
-			Reporter = ?CHILD(ar_verify_chunks_reporter, worker),
+			Reporter = ?CHILD(big_verify_chunks_reporter, worker),
 			{ok, {{one_for_one, 5, 10}, [Reporter | Workers]}}
 	end.
 	

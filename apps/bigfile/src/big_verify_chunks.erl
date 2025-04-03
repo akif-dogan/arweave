@@ -296,7 +296,7 @@ report_progress(State) ->
 		progress = Progress,
 		status = Status
 	},
-	ar_verify_chunks_reporter:update(StoreID, Report2),
+	big_verify_chunks_reporter:update(StoreID, Report2),
 	State#state{ verify_report = Report2 }.
 
 %% big_chunk_storage does not store small chunks before strict_split_data_threshold
