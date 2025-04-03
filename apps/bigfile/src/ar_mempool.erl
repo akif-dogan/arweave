@@ -26,7 +26,7 @@ load_from_disk() ->
 					fun(TXID, {TX, Status}, {MempoolSize, PrioritySet, PropagationQueue, LastTXMap, OriginTXMap}) ->
 						Metadata = {_, _, Timestamp} = init_tx_metadata(TX, Status),
 						ets:insert(node_state, {{tx, TXID}, Metadata}),
-						ets:insert(tx_prefixes, {ar_node_worker:tx_id_prefix(TXID), TXID}),
+						ets:insert(tx_prefixes, {big_node_worker:tx_id_prefix(TXID), TXID}),
 						Q = case Status of
 							ready_for_mining ->
 								PropagationQueue;
@@ -70,7 +70,7 @@ add_tx(#tx{ id = TXID } = TX, Status) ->
 		case get_tx_metadata(TXID) of
 			not_found ->
 				{_, _, Timestamp} = init_tx_metadata(TX, Status),
-				ets:insert(tx_prefixes, {ar_node_worker:tx_id_prefix(TXID), TXID}),
+				ets:insert(tx_prefixes, {big_node_worker:tx_id_prefix(TXID), TXID}),
 				{
 					{TX, Status, Timestamp},
 					increase_mempool_size(get_mempool_size(), TX),
@@ -145,7 +145,7 @@ drop_txs(DroppedTXs, RemoveTXPrefixes, DropFromDiskPool) ->
 						ets:delete(node_state, {tx, TXID}),
 						case RemoveTXPrefixes of
 							true ->
-								ets:delete_object(tx_prefixes, {ar_node_worker:tx_id_prefix(TXID), TXID});
+								ets:delete_object(tx_prefixes, {big_node_worker:tx_id_prefix(TXID), TXID});
 							false ->
 								ok
 						end,
@@ -517,7 +517,7 @@ find_overspent_txs(Origin, SpentTXIDs, Wallet, Denomination) ->
 		false ->
 			{{_, TXID}, SpentTXIDs2} = gb_sets:take_largest(SpentTXIDs),
 			TX = get_tx(TXID),
-			Wallet2 = ar_node_utils:apply_tx(Wallet, Denomination, TX),
+			Wallet2 = big_node_utils:apply_tx(Wallet, Denomination, TX),
 			case is_overspent(Origin, Wallet2) of
 				false ->
 					find_overspent_txs(Origin, SpentTXIDs2, Wallet2, Denomination);

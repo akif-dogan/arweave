@@ -610,7 +610,7 @@ h2_passes_diff_checks(H2, Candidate, State) ->
 passes_diff_checks(SolutionHash, IsPoA1, Candidate, State) ->
 	DiffPair = get_difficulty(State, Candidate),
 	#mining_candidate{ packing_difficulty = PackingDifficulty } = Candidate,
-	case ar_node_utils:passes_diff_check(SolutionHash, IsPoA1, DiffPair, PackingDifficulty) of
+	case big_node_utils:passes_diff_check(SolutionHash, IsPoA1, DiffPair, PackingDifficulty) of
 		true ->
 			true;
 		false ->
@@ -618,7 +618,7 @@ passes_diff_checks(SolutionHash, IsPoA1, Candidate, State) ->
 				not_set ->
 					false;
 				PartialDiffPair ->
-					case ar_node_utils:passes_diff_check(SolutionHash, IsPoA1,
+					case big_node_utils:passes_diff_check(SolutionHash, IsPoA1,
 							PartialDiffPair, PackingDifficulty) of
 						true ->
 							partial;

@@ -331,7 +331,7 @@ base_cm_config(Peers) ->
 	}.
 
 mine() ->
-	gen_server:cast(ar_node_worker, mine).
+	gen_server:cast(big_node_worker, mine).
 
 %% @doc Start mining on the given node. The node will be mining until it finds a block.
 mine(Node) ->
@@ -811,7 +811,7 @@ join(JoinOnNode, Rejoin) ->
 		peers = [Peer]
 	}),
 	big:start_dependencies(),
-	whereis(ar_node_worker).
+	whereis(big_node_worker).
 
 get_default_storage_module_packing(RewardAddr, Index) ->
 	get_default_storage_module_packing(RewardAddr, Index, #{}).

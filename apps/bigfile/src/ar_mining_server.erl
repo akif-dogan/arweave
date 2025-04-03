@@ -948,7 +948,7 @@ post_solution(not_set, Solution, State) ->
 			big:console("WARNING: the solution we found is invalid. Check logs for more "
 					"details~n");
 		{true, PoACache, PoA2Cache} ->
-			ar_node_worker:found_solution(miner, Solution, PoACache, PoA2Cache)
+			big_node_worker:found_solution(miner, Solution, PoACache, PoA2Cache)
 	end;
 post_solution(ExitPeer, Solution, #state{ is_pool_client = true }) ->
 	case ar_http_iface_client:post_partial_solution(ExitPeer, Solution) of
@@ -1187,7 +1187,7 @@ validate_solution(Solution, DiffPair) ->
 		{true, ChunkID} ->
 			PoACache = {{BlockStart1, RecallByte1, TXRoot1, BlockSize1, Packing,
 					SubChunkIndex}, ChunkID},
-			case ar_node_utils:h1_passes_diff_check(H1, DiffPair, PackingDifficulty) of
+			case big_node_utils:h1_passes_diff_check(H1, DiffPair, PackingDifficulty) of
 				true ->
 					%% validates solution_hash
 					SolutionHash = H1,
@@ -1203,7 +1203,7 @@ validate_solution(Solution, DiffPair) ->
 							#mining_solution{
 								recall_byte2 = RecallByte2, poa2 = PoA2 } = Solution,
 							{H2, _Preimage2} = big_block:compute_h2(H1, PoA2#poa.chunk, H0),
-							case ar_node_utils:h2_passes_diff_check(H2, DiffPair,
+							case big_node_utils:h2_passes_diff_check(H2, DiffPair,
 									PackingDifficulty) of
 								false ->
 									{false, h2_diff_check};

@@ -92,7 +92,7 @@ init([]) ->
 		?CHILD(ar_tx_poller, worker),
 		?CHILD_SUP(ar_block_pre_validator_sup, supervisor),
 		?CHILD_SUP(ar_poller_sup, supervisor),
-		?CHILD_SUP(ar_node_sup, supervisor),
+		?CHILD_SUP(big_node_sup, supervisor),
 		?CHILD_SUP(big_webhook_sup, supervisor),
 		?CHILD(big_p3, worker),
 		?CHILD(ar_p3_db, worker),

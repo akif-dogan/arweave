@@ -163,7 +163,7 @@ persisted_mempool_test_() ->
 	%% Make the propagation delay noticeable so that the submitted transactions do not
 	%% become ready for mining before the node is restarted and we assert that waiting
 	%% transactions found in the persisted mempool are (re-)submitted to peers.
-	ar_test_node:test_with_mocked_functions([{ar_node_worker, calculate_delay,
+	ar_test_node:test_with_mocked_functions([{big_node_worker, calculate_delay,
 			fun(_Size) -> 5000 end}], fun test_persisted_mempool/0).
 
 test_persisted_mempool() ->

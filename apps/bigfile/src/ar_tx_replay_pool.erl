@@ -1,5 +1,5 @@
 %%% @doc This module contains functions for transaction verification. It relies on
-%%% some verification helpers from the ar_tx and ar_node_utils modules.
+%%% some verification helpers from the ar_tx and big_node_utils modules.
 %%% The module should be used to verify transactions on-edge, validate
 %%% new blocks' transactions, pick transactions to include into a block, and
 %%% remove no longer valid transactions from the mempool after accepting a new block.
@@ -59,7 +59,7 @@ verify_block_txs([TX | TXs],
 			Mempool, verify_signature}) of
 		valid ->
 			NewMempool = maps:put(TX#tx.id, no_tx, Mempool),
-			NewWallets = ar_node_utils:apply_tx(Wallets, Denomination, TX),
+			NewWallets = big_node_utils:apply_tx(Wallets, Denomination, TX),
 			NewSize =
 				case TX of
 					#tx{ format = 1 } ->
@@ -195,7 +195,7 @@ pick_txs_under_size_limit(
 			Mempool, verify_signature}) of
 		valid ->
 			NewMempool = maps:put(TX#tx.id, no_tx, Mempool),
-			NewWallets = ar_node_utils:apply_tx(Wallets, Denomination, TX),
+			NewWallets = big_node_utils:apply_tx(Wallets, Denomination, TX),
 			NewSize =
 				case TX of
 					#tx{ format = 1 } ->

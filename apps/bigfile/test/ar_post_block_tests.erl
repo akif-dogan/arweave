@@ -563,7 +563,7 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	true = ar_util:do_until(
 		fun() ->
 			map_size(maps:get(double_signing_proofs,
-					sys:get_state(ar_node_worker), #{})) > 0
+					sys:get_state(big_node_worker), #{})) > 0
 		end,
 		200,
 		5000

@@ -208,7 +208,7 @@ send_to_worker(Peer, {JSON, B}, W) ->
 							recall_byte = B#block.recall_byte,
 							recall_byte2 = B#block.recall_byte2,
 							solution_hash = SolutionH2,
-							tx_prefixes = [ar_node_worker:tx_id_prefix(ID)
+							tx_prefixes = [big_node_worker:tx_id_prefix(ID)
 									|| #tx{ id = ID } <- TXs] },
 					ar_http_iface_client:send_block_announcement(Peer, Announcement)
 				end,
@@ -216,12 +216,12 @@ send_to_worker(Peer, {JSON, B}, W) ->
 				fun(MissingChunk, MissingChunk2, MissingTXs) ->
 					%% Some transactions might be absent from our mempool. We still gossip
 					%% this block further and search for the missing transactions afterwads
-					%% (the process is initiated by ar_node_worker). We are gradually moving
+					%% (the process is initiated by big_node_worker). We are gradually moving
 					%% to the new process where blocks are sent over POST /block2 along with
 					%% all the missing transactions specified in the preceding
 					%% POST /block_announcement reply. Once the network adopts the new release,
 					%% we will turn off POST /block and remove the missing transactions search
-					%% in ar_node_worker.
+					%% in big_node_worker.
 					case determine_included_transactions(TXs, MissingTXs) of
 						missing ->
 							case Height >= ar_fork:height_2_6() of

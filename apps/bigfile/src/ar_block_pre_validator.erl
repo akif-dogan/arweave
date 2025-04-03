@@ -420,7 +420,7 @@ pre_validate_existing_solution_hash(B, PrevB, Peer) ->
 			invalid ->
 				invalid;
 			{valid, B4} ->
-				case ar_node_utils:block_passes_diff_check(B) of
+				case big_node_utils:block_passes_diff_check(B) of
 					true ->
 						{valid, B4};
 					false ->
@@ -603,7 +603,7 @@ pre_validate_quick_pow(B, PrevB, SolutionResigned, Peer) ->
 	#block{ hash_preimage = HashPreimage } = B,
 	H0 = big_block:compute_h0(B, PrevB),
 	SolutionHash = big_block:compute_solution_h(H0, HashPreimage),
-	case ar_node_utils:block_passes_diff_check(SolutionHash, B) of
+	case big_node_utils:block_passes_diff_check(SolutionHash, B) of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_hash_preimage, Peer),
 			ar_events:send(block, {rejected, invalid_hash_preimage,
@@ -668,7 +668,7 @@ pre_validate_pow_2_6(B, PrevB, PartitionUpperBound, Peer) ->
 	Chunk1 = (B#block.poa)#poa.chunk,
 	{H1, Preimage1} = big_block:compute_h1(H0, B#block.nonce, Chunk1),
 	DiffPair = ar_difficulty:diff_pair(B),
-	case H1 == B#block.hash andalso ar_node_utils:h1_passes_diff_check(H1, DiffPair,
+	case H1 == B#block.hash andalso big_node_utils:h1_passes_diff_check(H1, DiffPair,
 				B#block.packing_difficulty)
 			andalso Preimage1 == B#block.hash_preimage
 			andalso B#block.recall_byte2 == undefined
@@ -678,7 +678,7 @@ pre_validate_pow_2_6(B, PrevB, PartitionUpperBound, Peer) ->
 		false ->
 			Chunk2 = (B#block.poa2)#poa.chunk,
 			{H2, Preimage2} = big_block:compute_h2(H1, Chunk2, H0),
-			case H2 == B#block.hash andalso ar_node_utils:h2_passes_diff_check(H2, DiffPair,
+			case H2 == B#block.hash andalso big_node_utils:h2_passes_diff_check(H2, DiffPair,
 						B#block.packing_difficulty)
 					andalso Preimage2 == B#block.hash_preimage of
 				true ->

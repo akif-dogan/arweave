@@ -1,4 +1,4 @@
--module(ar_testnet).
+-module(big_testnet).
 
 -export([is_testnet/0, height_testnet_fork/0, top_up_test_wallet/2,
 		locked_rewards_blocks/1, reward_history_blocks/1, target_block_time/1,

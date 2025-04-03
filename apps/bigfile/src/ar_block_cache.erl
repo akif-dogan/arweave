@@ -88,7 +88,7 @@ add(Tab,
 			Set2 = gb_sets:insert({Height, H}, Set),
 			Status = {not_validated, awaiting_nonce_limiter_validation},
 			%% If CDiff > MaxCDiff it means this block belongs to the heaviest fork we're aware
-			%% of. If our current tip is not on this fork, ar_node_worker may switch to this fork.
+			%% of. If our current tip is not on this fork, big_node_worker may switch to this fork.
 			insert(Tab, [
 				{max_cdiff, maybe_increase_max_cdiff(Tab, B, Status)},
 				{links, Set2},

@@ -1,5 +1,5 @@
 %%% @doc Different utility functions for node and node worker.
--module(ar_node_utils).
+-module(big_node_utils).
 
 -export([apply_tx/3, apply_txs/3, update_accounts/3, validate/6,
 	h1_passes_diff_check/3, h2_passes_diff_check/3, solution_passes_diff_check/2,
@@ -58,7 +58,7 @@ update_accounts(B, PrevB, Accounts) ->
 
 %% @doc Perform the last stage of block validation. The majority of the checks
 %% are made in ar_block_pre_validator.erl, ar_nonce_limiter.erl, and
-%% ar_node_utils:update_accounts/3.
+%% big_node_utils:update_accounts/3.
 validate(NewB, B, Wallets, BlockAnchors, RecentTXMap, PartitionUpperBound) ->
 	?LOG_INFO([{event, validating_block}, {hash, ar_util:encode(NewB#block.indep_hash)}]),
 	case timer:tc(
@@ -376,7 +376,7 @@ update_accounts5(B, Accounts, Args) ->
 			KryderPlusRateMultiplier} = Args,
 	case validate_account_anchors(Accounts, B#block.txs) of
 		true ->
-			Accounts2 = ar_testnet:top_up_test_wallet(Accounts, B#block.height),
+			Accounts2 = big_testnet:top_up_test_wallet(Accounts, B#block.height),
 			{ok, {EndowmentPool, MinerReward, DebtSupply, KryderPlusRateMultiplierLatch,
 					KryderPlusRateMultiplier, Accounts2}};
 		false ->

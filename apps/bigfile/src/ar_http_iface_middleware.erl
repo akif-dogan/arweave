@@ -2652,7 +2652,7 @@ get_missing_tx_identifiers([_ | _], _, N) when N == ?BLOCK_TX_COUNT_LIMIT ->
 get_missing_tx_identifiers([#tx{} | TXIDs], MissingTXIDs, N) ->
 	get_missing_tx_identifiers(TXIDs, MissingTXIDs, N + 1);
 get_missing_tx_identifiers([TXID | TXIDs], MissingTXIDs, N) ->
-	case ar_node_worker:is_mempool_or_block_cache_tx(TXID) of
+	case big_node_worker:is_mempool_or_block_cache_tx(TXID) of
 		true ->
 			get_missing_tx_identifiers(TXIDs, MissingTXIDs, N + 1);
 		false ->

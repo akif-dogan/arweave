@@ -34,7 +34,7 @@ get_info() ->
         <<"queue_length">> =>
             element(
                 2,
-                erlang:process_info(whereis(ar_node_worker), message_queue_len)
+                erlang:process_info(whereis(big_node_worker), message_queue_len)
             ),
         <<"node_state_latency">> => (Time + Time2) div 2
     }.

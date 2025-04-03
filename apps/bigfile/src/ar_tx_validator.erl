@@ -70,7 +70,7 @@ validate(TX) ->
 							%% advance, otherwise big_header_sync may fail to store the chunks
 							%% when persisting the transaction as registering the data roots of
 							%% a confirmed block is an asynchronous procedure
-							%% (see big_data_sync:add_tip_block called in ar_node_worker) which
+							%% (see big_data_sync:add_tip_block called in big_node_worker) which
 							%% does not always complete before big_header_sync attempts the
 							%% insertion.
 							V1Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, TX#tx.data),

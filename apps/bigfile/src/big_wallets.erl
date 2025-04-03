@@ -80,7 +80,7 @@ init([{blocks, []} | _]) ->
 	%% Trap exit to avoid corrupting any open files on quit.
 	process_flag(trap_exit, true),
 	DAG = ar_diff_dag:new(<<>>, ar_patricia_tree:new(), not_set),
-	ar_node_worker ! wallets_ready,
+	big_node_worker ! wallets_ready,
 	{ok, DAG};
 init([{blocks, Blocks} | Args]) ->
 	%% Trap exit to avoid corrupting any open files on quit.
@@ -322,7 +322,7 @@ apply_block2(B, PrevB, DAG) ->
 				[big_wallet:hash_pub_key(element(1, Proof)) | Addresses2]
 		end,
 	Accounts = get_map(Tree, Addresses3),
-	case ar_node_utils:update_accounts(B, PrevB, Accounts) of
+	case big_node_utils:update_accounts(B, PrevB, Accounts) of
 		{ok, Args} ->
 			apply_block2(B, PrevB, Args, Tree, DAG);
 		Error ->

@@ -3,7 +3,7 @@
 %% with this file, You can obtain one at 
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
--module(ar_node_sup).
+-module(big_node_sup).
 
 -behaviour(supervisor).
 
@@ -26,5 +26,5 @@ start_link() ->
 %% ===================================================================
 init([]) ->
 	{ok, {{one_for_all, 5, 10}, [
-		?CHILD(ar_node_worker, worker)
+		?CHILD(big_node_worker, worker)
 	]}}.

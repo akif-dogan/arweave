@@ -198,7 +198,7 @@ emit_set_not_empty(Set, Peers, MaxPeers, N, State) ->
 
 			%% The cache storing recently emitted transactions is used instead
 			%% of an explicit synchronization of the propagation queue updates
-			%% with ar_node_worker - we do not rely on ar_node_worker removing
+			%% with big_node_worker - we do not rely on big_node_worker removing
 			%% emitted transactions from the queue on time.
 			ets:insert(ar_tx_emitter_recently_emitted, {TXID}),
 			erlang:send_after(?CLEANUP_RECENTLY_EMITTED_TIMEOUT, ?MODULE,

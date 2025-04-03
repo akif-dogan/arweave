@@ -16,9 +16,9 @@ reward_history_length(Height) ->
 		Height - ar_fork:height_2_6() + 1, %% included for compatibility with unit tests
 		case Height >= ar_fork:height_2_8() of
 			true ->
-				ar_testnet:reward_history_blocks(Height) + ?STORE_BLOCKS_BEHIND_CURRENT;
+				big_testnet:reward_history_blocks(Height) + ?STORE_BLOCKS_BEHIND_CURRENT;
 			false ->
-				ar_testnet:legacy_reward_history_blocks(Height) + ?STORE_BLOCKS_BEHIND_CURRENT
+				big_testnet:legacy_reward_history_blocks(Height) + ?STORE_BLOCKS_BEHIND_CURRENT
 		end
 	).
 
@@ -44,7 +44,7 @@ buffered_reward_history_length(Height) ->
 			reward_history_length(Height - expected_hashes_length(Height)),
 			reward_history_length(Height)
 		),
-		ar_testnet:locked_rewards_blocks(Height)
+		big_testnet:locked_rewards_blocks(Height)
 	).
 
 %% @doc Add the corresponding reward history to every block record. We keep
@@ -67,7 +67,7 @@ get_locked_rewards(B) ->
 
 %% @doc Trim RewardHistory to just the locked rewards.
 trim_locked_rewards(Height, RewardHistory) ->
-	LockRewardsLength = ar_testnet:locked_rewards_blocks(Height),
+	LockRewardsLength = big_testnet:locked_rewards_blocks(Height),
 	lists:sublist(RewardHistory, LockRewardsLength).
 
 %% @doc Trim RewardHistory to the values that will be stored in the block. This is the
@@ -194,9 +194,9 @@ apply_rewards(PrevB, Accounts) ->
 	%% happen on testnet.
 	Height = PrevB#block.height,
 	NumRewardsToApply = max(0,
-			ar_testnet:locked_rewards_blocks(Height) -
-			ar_testnet:locked_rewards_blocks(Height + 1) + 1),
-	true = NumRewardsToApply == 1 orelse ar_testnet:is_testnet(),
+			big_testnet:locked_rewards_blocks(Height) -
+			big_testnet:locked_rewards_blocks(Height + 1) + 1),
+	true = NumRewardsToApply == 1 orelse big_testnet:is_testnet(),
 
 	%% Get the last NumRewardsToApply elements of the LockedRewards list in reverse order.
 	%% Normally this will be a list with a single element: the last element in the
@@ -210,7 +210,7 @@ apply_rewards2([], _Denomination, Accounts) ->
 	Accounts;
 apply_rewards2([{Addr, _HashRate, Reward, RewardDenomination} | RewardsToApply],
 		Denomination, Accounts) ->
-	case ar_node_utils:is_account_banned(Addr, Accounts) of
+	case big_node_utils:is_account_banned(Addr, Accounts) of
 		true ->
 			apply_rewards2(RewardsToApply, Denomination, Accounts);
 		false ->
@@ -226,14 +226,14 @@ apply_reward(Accounts, unclaimed, _Quantity, _Denomination) ->
 apply_reward(Accounts, RewardAddr, Amount, Denomination) ->
 	case maps:get(RewardAddr, Accounts, not_found) of
 		not_found ->
-			ar_node_utils:update_account(RewardAddr, Amount, <<>>, Denomination, true, Accounts);
+			big_node_utils:update_account(RewardAddr, Amount, <<>>, Denomination, true, Accounts);
 		{Balance, LastTX} ->
 			Balance2 = big_pricing:redenominate(Balance, 1, Denomination),
-			ar_node_utils:update_account(RewardAddr, Balance2 + Amount, LastTX,
+			big_node_utils:update_account(RewardAddr, Balance2 + Amount, LastTX,
 				Denomination, true, Accounts);
 		{Balance, LastTX, AccountDenomination, MiningPermission} ->
 			Balance2 = big_pricing:redenominate(Balance, AccountDenomination, Denomination),
-			ar_node_utils:update_account(RewardAddr, Balance2 + Amount, LastTX,
+			big_node_utils:update_account(RewardAddr, Balance2 + Amount, LastTX,
 				Denomination, MiningPermission, Accounts)
 	end.
 

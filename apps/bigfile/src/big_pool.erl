@@ -549,7 +549,7 @@ process_partial_solution_difficulty(Solution, Ref, PoACache, PoA2Cache) ->
 	#mining_solution{ solution_hash = SolutionH, recall_byte2 = RecallByte2,
 			packing_difficulty = PackingDifficulty } = Solution,
 	IsPoA1 = (RecallByte2 == undefined),
-	case ar_node_utils:passes_diff_check(SolutionH, IsPoA1, big_node:get_current_diff(),
+	case big_node_utils:passes_diff_check(SolutionH, IsPoA1, big_node:get_current_diff(),
 			PackingDifficulty) of
 		false ->
 			#partial_solution_response{ status = <<"accepted">> };
@@ -582,10 +582,10 @@ process_partial_solution_vdf(Solution, Ref, PoACache, PoA2Cache) ->
 			Solution2 =
 				Solution#mining_solution{
 					last_step_checkpoints = LastStepCheckpoints,
-					%% ar_node_worker will fetch the required steps based on the prev block.
+					%% big_node_worker will fetch the required steps based on the prev block.
 					steps = not_found
 				},
-			ar_node_worker:found_solution({pool, Ref}, Solution2, PoACache, PoA2Cache),
+			big_node_worker:found_solution({pool, Ref}, Solution2, PoACache, PoA2Cache),
 			noreply;
 		_ ->
 			%% {Output, Seed, PartitionUpperBound} mismatch (pattern matching against
@@ -996,7 +996,7 @@ process_solution_test_() ->
 				end
 			end},
 		{ar_events, send, fun(_Type, _Payload) -> ok end},
-		{ar_node_worker, found_solution, fun(_, _, _, _) -> ok end}],
+		{big_node_worker, found_solution, fun(_, _, _, _) -> ok end}],
 		fun test_process_solution/0
 	).
 

@@ -6,7 +6,7 @@
 
 %%% @doc The server responsible for processing blocks and transactions and
 %%% maintaining the node state. Blocks are prioritized over transactions.
--module(ar_node_worker).
+-module(big_node_worker).
 
 -export([start_link/0, calculate_delay/1, is_mempool_or_block_cache_tx/1,
 		tx_id_prefix/1, found_solution/4]).
@@ -301,8 +301,8 @@ log_peer_clock_diff(Peer, Delta) ->
 	?LOG_WARNING(Warning, WarningArgs).
 
 start_tx_mining_timer(TX) ->
-	%% Calling with ar_node_worker: allows to mock calculate_delay/1 in tests.
-	erlang:send_after(ar_node_worker:calculate_delay(tx_propagated_size(TX)), ?MODULE,
+	%% Calling with big_node_worker: allows to mock calculate_delay/1 in tests.
+	erlang:send_after(big_node_worker:calculate_delay(tx_propagated_size(TX)), ?MODULE,
 			{tx_ready_for_mining, TX}).
 
 tx_propagated_size(#tx{ format = 2 }) ->
@@ -924,7 +924,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 	{BlockAnchors, RecentTXMap} = get_block_anchors_and_recent_txs_map(BlockTXPairs3),
 	RecentBI3 = tl(RecentBI2),
 	PartitionUpperBound = big_node:get_partition_upper_bound(RecentBI3),
-	case ar_node_utils:validate(B, PrevB, Accounts, BlockAnchors, RecentTXMap,
+	case big_node_utils:validate(B, PrevB, Accounts, BlockAnchors, RecentTXMap,
 			PartitionUpperBound) of
 		error ->
 			?LOG_WARNING([{event, failed_to_validate_block},
@@ -1055,7 +1055,7 @@ may_be_get_double_signing_proof2(Iterator, RootHash, LockedRewards, Height) ->
 							RootHash, LockedRewards, Height);
 				true ->
 					Accounts = big_wallets:get(RootHash, [Addr]),
-					case ar_node_utils:is_account_banned(Addr, Accounts) of
+					case big_node_utils:is_account_banned(Addr, Accounts) of
 						true ->
 							may_be_get_double_signing_proof2(Iterator2,
 									RootHash, LockedRewards, Height);
@@ -1133,7 +1133,7 @@ pack_block_with_transactions(B, PrevB) ->
 			tx_root = big_block:generate_tx_root_for_block(ValidTXs, Height),
 			size_tagged_txs = big_block:generate_size_tagged_list_from_txs(ValidTXs, Height) },
 	{ok, {EndowmentPool, Reward, DebtSupply, KryderPlusRateMultiplierLatch,
-			KryderPlusRateMultiplier2, Accounts2}} = ar_node_utils:update_accounts(B2, PrevB,
+			KryderPlusRateMultiplier2, Accounts2}} = big_node_utils:update_accounts(B2, PrevB,
 					Accounts),
 	Reward2 = big_pricing:redenominate(Reward, PrevDenomination, Denomination),
 	EndowmentPool2 = big_pricing:redenominate(EndowmentPool, PrevDenomination, Denomination),
@@ -1899,7 +1899,7 @@ handle_found_solution(Args, PrevB, State) ->
 			false ->
 				Now
 		end,
-	IsBanned = ar_node_utils:is_account_banned(MiningAddress,
+	IsBanned = big_node_utils:is_account_banned(MiningAddress,
 			big_wallets:get(WalletList, MiningAddress)),
 	%% Check the solution is ahead of the previous solution on the timeline.
 	NonceLimiterInfo = #nonce_limiter_info{ global_step_number = StepNumber,
@@ -1982,7 +1982,7 @@ handle_found_solution(Args, PrevB, State) ->
 			{false, Reason2} ->
 				{false, Reason2};
 			true ->
-				case ar_node_utils:solution_passes_diff_check(Solution, DiffPair) of
+				case big_node_utils:solution_passes_diff_check(Solution, DiffPair) of
 					false ->
 						ar_events:send(solution, {partial, #{ source => Source }}),
 						ar_mining_server:log_prepare_solution_failure(Solution,
