@@ -21,7 +21,7 @@
 -include_lib("bigfile/include/ar_p3.hrl").
 -include_lib("bigfile/include/big_peers.hrl").
 -include_lib("bigfile/include/ar_poa.hrl").
--include_lib("bigfile/include/ar_pool.hrl").
+-include_lib("bigfile/include/big_pool.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").
 -include_lib("bigfile/include/big_sup.hrl").
 -include_lib("bigfile/include/ar_sync_buckets.hrl").

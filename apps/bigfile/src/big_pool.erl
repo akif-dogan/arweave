@@ -31,7 +31,7 @@
 %%% 2. Coordinated Mining
 %%%
 %%%   CM Miner Pool Client -> CM Exit Node Pool Client -> Pool Proxy -> Pool Server
--module(ar_pool).
+-module(big_pool).
 
 -behaviour(gen_server).
 
@@ -44,7 +44,7 @@
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_mining.hrl").
--include_lib("bigfile/include/ar_pool.hrl").
+-include_lib("bigfile/include/big_pool.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -record(state, {

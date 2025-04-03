@@ -7,7 +7,7 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_pool.hrl").
+-include_lib("bigfile/include/big_pool.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -26,7 +26,7 @@ start_link() ->
 %%%===================================================================
 
 init([]) ->
-	case {ar_pool:is_client(), ar_coordination:is_exit_peer()} of
+	case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
 		{true, true} ->
 			gen_server:cast(self(), fetch_cm_jobs);
 		_ ->
@@ -41,13 +41,13 @@ handle_call(Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast(fetch_cm_jobs, State) ->
-	Peer = ar_pool:pool_peer(),
+	Peer = big_pool:pool_peer(),
 	Partitions = ar_coordination:get_cluster_partitions_list(),
 	PartitionJobs = #pool_cm_jobs{ partitions = Partitions },
 	case ar_http_iface_client:get_pool_cm_jobs(Peer, PartitionJobs) of
 		{ok, Jobs} ->
 			push_cm_jobs_to_cm_peers(Jobs),
-			ar_pool:process_cm_jobs(Jobs, Peer),
+			big_pool:process_cm_jobs(Jobs, Peer),
 			ar_util:cast_after(?FETCH_CM_JOBS_FREQUENCY_MS, self(), fetch_cm_jobs);
 		{error, Error} ->
 			?LOG_WARNING([{event, failed_to_fetch_pool_cm_jobs},

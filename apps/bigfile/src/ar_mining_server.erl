@@ -175,7 +175,7 @@ init([]) ->
 
 	{ok, #state{
 		workers = Workers,
-		is_pool_client = ar_pool:is_client(),
+		is_pool_client = big_pool:is_client(),
 		packing_difficulty = PackingDifficulty
 	}}.
 
@@ -285,7 +285,7 @@ handle_cast(Cast, State) ->
 handle_info({event, nonce_limiter, {computed_output, _Args}}, #state{ paused = true } = State) ->
 	{noreply, State};
 handle_info({event, nonce_limiter, {computed_output, Args}}, State) ->
-	case ar_pool:is_client() of
+	case big_pool:is_client() of
 		true ->
 			%% Ignore VDF events because we are receiving jobs from the pool.
 			{noreply, State};
@@ -915,7 +915,7 @@ post_solution(Solution, State) ->
 post_solution(not_set, Solution, #state{ is_pool_client = true }) ->
 	%% When posting a partial solution the pool client will skip many of the validation steps
 	%% that are normally performed before sharing a solution.
-	ar_pool:post_partial_solution(Solution);
+	big_pool:post_partial_solution(Solution);
 post_solution(not_set, Solution, State) ->
 	#state{ diff_pair = DiffPair } = State,
 	#mining_solution{

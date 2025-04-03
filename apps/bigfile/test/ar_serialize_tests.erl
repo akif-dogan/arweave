@@ -2,7 +2,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_mining.hrl").
--include_lib("bigfile/include/ar_pool.hrl").
+-include_lib("bigfile/include/big_pool.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 block_to_binary_test_() ->

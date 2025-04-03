@@ -10,7 +10,7 @@
 -include("../include/big_data_sync.hrl").
 -include("../include/big_data_discovery.hrl").
 
--include("../include/ar_pool.hrl").
+-include("../include/big_pool.hrl").
 
 
 -define(HANDLER_TIMEOUT, 55000).
@@ -1395,7 +1395,7 @@ handle(<<"GET">>, [<<"coordinated_mining">>, <<"partition_table">>], Req, _Pid) 
 					not_joined(Req);
 				true ->
 					Partitions =
-						case {ar_pool:is_client(), ar_coordination:is_exit_peer()} of
+						case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
 							{true, true} ->
 								%% When we work with a pool, the exit node shares
 								%% the information about external partitions with
@@ -2496,7 +2496,7 @@ check_block_receive_timestamp(H) ->
 
 handle_post_partial_solution(Req, Pid) ->
 	{ok, Config} = application:get_env(bigfile, config),
-	CMExitNode = ar_coordination:is_exit_peer() andalso ar_pool:is_client(),
+	CMExitNode = ar_coordination:is_exit_peer() andalso big_pool:is_client(),
 	case {Config#config.is_pool_server, CMExitNode} of
 		{false, false} ->
 			{501, #{}, jiffy:encode(#{ error => configuration }), Req};
@@ -2524,7 +2524,7 @@ handle_post_partial_solution_pool_server(Req, Pid) ->
 				{'EXIT', _} ->
 					{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 				Solution ->
-					Response = ar_pool:process_partial_solution(Solution),
+					Response = big_pool:process_partial_solution(Solution),
 					JSON = ar_serialize:partial_solution_response_to_json_struct(Response),
 					{200, #{}, ar_serialize:jsonify(JSON), Req2}
 			end;
@@ -2537,7 +2537,7 @@ handle_post_partial_solution_pool_server(Req, Pid) ->
 handle_post_partial_solution_cm_exit_peer_pool_client(Req, Pid) ->
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
-			ar_pool:post_partial_solution(Body),
+			big_pool:post_partial_solution(Body),
 			{200, #{}, jiffy:encode(#{}), Req2};
 		{error, body_size_too_large} ->
 			{413, #{}, <<"Payload too large">>, Req};
@@ -2547,7 +2547,7 @@ handle_post_partial_solution_cm_exit_peer_pool_client(Req, Pid) ->
 
 handle_get_jobs(PrevOutput, Req) ->
 	{ok, Config} = application:get_env(bigfile, config),
-	CMExitNode = ar_coordination:is_exit_peer() andalso ar_pool:is_client(),
+	CMExitNode = ar_coordination:is_exit_peer() andalso big_pool:is_client(),
 	case {Config#config.is_pool_server, CMExitNode} of
 		{false, false} ->
 			{501, #{}, jiffy:encode(#{ error => configuration }), Req};
@@ -2602,11 +2602,11 @@ handle_get_jobs_pool_server(PrevOutput, Req) ->
 
 handle_get_jobs_cm_exit_peer_pool_client(PrevOutput, Req) ->
 	{200, #{}, ar_serialize:jsonify(
-			ar_serialize:jobs_to_json_struct(ar_pool:get_jobs(PrevOutput))), Req}.
+			ar_serialize:jobs_to_json_struct(big_pool:get_jobs(PrevOutput))), Req}.
 
 %% Only for cm miners that are NOT exit peers.
 handle_post_pool_cm_jobs(Req, Pid) ->
-	PoolCMMiner = (not ar_coordination:is_exit_peer()) andalso ar_pool:is_client(),
+	PoolCMMiner = (not ar_coordination:is_exit_peer()) andalso big_pool:is_client(),
 	case PoolCMMiner of
 		false ->
 			{501, #{}, jiffy:encode(#{ error => configuration }), Req};
@@ -2628,7 +2628,7 @@ handle_post_pool_cm_jobs2(Req, Pid) ->
 				{'EXIT', _} ->
 					{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 				Jobs ->
-					ar_pool:process_cm_jobs(Jobs, Peer),
+					big_pool:process_cm_jobs(Jobs, Peer),
 					{200, #{}, <<>>, Req2}
 			end;
 		{error, body_size_too_large} ->
@@ -3173,9 +3173,9 @@ handle_mining_h1(Req, Pid) ->
 						{'EXIT', _} ->
 							{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 						Candidate ->
-							case {ar_pool:is_client(), ar_coordination:is_exit_peer()} of
+							case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
 								{true, true} ->
-									PoolPeer = ar_pool:pool_peer(),
+									PoolPeer = big_pool:pool_peer(),
 									Jobs = #pool_cm_jobs{ h1_to_h2_jobs = [Candidate] },
 									Payload = ar_serialize:jsonify(
 											ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),
@@ -3207,9 +3207,9 @@ handle_mining_h2(Req, Pid) ->
 						Candidate ->
 							?LOG_INFO([{event, h2_received},
 									{peer, ar_util:format_peer(Peer)}]),
-							case {ar_pool:is_client(), ar_coordination:is_exit_peer()} of
+							case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
 								{true, true} ->
-									PoolPeer = ar_pool:pool_peer(),
+									PoolPeer = big_pool:pool_peer(),
 									Jobs = #pool_cm_jobs{ h1_read_jobs = [Candidate] },
 									Payload = ar_serialize:jsonify(
 											ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),

@@ -298,7 +298,7 @@ jobs:
             ar_verify_chunks,
             big_wallet,
             ar_webhook,
-            ar_pool
+            big_pool
           ]
     steps:
       - uses: actions/checkout@v4

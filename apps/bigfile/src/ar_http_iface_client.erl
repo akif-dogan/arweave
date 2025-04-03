@@ -31,7 +31,7 @@
 -include_lib("bigfile/include/big_data_discovery.hrl").
 -include_lib("bigfile/include/big_mining.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").
--include_lib("bigfile/include/ar_pool.hrl").
+-include_lib("bigfile/include/big_pool.hrl").
 
 %%--------------------------------------------------------------------
 %% @doc Send a JSON-encoded transaction to the given Peer with default

@@ -7,7 +7,7 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_pool.hrl").
+-include_lib("bigfile/include/big_pool.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -record(state, {}).
@@ -25,7 +25,7 @@ start_link() ->
 %%%===================================================================
 
 init([]) ->
-	case ar_pool:is_client() of
+	case big_pool:is_client() of
 		true ->
 			gen_server:cast(self(), fetch_jobs);
 		false ->
@@ -38,24 +38,24 @@ handle_call(Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast(fetch_jobs, State) ->
-	PrevOutput = (ar_pool:get_latest_job())#job.output,
+	PrevOutput = (big_pool:get_latest_job())#job.output,
 	{ok, Config} = application:get_env(bigfile, config),
 	Peer =
 		case {Config#config.coordinated_mining, Config#config.cm_exit_peer} of
 			{true, not_set} ->
 				%% We are a CM exit node.
-				ar_pool:pool_peer();
+				big_pool:pool_peer();
 			{true, ExitPeer} ->
 				%% We are a CM miner.
 				ExitPeer;
 			_ ->
 				%% We are a standalone pool client (a non-CM miner and a pool client).
-				ar_pool:pool_peer()
+				big_pool:pool_peer()
 		end,
 	case ar_http_iface_client:get_jobs(Peer, PrevOutput) of
 		{ok, Jobs} ->
 			emit_pool_jobs(Jobs),
-			ar_pool:cache_jobs(Jobs),
+			big_pool:cache_jobs(Jobs),
 			ar_util:cast_after(?FETCH_JOBS_FREQUENCY_MS, self(), fetch_jobs);
 		{error, Error} ->
 			?LOG_WARNING([{event, failed_to_fetch_pool_jobs},

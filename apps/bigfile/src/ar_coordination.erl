@@ -132,7 +132,7 @@ is_coordinated_miner() ->
 %%   {pdiff, PackingDifficulty}
 %% ]}
 get_self_plus_external_partitions_list() ->
-	PoolPeer = ar_pool:pool_peer(),
+	PoolPeer = big_pool:pool_peer(),
 	PoolPartitions = get_peer_partitions(PoolPeer),
 	LocalPartitions = get_unique_partitions_set(),
 	lists:sort(sets:to_list(get_unique_partitions_set(PoolPartitions, LocalPartitions))).
@@ -473,7 +473,7 @@ refetch_peer_partitions(Peers) ->
 			),
 		%% ar_util:pmap ensures we fetch all the local up-to-date CM peer partitions first,
 		%% then share them with the Pool to fetch the complementary pool CM peer partitions.
-		case {ar_pool:is_client(), ar_coordination:is_exit_peer()} of
+		case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
 			{true, true} ->
 				refetch_pool_peer_partitions();
 			_ ->
@@ -512,7 +512,7 @@ get_unique_partitions_set([{PartitionID, BucketSize, MiningAddress, PackingDiffi
 refetch_pool_peer_partitions(UniquePeerPartitions) ->
 	spawn(fun() ->
 		JSON = ar_serialize:jsonify(lists:sort(sets:to_list(UniquePeerPartitions))),
-		PoolPeer = ar_pool:pool_peer(),
+		PoolPeer = big_pool:pool_peer(),
 		case ar_http_iface_client:post_cm_partition_table_to_pool(PoolPeer, JSON) of
 			{ok, PartitionList} ->
 				ar_coordination:update_peer(PoolPeer, PartitionList);

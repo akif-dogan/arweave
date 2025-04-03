@@ -96,7 +96,7 @@ init([]) ->
 		?CHILD_SUP(ar_webhook_sup, supervisor),
 		?CHILD(ar_p3, worker),
 		?CHILD(ar_p3_db, worker),
-		?CHILD(ar_pool, worker),
+		?CHILD(big_pool, worker),
 		?CHILD(ar_pool_job_poller, worker),
 		?CHILD(ar_pool_cm_job_poller, worker),
 		?CHILD(big_chain_stats, worker)

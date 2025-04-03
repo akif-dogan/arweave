@@ -116,7 +116,7 @@ init({Partition, PackingDifficulty}) ->
 	gen_server:cast(self(), check_worker_status),
 	prometheus_gauge:set(mining_server_chunk_cache_size, [Partition], 0),
 	{ok, #state{ name = Name, partition_number = Partition,
-			is_pool_client = ar_pool:is_client(), packing_difficulty = PackingDifficulty }}.
+			is_pool_client = big_pool:is_client(), packing_difficulty = PackingDifficulty }}.
 
 handle_call(Request, _From, State) ->
 	?LOG_WARNING([{event, unhandled_call}, {module, ?MODULE}, {request, Request}]),
