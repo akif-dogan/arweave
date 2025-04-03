@@ -2,7 +2,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_header_sync.hrl").
+-include_lib("bigfile/include/big_header_sync.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("kernel/include/file.hrl").
 

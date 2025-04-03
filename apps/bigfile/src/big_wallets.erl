@@ -10,7 +10,7 @@
 -export([init/1, handle_call/3, handle_cast/2, terminate/2]).
 
 -include_lib("bigfile/include/big.hrl").
--include_lib("bigfile/include/ar_header_sync.hrl").
+-include_lib("bigfile/include/big_header_sync.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").
 

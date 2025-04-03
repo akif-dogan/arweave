@@ -67,11 +67,11 @@ validate(TX) ->
 							%% it so that it can accept the chunks. One may notice here that
 							%% in case of v1 transactions, chunks arrive together with the tx
 							%% header. However, we send the data root to big_data_sync in
-							%% advance, otherwise ar_header_sync may fail to store the chunks
+							%% advance, otherwise big_header_sync may fail to store the chunks
 							%% when persisting the transaction as registering the data roots of
 							%% a confirmed block is an asynchronous procedure
 							%% (see big_data_sync:add_tip_block called in ar_node_worker) which
-							%% does not always complete before ar_header_sync attempts the
+							%% does not always complete before big_header_sync attempts the
 							%% insertion.
 							V1Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, TX#tx.data),
 							SizeTaggedV1Chunks = ar_tx:chunks_to_size_tagged_chunks(V1Chunks),

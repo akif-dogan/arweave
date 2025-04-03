@@ -2403,7 +2403,7 @@ repair_data_root_offset_index(BI, State) ->
 			?LOG_INFO([{event, starting_data_root_offset_index_scan}]),
 			ReverseBI = lists:reverse(BI),
 			ResyncBlocks = repair_data_root_offset_index(ReverseBI, <<>>, 0, [], State),
-			[ar_header_sync:remove_block(Height) || Height <- ResyncBlocks],
+			[big_header_sync:remove_block(Height) || Height <- ResyncBlocks],
 			ok = ar_kv:put(DB, <<"repair_data_root_offset_index">>, <<>>),
 			?LOG_INFO([{event, data_root_offset_index_scan_complete}]);
 		_ ->

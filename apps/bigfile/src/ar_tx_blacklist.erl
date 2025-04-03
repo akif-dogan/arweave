@@ -575,7 +575,7 @@ request_header_takedown(State) ->
 		'$end_of_table' ->
 			State;
 		TXID ->
-			ar_header_sync:request_tx_removal(TXID),
+			big_header_sync:request_tx_removal(TXID),
 			State#ar_tx_blacklist_state{
 				header_takedown_request_timestamp = os:system_time(millisecond)
 			}

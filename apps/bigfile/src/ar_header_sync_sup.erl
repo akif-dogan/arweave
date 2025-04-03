@@ -18,7 +18,7 @@ start_link(Args) ->
 init(Args) ->
 	SupFlags = #{strategy => one_for_one, intensity => 10, period => 1},
 	ChildSpec = #{
-		id => ar_header_sync,
-		start => {ar_header_sync, start_link, [Args]}
+		id => big_header_sync,
+		start => {big_header_sync, start_link, [Args]}
 	},
 	{ok, {SupFlags, [ChildSpec]}}.

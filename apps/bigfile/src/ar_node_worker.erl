@@ -416,7 +416,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 	Height = B#block.height,
 	ar_disk_cache:write_block(B),
 	big_data_sync:join(RecentBI),
-	ar_header_sync:join(Height, RecentBI, Blocks),
+	big_header_sync:join(Height, RecentBI, Blocks),
 	ar_tx_blacklist:start_taking_down(),
 	BlockTXPairs = [block_txs_pair(Block) || Block <- Blocks],
 	{BlockAnchors, RecentTXMap} = get_block_anchors_and_recent_txs_map(BlockTXPairs),
@@ -1404,10 +1404,10 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	ar_block_index:update(AddedBIElements, OrphanCount),
 	RecentBI2 = lists:sublist(RecentBI, ?BLOCK_INDEX_HEAD_LEN),
 	big_data_sync:add_tip_block(BlockTXPairs, RecentBI2),
-	ar_header_sync:add_tip_block(B, RecentBI2),
+	big_header_sync:add_tip_block(B, RecentBI2),
 	lists:foreach(
 		fun(PrevB3) ->
-			ar_header_sync:add_block(PrevB3),
+			big_header_sync:add_block(PrevB3),
 			ar_disk_cache:write_block(PrevB3)
 		end,
 		tl(lists:reverse(PrevBlocks))

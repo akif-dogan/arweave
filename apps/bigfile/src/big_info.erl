@@ -14,7 +14,7 @@ get_info() ->
 		timer:tc(fun() -> big_node:get_current_block_hash() end),
 	{Time2, Height} =
 		timer:tc(fun() -> big_node:get_height() end),
-	[{_, BlockCount}] = ets:lookup(ar_header_sync, synced_blocks),
+	[{_, BlockCount}] = ets:lookup(big_header_sync, synced_blocks),
     #{
         <<"network">> => list_to_binary(?NETWORK_NAME),
         <<"version">> => ?CLIENT_VERSION,

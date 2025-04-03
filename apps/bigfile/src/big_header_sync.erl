@@ -1,4 +1,4 @@
--module(ar_header_sync).
+-module(big_header_sync).
 
 -behaviour(gen_server).
 
@@ -9,7 +9,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
--include_lib("bigfile/include/ar_header_sync.hrl").
+-include_lib("bigfile/include/big_header_sync.hrl").
 -include_lib("bigfile/include/big_data_sync.hrl").
 -include_lib("bigfile/include/big_chunk_storage.hrl").
 
