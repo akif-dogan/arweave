@@ -87,8 +87,8 @@ init([]) ->
 		ar_intervals:new(),
 		["default" | Config#config.storage_modules]
 	),
-	SyncBuckets = ar_sync_buckets:from_intervals(SyncRecord),
-	{SyncBuckets2, SerializedSyncBuckets} = ar_sync_buckets:serialize(SyncBuckets,
+	SyncBuckets = big_sync_buckets:from_intervals(SyncRecord),
+	{SyncBuckets2, SerializedSyncBuckets} = big_sync_buckets:serialize(SyncBuckets,
 					?MAX_SYNC_BUCKETS_SIZE),
 	ets:insert(?MODULE, {serialized_sync_buckets, SerializedSyncBuckets}),
 	ar_util:cast_after(?UPDATE_SERIALIZED_SYNC_BUCKETS_FREQUENCY_S * 1000,
@@ -108,7 +108,7 @@ handle_call(Request, _From, State) ->
 
 handle_cast(update_serialized_sync_buckets, State) ->
 	#state{ sync_buckets = SyncBuckets } = State,
-	{SyncBuckets2, SerializedSyncBuckets} = ar_sync_buckets:serialize(SyncBuckets,
+	{SyncBuckets2, SerializedSyncBuckets} = big_sync_buckets:serialize(SyncBuckets,
 			?MAX_SYNC_BUCKETS_SIZE),
 	ets:insert(?MODULE, {serialized_sync_buckets, SerializedSyncBuckets}),
 	ar_util:cast_after(?UPDATE_SERIALIZED_SYNC_BUCKETS_FREQUENCY_S * 1000,
@@ -136,20 +136,20 @@ handle_info({event, sync_record, {add_range, Start, End, big_data_sync, StoreID}
 		_ ->
 			#state{ sync_record = SyncRecord, sync_buckets = SyncBuckets } = State,
 			SyncRecord2 = ar_intervals:add(SyncRecord, End, Start),
-			SyncBuckets2 = ar_sync_buckets:add(End, Start, SyncBuckets),
+			SyncBuckets2 = big_sync_buckets:add(End, Start, SyncBuckets),
 			{noreply, State#state{ sync_record = SyncRecord2, sync_buckets = SyncBuckets2 }}
 	end;
 
 handle_info({event, sync_record, {global_cut, Offset}}, State) ->
 	#state{ sync_record = SyncRecord, sync_buckets = SyncBuckets } = State,
 	SyncRecord2 = ar_intervals:cut(SyncRecord, Offset),
-	SyncBuckets2 = ar_sync_buckets:cut(Offset, SyncBuckets),
+	SyncBuckets2 = big_sync_buckets:cut(Offset, SyncBuckets),
 	{noreply, State#state{ sync_record = SyncRecord2, sync_buckets = SyncBuckets2 }};
 
 handle_info({event, sync_record, {global_remove_range, Start, End}}, State) ->
 	#state{ sync_record = SyncRecord, sync_buckets = SyncBuckets } = State,
 	SyncRecord2 = ar_intervals:delete(SyncRecord, End, Start),
-	SyncBuckets2 = ar_sync_buckets:delete(End, Start, SyncBuckets),
+	SyncBuckets2 = big_sync_buckets:delete(End, Start, SyncBuckets),
 	{noreply, State#state{ sync_record = SyncRecord2, sync_buckets = SyncBuckets2 }};
 
 handle_info({event, sync_record, _}, State) ->

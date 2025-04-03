@@ -27,7 +27,7 @@
 -include("../include/big_poa.hrl").
 -include("../include/big_data_discovery.hrl").
 -include("../include/big_data_sync.hrl").
--include("../include/ar_sync_buckets.hrl").
+-include("../include/big_sync_buckets.hrl").
 
 -ifdef(AR_TEST).
 -define(COLLECT_SYNC_INTERVALS_FREQUENCY_MS, 300_000).

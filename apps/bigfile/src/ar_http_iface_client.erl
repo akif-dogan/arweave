@@ -926,7 +926,7 @@ handle_mempool_response(Response) ->
 	{error, Response}.
 
 handle_get_sync_buckets_response({ok, {{<<"200">>, _}, _, Body, _, _}}) ->
-	case ar_sync_buckets:deserialize(Body) of
+	case big_sync_buckets:deserialize(Body) of
 		{ok, Buckets} ->
 			{ok, Buckets};
 		{'EXIT', Reason} ->

@@ -24,7 +24,7 @@
 -include_lib("bigfile/include/big_pool.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").
 -include_lib("bigfile/include/big_sup.hrl").
--include_lib("bigfile/include/ar_sync_buckets.hrl").
+-include_lib("bigfile/include/big_sync_buckets.hrl").
 -include_lib("bigfile/include/big_vdf.hrl").
 -include_lib("bigfile/include/big_verify_chunks.hrl").
 -include_lib("bigfile/include/big_wallets.hrl").

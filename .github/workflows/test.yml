@@ -290,7 +290,7 @@ jobs:
             ar_serialize,
             ar_storage_module,
             ar_storage,
-            ar_sync_buckets,
+            big_sync_buckets,
             ar_sync_record,
             ar_tx_db,
             ar_unbalanced_merkle,

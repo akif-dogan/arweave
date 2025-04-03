@@ -1,9 +1,9 @@
--module(ar_sync_buckets).
+-module(big_sync_buckets).
 
 -export([new/0, from_intervals/1, from_intervals/2, add/3, delete/3, cut/2, get/3, serialize/2,
 		deserialize/1, foreach/3]).
 
--include_lib("bigfile/include/ar_sync_buckets.hrl").
+-include_lib("bigfile/include/big_sync_buckets.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 %%%===================================================================

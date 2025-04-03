@@ -129,7 +129,7 @@ handle_cast({add_peer_sync_buckets, Peer, SyncBuckets}, State) ->
 	#state{ network_map = Map } = State,
 	State2 = refresh_expiration_timer(Peer, State),
 	Map2 = maps:put(Peer, SyncBuckets, Map),
-	ar_sync_buckets:foreach(
+	big_sync_buckets:foreach(
 		fun(Bucket, Share) ->
 			ets:insert(?MODULE, {{Bucket, Share, Peer}})
 		end,
@@ -145,7 +145,7 @@ handle_cast({remove_peer, Peer}, State) ->
 			error ->
 				Map;
 			{SyncBuckets, Map3} ->
-				ar_sync_buckets:foreach(
+				big_sync_buckets:foreach(
 					fun(Bucket, Share) ->
 						ets:delete(?MODULE, {Bucket, Share, Peer})
 					end,
@@ -216,8 +216,8 @@ collect_peers([]) ->
 get_sync_buckets(Peer) ->
 	case ar_http_iface_client:get_sync_record(Peer) of
 		{ok, SyncRecord} ->
-			SyncBuckets = ar_sync_buckets:from_intervals(SyncRecord),
-			{SyncBuckets2, _} = ar_sync_buckets:serialize(SyncBuckets, ?MAX_SYNC_BUCKETS_SIZE),
+			SyncBuckets = big_sync_buckets:from_intervals(SyncRecord),
+			{SyncBuckets2, _} = big_sync_buckets:serialize(SyncBuckets, ?MAX_SYNC_BUCKETS_SIZE),
 			gen_server:cast(?MODULE, {add_peer_sync_buckets, Peer, SyncBuckets2});
 		Error ->
 			?LOG_DEBUG([{event, failed_to_fetch_sync_record_from_peer},
