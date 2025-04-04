@@ -1,4 +1,4 @@
--module(ar_pricing_transition).
+-module(big_pricing_transition).
 
 -export([get_transition_price/2, static_price/0, static_pricing_height/0, is_v2_pricing_height/1,
 	transition_start_2_6_8/0, transition_start_2_7_2/0, transition_length_2_6_8/0,
@@ -156,7 +156,7 @@
 %% @doc There's a complex series of transition phases that we pass through as we move from
 %% static pricing to dynamic pricing (aka v2 pricing). This function handles those phases.
 get_transition_price(Height, V2Price) ->
-	StaticPricingHeight = ar_pricing_transition:static_pricing_height(),
+	StaticPricingHeight = big_pricing_transition:static_pricing_height(),
 	PriceTransitionStart = transition_start(Height),
 	PriceTransitionEnd = PriceTransitionStart + transition_length(Height),
 
@@ -166,7 +166,7 @@ get_transition_price(Height, V2Price) ->
 
 	case Height of
 		_ when Height < StaticPricingHeight ->
-			ar_pricing_transition:static_price();
+			big_pricing_transition:static_price();
 		_ when Height < PriceTransitionEnd ->
 			%% Interpolate between the pre-transition price and the new price.
 			Interval1 = Height - PriceTransitionStart,
@@ -191,14 +191,14 @@ static_price() ->
 %% @doc Height before which we use the hardcoded static price - no phase
 %% of the pricing transition has started.
 static_pricing_height() ->
-	ar_pricing_transition:transition_start_2_6_8().
+	big_pricing_transition:transition_start_2_6_8().
 
 %% @doc Return true if the given height is a height where the transition to the
 %% new pricing algorithm is complete.
 is_v2_pricing_height(Height) ->
 	Height >=
-		ar_pricing_transition:transition_start_2_7_2() +
-			ar_pricing_transition:transition_length_2_7_2().
+		big_pricing_transition:transition_start_2_7_2() +
+			big_pricing_transition:transition_length_2_7_2().
 
 transition_start_2_6_8() ->
 	ar_fork:height_2_6_8() + ?PRICE_2_6_8_TRANSITION_START.
@@ -215,13 +215,13 @@ transition_length_2_7_2() ->
 	?PRICE_2_7_2_TRANSITION_BLOCKS.
 
 transition_length(Height) ->
-	TransitionStart_2_7_2 = ar_pricing_transition:transition_start_2_7_2(),
+	TransitionStart_2_7_2 = big_pricing_transition:transition_start_2_7_2(),
 
 	case Height of
 		_ when Height >= TransitionStart_2_7_2 ->
-			ar_pricing_transition:transition_length_2_7_2();
+			big_pricing_transition:transition_length_2_7_2();
 		_ ->
-			ar_pricing_transition:transition_length_2_6_8()
+			big_pricing_transition:transition_length_2_6_8()
 	end.
 
 
@@ -230,8 +230,8 @@ transition_length(Height) ->
 %%%===================================================================
 
 transition_start(Height) ->
-	TransitionStart_2_6_8 = ar_pricing_transition:transition_start_2_6_8(),
-	TransitionStart_2_7_2 = ar_pricing_transition:transition_start_2_7_2(),
+	TransitionStart_2_6_8 = big_pricing_transition:transition_start_2_6_8(),
+	TransitionStart_2_7_2 = big_pricing_transition:transition_start_2_7_2(),
 	
 	%% There are 2 overlapping transition periods:
 	%% 2.6.8 Transition Period:
@@ -252,7 +252,7 @@ transition_start(Height) ->
 	end.
 
 transition_start_price(Height) ->
-	TransitionStart_2_7_2 = ar_pricing_transition:transition_start_2_7_2(),
+	TransitionStart_2_7_2 = big_pricing_transition:transition_start_2_7_2(),
 
 	case Height of
 		_ when Height >= TransitionStart_2_7_2 ->
@@ -262,7 +262,7 @@ transition_start_price(Height) ->
 	end.
 
 transition_upper_bound(Height) ->
-	TransitionStart_2_7_2 = ar_pricing_transition:transition_start_2_7_2(),
+	TransitionStart_2_7_2 = big_pricing_transition:transition_start_2_7_2(),
 	Fork_2_7_2 = ar_fork:height_2_7_2(),
 	
 	case Height of
@@ -275,7 +275,7 @@ transition_upper_bound(Height) ->
 	end.
 
 transition_lower_bound(Height) ->
-	TransitionStart_2_7_2 = ar_pricing_transition:transition_start_2_7_2(),
+	TransitionStart_2_7_2 = big_pricing_transition:transition_start_2_7_2(),
 	Fork_2_7_2 = ar_fork:height_2_7_2(),
 	
 	case Height of

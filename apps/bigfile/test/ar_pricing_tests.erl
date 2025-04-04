@@ -13,10 +13,10 @@ get_price_per_gib_minute_test_() ->
 		ar_test_node:test_with_mocked_functions(
 			[
 				{ar_fork, height_2_7_2, fun() -> 10 end},
-				{ar_pricing_transition, transition_start_2_6_8, fun() -> 5 end},
-				{ar_pricing_transition, transition_start_2_7_2, fun() -> 15 end},
-				{ar_pricing_transition, transition_length_2_6_8, fun() -> 20 end},
-				{ar_pricing_transition, transition_length_2_7_2, fun() -> 40 end}
+				{big_pricing_transition, transition_start_2_6_8, fun() -> 5 end},
+				{big_pricing_transition, transition_start_2_7_2, fun() -> 15 end},
+				{big_pricing_transition, transition_length_2_6_8, fun() -> 20 end},
+				{big_pricing_transition, transition_length_2_7_2, fun() -> 40 end}
 			],
 			fun test_price_per_gib_minute_transition_phases/0),
 		{timeout, 30, fun test_v2_price/0},
@@ -34,10 +34,10 @@ get_price_per_gib_minute_test_() ->
 %% So when the price transition starts we don't have enough block time history to apply the
 %% new algorithm.
 test_price_per_gib_minute_pre_block_time_history() ->
-	Start = ar_pricing_transition:transition_start_2_6_8(),
+	Start = big_pricing_transition:transition_start_2_6_8(),
 	B = #block{
 		reward_history = reward_history(1, 1), block_time_history = block_time_history(1, 1) },
-	?assertEqual(ar_pricing_transition:static_price(),
+	?assertEqual(big_pricing_transition:static_price(),
 		big_pricing:get_price_per_gib_minute(Start, B),
 		"Before we have enough block time history").
 
@@ -53,11 +53,11 @@ test_price_per_gib_minute_transition_phases() ->
 		big_pricing:get_v2_price_per_gib_minute(10, B),
 		"V2 Price"),
 	%% Static price
-	?assertEqual(ar_pricing_transition:static_price(),
+	?assertEqual(big_pricing_transition:static_price(),
 		big_pricing:get_price_per_gib_minute(4, B),
 		"Static price"),
 	%% 2.6.8 start
-	?assertEqual(ar_pricing_transition:static_price(),
+	?assertEqual(big_pricing_transition:static_price(),
 		big_pricing:get_price_per_gib_minute(5, B),
 		"2.6.8 start price"),
 	%% 2.6.8 transition, pre-2.7.2
@@ -107,8 +107,8 @@ test_price_per_gib_minute_transition_phases() ->
 		"After 2.7.2 transition end").
 
 test_v2_price() ->
-	AtTransitionEnd = ar_pricing_transition:transition_start_2_7_2() + 
-		ar_pricing_transition:transition_length(ar_pricing_transition:transition_start_2_7_2()),
+	AtTransitionEnd = big_pricing_transition:transition_start_2_7_2() + 
+		big_pricing_transition:transition_length(big_pricing_transition:transition_start_2_7_2()),
 
 	%% 2 chunks per partition when running tests
 	%% If we get 1 solution per chunk (or 2 per partition), then we expect a price of 61440
@@ -130,8 +130,8 @@ test_v2_price() ->
 	do_price_per_gib_minute_post_transition(BeyondTransition, 61440, 122880, 92160).
 
 test_v2_price_with_poa1_diff_multiplier() ->
-	AtTransitionEnd = ar_pricing_transition:transition_start_2_7_2() + 
-		ar_pricing_transition:transition_length(ar_pricing_transition:transition_start_2_7_2()),
+	AtTransitionEnd = big_pricing_transition:transition_start_2_7_2() + 
+		big_pricing_transition:transition_length(big_pricing_transition:transition_start_2_7_2()),
 
 	%% 2 chunks per partition when running tests
 	%% If we get 1 solution per chunk (or 2 per partition), then we expect a price of 61440
@@ -285,8 +285,8 @@ recalculate_price_per_gib_minute_2_7_1_ema_test_() ->
 auto_redenomination_and_endowment_debt_test_() ->
 	%% Set some weird mocks to preserve the existing behavior of this test
 	ar_test_node:test_with_mocked_functions([
-			{ar_pricing_transition, transition_start_2_7_2, fun() -> 3 end},
-			{ar_pricing_transition, transition_length_2_7_2, fun() -> 1 end}
+			{big_pricing_transition, transition_start_2_7_2, fun() -> 3 end},
+			{big_pricing_transition, transition_length_2_7_2, fun() -> 1 end}
 		],
 		fun test_auto_redenomination_and_endowment_debt/0).
 
@@ -302,8 +302,8 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0),
 	ar_test_node:connect_to_peer(peer1),
-	?assert(ar_pricing_transition:transition_start_2_6_8() == 2),
-	?assert(ar_pricing_transition:transition_length_2_6_8() == 2),
+	?assert(big_pricing_transition:transition_start_2_6_8() == 2),
+	?assert(big_pricing_transition:transition_length_2_6_8() == 2),
 	?assert(?PRICE_ADJUSTMENT_FREQUENCY == 2),
 	?assert(?REDENOMINATION_DELAY_BLOCKS == 2),
 	?assert(?REWARD_HISTORY_BLOCKS == 3),

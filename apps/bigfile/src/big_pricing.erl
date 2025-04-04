@@ -41,7 +41,7 @@
 %% Also, the returned price is always at least 1 Winston.
 get_price_per_gib_minute(Height, B) ->
 	V2Price = get_v2_price_per_gib_minute(Height, B),
-	ar_pricing_transition:get_transition_price(Height, V2Price).
+	big_pricing_transition:get_transition_price(Height, V2Price).
 
 get_v2_price_per_gib_minute(Height, B) ->
 	OneDifficultyHeight = ar_fork:height_2_7() + ar_block_time_history:history_length(),
@@ -307,7 +307,7 @@ redenominate(Amount, BaseDenomination, Denomination) when Denomination > BaseDen
 may_be_redenominate(B) ->
 	#block{ height = Height, denomination = Denomination,
 			redenomination_height = RedenominationHeight } = B,
-	case ar_pricing_transition:is_v2_pricing_height(Height + 1) of
+	case big_pricing_transition:is_v2_pricing_height(Height + 1) of
 		false ->
 			{Denomination, RedenominationHeight};
 		true ->
@@ -350,7 +350,7 @@ recalculate_price_per_gib_minute(B) ->
 	Fork_2_7_1 = ar_fork:height_2_7_1(),
 	case Height of
 		Fork_2_7 ->
-			{ar_pricing_transition:static_price(), ar_pricing_transition:static_price()};
+			{big_pricing_transition:static_price(), big_pricing_transition:static_price()};
 		Height when Height < Fork_2_7_1 ->
 			case is_price_adjustment_height(Height) of
 				false ->
