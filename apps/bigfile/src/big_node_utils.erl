@@ -97,7 +97,7 @@ block_passes_diff_check(Block) ->
 block_passes_diff_check(SolutionHash, Block) ->
 	IsPoA1 = (Block#block.recall_byte2 == undefined),
 	PackingDifficulty = Block#block.packing_difficulty,
-	DiffPair = ar_difficulty:diff_pair(Block),
+	DiffPair = big_difficulty:diff_pair(Block),
 	passes_diff_check(SolutionHash, IsPoA1, DiffPair, PackingDifficulty).
 
 passes_diff_check(_SolutionHash, _IsPoA1, not_set, _PackingDifficulty) ->
@@ -115,12 +115,12 @@ passes_diff_check(SolutionHash, IsPoA1, {PoA1Diff, Diff}, PackingDifficulty) ->
 			0 ->
 				Diff2;
 			_ ->
-				SubDiff = ar_difficulty:sub_diff(Diff2, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
+				SubDiff = big_difficulty:sub_diff(Diff2, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
 				%% We are introducing composite packing along with reducing the recall range
 				%% from 200 MiB to 50 MiB while keeping the total worth of the nonces constant
 				%% so we want the mining difficulty to be 1 / (PackingDifficulty * 4)
 				%% of the difficulty applied to the 200 MiB-range nonces.
-				ar_difficulty:scale_diff(SubDiff, {1, PackingDifficulty * 4},
+				big_difficulty:scale_diff(SubDiff, {1, PackingDifficulty * 4},
 						%% The minimal difficulty height. It does not change at the
 						%% packing difficulty fork.
 						ar_fork:height_2_8())
@@ -496,7 +496,7 @@ validate_block(reward_history_hash, {NewB, OldB, Wallets, BlockAnchors, RecentTX
 			denomination = Denomination, height = Height } = NewB,
 	#block{ reward_history = RewardHistory,
 			reward_history_hash = PreviousRewardHistoryHash } = OldB,
-	HashRate = ar_difficulty:get_hash_rate_fixed_ratio(NewB),
+	HashRate = big_difficulty:get_hash_rate_fixed_ratio(NewB),
 	RewardAddr = NewB#block.reward_addr,
 	%% Pre-2.8: slice the reward history to compute the hash
 	%% Post-2.8: use the previous reward history hash and the head of the history to compute

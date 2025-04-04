@@ -199,7 +199,7 @@ test_reject_block_invalid_miner_reward({Key, B, PrevB}) ->
 	ok = ar_events:subscribe(block),
 	B2 = sign_block(B#block{ reward = 0 }, PrevB, Key),
 	post_block(B2, invalid_reward_history_hash),
-	HashRate = ar_difficulty:get_hash_rate_fixed_ratio(B2),
+	HashRate = big_difficulty:get_hash_rate_fixed_ratio(B2),
 	RewardHistory = tl(B2#block.reward_history),
 	Addr = B2#block.reward_addr,
 	B3 = sign_block(B2#block{

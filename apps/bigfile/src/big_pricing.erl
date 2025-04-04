@@ -106,7 +106,7 @@ get_v2_price_per_gib_minute_two_difficulty(Height, B) ->
 	%% The SolutionsPerPartitionPerVDFStep combines that average weave calculation
 	%% with the expected number of solutions per partition per VDF step to arrive a single
 	%% number that can be used in the PricePerGiBPerMinute calculation.
-	PoA1Mult = ar_difficulty:poa1_diff_multiplier(Height),
+	PoA1Mult = big_difficulty:poa1_diff_multiplier(Height),
 	RecallRangeSize = big_block:get_recall_range_size(0),
 	MaxSolutionsPerPartition =
 		(PoA1Mult + 1) * RecallRangeSize div (?DATA_CHUNK_SIZE * PoA1Mult),

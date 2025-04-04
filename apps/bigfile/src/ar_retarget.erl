@@ -67,7 +67,7 @@ maybe_retarget(Height, {CurPoA1Diff, CurDiff}, TS, LastRetargetTS, PrevTS) ->
 	case ar_retarget:is_retarget_height(Height) of
 		true ->
 			NewDiff = calculate_difficulty(CurDiff, TS, LastRetargetTS, Height, PrevTS),
-			{ar_difficulty:poa1_diff(NewDiff, Height), NewDiff};
+			{big_difficulty:poa1_diff(NewDiff, Height), NewDiff};
 		false ->
 			{CurPoA1Diff, CurDiff}
 	end.
@@ -105,7 +105,7 @@ calculate_difficulty(OldDiff, TS, Last, Height, PrevTS) ->
 		_ when Height == Fork_1_8 ->
 			switch_to_linear_diff_pre_fork_2_5(OldDiff);
 		_ when Height == Fork_1_7 ->
-			ar_difficulty:switch_to_randomx_fork_diff(OldDiff);
+			big_difficulty:switch_to_randomx_fork_diff(OldDiff);
 		_ ->
 			calculate_difficulty_before_1_8(OldDiff, TS, Last, Height)
 	end.
@@ -155,7 +155,7 @@ calculate_difficulty(OldDiff, TS, Last, Height) ->
 			%% Scale difficulty by TargetTime / ActualTime
 			%% If ActualTime is less than TargetTime it means we need to *increase* the difficulty,
 			%% and vice versa.
-			ar_difficulty:scale_diff(OldDiff, {TargetTime, ActualTime}, Height)
+			big_difficulty:scale_diff(OldDiff, {TargetTime, ActualTime}, Height)
 	end.
 
 calculate_difficulty_at_2_5(OldDiff, TS, Last, Height, PrevTS) ->
@@ -173,7 +173,7 @@ calculate_difficulty_with_drop(OldDiff, TS, Last, Height, PrevTS, InitialCoeff, 
 	%% Scale difficulty by TargetTime / ActualTime2
 	%% If ActualTime2 is less than TargetTime it means we need to *increase* the difficulty,
 	%% and vice versa.
-	ar_difficulty:scale_diff(OldDiff, {TargetTime, ActualTime2}, Height).
+	big_difficulty:scale_diff(OldDiff, {TargetTime, ActualTime2}, Height).
 
 calculate_difficulty_after_2_4_before_2_5(OldDiff, TS, Last, Height) ->
 	TargetTime = ?RETARGET_BLOCKS * big_testnet:target_block_time(Height),
@@ -184,7 +184,7 @@ calculate_difficulty_after_2_4_before_2_5(OldDiff, TS, Last, Height) ->
 			OldDiff;
 		false ->
 			MaxDiff = ?MAX_DIFF,
-			MinDiff = ar_difficulty:min_difficulty(Height),
+			MinDiff = big_difficulty:min_difficulty(Height),
 			DiffInverse = erlang:trunc((MaxDiff - OldDiff) * TimeDelta),
 			ar_util:between(
 				MaxDiff - DiffInverse,
@@ -203,7 +203,7 @@ calculate_difficulty_at_2_4(OldDiff, TS, Last, Height) ->
 	%% reduction in difficulty, it would only take 100 minutes to adjust.
 	TimeDelta = 10 * ActualTime / TargetTime,
 	MaxDiff = ?MAX_DIFF,
-	MinDiff = ar_difficulty:min_difficulty(Height),
+	MinDiff = big_difficulty:min_difficulty(Height),
 	DiffInverse = erlang:trunc((MaxDiff - OldDiff) * TimeDelta),
 	ar_util:between(
 		MaxDiff - DiffInverse,
@@ -220,7 +220,7 @@ calculate_difficulty_at_and_after_1_9_before_2_4(OldDiff, TS, Last, Height) ->
 			OldDiff;
 		false ->
 			MaxDiff = ?MAX_DIFF,
-			MinDiff = ar_difficulty:min_difficulty(Height),
+			MinDiff = big_difficulty:min_difficulty(Height),
 			EffectiveTimeDelta = ar_util:between(
 				ActualTime / TargetTime,
 				1 / ?DIFF_ADJUSTMENT_UP_LIMIT,
@@ -243,7 +243,7 @@ calculate_difficulty_after_1_8_before_1_9(OldDiff, TS, Last, Height) ->
 			OldDiff;
 		false ->
 			MaxDiff = ?MAX_DIFF,
-			MinDiff = ar_difficulty:min_difficulty(Height),
+			MinDiff = big_difficulty:min_difficulty(Height),
 			ar_util:between(
 				MaxDiff - (MaxDiff - OldDiff) * ActualTime div TargetTime,
 				max(MinDiff, OldDiff div 2),
@@ -261,7 +261,7 @@ calculate_difficulty_before_1_8(OldDiff, TS, Last, Height) ->
 			TargetTime > ActualTime                        -> OldDiff + 1;
 			true                                           -> OldDiff - 1
 		end,
-		ar_difficulty:min_difficulty(Height)
+		big_difficulty:min_difficulty(Height)
 	),
 	Diff.
 

@@ -140,7 +140,7 @@ verify_weave_size(NewB, OldB, TXs) ->
 %% @doc Verify the new cumulative difficulty is computed correctly.
 verify_cumulative_diff(NewB, OldB) ->
 	NewB#block.cumulative_diff ==
-		ar_difficulty:next_cumulative_diff(
+		big_difficulty:next_cumulative_diff(
 			OldB#block.cumulative_diff,
 			NewB#block.diff,
 			NewB#block.height

@@ -987,7 +987,7 @@ test_get_total_supply(_Args) ->
 					Acc + big_pricing:redenominate(B, Denomination, BlockDenomination)
 			end,
 			0,
-			ar_diff_dag:get_sink(sys:get_state(big_wallets))
+			big_diff_dag:get_sink(sys:get_state(big_wallets))
 		),
 	TotalSupplyBin = integer_to_binary(TotalSupply),
 	?assertMatch({ok, {{<<"200">>, _}, _, TotalSupplyBin, _, _}},

@@ -89,7 +89,7 @@ get_oldest_locked_address(B) ->
 add_element(B, RewardHistory) ->
 	Height = B#block.height,
 	Reward = B#block.reward,
-	HashRate = ar_difficulty:get_hash_rate_fixed_ratio(B),
+	HashRate = big_difficulty:get_hash_rate_fixed_ratio(B),
 	Denomination = B#block.denomination,
 	RewardAddr = B#block.reward_addr,
 	trim_buffered_reward_history(Height, 

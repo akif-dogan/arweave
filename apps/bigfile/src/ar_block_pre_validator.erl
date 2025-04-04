@@ -667,7 +667,7 @@ pre_validate_pow_2_6(B, PrevB, PartitionUpperBound, Peer) ->
 	H0 = big_block:compute_h0(B, PrevB),
 	Chunk1 = (B#block.poa)#poa.chunk,
 	{H1, Preimage1} = big_block:compute_h1(H0, B#block.nonce, Chunk1),
-	DiffPair = ar_difficulty:diff_pair(B),
+	DiffPair = big_difficulty:diff_pair(B),
 	case H1 == B#block.hash andalso big_node_utils:h1_passes_diff_check(H1, DiffPair,
 				B#block.packing_difficulty)
 			andalso Preimage1 == B#block.hash_preimage

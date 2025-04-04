@@ -79,21 +79,21 @@ get_size() ->
 init([{blocks, []} | _]) ->
 	%% Trap exit to avoid corrupting any open files on quit.
 	process_flag(trap_exit, true),
-	DAG = ar_diff_dag:new(<<>>, ar_patricia_tree:new(), not_set),
+	DAG = big_diff_dag:new(<<>>, ar_patricia_tree:new(), not_set),
 	big_node_worker ! wallets_ready,
 	{ok, DAG};
 init([{blocks, Blocks} | Args]) ->
 	%% Trap exit to avoid corrupting any open files on quit.
 	process_flag(trap_exit, true),
 	gen_server:cast(?MODULE, {init, Blocks, Args}),
-	DAG = ar_diff_dag:new(<<>>, ar_patricia_tree:new(), not_set),
+	DAG = big_diff_dag:new(<<>>, ar_patricia_tree:new(), not_set),
 	{ok, DAG}.
 
 handle_call({get, Addresses}, _From, DAG) ->
-	{reply, get_map(ar_diff_dag:get_sink(DAG), Addresses), DAG};
+	{reply, get_map(big_diff_dag:get_sink(DAG), Addresses), DAG};
 
 handle_call({get, RootHash, Addresses}, _From, DAG) ->
-	case ar_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2) of
+	case big_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2) of
 		{error, _} = Error ->
 			{reply, Error, DAG};
 		Tree ->
@@ -101,7 +101,7 @@ handle_call({get, RootHash, Addresses}, _From, DAG) ->
 	end;
 
 handle_call({get_chunk, RootHash, Cursor}, _From, DAG) ->
-	case ar_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2) of
+	case big_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2) of
 		{error, not_found} ->
 			{reply, {error, root_hash_not_found}, DAG};
 		Tree ->
@@ -110,14 +110,14 @@ handle_call({get_chunk, RootHash, Cursor}, _From, DAG) ->
 	end;
 
 handle_call(get_size, _From, DAG) ->
-	{reply, ar_patricia_tree:size(ar_diff_dag:get_sink(DAG)), DAG};
+	{reply, ar_patricia_tree:size(big_diff_dag:get_sink(DAG)), DAG};
 
 handle_call({get_balance, Address}, _From, DAG) ->
-	case ar_patricia_tree:get(Address, ar_diff_dag:get_sink(DAG)) of
+	case ar_patricia_tree:get(Address, big_diff_dag:get_sink(DAG)) of
 		not_found ->
 			{reply, 0, DAG};
 		Entry ->
-			Denomination = ar_diff_dag:get_sink_metadata(DAG),
+			Denomination = big_diff_dag:get_sink_metadata(DAG),
 			case Entry of
 				{Balance, _LastTX} ->
 					{reply, big_pricing:redenominate(Balance, 1, Denomination), DAG};
@@ -128,7 +128,7 @@ handle_call({get_balance, Address}, _From, DAG) ->
 	end;
 
 handle_call({get_balance, RootHash, Address}, _From, DAG) ->
-	case ar_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2) of
+	case big_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2) of
 		{error, _} = Error ->
 			{reply, Error, DAG};
 		Tree ->
@@ -136,7 +136,7 @@ handle_call({get_balance, RootHash, Address}, _From, DAG) ->
 				not_found ->
 					{reply, 0, DAG};
 				Entry ->
-					Denomination = ar_diff_dag:get_metadata(DAG, RootHash),
+					Denomination = big_diff_dag:get_metadata(DAG, RootHash),
 					case Entry of
 						{Balance, _LastTX} ->
 							{reply, big_pricing:redenominate(Balance, 1, Denomination), DAG};
@@ -149,7 +149,7 @@ handle_call({get_balance, RootHash, Address}, _From, DAG) ->
 
 handle_call({get_last_tx, Address}, _From, DAG) ->
 	{reply,
-		case ar_patricia_tree:get(Address, ar_diff_dag:get_sink(DAG)) of
+		case ar_patricia_tree:get(Address, big_diff_dag:get_sink(DAG)) of
 			not_found ->
 				<<>>;
 			{_Balance, LastTX} ->
@@ -164,7 +164,7 @@ handle_call({apply_block, B, PrevB}, _From, DAG) ->
 	{reply, Reply, DAG2};
 
 handle_call({add_wallets, RootHash, Wallets, Height, Denomination}, _From, DAG) ->
-	Tree = ar_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2),
+	Tree = big_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2),
 	RootHash2 = compute_hash(Tree, Wallets, Height),
 	DAG2 = maybe_add_node(DAG, RootHash2, RootHash, Wallets, Denomination),
 	{reply, {ok, RootHash2}, DAG2};
@@ -240,7 +240,7 @@ initialize_state(Blocks, Tree) ->
 				gen_server:cast(big_storage, {store_account_tree_update, B#block.height,
 						RootHash, UpdateMap}),
 				RootHash = B#block.wallet_list,
-				DAG = ar_diff_dag:new(RootHash, UpdatedTree, B#block.denomination),
+				DAG = big_diff_dag:new(RootHash, UpdatedTree, B#block.denomination),
 				{DAG, B};
 			(B, {DAG, PrevB}) ->
 				ExpectedRootHash = B#block.wallet_list,
@@ -309,7 +309,7 @@ apply_block(B, PrevB, DAG) ->
 
 apply_block2(B, PrevB, DAG) ->
 	RootHash = PrevB#block.wallet_list,
-	Tree = ar_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2),
+	Tree = big_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2),
 	TXs = B#block.txs,
 	RewardAddr = B#block.reward_addr,
 	Addresses = [RewardAddr | big_tx:get_addresses(TXs)],
@@ -368,8 +368,8 @@ apply_block2(B, PrevB, Args, Tree, DAG) ->
 	end.
 
 set_current(DAG, RootHash, Height, PruneDepth) ->
-	UpdatedDAG = ar_diff_dag:update_sink(
-		ar_diff_dag:move_sink(DAG, RootHash, fun apply_diff/2, fun reverse_diff/2),
+	UpdatedDAG = big_diff_dag:update_sink(
+		big_diff_dag:move_sink(DAG, RootHash, fun apply_diff/2, fun reverse_diff/2),
 		RootHash,
 		fun(Tree, Meta) ->
 			{RootHash, UpdatedTree, UpdateMap} = big_block:hash_wallet_list(Tree),
@@ -378,10 +378,10 @@ set_current(DAG, RootHash, Height, PruneDepth) ->
 			{RootHash, UpdatedTree, Meta}
 		end
 	),
-	Tree = ar_diff_dag:get_sink(UpdatedDAG),
+	Tree = big_diff_dag:get_sink(UpdatedDAG),
 	true = Height >= ar_fork:height_2_2(),
 	prometheus_gauge:set(wallet_list_size, ar_patricia_tree:size(Tree)),
-	ar_diff_dag:filter(UpdatedDAG, PruneDepth).
+	big_diff_dag:filter(UpdatedDAG, PruneDepth).
 
 apply_diff(Diff, Tree) ->
 	maps:fold(
@@ -449,10 +449,10 @@ maybe_add_node(DAG, RootHash, RootHash, _Wallets, _Metadata) ->
 	%% and the miner did not claim the reward.
 	DAG;
 maybe_add_node(DAG, UpdatedRootHash, RootHash, Wallets, Metadata) ->
-	case ar_diff_dag:is_node(DAG, UpdatedRootHash) of
+	case big_diff_dag:is_node(DAG, UpdatedRootHash) of
 		true ->
 			%% The new wallet list is already known from a different fork.
 			DAG;
 		false ->
-			ar_diff_dag:add_node(DAG, UpdatedRootHash, RootHash, Wallets, Metadata)
+			big_diff_dag:add_node(DAG, UpdatedRootHash, RootHash, Wallets, Metadata)
 	end.

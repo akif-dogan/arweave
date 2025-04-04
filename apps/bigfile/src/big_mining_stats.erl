@@ -453,7 +453,7 @@ generate_report(_Height, _Packing, [], _Peers, _WeaveSize, Now) ->
 		now = Now
 	};
 generate_report(Height, Packing, Partitions, Peers, WeaveSize, Now) ->
-	PoA1Multiplier = ar_difficulty:poa1_diff_multiplier(Height),
+	PoA1Multiplier = big_difficulty:poa1_diff_multiplier(Height),
 	VDFSpeed = vdf_speed(Now),
 	TotalDataSize = get_total_minable_data_size(Packing),
 	Report = #report{
@@ -819,7 +819,7 @@ mining_stats_test_() ->
 		{timeout, 30, fun test_report_poa1_multiple_1/0},
 		ar_test_node:test_with_mocked_functions(
 			[
-				{ar_difficulty, poa1_diff_multiplier, fun(_) -> 2 end}
+				{big_difficulty, poa1_diff_multiplier, fun(_) -> 2 end}
 			],
 			fun test_report_poa1_multiple_2/0
 		)

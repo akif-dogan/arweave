@@ -53,7 +53,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 			tx_root = TXRoot,
 			wallet_list = WLH,
 			diff = Diff,
-			cumulative_diff = ar_difficulty:next_cumulative_diff(0, Diff, 0),
+			cumulative_diff = big_difficulty:next_cumulative_diff(0, Diff, 0),
 			weave_size = BlockSize,
 			block_size = BlockSize,
 			reward_pool = 0,
@@ -71,7 +71,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 			false ->
 				RewardKey = element(2, big_wallet:new()),
 				RewardAddr = big_wallet:to_address(RewardKey),
-				HashRate = ar_difficulty:get_hash_rate_fixed_ratio(B0),
+				HashRate = big_difficulty:get_hash_rate_fixed_ratio(B0),
 				RewardHistory = [{RewardAddr, HashRate, 10, 1}],
 				PricePerGiBMinute = big_pricing:get_price_per_gib_minute(0, 
 						B0#block{ reward_history = RewardHistory, denomination = 1 }),

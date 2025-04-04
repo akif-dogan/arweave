@@ -433,7 +433,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 		{height,				Height},
 		{hash,					B#block.hash},
 		{reward_pool,			B#block.reward_pool},
-		{diff_pair,				ar_difficulty:diff_pair(B)},
+		{diff_pair,				big_difficulty:diff_pair(B)},
 		{cumulative_diff,		B#block.cumulative_diff},
 		{last_retarget,			B#block.last_retarget},
 		{weave_size,			B#block.weave_size},
@@ -1425,7 +1425,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 		{height,				B#block.height},
 		{hash,					B#block.hash},
 		{reward_pool,			B#block.reward_pool},
-		{diff_pair,				ar_difficulty:diff_pair(B)},
+		{diff_pair,				big_difficulty:diff_pair(B)},
 		{cumulative_diff,		B#block.cumulative_diff},
 		{last_retarget,			B#block.last_retarget},
 		{weave_size,			B#block.weave_size},
@@ -1506,10 +1506,10 @@ record_economic_metrics(B, PrevB) ->
 	end.
 
 record_economic_metrics2(B, PrevB) ->
-	{PoA1Diff, Diff} = ar_difficulty:diff_pair(B),
+	{PoA1Diff, Diff} = big_difficulty:diff_pair(B),
 	prometheus_gauge:set(log_diff, [poa1], ar_retarget:switch_to_log_diff(PoA1Diff)),
 	prometheus_gauge:set(log_diff, [poa2], ar_retarget:switch_to_log_diff(Diff)),
-	prometheus_gauge:set(network_hashrate, ar_difficulty:get_hash_rate_fixed_ratio(B)),
+	prometheus_gauge:set(network_hashrate, big_difficulty:get_hash_rate_fixed_ratio(B)),
 	prometheus_gauge:set(endowment_pool, B#block.reward_pool),
 	Period_200_Years = 200 * 365 * 24 * 60 * 60,
 	Burden = big_pricing:get_storage_cost(B#block.weave_size, B#block.timestamp,
@@ -1972,7 +1972,7 @@ handle_found_solution(Args, PrevB, State) ->
 		end,
 
 	%% Check solution difficulty
-	PrevDiffPair = ar_difficulty:diff_pair(PrevB),
+	PrevDiffPair = big_difficulty:diff_pair(PrevB),
 	LastRetarget = PrevB#block.last_retarget,
 	PrevTS = PrevB#block.timestamp,
 	DiffPair = {_PoA1Diff, Diff} = ar_retarget:maybe_retarget(PrevB#block.height + 1,
@@ -2104,7 +2104,7 @@ handle_found_solution(Args, PrevB, State) ->
 					Denomination2),
 			ScheduledPricePerGiBMinute2 = big_pricing:redenominate(ScheduledPricePerGiBMinute,
 					Denomination, Denomination2),
-			CDiff = ar_difficulty:next_cumulative_diff(PrevB#block.cumulative_diff, Diff,
+			CDiff = big_difficulty:next_cumulative_diff(PrevB#block.cumulative_diff, Diff,
 					Height),
 			UnsignedB = pack_block_with_transactions(#block{
 				nonce = Nonce,
