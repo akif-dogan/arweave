@@ -209,7 +209,7 @@ chunks_to_size_tagged_chunks(Chunks) ->
 %% @doc Convert a list of chunk, byte offset tuples to
 %% the list of chunk ID, byte offset tuples.
 sized_chunks_to_sized_chunk_ids(SizedChunks) ->
-	[{ar_tx:generate_chunk_id(Chunk), Size} || {Chunk, Size} <- SizedChunks].
+	[{big_tx:generate_chunk_id(Chunk), Size} || {Chunk, Size} <- SizedChunks].
 
 %% @doc Get a list of unique source and destination addresses from the given list of txs.
 get_addresses(TXs) ->
@@ -604,7 +604,7 @@ is_tx_fee_sufficient(Args) ->
 	{TX, PricePerGiBMinute, KryderPlusRateMultiplier, Denomination, Height, Accounts,
 			Addr} = Args,
 	DataSize = get_weave_size_increase(TX, Height + 1),
-	MinimumRequiredFee = ar_tx:get_tx_fee({DataSize, PricePerGiBMinute,
+	MinimumRequiredFee = big_tx:get_tx_fee({DataSize, PricePerGiBMinute,
 			KryderPlusRateMultiplier, Addr, Accounts, Height + 1}),
 	Fee = TX#tx.reward,
 	big_pricing:redenominate(Fee, TX#tx.denomination, Denomination) >= MinimumRequiredFee.
@@ -743,7 +743,7 @@ test_sign_tx() ->
 						maps:put(Addr, {?BIG(10), <<>>}, Acc)
 					end,
 					#{},
-					ar_tx:get_addresses([TX])
+					big_tx:get_addresses([TX])
 				),
 			Args1 = {Rate, PricePerGiBMinute, 1, 1, 0, 0, Accounts, Timestamp},
 			?assert(verify(TX, Args1), ar_util:encode(TX#tx.id)),
@@ -776,7 +776,7 @@ test_sign_tx() ->
 						maps:put(Addr, {?BIG(10), <<>>}, Acc)
 					end,
 					#{},
-					ar_tx:get_addresses([TX])
+					big_tx:get_addresses([TX])
 				),
 			Args3 = {Rate, PricePerGiBMinute, 1, 1, 0, 0, Accounts, Timestamp},
 			?assert(not verify(TX, Args3), ar_util:encode(TX#tx.id)),
@@ -858,9 +858,9 @@ test_check_last_tx() ->
 	{_Priv1, Pub1} = big_wallet:new(),
 	{Priv2, Pub2} = big_wallet:new(),
 	{Priv3, Pub3} = big_wallet:new(),
-	TX = ar_tx:new(Pub2, ?BIG(1), ?BIG(500), <<>>),
-	TX2 = ar_tx:new(Pub3, ?BIG(1), ?BIG(400), TX#tx.id),
-	TX3 = ar_tx:new(Pub1, ?BIG(1), ?BIG(300), TX#tx.id),
+	TX = big_tx:new(Pub2, ?BIG(1), ?BIG(500), <<>>),
+	TX2 = big_tx:new(Pub3, ?BIG(1), ?BIG(400), TX#tx.id),
+	TX3 = big_tx:new(Pub1, ?BIG(1), ?BIG(300), TX#tx.id),
 	SignedTX2 = sign_v1(TX2, Priv2, Pub2),
 	SignedTX3 = sign_v1(TX3, Priv3, Pub3),
 	WalletList =
@@ -902,7 +902,7 @@ test_generate_chunk_tree_and_validate_path(Data, ChallengeLocation) ->
 	ChunkStart = ar_util:floor_int(ChallengeLocation, ?DATA_CHUNK_SIZE),
 	Chunk = binary:part(Data, ChunkStart, min(?DATA_CHUNK_SIZE, byte_size(Data) - ChunkStart)),
 	#tx{ data_root = DataRoot, data_tree = DataTree } =
-		ar_tx:generate_chunk_tree(
+		big_tx:generate_chunk_tree(
 			#tx{
 				data = Data,
 				data_size = byte_size(Data)
@@ -914,7 +914,7 @@ test_generate_chunk_tree_and_validate_path(Data, ChallengeLocation) ->
 			ChallengeLocation,
 			DataTree
 		),
-	RealChunkID = ar_tx:generate_chunk_id(Chunk),
+	RealChunkID = big_tx:generate_chunk_id(Chunk),
 	{PathChunkID, StartOffset, EndOffset} =
 		big_merkle:validate_path(DataRoot, ChallengeLocation, byte_size(Data), DataPath),
 	{PathChunkID, StartOffset, EndOffset} =
