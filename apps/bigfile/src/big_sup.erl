@@ -87,7 +87,7 @@ init([]) ->
 		?CHILD(ar_global_sync_record, worker),
 		?CHILD_SUP(ar_nonce_limiter_sup, supervisor),
 		?CHILD_SUP(big_mining_sup, supervisor),
-		?CHILD(ar_coordination, worker),
+		?CHILD(big_coordination, worker),
 		?CHILD_SUP(ar_tx_emitter_sup, supervisor),
 		?CHILD(ar_tx_poller, worker),
 		?CHILD_SUP(ar_block_pre_validator_sup, supervisor),

@@ -271,7 +271,7 @@ handle_cast({manual_garbage_collect, Ref}, #state{ gc_process_ref = Ref } = Stat
 		end,
 		State#state.workers
 	),
-	ar_coordination:garbage_collect(),
+	big_coordination:garbage_collect(),
 	ar_util:cast_after(State#state.gc_frequency_ms, ?MODULE, {manual_garbage_collect, Ref}),
 	{noreply, State};
 handle_cast({manual_garbage_collect, _}, State) ->
@@ -896,8 +896,8 @@ is_poa_complete(_, _) ->
 may_be_leave_it_to_exit_peer(error, _FailureReason, _AdditionalLogData) ->
 	error;
 may_be_leave_it_to_exit_peer(Solution, FailureReason, AdditionalLogData) ->
-	case ar_coordination:is_coordinated_miner() andalso
-			not ar_coordination:is_exit_peer() of
+	case big_coordination:is_coordinated_miner() andalso
+			not big_coordination:is_exit_peer() of
 		true ->
 			Solution;
 		false ->

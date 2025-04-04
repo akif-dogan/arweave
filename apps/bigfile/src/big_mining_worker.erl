@@ -497,7 +497,7 @@ handle_task({computed_h1, Candidate, _ExtraArgs}, State) ->
 									PartialDiffPair ->
 										PartialDiffPair
 								end,
-							ar_coordination:computed_h1(Candidate, DiffPair)
+							big_coordination:computed_h1(Candidate, DiffPair)
 					end,
 					%% Decrement 1 for chunk1:
 					%% do_not_cache indicates chunk2 was not and will not be read or cached
@@ -553,7 +553,7 @@ handle_task({computed_h2, Candidate, _ExtraArgs}, State) ->
 					%% have already printed several errors so we'll continue just in case.
 					#poa{ chunk = Chunk2 }
 			end,
-			ar_coordination:computed_h2_for_peer(Candidate#mining_candidate{ poa2 = PoA2 })
+			big_coordination:computed_h2_for_peer(Candidate#mining_candidate{ poa2 = PoA2 })
 	end,
 	{noreply, State2};
 

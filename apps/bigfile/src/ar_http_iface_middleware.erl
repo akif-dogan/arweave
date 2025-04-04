@@ -1395,17 +1395,17 @@ handle(<<"GET">>, [<<"coordinated_mining">>, <<"partition_table">>], Req, _Pid) 
 					not_joined(Req);
 				true ->
 					Partitions =
-						case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
+						case {big_pool:is_client(), big_coordination:is_exit_peer()} of
 							{true, true} ->
 								%% When we work with a pool, the exit node shares
 								%% the information about external partitions with
 								%% every internal miner.
-								ar_coordination:get_self_plus_external_partitions_list();
+								big_coordination:get_self_plus_external_partitions_list();
 							_ ->
 								%% CM miners ask each other about their local
 								%% partitions. A CM exit node is not an exception - it
 								%% does NOT aggregate peer partitions in this case.
-								ar_coordination:get_unique_partitions_list()
+								big_coordination:get_unique_partitions_list()
 						end,
 					JSON = ar_serialize:jsonify(Partitions),
 					{200, #{}, JSON, Req}
@@ -1422,7 +1422,7 @@ handle(<<"GET">>, [<<"coordinated_mining">>, <<"state">>], Req, _Pid) ->
 				false ->
 					not_joined(Req);
 				true ->
-					{ok, {LastPeerResponse}} = ar_coordination:get_public_state(),
+					{ok, {LastPeerResponse}} = big_coordination:get_public_state(),
 					Peers = maps:fold(fun(Peer, Value, Acc) ->
 						{AliveStatus, PartitionList} = Value,
 						Table = lists:map(
@@ -2496,7 +2496,7 @@ check_block_receive_timestamp(H) ->
 
 handle_post_partial_solution(Req, Pid) ->
 	{ok, Config} = application:get_env(bigfile, config),
-	CMExitNode = ar_coordination:is_exit_peer() andalso big_pool:is_client(),
+	CMExitNode = big_coordination:is_exit_peer() andalso big_pool:is_client(),
 	case {Config#config.is_pool_server, CMExitNode} of
 		{false, false} ->
 			{501, #{}, jiffy:encode(#{ error => configuration }), Req};
@@ -2547,7 +2547,7 @@ handle_post_partial_solution_cm_exit_peer_pool_client(Req, Pid) ->
 
 handle_get_jobs(PrevOutput, Req) ->
 	{ok, Config} = application:get_env(bigfile, config),
-	CMExitNode = ar_coordination:is_exit_peer() andalso big_pool:is_client(),
+	CMExitNode = big_coordination:is_exit_peer() andalso big_pool:is_client(),
 	case {Config#config.is_pool_server, CMExitNode} of
 		{false, false} ->
 			{501, #{}, jiffy:encode(#{ error => configuration }), Req};
@@ -2606,7 +2606,7 @@ handle_get_jobs_cm_exit_peer_pool_client(PrevOutput, Req) ->
 
 %% Only for cm miners that are NOT exit peers.
 handle_post_pool_cm_jobs(Req, Pid) ->
-	PoolCMMiner = (not ar_coordination:is_exit_peer()) andalso big_pool:is_client(),
+	PoolCMMiner = (not big_coordination:is_exit_peer()) andalso big_pool:is_client(),
 	case PoolCMMiner of
 		false ->
 			{501, #{}, jiffy:encode(#{ error => configuration }), Req};
@@ -3173,7 +3173,7 @@ handle_mining_h1(Req, Pid) ->
 						{'EXIT', _} ->
 							{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 						Candidate ->
-							case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
+							case {big_pool:is_client(), big_coordination:is_exit_peer()} of
 								{true, true} ->
 									PoolPeer = big_pool:pool_peer(),
 									Jobs = #pool_cm_jobs{ h1_to_h2_jobs = [Candidate] },
@@ -3184,7 +3184,7 @@ handle_mining_h1(Req, Pid) ->
 												Payload) end),
 									{200, #{}, <<>>, Req2};
 								_ ->
-									ar_coordination:compute_h2_for_peer(Peer, Candidate),
+									big_coordination:compute_h2_for_peer(Peer, Candidate),
 									{200, #{}, <<>>, Req}
 							end
 					end;
@@ -3207,7 +3207,7 @@ handle_mining_h2(Req, Pid) ->
 						Candidate ->
 							?LOG_INFO([{event, h2_received},
 									{peer, ar_util:format_peer(Peer)}]),
-							case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
+							case {big_pool:is_client(), big_coordination:is_exit_peer()} of
 								{true, true} ->
 									PoolPeer = big_pool:pool_peer(),
 									Jobs = #pool_cm_jobs{ h1_read_jobs = [Candidate] },

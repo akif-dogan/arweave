@@ -1,4 +1,4 @@
--module(ar_coordination).
+-module(big_coordination).
 
 -behaviour(gen_server).
 
@@ -329,7 +329,7 @@ handle_cast(refetch_pool_peer_partitions, State) ->
 
 handle_cast(garbage_collect, State) ->
 	erlang:garbage_collect(self(),
-		[{async, {ar_coordination, self(), erlang:monotonic_time()}}]),
+		[{async, {big_coordination, self(), erlang:monotonic_time()}}]),
 	{noreply, State};
 
 handle_cast(Cast, State) ->
@@ -465,7 +465,7 @@ refetch_peer_partitions(Peers) ->
 			fun(Peer) ->
 				case big_http_iface_client:get_cm_partition_table(Peer) of
 					{ok, PartitionList} ->
-						ar_coordination:update_peer(Peer, PartitionList);
+						big_coordination:update_peer(Peer, PartitionList);
 					_ ->
 						ok
 				end end,
@@ -473,7 +473,7 @@ refetch_peer_partitions(Peers) ->
 			),
 		%% ar_util:pmap ensures we fetch all the local up-to-date CM peer partitions first,
 		%% then share them with the Pool to fetch the complementary pool CM peer partitions.
-		case {big_pool:is_client(), ar_coordination:is_exit_peer()} of
+		case {big_pool:is_client(), big_coordination:is_exit_peer()} of
 			{true, true} ->
 				refetch_pool_peer_partitions();
 			_ ->
@@ -515,7 +515,7 @@ refetch_pool_peer_partitions(UniquePeerPartitions) ->
 		PoolPeer = big_pool:pool_peer(),
 		case big_http_iface_client:post_cm_partition_table_to_pool(PoolPeer, JSON) of
 			{ok, PartitionList} ->
-				ar_coordination:update_peer(PoolPeer, PartitionList);
+				big_coordination:update_peer(PoolPeer, PartitionList);
 			_ ->
 				ok
 		end

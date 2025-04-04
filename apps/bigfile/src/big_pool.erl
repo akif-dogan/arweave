@@ -598,7 +598,7 @@ process_h1_to_h2_jobs([], _Peer, _Partitions) ->
 process_h1_to_h2_jobs([Candidate | Jobs], Peer, Partitions) ->
 	case we_have_partition_for_the_second_recall_byte(Candidate, Partitions) of
 		true ->
-			ar_coordination:compute_h2_for_peer(Peer, Candidate);
+			big_coordination:compute_h2_for_peer(Peer, Candidate);
 		false ->
 			ok
 	end,
