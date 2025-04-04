@@ -47,12 +47,12 @@ reencrypt_composite_chunk({rx4096, RandomXState}, Key1, Key2, Chunk, PackingRoun
 		SubChunkCount1, SubChunkCount2).
 
 setup() ->
-    FastState512 = ar_mine_randomx:init_fast2(rx512, ?RANDOMX_PACKING_KEY, 0, 0,
+    FastState512 = big_mine_randomx:init_fast2(rx512, ?RANDOMX_PACKING_KEY, 0, 0,
 		erlang:system_info(dirty_cpu_schedulers_online)),
-    LightState512 = ar_mine_randomx:init_light2(rx512, ?RANDOMX_PACKING_KEY, 0, 0),
-    FastState4096 = ar_mine_randomx:init_fast2(rx4096, ?RANDOMX_PACKING_KEY, 0, 0,
+    LightState512 = big_mine_randomx:init_light2(rx512, ?RANDOMX_PACKING_KEY, 0, 0),
+    FastState4096 = big_mine_randomx:init_fast2(rx4096, ?RANDOMX_PACKING_KEY, 0, 0,
 		erlang:system_info(dirty_cpu_schedulers_online)),
-    LightState4096 = ar_mine_randomx:init_light2(rx4096, ?RANDOMX_PACKING_KEY, 0, 0),
+    LightState4096 = big_mine_randomx:init_light2(rx4096, ?RANDOMX_PACKING_KEY, 0, 0),
 	{FastState512, LightState512, FastState4096, LightState4096}.
 
 test_register(TestFun, Fixture) ->
@@ -95,59 +95,59 @@ test_state({
 	%% So the expected dataset size is 4,326,530,304 / 64 = 67,602,036 items.
 	?assertEqual(
 		{ok, {rx512, fast, 8881780, 2097152}},
-		ar_mine_randomx:info(FastState512)
+		big_mine_randomx:info(FastState512)
 	),
 	?assertEqual(
 		{ok, {rx4096, fast, 67602036, 2097152}},
-		ar_mine_randomx:info(FastState4096)
+		big_mine_randomx:info(FastState4096)
 	),
 	%% Unfortunately we don't have access to the cache size. The randomx_info_nif will check
 	%% that in fast mode the cache is not initialized, and in light mode the dataset is not
 	%% initialized and return an error if either check fails.
 	?assertEqual(
 		{ok, {rx512, light, 0, 2097152}},
-		ar_mine_randomx:info(LightState512)
+		big_mine_randomx:info(LightState512)
 	),
 	?assertEqual(
 		{ok, {rx4096, light, 0, 2097152}},
-		ar_mine_randomx:info(LightState4096)
+		big_mine_randomx:info(LightState4096)
 	).
 
 test_bad_state(_) ->
 	BadState = {bad_mode, bad_state},
 	?assertEqual({error, invalid_randomx_mode},
-		ar_mine_randomx:info(BadState)),
+		big_mine_randomx:info(BadState)),
 	?assertEqual({error, invalid_randomx_mode},
-		ar_mine_randomx:hash(BadState, crypto:strong_rand_bytes(32))),
+		big_mine_randomx:hash(BadState, crypto:strong_rand_bytes(32))),
 	?assertEqual({error, invalid_randomx_mode},
-		ar_mine_randomx:randomx_encrypt_chunk(
+		big_mine_randomx:randomx_encrypt_chunk(
 			{spora_2_6, crypto:strong_rand_bytes(32)}, BadState,
 			crypto:strong_rand_bytes(32), crypto:strong_rand_bytes(?DATA_CHUNK_SIZE))),
 	?assertEqual({error, invalid_randomx_mode},
-		ar_mine_randomx:randomx_encrypt_chunk(
+		big_mine_randomx:randomx_encrypt_chunk(
 			{composite, 2, crypto:strong_rand_bytes(32)}, BadState,
 			crypto:strong_rand_bytes(32), crypto:strong_rand_bytes(?DATA_CHUNK_SIZE))),
 	?assertEqual({error, invalid_randomx_mode},
-		ar_mine_randomx:randomx_decrypt_chunk(
+		big_mine_randomx:randomx_decrypt_chunk(
 			{spora_2_6, crypto:strong_rand_bytes(32)}, BadState,
 			crypto:strong_rand_bytes(32), crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 			?DATA_CHUNK_SIZE)),
 	?assertEqual({error, invalid_randomx_mode},
-		ar_mine_randomx:randomx_decrypt_chunk(
+		big_mine_randomx:randomx_decrypt_chunk(
 			{composite, 2, crypto:strong_rand_bytes(32)}, BadState,
 			crypto:strong_rand_bytes(32), crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 			?DATA_CHUNK_SIZE)),
 	?assertEqual({error, invalid_randomx_mode},
-		ar_mine_randomx:randomx_decrypt_sub_chunk(
+		big_mine_randomx:randomx_decrypt_sub_chunk(
 			{composite, 2, crypto:strong_rand_bytes(32)}, BadState,
 			crypto:strong_rand_bytes(32), crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),0)),
 	?assertEqual({error, invalid_randomx_mode},
-		ar_mine_randomx:randomx_reencrypt_chunk(
+		big_mine_randomx:randomx_reencrypt_chunk(
 			{spora_2_6, crypto:strong_rand_bytes(32)}, {spora_2_6, crypto:strong_rand_bytes(32)},
 			BadState, crypto:strong_rand_bytes(32), crypto:strong_rand_bytes(32), 
 			crypto:strong_rand_bytes(?DATA_CHUNK_SIZE), ?DATA_CHUNK_SIZE)),
 	?assertEqual({error, invalid_reencrypt_packing},
-		ar_mine_randomx:randomx_reencrypt_chunk(
+		big_mine_randomx:randomx_reencrypt_chunk(
 			{composite, 2, crypto:strong_rand_bytes(32)},
 			{composite, 2, crypto:strong_rand_bytes(32)},
 			BadState, crypto:strong_rand_bytes(32), crypto:strong_rand_bytes(32), 
@@ -238,60 +238,60 @@ test_nif_wrappers(State512, State4096, Chunk) ->
 	%% spora_26 randomx_encrypt_chunk 
 	{ok, Packed_2_6A} = ar_rx512_nif:rx512_encrypt_chunk_nif(
 		element(2, State512), KeyA, Chunk, ?RANDOMX_PACKING_ROUNDS_2_6,
-		ar_mine_randomx:jit(), ar_mine_randomx:large_pages(), ar_mine_randomx:hardware_aes()),
+		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes()),
 	?assertEqual({ok, Packed_2_6A},
-		ar_mine_randomx:randomx_encrypt_chunk({spora_2_6, AddrA}, State512, KeyA, Chunk)),
+		big_mine_randomx:randomx_encrypt_chunk({spora_2_6, AddrA}, State512, KeyA, Chunk)),
 
 	%% composite randomx_encrypt_composite_chunk
 	{ok, PackedCompositeA2} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		element(2, State4096), KeyA, Chunk,
-		ar_mine_randomx:jit(), ar_mine_randomx:large_pages(), ar_mine_randomx:hardware_aes(),
+		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes(),
 		?COMPOSITE_PACKING_ROUND_COUNT, 2, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
 	?assertEqual({ok, PackedCompositeA2},
-		ar_mine_randomx:randomx_encrypt_chunk({composite, AddrA, 2}, State4096, KeyA, Chunk)),
+		big_mine_randomx:randomx_encrypt_chunk({composite, AddrA, 2}, State4096, KeyA, Chunk)),
 
 	%% spora_2_6 randomx_decrypt_chunk
 	?assertEqual({ok, Chunk},
-		ar_mine_randomx:randomx_decrypt_chunk(
+		big_mine_randomx:randomx_decrypt_chunk(
 			{spora_2_6, AddrA}, State512, KeyA, Packed_2_6A, byte_size(Chunk))),
 
 	%% composite randomx_decrypt_composite_chunk
 	?assertEqual({ok, Chunk},
-		ar_mine_randomx:randomx_decrypt_chunk(
+		big_mine_randomx:randomx_decrypt_chunk(
 			{composite, AddrA, 2}, State4096, KeyA, PackedCompositeA2, byte_size(Chunk))),
 
 	%% Prepare data for the reencryption tests
 	{ok, Packed_2_6B} = ar_rx512_nif:rx512_encrypt_chunk_nif(
 		element(2, State512), KeyB, Chunk, ?RANDOMX_PACKING_ROUNDS_2_6,
-		ar_mine_randomx:jit(), ar_mine_randomx:large_pages(), ar_mine_randomx:hardware_aes()),
+		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes()),
 	{ok, PackedCompositeA3} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		element(2, State4096), KeyA, Chunk,
-		ar_mine_randomx:jit(), ar_mine_randomx:large_pages(), ar_mine_randomx:hardware_aes(),
+		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes(),
 		?COMPOSITE_PACKING_ROUND_COUNT, 3, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
 	{ok, PackedCompositeB3} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		element(2, State4096), KeyB, Chunk,
-		ar_mine_randomx:jit(), ar_mine_randomx:large_pages(), ar_mine_randomx:hardware_aes(),
+		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes(),
 		?COMPOSITE_PACKING_ROUND_COUNT, 3, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
 		
 	%% spora_2_6 -> spora_2_6 randomx_reencrypt_chunk
 	?assertEqual({ok, Packed_2_6B, Chunk},
-		ar_mine_randomx:randomx_reencrypt_chunk(
+		big_mine_randomx:randomx_reencrypt_chunk(
 			{spora_2_6, AddrA}, {spora_2_6, AddrB},
 			State512, KeyA, KeyB, Packed_2_6A, byte_size(Chunk))),
 	
 	%% composite -> composite randomx_reencrypt_chunk
 	?assertEqual({ok, PackedCompositeB3, Chunk},
-		ar_mine_randomx:randomx_reencrypt_chunk(
+		big_mine_randomx:randomx_reencrypt_chunk(
 			{composite, AddrA, 2}, {composite, AddrB, 3},
 			State4096, KeyA, KeyB, PackedCompositeA2, byte_size(Chunk))),
 	?assertEqual({ok, PackedCompositeA3, none},
-		ar_mine_randomx:randomx_reencrypt_chunk(
+		big_mine_randomx:randomx_reencrypt_chunk(
 			{composite, AddrA, 2}, {composite, AddrA, 3},
 			State4096, KeyA, KeyA, PackedCompositeA2, byte_size(Chunk))),	
 	
 	%% spora_2_6 -> composite randomx_reencrypt_chunk
 	?assertEqual({error, invalid_reencrypt_packing},
-		ar_mine_randomx:randomx_reencrypt_chunk(
+		big_mine_randomx:randomx_reencrypt_chunk(
 			{spora_2_6, AddrA}, {composite, AddrB, 3},
 			State512, KeyA, KeyB, Packed_2_6A, byte_size(Chunk))).
 
@@ -574,11 +574,11 @@ test_hash({
     Segment = ar_util:decode(?ENCODED_SEGMENT),
     Input = << Nonce/binary, Segment/binary >>,
 	?assertEqual(ExpectedHash512,
-		ar_mine_randomx:hash(FastState512, Input, 0, 0, 0)),
+		big_mine_randomx:hash(FastState512, Input, 0, 0, 0)),
 	?assertEqual(ExpectedHash512,
-		ar_mine_randomx:hash(LightState512, Input, 0, 0, 0)),
+		big_mine_randomx:hash(LightState512, Input, 0, 0, 0)),
 	?assertEqual(ExpectedHash4096,
-		ar_mine_randomx:hash(FastState4096, Input, 0, 0, 0)),
+		big_mine_randomx:hash(FastState4096, Input, 0, 0, 0)),
 	?assertEqual(ExpectedHash4096,
-		ar_mine_randomx:hash(LightState4096, Input, 0, 0, 0)).
+		big_mine_randomx:hash(LightState4096, Input, 0, 0, 0)).
 

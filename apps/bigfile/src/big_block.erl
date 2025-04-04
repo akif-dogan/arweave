@@ -191,7 +191,7 @@ compute_h0(NonceLimiterOutput, PartitionNumber, Seed, MiningAddr, PackingDifficu
 					PackingDifficulty:8 >>
 		end,
 	RandomXState = ar_packing_server:get_randomx_state_for_h0(PackingDifficulty, PackingState),
-	ar_mine_randomx:hash(RandomXState, Preimage).
+	big_mine_randomx:hash(RandomXState, Preimage).
 
 %% @doc Compute "h1" - a cryptographic hash which is either the hash of a solution not
 %% involving the second chunk or a carrier of the information about the first chunk

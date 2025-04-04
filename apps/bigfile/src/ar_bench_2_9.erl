@@ -110,7 +110,7 @@ prepare_context(replica_2_9, Threads, DataMiB) ->
 	Key = ar_replica_2_9:get_entropy_key(Address, Offset, SubChunkIndex),
 	DataPerThread = DataMiB * ?MiB div Threads,
 	EntropyPerThread = DataPerThread div ?REPLICA_2_9_ENTROPY_SIZE,
-	RandomXState = ar_mine_randomx:init_fast2(
+	RandomXState = big_mine_randomx:init_fast2(
 		rxsquared, ?RANDOMX_PACKING_KEY, 1, 1, 
 		erlang:system_info(dirty_cpu_schedulers_online)),
 	{RandomXState, SubChunk, Key, EntropyPerThread};
@@ -120,7 +120,7 @@ prepare_context(spora_2_6, Threads, DataMiB) ->
 	Chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	Offset = rand:uniform(1024 * 1024 * 1024),
 	{spora_2_6, Key} = ar_packing_server:chunk_key({spora_2_6, Address}, Offset, Root),
-	{rx512, RandomXState} = ar_mine_randomx:init_fast2(
+	{rx512, RandomXState} = big_mine_randomx:init_fast2(
 		rx512, ?RANDOMX_PACKING_KEY, 1, 1, 
 		erlang:system_info(dirty_cpu_schedulers_online)),
 	ChunksPerThread = DataMiB * ?MiB div Threads div ?DATA_CHUNK_SIZE,
@@ -131,7 +131,7 @@ prepare_context({composite, Difficulty}, Threads, DataMiB) ->
 	Chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	Offset = rand:uniform(1024 * 1024 * 1024),
 	{composite, Key} = ar_packing_server:chunk_key({composite, Address, Difficulty}, Offset, Root),
-	{rx4096, RandomXState} = ar_mine_randomx:init_fast2(
+	{rx4096, RandomXState} = big_mine_randomx:init_fast2(
 		rx4096, ?RANDOMX_PACKING_KEY, 1, 1, 
 		erlang:system_info(dirty_cpu_schedulers_online)),
 	ChunksPerThread = DataMiB * ?MiB div Threads div ?DATA_CHUNK_SIZE,
@@ -154,7 +154,7 @@ pack_chunks(_Format, _Thread, _Dir, _Context, 0) ->
 	ok;
 pack_chunks(replica_2_9, Thread, Dir, Context, Count) ->
 	{RandomXState, SubChunk, Key, _EntropyPerThread} = Context,
-	Entropy = ar_mine_randomx:randomx_generate_replica_2_9_entropy(RandomXState, Key),
+	Entropy = big_mine_randomx:randomx_generate_replica_2_9_entropy(RandomXState, Key),
 	PackedSubChunks = pack_sub_chunks(SubChunk, Entropy, 0, RandomXState, []),
 	case Dir of
 		undefined ->
@@ -203,7 +203,7 @@ pack_sub_chunks(_SubChunk, _Entropy, Index, _State, PackedSubChunks)
 		when Index * ?COMPOSITE_PACKING_SUB_CHUNK_SIZE >= ?REPLICA_2_9_ENTROPY_SIZE ->
 	PackedSubChunks;
 pack_sub_chunks(SubChunk, Entropy, Index, State, PackedSubChunks) ->
-	{ok, PackedSubChunk} = ar_mine_randomx:randomx_encrypt_replica_2_9_sub_chunk(
+	{ok, PackedSubChunk} = big_mine_randomx:randomx_encrypt_replica_2_9_sub_chunk(
 			{State, Entropy, SubChunk, Index}),
 	pack_sub_chunks(
 		SubChunk, Entropy, Index + 1, State, 

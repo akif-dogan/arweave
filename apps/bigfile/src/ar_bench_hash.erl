@@ -19,7 +19,7 @@ run_benchmark_from_cli(Args) ->
 	end,
 
 	Schedulers = erlang:system_info(dirty_cpu_schedulers_online),
-	RandomXState = ar_mine_randomx:init_fast2(
+	RandomXState = big_mine_randomx:init_fast2(
 		RandomXMode, ?RANDOMX_PACKING_KEY, JIT, LargePages, Schedulers),
 	{H0, H1} = run_benchmark(RandomXState, JIT, LargePages, HardwareAES),
 	H0String = io_lib:format("~.3f", [H0 / 1000]),
@@ -43,8 +43,8 @@ show_help() ->
 	erlang:halt().
 
 run_benchmark(RandomXState) ->
-	run_benchmark(RandomXState, ar_mine_randomx:jit(),
-		ar_mine_randomx:large_pages(), ar_mine_randomx:hardware_aes()).
+	run_benchmark(RandomXState, big_mine_randomx:jit(),
+		big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes()).
 
 run_benchmark(RandomXState, JIT, LargePages, HardwareAES) ->
 	NonceLimiterOutput = crypto:strong_rand_bytes(32),
@@ -56,7 +56,7 @@ run_benchmark(RandomXState, JIT, LargePages, HardwareAES) ->
 			fun(I) ->
 				Data = << NonceLimiterOutput:32/binary,
 				I:256, Seed:32/binary, MiningAddr/binary >>,
-				ar_mine_randomx:hash(RandomXState, Data, JIT, LargePages, HardwareAES)
+				big_mine_randomx:hash(RandomXState, Data, JIT, LargePages, HardwareAES)
 			end,
 			lists:seq(1, Iterations))
 		end),

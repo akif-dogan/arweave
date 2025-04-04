@@ -95,7 +95,7 @@ unpack_sub_chunk({composite, _, _} = Packing,
 			RandomXState = get_randomx_state_by_packing(Packing, PackingState),
 			case prometheus_histogram:observe_duration(packing_duration_milliseconds,
 					[unpack_sub_chunk, PackingAtom, external], fun() ->
-						ar_mine_randomx:randomx_decrypt_sub_chunk(Packing, RandomXState,
+						big_mine_randomx:randomx_decrypt_sub_chunk(Packing, RandomXState,
 									Key, Chunk, SubChunkStartOffset) end) of
 				{ok, UnpackedSubChunk} ->
 					{ok, UnpackedSubChunk};
@@ -118,7 +118,7 @@ unpack_sub_chunk({replica_2_9, RewardAddr} = Packing,
 					AbsoluteEndOffset),
 			case prometheus_histogram:observe_duration(packing_duration_milliseconds,
 					[unpack_sub_chunk, replica_2_9, external], fun() ->
-						ar_mine_randomx:randomx_decrypt_replica_2_9_sub_chunk({RandomXState,
+						big_mine_randomx:randomx_decrypt_replica_2_9_sub_chunk({RandomXState,
 								Key, Chunk, EntropySubChunkIndex}) end) of
 				{ok, UnpackedSubChunk} ->
 					{ok, UnpackedSubChunk};
@@ -237,7 +237,7 @@ generate_replica_2_9_entropy(RewardAddr, AbsoluteEndOffset, SubChunkStartOffset)
 	Entropy = prometheus_histogram:observe_duration(
 		replica_2_9_entropy_duration_milliseconds, [1], 
 			fun() ->
-				ar_mine_randomx:randomx_generate_replica_2_9_entropy(RandomXState, Key)
+				big_mine_randomx:randomx_generate_replica_2_9_entropy(RandomXState, Key)
 			end),
 	%% Primarily needed for testing where the entropy generated exceeds the entropy
 	%% needed for tests.
@@ -362,9 +362,9 @@ terminate(_Reason, _State) ->
 
 init_packing_state() ->
 	Schedulers = erlang:system_info(dirty_cpu_schedulers_online),
-	RandomXState512 = ar_mine_randomx:init_fast(rx512, ?RANDOMX_PACKING_KEY, Schedulers),
-	RandomXState4096 = ar_mine_randomx:init_fast(rx4096, ?RANDOMX_PACKING_KEY, Schedulers),
-	RandomXStateSharedEntropy = ar_mine_randomx:init_fast(rxsquared,
+	RandomXState512 = big_mine_randomx:init_fast(rx512, ?RANDOMX_PACKING_KEY, Schedulers),
+	RandomXState4096 = big_mine_randomx:init_fast(rx4096, ?RANDOMX_PACKING_KEY, Schedulers),
+	RandomXStateSharedEntropy = big_mine_randomx:init_fast(rxsquared,
 			?RANDOMX_PACKING_KEY, Schedulers),
 	PackingState = {RandomXState512, RandomXState4096, RandomXStateSharedEntropy},
 	ets:insert(?MODULE, {randomx_packing_state, PackingState}),
@@ -509,7 +509,7 @@ pack(Packing, ChunkOffset, TXRoot, Chunk, PackingState, External) ->
 			RandomXState = get_randomx_state_by_packing(Packing, PackingState),
 			case prometheus_histogram:observe_duration(packing_duration_milliseconds,
 					[pack, PackingAtom, External], fun() ->
-							ar_mine_randomx:randomx_encrypt_chunk(Packing, RandomXState,
+							big_mine_randomx:randomx_encrypt_chunk(Packing, RandomXState,
 									Key, Chunk) end) of
 				{ok, Packed} ->
 					{ok, Packed, was_not_already_packed};
@@ -537,7 +537,7 @@ pack_replica_2_9_sub_chunks(RewardAddr, AbsoluteEndOffset, RandomXState,
 	Entropy = generate_replica_2_9_entropy(RewardAddr, AbsoluteEndOffset, SubChunkStartOffset),
 	case prometheus_histogram:observe_duration(packing_duration_milliseconds,
 			[pack_sub_chunk, replica_2_9, internal], fun() ->
-					ar_mine_randomx:randomx_encrypt_replica_2_9_sub_chunk({RandomXState,
+					big_mine_randomx:randomx_encrypt_replica_2_9_sub_chunk({RandomXState,
 							Entropy, SubChunk, EntropySubChunkIndex}) end) of
 		{ok, PackedSubChunk} ->
 			SubChunkSize = ?COMPOSITE_PACKING_SUB_CHUNK_SIZE,
@@ -564,7 +564,7 @@ unpack_replica_2_9_sub_chunks(RewardAddr, AbsoluteEndOffset, RandomXState,
 	EntropySubChunkIndex = ar_replica_2_9:get_slice_index(AbsoluteEndOffset),
 	case prometheus_histogram:observe_duration(packing_duration_milliseconds,
 			[unpack_sub_chunk, replica_2_9, internal], fun() ->
-					ar_mine_randomx:randomx_decrypt_replica_2_9_sub_chunk({RandomXState,
+					big_mine_randomx:randomx_decrypt_replica_2_9_sub_chunk({RandomXState,
 							Key, SubChunk, EntropySubChunkIndex}) end) of
 		{ok, UnpackedSubChunk} ->
 			SubChunkSize = ?COMPOSITE_PACKING_SUB_CHUNK_SIZE,
@@ -612,7 +612,7 @@ unpack(Packing, ChunkOffset, TXRoot, Chunk, ChunkSize, PackingState, External) -
 			RandomXState = get_randomx_state_by_packing(Packing, PackingState),
 			case prometheus_histogram:observe_duration(packing_duration_milliseconds,
 					[unpack, PackingAtom, External], fun() ->
-							ar_mine_randomx:randomx_decrypt_chunk(Packing, RandomXState,
+							big_mine_randomx:randomx_decrypt_chunk(Packing, RandomXState,
 									Key, Chunk, ChunkSize) end) of
 				{ok, Unpacked} ->
 					{ok, Unpacked, was_not_already_unpacked};
@@ -715,7 +715,7 @@ repack(RequestedPacking, StoredPacking,
 			RandomXState = get_randomx_state_by_packing(RequestedPacking, PackingState),
 			prometheus_histogram:observe_duration(packing_duration_milliseconds,
 				[repack, PrometheusLabel, External], fun() ->
-					ar_mine_randomx:randomx_reencrypt_chunk(StoredPacking, RequestedPacking,
+					big_mine_randomx:randomx_reencrypt_chunk(StoredPacking, RequestedPacking,
 							RandomXState, UnpackKey, PackKey, Chunk, ChunkSize) end);
 		Error ->
 			Error
@@ -823,7 +823,7 @@ encipher_replica_2_9_sub_chunks(<<>>, <<>>) ->
 encipher_replica_2_9_sub_chunks(
 		<< SubChunk:(?COMPOSITE_PACKING_SUB_CHUNK_SIZE)/binary, ChunkRest/binary >>,
 		<< EntropyPart:(?COMPOSITE_PACKING_SUB_CHUNK_SIZE)/binary, EntropyRest/binary >>) ->
-	[ar_mine_randomx:encipher_sub_chunk(SubChunk, EntropyPart)
+	[big_mine_randomx:encipher_sub_chunk(SubChunk, EntropyPart)
 			| encipher_replica_2_9_sub_chunks(ChunkRest, EntropyRest)].
 
 %%%===================================================================

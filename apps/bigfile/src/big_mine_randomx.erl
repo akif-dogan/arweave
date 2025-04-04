@@ -1,4 +1,4 @@
--module(ar_mine_randomx).
+-module(big_mine_randomx).
 
 -export([init_fast/3, init_light/2, info/1, hash/2, hash/5,
 		randomx_encrypt_chunk/4,
