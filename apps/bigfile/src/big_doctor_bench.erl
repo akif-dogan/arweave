@@ -1,4 +1,4 @@
--module(ar_doctor_bench).
+-module(big_doctor_bench).
 
 -export([main/1, help/0]).
 

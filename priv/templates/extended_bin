@@ -288,7 +288,7 @@ bigfile_wallet_create_ecdsa() {
 # Bigfile Data Doctor Section
 ######################################################################
 bigfile_doctor() {
-    BIGFILE_OPTS="-run ar_data_doctor main"
+    BIGFILE_OPTS="-run big_data_doctor main"
     echo ${*}
 }
 

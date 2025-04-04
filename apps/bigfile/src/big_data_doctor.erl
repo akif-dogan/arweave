@@ -1,4 +1,4 @@
--module(ar_data_doctor).
+-module(big_data_doctor).
 
 -export([main/0, main/1]).
 
@@ -19,7 +19,7 @@ main(Args) ->
 		"merge" ->
 			ar_doctor_merge:main(tl(Args));
 		"bench" ->
-			ar_doctor_bench:main(tl(Args));
+			big_doctor_bench:main(tl(Args));
 		"dump" ->
 			ar_doctor_dump:main(tl(Args));
 		_ ->
@@ -37,7 +37,7 @@ help() ->
 	big:console("~n"),
 	ar_doctor_merge:help(),
 	big:console("~n"),
-	ar_doctor_bench:help(),
+	big_doctor_bench:help(),
 	big:console("~n"),
 	ar_doctor_dump:help(),
 	big:console("~n").
