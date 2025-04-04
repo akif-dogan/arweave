@@ -425,12 +425,12 @@ handle_task({computed_h0, Candidate, _ExtraArgs}, State) ->
 	Partition2 = big_node:get_partition_number(RecallRange2Start),
 	Candidate2 = Candidate#mining_candidate{ partition_number2 = Partition2 },
 	Candidate3 = generate_cache_ref(Candidate2),
-	Range1Exists = ar_mining_io:read_recall_range(
+	Range1Exists = big_mining_io:read_recall_range(
 			chunk1, self(), Candidate3, RecallRange1Start),
 	PackingDifficulty = Candidate#mining_candidate.packing_difficulty,
 	State3 = case Range1Exists of
 		true ->
-			Range2Exists = ar_mining_io:read_recall_range(
+			Range2Exists = big_mining_io:read_recall_range(
 					chunk2, self(), Candidate3, RecallRange2Start),
 			case Range2Exists of
 				true -> 
@@ -574,7 +574,7 @@ handle_task({compute_h2_for_peer, Candidate, _ExtraArgs}, State) ->
 	%% Clear the list so we aren't copying it around all over the place
 	Candidate3 = Candidate2#mining_candidate{ cm_h1_list = [] },
 
-	Range2Exists = ar_mining_io:read_recall_range(chunk2, self(), Candidate3, RecallRange2Start),
+	Range2Exists = big_mining_io:read_recall_range(chunk2, self(), Candidate3, RecallRange2Start),
 	case Range2Exists of
 		true ->
 			big_mining_stats:h1_received_from_peer(Peer, length(H1List)),

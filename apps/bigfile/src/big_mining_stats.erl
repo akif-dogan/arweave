@@ -437,8 +437,8 @@ optimal_partition_hash_hps(PoA1Multiplier, VDFSpeed, PartitionDataSize, TotalDat
 generate_report() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	Height = big_node:get_height(),
-	Packing = ar_mining_io:get_packing(),
-	Partitions = ar_mining_io:get_partitions(),
+	Packing = big_mining_io:get_packing(),
+	Partitions = big_mining_io:get_partitions(),
 	generate_report(
 		Height,
 		Packing,

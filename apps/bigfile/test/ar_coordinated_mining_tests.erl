@@ -213,7 +213,7 @@ test_partition_table() ->
 
 	%% Simulate mining start
 	PartitionUpperBound = 35 * ?PARTITION_SIZE, %% less than the highest configured partition
-	ar_mining_io:set_largest_seen_upper_bound(PartitionUpperBound),
+	big_mining_io:set_largest_seen_upper_bound(PartitionUpperBound),
 	
 	?assertEqual(
 		{ok, [
@@ -267,11 +267,11 @@ test_peers_by_partition() ->
 			{?PARTITION_SIZE, 4, {spora_2_6, MiningAddr}}
 		]}, false]),
 
-	ar_test_node:remote_call(peer1, ar_mining_io, set_largest_seen_upper_bound,
+	ar_test_node:remote_call(peer1, big_mining_io, set_largest_seen_upper_bound,
 		[PartitionUpperBound]),
-	ar_test_node:remote_call(peer2, ar_mining_io, set_largest_seen_upper_bound,
+	ar_test_node:remote_call(peer2, big_mining_io, set_largest_seen_upper_bound,
 		[PartitionUpperBound]),
-	ar_test_node:remote_call(peer3, ar_mining_io, set_largest_seen_upper_bound,
+	ar_test_node:remote_call(peer3, big_mining_io, set_largest_seen_upper_bound,
 		[PartitionUpperBound]),
 
 	timer:sleep(3000),
@@ -320,7 +320,7 @@ test_peers_by_partition() ->
 			{?PARTITION_SIZE, 4, {spora_2_6, MiningAddr}},
 			{?PARTITION_SIZE, 5, {spora_2_6, MiningAddr}}
 		]}, false]),
-	ar_test_node:remote_call(peer1, ar_mining_io, set_largest_seen_upper_bound,
+	ar_test_node:remote_call(peer1, big_mining_io, set_largest_seen_upper_bound,
 		[PartitionUpperBound]),
 	timer:sleep(3000),
 

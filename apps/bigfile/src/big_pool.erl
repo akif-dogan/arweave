@@ -103,7 +103,7 @@ pool_peer() ->
 process_cm_jobs(Jobs, Peer) ->
 	#pool_cm_jobs{ h1_to_h2_jobs = H1ToH2Jobs, h1_read_jobs = H1ReadJobs } = Jobs,
 	{ok, Config} = application:get_env(bigfile, config),
-	Partitions = ar_mining_io:get_partitions(infinity),
+	Partitions = big_mining_io:get_partitions(infinity),
 	case Config#config.mine of
 		true ->
 			process_h1_to_h2_jobs(H1ToH2Jobs, Peer, Partitions);

@@ -227,7 +227,7 @@ handle_call(get_cluster_partitions_list, _From, State) ->
 			sets:new(),
 			State#state.peers_by_partition
 		),
-	Set = get_unique_partitions_set(ar_mining_io:get_partitions(), PeerPartitions),
+	Set = get_unique_partitions_set(big_mining_io:get_partitions(), PeerPartitions),
 	{reply, lists:sort(sets:to_list(Set)), State};
 
 handle_call(Request, _From, State) ->
@@ -258,7 +258,7 @@ handle_cast({computed_h1, ShareableCandidate, H1, Nonce}, State) ->
 	{noreply, State#state{ out_batches = OutBatches2 }};
 
 handle_cast({compute_h2_for_peer, Candidate}, State) ->
-	%% No don't need to batch inbound batches since ar_mining_io will cache the recall
+	%% No don't need to batch inbound batches since big_mining_io will cache the recall
 	%% range for a short period greatly lowering the cost of processing the same
 	%% multiple times across several batches.
 	big_mining_server:compute_h2_for_peer(Candidate),
@@ -485,11 +485,11 @@ refetch_pool_peer_partitions() ->
 	gen_server:cast(?MODULE, refetch_pool_peer_partitions).
 
 get_unique_partitions_list() ->
-	Set = get_unique_partitions_set(ar_mining_io:get_partitions(), sets:new()),
+	Set = get_unique_partitions_set(big_mining_io:get_partitions(), sets:new()),
 	lists:sort(sets:to_list(Set)).
 
 get_unique_partitions_set() ->
-	get_unique_partitions_set(ar_mining_io:get_partitions(), sets:new()).
+	get_unique_partitions_set(big_mining_io:get_partitions(), sets:new()).
 
 get_unique_partitions_set([], UniquePartitions) ->
 	UniquePartitions;

@@ -30,12 +30,12 @@ init([]) ->
 				big_mining_worker, worker, big_mining_worker:name(Partition, PackingDifficulty),
 					[Partition, PackingDifficulty])
 		end,
-		ar_mining_io:get_partitions(infinity)
+		big_mining_io:get_partitions(infinity)
 	),
 	Children = MiningWorkers ++ [
 		?CHILD(big_mining_server, worker),
 		?CHILD(ar_mining_hash, worker),
-		?CHILD(ar_mining_io, worker),
+		?CHILD(big_mining_io, worker),
 		?CHILD(big_mining_stats, worker)
 	],
 	{ok, {{one_for_one, 5, 10}, Children}}.

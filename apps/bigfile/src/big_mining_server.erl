@@ -156,8 +156,8 @@ init([]) ->
 	ok = ar_events:subscribe(nonce_limiter),
 	big_chunk_storage:open_files("default"),
 
-	Partitions = ar_mining_io:get_partitions(infinity),
-	Packing = ar_mining_io:get_packing(),
+	Partitions = big_mining_io:get_partitions(infinity),
+	Packing = big_mining_io:get_packing(),
 	PackingDifficulty = get_packing_difficulty(Packing),
 
 	Workers = lists:foldl(
@@ -262,7 +262,7 @@ handle_cast({manual_garbage_collect, Ref}, #state{ gc_process_ref = Ref } = Stat
 	%% the cache.
 	?LOG_DEBUG([{event, mining_debug_garbage_collect_start},
 		{frequency, State#state.gc_frequency_ms}]),
-	ar_mining_io:garbage_collect(),
+	big_mining_io:garbage_collect(),
 	ar_mining_hash:garbage_collect(),
 	erlang:garbage_collect(self(), [{async, erlang:monotonic_time()}]),
 	maps:foreach(
@@ -437,7 +437,7 @@ add_seed(SessionKey, State) ->
 	end.
 
 update_cache_limits(State) ->
-	NumActivePartitions = length(ar_mining_io:get_partitions()),
+	NumActivePartitions = length(big_mining_io:get_partitions()),
 	update_cache_limits(NumActivePartitions, State).
 
 update_cache_limits(0, State) ->
@@ -524,7 +524,7 @@ maybe_update_cache_limits(Limits, State) ->
 	}.
 
 distribute_output(Candidate, State) ->
-	distribute_output(ar_mining_io:get_partitions(), Candidate, State).
+	distribute_output(big_mining_io:get_partitions(), Candidate, State).
 
 distribute_output([], _Candidate, _State) ->
 	ok;
@@ -551,7 +551,7 @@ distribute_output([{Partition, MiningAddress, PackingDifficulty} | Partitions],
 					mining_address = MiningAddress,
 					packing_difficulty = PackingDifficulty,
 					replica_format
-						= ar_mining_io:get_replica_format_from_packing_difficulty(PackingDifficulty)
+						= big_mining_io:get_replica_format_from_packing_difficulty(PackingDifficulty)
 				})
 	end,
 	distribute_output(Partitions, Candidate, State).
@@ -1021,7 +1021,7 @@ handle_computed_output(SessionKey, StepNumber, Output, PartitionUpperBound,
 	true = is_integer(StepNumber),
 	big_mining_stats:vdf_computed(),
 
-	State2 = case ar_mining_io:set_largest_seen_upper_bound(PartitionUpperBound) of
+	State2 = case big_mining_io:set_largest_seen_upper_bound(PartitionUpperBound) of
 		true ->
 			%% If the largest seen upper bound changed, a new partition may have been added
 			%% to the mining set, so we may need to update the chunk cache size limit.

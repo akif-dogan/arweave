@@ -1,4 +1,4 @@
--module(ar_mining_io).
+-module(big_mining_io).
 
 -behaviour(gen_server).
 
@@ -144,7 +144,7 @@ handle_cast(initialize_state, State) ->
 
 handle_cast(garbage_collect, State) ->
 	erlang:garbage_collect(self(),
-		[{async, {ar_mining_io, self(), erlang:monotonic_time()}}]),
+		[{async, {big_mining_io, self(), erlang:monotonic_time()}}]),
 	maps:fold(
 		fun(_Key, Thread, _) ->
 			erlang:garbage_collect(Thread,

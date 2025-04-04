@@ -44,14 +44,14 @@ read_recall_range_test_() ->
 
 test_read_recall_range() ->
 	Candidate = default_candidate(),
-	?assertEqual(true, ar_mining_io:read_recall_range(chunk1, self(), Candidate, 0)),
+	?assertEqual(true, big_mining_io:read_recall_range(chunk1, self(), Candidate, 0)),
 	wait_for_io(1),
 	[Chunk1, Chunk2] = get_recall_chunks(),
 	assert_chunks_read([{chunk1, Candidate, 0, [
 		{?DATA_CHUNK_SIZE, Chunk1},
 		{?DATA_CHUNK_SIZE*2, Chunk2}]}]),
 
-	?assertEqual(true, ar_mining_io:read_recall_range(chunk1, self(), Candidate, ?DATA_CHUNK_SIZE div 2)),
+	?assertEqual(true, big_mining_io:read_recall_range(chunk1, self(), Candidate, ?DATA_CHUNK_SIZE div 2)),
 	wait_for_io(1),
 	[Chunk1, Chunk2, Chunk3] = get_recall_chunks(),
 	assert_chunks_read([{chunk1, Candidate, ?DATA_CHUNK_SIZE div 2, [
@@ -59,14 +59,14 @@ test_read_recall_range() ->
 		{?DATA_CHUNK_SIZE*2, Chunk2},
 		{?DATA_CHUNK_SIZE*3, Chunk3}]}]),
 
-	?assertEqual(true, ar_mining_io:read_recall_range(chunk1, self(), Candidate, ?DATA_CHUNK_SIZE)),
+	?assertEqual(true, big_mining_io:read_recall_range(chunk1, self(), Candidate, ?DATA_CHUNK_SIZE)),
 	wait_for_io(1),
 	[Chunk2, Chunk3] = get_recall_chunks(),
 	assert_chunks_read([{chunk1, Candidate, ?DATA_CHUNK_SIZE, [
 		{?DATA_CHUNK_SIZE*2, Chunk2},
 		{?DATA_CHUNK_SIZE*3, Chunk3}]}]),
 
-	?assertEqual(true, ar_mining_io:read_recall_range(chunk2, self(), Candidate,
+	?assertEqual(true, big_mining_io:read_recall_range(chunk2, self(), Candidate,
 		?PARTITION_SIZE - ?DATA_CHUNK_SIZE)),
 	wait_for_io(1),
 	[Chunk4, Chunk5] = get_recall_chunks(),
@@ -74,63 +74,63 @@ test_read_recall_range() ->
 		{?PARTITION_SIZE, Chunk4},
 		{?PARTITION_SIZE + ?DATA_CHUNK_SIZE, Chunk5}]}]),
 
-	?assertEqual(true, ar_mining_io:read_recall_range(chunk2, self(), Candidate, ?PARTITION_SIZE)),
+	?assertEqual(true, big_mining_io:read_recall_range(chunk2, self(), Candidate, ?PARTITION_SIZE)),
 	wait_for_io(1),
 	[Chunk5, Chunk6] = get_recall_chunks(),
 	assert_chunks_read([{chunk2, Candidate, ?PARTITION_SIZE, [
 		{?PARTITION_SIZE + ?DATA_CHUNK_SIZE, Chunk5},
 		{?PARTITION_SIZE + (2*?DATA_CHUNK_SIZE), Chunk6}]}]),
 
-	?assertEqual(true, ar_mining_io:read_recall_range(chunk1, self(), Candidate,
+	?assertEqual(true, big_mining_io:read_recall_range(chunk1, self(), Candidate,
 		?WEAVE_SIZE - ?DATA_CHUNK_SIZE)),
 	wait_for_io(1),
 	[Chunk7] = get_recall_chunks(),
 	assert_chunks_read([{chunk1, Candidate, ?WEAVE_SIZE - ?DATA_CHUNK_SIZE, [
 		{?WEAVE_SIZE, Chunk7}]}]),
 
-	?assertEqual(false, ar_mining_io:read_recall_range(chunk1, self(), Candidate, ?WEAVE_SIZE)).
+	?assertEqual(false, big_mining_io:read_recall_range(chunk1, self(), Candidate, ?WEAVE_SIZE)).
 
 test_partitions() ->
 	Candidate = default_candidate(),
 	MiningAddress = Candidate#mining_candidate.mining_address,
 
-	ar_mining_io:set_largest_seen_upper_bound(0),
-	?assertEqual([], ar_mining_io:get_partitions()),
+	big_mining_io:set_largest_seen_upper_bound(0),
+	?assertEqual([], big_mining_io:get_partitions()),
 
-	ar_mining_io:set_largest_seen_upper_bound(?PARTITION_SIZE),
-	?assertEqual([], ar_mining_io:get_partitions(0)),
+	big_mining_io:set_largest_seen_upper_bound(?PARTITION_SIZE),
+	?assertEqual([], big_mining_io:get_partitions(0)),
 	?assertEqual([
 			{0, MiningAddress, 0}],
-		ar_mining_io:get_partitions()),
+		big_mining_io:get_partitions()),
 
-	ar_mining_io:set_largest_seen_upper_bound(trunc(2.5 * ?PARTITION_SIZE)),
+	big_mining_io:set_largest_seen_upper_bound(trunc(2.5 * ?PARTITION_SIZE)),
 	?assertEqual([
 			{0, MiningAddress, 0}],
-		ar_mining_io:get_partitions(?PARTITION_SIZE)),
+		big_mining_io:get_partitions(?PARTITION_SIZE)),
 	?assertEqual([
 			{0, MiningAddress, 0},
 			{1, MiningAddress, 0}],
-		ar_mining_io:get_partitions()),
+		big_mining_io:get_partitions()),
 
-	ar_mining_io:set_largest_seen_upper_bound(trunc(5 * ?PARTITION_SIZE)),
+	big_mining_io:set_largest_seen_upper_bound(trunc(5 * ?PARTITION_SIZE)),
 	?assertEqual([
 			{0, MiningAddress, 0},
 			{1, MiningAddress, 0}],
-		ar_mining_io:get_partitions(trunc(2.5 * ?PARTITION_SIZE))),
+		big_mining_io:get_partitions(trunc(2.5 * ?PARTITION_SIZE))),
 	?assertEqual([
 			{0, MiningAddress, 0},
 			{1, MiningAddress, 0},
 			{2, MiningAddress, 0},
 			{3, MiningAddress, 0},
 			{4, MiningAddress, 0}],
-		ar_mining_io:get_partitions()),
+		big_mining_io:get_partitions()),
 	?assertEqual([
 			{0, MiningAddress, 0},
 			{1, MiningAddress, 0},
 			{2, MiningAddress, 0},
 			{3, MiningAddress, 0},
 			{4, MiningAddress, 0}],
-		ar_mining_io:get_partitions(trunc(5 * ?PARTITION_SIZE))).
+		big_mining_io:get_partitions(trunc(5 * ?PARTITION_SIZE))).
 
 default_candidate() ->
 	{ok, Config} = application:get_env(bigfile, config),

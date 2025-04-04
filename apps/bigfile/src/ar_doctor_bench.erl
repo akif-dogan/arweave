@@ -54,7 +54,7 @@ bench_read(Args) ->
 	big_storage_sup:start_link(),
 	ar_sync_record_sup:start_link(),
 	ar_chunk_storage_sup:start_link(),
-	ar_mining_io:start_link(standalone),
+	big_mining_io:start_link(standalone),
 
 	big:console("~n~nDisk read benchmark will run for ~B seconds.~n", [Duration]),
 	big:console("Data will be logged continuously to ~p in the format:~n", [?OUTPUT_FILENAME]),
@@ -146,7 +146,7 @@ read(StorageModule, StartOffset, EndOffset, Size, NumChunks, NumReads) ->
 		mining_address = big_storage_module:module_address(StorageModule),
 		packing_difficulty = big_storage_module:module_packing_difficulty(StorageModule)
 	},
-	RangeExists = ar_mining_io:read_recall_range(chunk1, self(), Candidate, Offset),
+	RangeExists = big_mining_io:read_recall_range(chunk1, self(), Candidate, Offset),
 	case RangeExists of
 		true ->
 			receive
