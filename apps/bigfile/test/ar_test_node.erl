@@ -84,7 +84,7 @@ new_custom_size_rsa_wallet(Size) ->
 	{[Expnt, Pub], [Expnt, Pub, Priv, P1, P2, E1, E2, C]} =
 		crypto:generate_key(rsa, {Size * 8, PublicExpnt}),
 	Key =
-		ar_serialize:jsonify(
+		big_serialize:jsonify(
 			{
 				[
 					{kty, <<"RSA">>},
@@ -346,7 +346,7 @@ http_get_block(H, Node) ->
 	case big_http:req(#{ peer => Peer, method => get,
 			path => "/block2/hash/" ++ binary_to_list(ar_util:encode(H)) }) of
 		{ok, {{<<"200">>, _}, _, BlockBin, _, _}} ->
-			ar_serialize:binary_to_block(BlockBin);
+			big_serialize:binary_to_block(BlockBin);
 		{error, Reason} ->
 			{error, Reason};
 		{ok, {{StatusCode, _}, _, Body, _, _}} ->
@@ -403,14 +403,14 @@ write_genesis_files(DataDir, B0) ->
 	BlockDir = filename:join(DataDir, ?BLOCK_DIR),
 	ok = filelib:ensure_dir(BlockDir ++ "/"),
 	BlockFilepath = filename:join(BlockDir, binary_to_list(ar_util:encode(BH)) ++ ".bin"),
-	ok = file:write_file(BlockFilepath, ar_serialize:block_to_binary(B0)),
+	ok = file:write_file(BlockFilepath, big_serialize:block_to_binary(B0)),
 	TXDir = filename:join(DataDir, ?TX_DIR),
 	ok = filelib:ensure_dir(TXDir ++ "/"),
 	lists:foreach(
 		fun(TX) ->
 			TXID = TX#tx.id,
 			TXFilepath = filename:join(TXDir, binary_to_list(ar_util:encode(TXID)) ++ ".json"),
-			TXJSON = ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX)),
+			TXJSON = big_serialize:jsonify(big_serialize:tx_to_json_struct(TX)),
 			ok = file:write_file(TXFilepath, TXJSON)
 		end,
 		B0#block.txs
@@ -441,8 +441,8 @@ write_genesis_files(DataDir, B0) ->
 	WalletListFilepath =
 		filename:join(WalletListDir, binary_to_list(ar_util:encode(RootHash)) ++ ".json"),
 	WalletListJSON =
-		ar_serialize:jsonify(
-			ar_serialize:wallet_list_to_json_struct(B0#block.reward_addr, false,
+		big_serialize:jsonify(
+			big_serialize:wallet_list_to_json_struct(B0#block.reward_addr, false,
 					B0#block.account_tree)
 		),
 	ok = file:write_file(WalletListFilepath, WalletListJSON).
@@ -1053,7 +1053,7 @@ post_tx_to_peer(Node, TX) ->
 	post_tx_to_peer(Node, TX, true).
 
 post_tx_to_peer(Node, TX, Wait) ->
-	Reply = post_tx_json(Node, ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX))),
+	Reply = post_tx_json(Node, big_serialize:jsonify(big_serialize:tx_to_json_struct(TX))),
 	case Reply of
 		{ok, {{<<"200">>, _}, _, <<"OK">>, _, _}} ->
 			case Wait of
@@ -1120,7 +1120,7 @@ get_tx_confirmations(Node, TXID) ->
 		}),
 	case Response of
 		{ok, {{<<"200">>, _}, _, Reply, _, _}} ->
-			{Status} = ar_serialize:dejsonify(Reply),
+			{Status} = big_serialize:dejsonify(Reply),
 			lists:keyfind(<<"number_of_confirmations">>, 1, Status);
 		{ok, {{<<"404">>, _}, _, _, _, _}} ->
 			-1
@@ -1227,7 +1227,7 @@ post_block(B, ExpectedResults, Peer) ->
 
 send_new_block(Peer, B) ->
 	big_http_iface_client:send_block_binary(Peer, B#block.indep_hash,
-			ar_serialize:block_to_binary(B)).
+			big_serialize:block_to_binary(B)).
 
 await_post_block(B, ExpectedResults) ->
 	await_post_block(B, ExpectedResults, peer_ip(main)).
@@ -1331,7 +1331,7 @@ get_chunk(Node, Offset, Packing) ->
 	Headers = case Packing of
 		undefined -> [];
 		_ -> 
-			PackingBinary = iolist_to_binary(ar_serialize:encode_packing(Packing, false)),
+			PackingBinary = iolist_to_binary(big_serialize:encode_packing(Packing, false)),
 			[{<<"x-packing">>, PackingBinary}]
 	end,
 	big_http:req(#{

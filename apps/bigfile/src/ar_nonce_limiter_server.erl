@@ -158,11 +158,11 @@ handle_computed_output(Args, State) ->
 					StepNumber, Output),
 			FullUpdate = make_full_nonce_limiter_update(SessionKey, Session),
 
-			PartialUpdateBin2 = ar_serialize:nonce_limiter_update_to_binary(2, PartialUpdate),
-			PartialUpdateBin3 = ar_serialize:nonce_limiter_update_to_binary(3, PartialUpdate),
-			FullUpdateBin2 = ar_serialize:nonce_limiter_update_to_binary(2, FullUpdate),
-			FullUpdateBin3 = ar_serialize:nonce_limiter_update_to_binary(3, FullUpdate),
-			FullUpdateBin4 = ar_serialize:nonce_limiter_update_to_binary(4, FullUpdate),
+			PartialUpdateBin2 = big_serialize:nonce_limiter_update_to_binary(2, PartialUpdate),
+			PartialUpdateBin3 = big_serialize:nonce_limiter_update_to_binary(3, PartialUpdate),
+			FullUpdateBin2 = big_serialize:nonce_limiter_update_to_binary(2, FullUpdate),
+			FullUpdateBin3 = big_serialize:nonce_limiter_update_to_binary(3, FullUpdate),
+			FullUpdateBin4 = big_serialize:nonce_limiter_update_to_binary(4, FullUpdate),
 			Keys = [
 				{{partial_update, 2}, PartialUpdateBin2},
 				{{partial_update, 3}, PartialUpdateBin3},
@@ -177,11 +177,11 @@ handle_computed_output(Args, State) ->
 					_ ->
 						FullPrevUpdate = make_full_nonce_limiter_update(
 								PrevSessionKey, PrevSession),
-						FullPrevUpdateBin2 = ar_serialize:nonce_limiter_update_to_binary(
+						FullPrevUpdateBin2 = big_serialize:nonce_limiter_update_to_binary(
 								2, FullPrevUpdate),
-						FullPrevUpdateBin3 = ar_serialize:nonce_limiter_update_to_binary(
+						FullPrevUpdateBin3 = big_serialize:nonce_limiter_update_to_binary(
 								3, FullPrevUpdate),
-						FullPrevUpdateBin4 = ar_serialize:nonce_limiter_update_to_binary(
+						FullPrevUpdateBin4 = big_serialize:nonce_limiter_update_to_binary(
 								4, FullPrevUpdate),
 						Keys ++ [
 							{{full_prev_update, 2}, FullPrevUpdateBin2},

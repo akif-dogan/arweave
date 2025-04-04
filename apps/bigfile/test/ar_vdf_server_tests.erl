@@ -783,8 +783,8 @@ test_serialize_update_format_2() ->
 			steps = [crypto:strong_rand_bytes(32)]
 		}
 	},
-	Binary = ar_serialize:nonce_limiter_update_to_binary(2, Update),
-	?assertEqual({ok, Update}, ar_serialize:binary_to_nonce_limiter_update(2, Binary)).
+	Binary = big_serialize:nonce_limiter_update_to_binary(2, Update),
+	?assertEqual({ok, Update}, big_serialize:binary_to_nonce_limiter_update(2, Binary)).
 
 test_serialize_update_format_3() ->
 	SessionKey0 = {crypto:strong_rand_bytes(48), 0, 1},
@@ -803,8 +803,8 @@ test_serialize_update_format_3() ->
 			steps = [crypto:strong_rand_bytes(32)]
 		}
 	},
-	Binary = ar_serialize:nonce_limiter_update_to_binary(3, Update),
-	?assertEqual({ok, Update}, ar_serialize:binary_to_nonce_limiter_update(3, Binary)).
+	Binary = big_serialize:nonce_limiter_update_to_binary(3, Update),
+	?assertEqual({ok, Update}, big_serialize:binary_to_nonce_limiter_update(3, Binary)).
 
 test_serialize_update_format_4() ->
 	SessionKey0 = {crypto:strong_rand_bytes(48), 0, 1},
@@ -825,15 +825,15 @@ test_serialize_update_format_4() ->
 			steps = [crypto:strong_rand_bytes(32)]
 		}
 	},
-	Binary = ar_serialize:nonce_limiter_update_to_binary(4, Update),
-	?assertEqual({ok, Update}, ar_serialize:binary_to_nonce_limiter_update(4, Binary)).
+	Binary = big_serialize:nonce_limiter_update_to_binary(4, Update),
+	?assertEqual({ok, Update}, big_serialize:binary_to_nonce_limiter_update(4, Binary)).
 
 %% @doc test serializing and deserializing a #nonce_limiter_update_response when the client
 %% is running the same node version as the server.
 test_serialize_response() ->
 	ResponseA = #nonce_limiter_update_response{},
-	BinaryA = ar_serialize:nonce_limiter_update_response_to_binary(ResponseA),
-	?assertEqual({ok, ResponseA}, ar_serialize:binary_to_nonce_limiter_update_response(BinaryA)),
+	BinaryA = big_serialize:nonce_limiter_update_response_to_binary(ResponseA),
+	?assertEqual({ok, ResponseA}, big_serialize:binary_to_nonce_limiter_update_response(BinaryA)),
 
 	ResponseB = #nonce_limiter_update_response{
 		session_found = false,
@@ -841,8 +841,8 @@ test_serialize_response() ->
 		postpone = 255,
 		format = 2
 	},
-	BinaryB = ar_serialize:nonce_limiter_update_response_to_binary(ResponseB),
-	?assertEqual({ok, ResponseB}, ar_serialize:binary_to_nonce_limiter_update_response(BinaryB)).
+	BinaryB = big_serialize:nonce_limiter_update_response_to_binary(ResponseB),
+	?assertEqual({ok, ResponseB}, big_serialize:binary_to_nonce_limiter_update_response(BinaryB)).
 
 %% @doc test serializing and deserializing a #nonce_limiter_update_response when the client
 %% is running an older node version than the server.
@@ -854,7 +854,7 @@ test_serialize_response_compatibility() ->
 		postpone = 0,
 		format = 1
 	},
-	?assertEqual({ok, ResponseA}, ar_serialize:binary_to_nonce_limiter_update_response(BinaryA)),
+	?assertEqual({ok, ResponseA}, big_serialize:binary_to_nonce_limiter_update_response(BinaryA)),
 
 	BinaryB = << 1:8, 2:8, 511:16, 120:8 >>,
 	ResponseB = #nonce_limiter_update_response{
@@ -863,7 +863,7 @@ test_serialize_response_compatibility() ->
 		postpone = 120,
 		format = 1
 	},
-	?assertEqual({ok, ResponseB}, ar_serialize:binary_to_nonce_limiter_update_response(BinaryB)).
+	?assertEqual({ok, ResponseB}, big_serialize:binary_to_nonce_limiter_update_response(BinaryB)).
 
 %% -------------------------------------------------------------------------------------------------
 %% Helper Functions
@@ -875,12 +875,12 @@ init(Req, State) ->
 
 handle([<<"vdf">>], Req, State) ->
 	{ok, Body, _} = ar_http_req:body(Req, ?MAX_BODY_SIZE),
-	case ar_serialize:binary_to_nonce_limiter_update(2, Body) of
+	case big_serialize:binary_to_nonce_limiter_update(2, Body) of
 		{ok, Update} ->
 			handle_update(Update, Req, State);
 		{error, _} ->
 			Response = #nonce_limiter_update_response{ format = 2 },
-			Bin = ar_serialize:nonce_limiter_update_response_to_binary(Response),
+			Bin = big_serialize:nonce_limiter_update_response_to_binary(Response),
 			{ok, cowboy_req:reply(202, #{}, Bin, Req), State}
 	end.
 
@@ -914,7 +914,7 @@ handle_update(Update, Req, State) ->
 			case IsPartial of
 				true ->
 					Response = #nonce_limiter_update_response{ session_found = false },
-					Bin = ar_serialize:nonce_limiter_update_response_to_binary(Response),
+					Bin = big_serialize:nonce_limiter_update_response_to_binary(Response),
 					{ok, cowboy_req:reply(202, #{}, Bin, Req), State};
 				false ->
 					ets:insert(computed_output, {Seed, StepNumber, StepNumber}),

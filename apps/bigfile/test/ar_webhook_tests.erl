@@ -110,11 +110,11 @@ test_webhooks() ->
 							[{_, B}] ->
 								{H, _, _} = big_node:get_block_index_entry(Height),
 								B2 = read_block_when_stored(H),
-								Struct = ar_serialize:block_to_json_struct(B2),
+								Struct = big_serialize:block_to_json_struct(B2),
 								Expected =
 									maps:remove(
 										<<"wallet_list">>,
-										jiffy:decode(ar_serialize:jsonify(Struct), [return_maps])
+										jiffy:decode(big_serialize:jsonify(Struct), [return_maps])
 									),
 								?assertEqual(Expected, B),
 								true;	
@@ -129,11 +129,11 @@ test_webhooks() ->
 					fun() ->
 						case ets:lookup(?MODULE, {tx, ar_util:encode(TX#tx.id)}) of
 							[{_, TX2}] ->
-								Struct = ar_serialize:tx_to_json_struct(TX),
+								Struct = big_serialize:tx_to_json_struct(TX),
 								Expected =
 									maps:remove(
 										<<"data">>,
-										jiffy:decode(ar_serialize:jsonify(Struct), [return_maps])
+										jiffy:decode(big_serialize:jsonify(Struct), [return_maps])
 									),
 								?assertEqual(Expected, TX2),
 								true;
@@ -159,11 +159,11 @@ test_webhooks() ->
 			fun() ->
 				case ets:lookup(?MODULE, {tx, ar_util:encode(UnconfirmedTX#tx.id)}) of
 					[{_, TX}] ->
-						Struct = ar_serialize:tx_to_json_struct(UnconfirmedTX),
+						Struct = big_serialize:tx_to_json_struct(UnconfirmedTX),
 						Expected =
 							maps:remove(
 								<<"data">>,
-								jiffy:decode(ar_serialize:jsonify(Struct), [return_maps])
+								jiffy:decode(big_serialize:jsonify(Struct), [return_maps])
 							),
 						?assertEqual(Expected, TX),
 						true;
@@ -210,7 +210,7 @@ create_v2_tx(Wallet) ->
 	{TX, Proofs}.
 
 encode_proof(Proof) ->
-	ar_serialize:jsonify(#{
+	big_serialize:jsonify(#{
 		chunk => ar_util:encode(maps:get(chunk, Proof)),
 		data_path => ar_util:encode(maps:get(data_path, Proof)),
 		data_root => ar_util:encode(maps:get(data_root, Proof)),

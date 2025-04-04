@@ -55,7 +55,7 @@ new_keyfile(KeyType, WalletName) ->
 				{[Expnt, Pb], [Expnt, Pb, Prv, P1, P2, E1, E2, C]} =
 					crypto:generate_key(rsa, {?RSA_PRIV_KEY_SZ, PublicExpnt}),
 				Ky =
-					ar_serialize:jsonify(
+					big_serialize:jsonify(
 						{
 							[
 								{kty, <<"RSA">>},
@@ -78,7 +78,7 @@ new_keyfile(KeyType, WalletName) ->
 				PubPointMid = byte_size(PubPoint) div 2,
 				<<X:PubPointMid/binary, Y:PubPointMid/binary>> = PubPoint,
 				Ky =
-					ar_serialize:jsonify(
+					big_serialize:jsonify(
 						{
 							[
 								{kty, <<"EC">>},
@@ -93,7 +93,7 @@ new_keyfile(KeyType, WalletName) ->
 			{?EDDSA_SIGN_ALG, ed25519} ->
 				{{_, Prv, Pb}, _} = new(KeyType),
 				Ky =
-					ar_serialize:jsonify(
+					big_serialize:jsonify(
 						{
 							[
 								{kty, <<"OKP">>},
@@ -150,7 +150,7 @@ load_key(Addr) ->
 %% @doc Extract the public and private key from a keyfile.
 load_keyfile(File) ->
 	{ok, Body} = file:read_file(File),
-	{Key} = ar_serialize:dejsonify(Body),
+	{Key} = big_serialize:dejsonify(Body),
 	{Pub, Priv, KeyType} =
 		case lists:keyfind(<<"kty">>, 1, Key) of
 			{<<"kty">>, <<"EC">>} ->

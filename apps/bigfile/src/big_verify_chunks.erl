@@ -219,7 +219,7 @@ log_error(Type, Offset, ChunkSize, Logs, State) ->
 
 	LogMessage = [{event, verify_chunk_storage_error},
 		{type, Type}, {store_id, StoreID},
-		{packing, ar_serialize:encode_packing(Packing, true)},
+		{packing, big_serialize:encode_packing(Packing, true)},
 		{offset, Offset}, {cursor, Cursor}, {chunk_size, ChunkSize}] ++ Logs,
 	?LOG_INFO(LogMessage),
 	NewBytes = maps:get(Type, Report#verify_report.error_bytes, 0) + ChunkSize,

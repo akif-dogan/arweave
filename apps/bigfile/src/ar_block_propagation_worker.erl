@@ -46,7 +46,7 @@ handle_cast({send_block2, Peer, SendAnnouncementFun, SendFun, RetryCount, From},
 					{send_block2, Peer, SendAnnouncementFun, SendFun,
 							RetryCount - 1, From});
 		{ok, {{<<"200">>, _}, _, Body, _, _}} ->
-			case catch ar_serialize:binary_to_block_announcement_response(Body) of
+			case catch big_serialize:binary_to_block_announcement_response(Body) of
 				{'EXIT', Reason} ->
 					?LOG_INFO([{event, send_announcement_response}, {peer, ar_util:format_peer(Peer)},
 						{exit, Reason}]),

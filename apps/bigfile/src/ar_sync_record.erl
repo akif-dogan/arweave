@@ -391,7 +391,7 @@ handle_cast({add_async, Event, End, Start, Packing, ID}, State) ->
 					{status, failed},
 					{sync_record_id, ID},
 					{offset, End},
-					{packing, ar_serialize:encode_packing(Packing, true)},
+					{packing, big_serialize:encode_packing(Packing, true)},
 					{error, io_lib:format("~p", [Error])}])
 	end,
 	{noreply, State2};

@@ -66,7 +66,7 @@ is_public_vdf_server() ->
 	lists:member(public_vdf_server, Config#config.enable).
 
 parse(Config) when is_binary(Config) ->
-	case ar_serialize:json_decode(Config) of
+	case big_serialize:json_decode(Config) of
 		{ok, JsonValue} -> parse_options(JsonValue);
 		{error, _} -> {error, bad_json, Config}
 	end.
@@ -885,7 +885,7 @@ log_config_value(start_from_block, FieldValue) ->
 log_config_value(storage_modules, FieldValue) ->
 	[format_storage_module(StorageModule) || StorageModule <- FieldValue];
 log_config_value(repack_in_place_storage_modules, FieldValue) ->
-	[{format_storage_module(StorageModule), ar_serialize:encode_packing(ToPacking, false)}
+	[{format_storage_module(StorageModule), big_serialize:encode_packing(ToPacking, false)}
 			|| {StorageModule, ToPacking} <- FieldValue];
 log_config_value(_, FieldValue) ->
 	FieldValue.

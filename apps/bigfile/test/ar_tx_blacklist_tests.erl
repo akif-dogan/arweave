@@ -276,7 +276,7 @@ random_filename() ->
 		binary_to_list(ar_util:encode(crypto:strong_rand_bytes(32)))).
 
 encode_chunk(Proof) ->
-	ar_serialize:jsonify(#{
+	big_serialize:jsonify(#{
 		chunk => ar_util:encode(maps:get(chunk, Proof)),
 		data_path => ar_util:encode(maps:get(data_path, Proof)),
 		data_root => ar_util:encode(maps:get(data_root, Proof)),
@@ -446,7 +446,7 @@ assert_does_not_accept_offsets(BadOffsets) ->
 	).
 
 decode_chunk(EncodedProof) ->
-	ar_serialize:json_map_to_poa_map(
+	big_serialize:json_map_to_poa_map(
 		jiffy:decode(EncodedProof, [return_maps])
 	).
 

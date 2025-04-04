@@ -191,7 +191,7 @@ validate2({spora_2_6, _} = Packing, Args) ->
 			false;
 		{exception, Exception} ->
 			?LOG_WARNING([{event, validate_unpack_exception},
-				{packing, ar_serialize:encode_packing(Packing, false)},
+				{packing, big_serialize:encode_packing(Packing, false)},
 				{exception, Exception}]),
 			error;
 		{ok, Unpacked} ->
@@ -236,7 +236,7 @@ validate3(Packing, Args) ->
 			false;
 		{exception, Exception} ->
 			?LOG_WARNING([{event, validate_unpack_exception},
-				{packing, ar_serialize:encode_packing(Packing, false)},
+				{packing, big_serialize:encode_packing(Packing, false)},
 				{exception, Exception}]),
 			error;
 		{ok, UnpackedSubChunk} ->

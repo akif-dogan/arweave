@@ -619,31 +619,31 @@ test_send_block2() ->
 			tx_prefixes = [binary:part(TX#tx.id, 0, 8) || TX <- TXs2] },
 	{ok, {{<<"200">>, _}, _, Body, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
-			body => ar_serialize:block_announcement_to_binary(Announcement) }),
-	Response = ar_serialize:binary_to_block_announcement_response(Body),
+			body => big_serialize:block_announcement_to_binary(Announcement) }),
+	Response = big_serialize:binary_to_block_announcement_response(Body),
 	?assertEqual({ok, #block_announcement_response{ missing_chunk = true,
 			missing_tx_indices = [0, 2, 4, 6, 8] }}, Response),
 	Announcement2 = Announcement#block_announcement{ recall_byte = 0 },
 	{ok, {{<<"200">>, _}, _, Body2, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
-			body => ar_serialize:block_announcement_to_binary(Announcement2) }),
-	Response2 = ar_serialize:binary_to_block_announcement_response(Body2),
+			body => big_serialize:block_announcement_to_binary(Announcement2) }),
+	Response2 = big_serialize:binary_to_block_announcement_response(Body2),
 	%% We always report missing chunk currently.
 	?assertEqual({ok, #block_announcement_response{ missing_chunk = true,
 			missing_tx_indices = [0, 2, 4, 6, 8] }}, Response2),
 	Announcement3 = Announcement#block_announcement{ recall_byte = 100000000000000 },
 	{ok, {{<<"200">>, _}, _, Body, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
-			body => ar_serialize:block_announcement_to_binary(Announcement3) }),
+			body => big_serialize:block_announcement_to_binary(Announcement3) }),
 	{ok, {{<<"418">>, _}, _, Body3, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block2",
-			body => ar_serialize:block_to_binary(B) }),
+			body => big_serialize:block_to_binary(B) }),
 	?assertEqual(iolist_to_binary(lists:foldl(fun(#tx{ id = TXID }, Acc) -> [TXID | Acc] end,
 			[], TXs2 -- EverySecondTX)), Body3),
 	B2 = B#block{ txs = [lists:nth(1, TXs2) | tl(B#block.txs)] },
 	{ok, {{<<"418">>, _}, _, Body4, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block2",
-			body => ar_serialize:block_to_binary(B2) }),
+			body => big_serialize:block_to_binary(B2) }),
 	?assertEqual(iolist_to_binary(lists:foldl(fun(#tx{ id = TXID }, Acc) -> [TXID | Acc] end,
 			[], (TXs2 -- EverySecondTX) -- [lists:nth(1, TXs2)])), Body4),
 	TXs3 = [ar_test_node:sign_tx(main, Wallet, #{ last_tx => ar_test_node:get_tx_anchor(peer1),
@@ -653,23 +653,23 @@ test_send_block2() ->
 	[{H2, _, _}, _, _] = wait_until_height(main, 2),
 	{ok, {{<<"412">>, _}, _, <<>>, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
-			body => ar_serialize:block_announcement_to_binary(#block_announcement{
+			body => big_serialize:block_announcement_to_binary(#block_announcement{
 					indep_hash = H2, previous_block = B#block.indep_hash }) }),
 	BTXs = big_storage:read_tx(B#block.txs),
 	B3 = B#block{ txs = BTXs },
 	{ok, {{<<"200">>, _}, _, <<"OK">>, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block2",
-			body => ar_serialize:block_to_binary(B3) }),
+			body => big_serialize:block_to_binary(B3) }),
 	{ok, {{<<"200">>, _}, _, SerializedB, _, _}} = big_http:req(#{ method => get,
 			peer => ar_test_node:peer_ip(main), path => "/block2/height/1" }),
-	?assertEqual({ok, B}, ar_serialize:binary_to_block(SerializedB)),
+	?assertEqual({ok, B}, big_serialize:binary_to_block(SerializedB)),
 	Map = element(2, lists:foldl(fun(TX, {N, M}) -> {N + 1, maps:put(TX#tx.id, N, M)} end,
 			{0, #{}}, TXs2)),
 	{ok, {{<<"200">>, _}, _, Serialized2B, _, _}} = big_http:req(#{ method => get,
 			peer => ar_test_node:peer_ip(main), path => "/block2/height/1",
 			body => << 1:1, 0:(8 * 125 - 1) >> }),
 	?assertEqual({ok, B#block{ txs = [case maps:get(TX#tx.id, Map) == 0 of true -> TX;
-			_ -> TX#tx.id end || TX <- BTXs] }}, ar_serialize:binary_to_block(Serialized2B)),
+			_ -> TX#tx.id end || TX <- BTXs] }}, big_serialize:binary_to_block(Serialized2B)),
 	{ok, {{<<"200">>, _}, _, Serialized2B, _, _}} = big_http:req(#{ method => get,
 			peer => ar_test_node:peer_ip(main), path => "/block2/height/1",
 			body => << 1:1, 0:7 >> }),
@@ -678,12 +678,12 @@ test_send_block2() ->
 			body => << 0:1, 1:1, 0:1, 1:1, 0:4 >> }),
 	?assertEqual({ok, B#block{ txs = [case lists:member(maps:get(TX#tx.id, Map), [1, 3]) of
 			true -> TX; _ -> TX#tx.id end || TX <- BTXs] }},
-					ar_serialize:binary_to_block(Serialized3B)),
+					big_serialize:binary_to_block(Serialized3B)),
 	B4 = read_block_when_stored(H2, true),
 	timer:sleep(500),
 	{ok, {{<<"200">>, _}, _, <<"OK">>, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block2",
-			body => ar_serialize:block_to_binary(B4) }),
+			body => big_serialize:block_to_binary(B4) }),
 	ar_test_node:connect_to_peer(peer1),
 	lists:foreach(
 		fun(Height) ->
@@ -695,7 +695,7 @@ test_send_block2() ->
 	B5 = big_storage:read_block(big_node:get_current_block_hash()),
 	{ok, {{<<"208">>, _}, _, _, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
-			body => ar_serialize:block_announcement_to_binary(#block_announcement{
+			body => big_serialize:block_announcement_to_binary(#block_announcement{
 					indep_hash = B5#block.indep_hash,
 					previous_block = B5#block.previous_block }) }),
 	ar_test_node:disconnect_from(peer1),
@@ -704,24 +704,24 @@ test_send_block2() ->
 	B6 = big_storage:read_block(big_node:get_current_block_hash()),
 	{ok, {{<<"200">>, _}, _, Body5, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
-			body => ar_serialize:block_announcement_to_binary(#block_announcement{
+			body => big_serialize:block_announcement_to_binary(#block_announcement{
 					indep_hash = B6#block.indep_hash,
 					previous_block = B6#block.previous_block,
 					recall_byte = 0 }) }),
 	%% We always report missing chunk currently.
 	?assertEqual({ok, #block_announcement_response{ missing_chunk = true,
 			missing_tx_indices = [] }},
-			ar_serialize:binary_to_block_announcement_response(Body5)),
+			big_serialize:binary_to_block_announcement_response(Body5)),
 	{ok, {{<<"200">>, _}, _, Body6, _, _}} = big_http:req(#{ method => post,
 			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
-			body => ar_serialize:block_announcement_to_binary(#block_announcement{
+			body => big_serialize:block_announcement_to_binary(#block_announcement{
 					indep_hash = B6#block.indep_hash,
 					previous_block = B6#block.previous_block,
 					recall_byte = 1024 }) }),
 	%% We always report missing chunk currently.
 	?assertEqual({ok, #block_announcement_response{ missing_chunk = true,
 			missing_tx_indices = [] }},
-			ar_serialize:binary_to_block_announcement_response(Body6)).
+			big_serialize:binary_to_block_announcement_response(Body6)).
 
 resigned_solution_test_() ->
 	test_with_mocked_functions([{ar_fork, height_2_6, fun() -> 0 end}],

@@ -33,9 +33,9 @@ test_syncs_data() ->
 	lists:foreach(
 		fun({_, _, _, {_, Proof}}) ->
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-					ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof))),
+					ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-					ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof)))
+					ar_test_node:post_chunk(main, big_serialize:jsonify(Proof)))
 		end,
 		RecordsWithProofs
 	),
@@ -48,7 +48,7 @@ test_syncs_data() ->
 			TXSize = byte_size(binary:list_to_bin(Chunks)),
 			TXOffset = big_merkle:extract_note(ar_util:decode(maps:get(tx_path, Proof))),
 			AbsoluteTXOffset = B#block.weave_size - B#block.block_size + TXOffset,
-			ExpectedOffsetInfo = ar_serialize:jsonify(#{
+			ExpectedOffsetInfo = big_serialize:jsonify(#{
 					offset => integer_to_binary(AbsoluteTXOffset),
 					size => integer_to_binary(TXSize) }),
 			true = ar_util:do_until(
@@ -138,7 +138,7 @@ test_mines_off_only_last_chunks() ->
 					offset => integer_to_binary(Offset),
 					data_size => integer_to_binary(DataSize) },
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-					ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof))),
+					ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
 			case Height - ?SEARCH_SPACE_UPPER_BOUND_DEPTH of
 				-1 ->
 					%% Make sure we waited enough to have the next block use
@@ -201,7 +201,7 @@ test_mines_off_only_second_last_chunks() ->
 					offset => integer_to_binary(Offset),
 					data_size => integer_to_binary(DataSize) },
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-					ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof))),
+					ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
 			case Height - ?SEARCH_SPACE_UPPER_BOUND_DEPTH >= 0 of
 				true ->
 					%% Wait until the new chunks fall below the new upper bound and
@@ -253,7 +253,7 @@ test_disk_pool_rotation() ->
 			offset => integer_to_binary(Offset),
 			data_size => integer_to_binary(DataSize) },
 	?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-			ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof))),
+			ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
 	ar_test_node:mine(main),
 	assert_wait_until_height(main, 1),
 	timer:sleep(2000),

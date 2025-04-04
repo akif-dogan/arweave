@@ -330,7 +330,7 @@ post_proofs(Peer, B, TX, Chunks, IsTemporary) ->
 	lists:foreach(
 		fun({_, Proof}) ->
 			{ok, {{HttpStatus, _}, _, _, _, _}} =
-				ar_test_node:post_chunk(Peer, ar_serialize:jsonify(Proof))
+				ar_test_node:post_chunk(Peer, big_serialize:jsonify(Proof))
 		end,
 		Proofs
 	),
@@ -383,7 +383,7 @@ wait_until_syncs_chunks(Node, Proofs, UpperBound) ->
 						false ->
 							case ar_test_node:get_chunk(Node, EndOffset) of
 								{ok, {{<<"200">>, _}, _, EncodedProof, _, _}} ->
-									FetchedProof = ar_serialize:json_map_to_poa_map(
+									FetchedProof = big_serialize:json_map_to_poa_map(
 										jiffy:decode(EncodedProof, [return_maps])
 									),
 									ExpectedProof = #{

@@ -52,14 +52,14 @@ load_wallet_fixture(WalletFixture) ->
 
 -spec write_chunk_fixture(binary(), non_neg_integer(), binary()) -> ok.
 write_chunk_fixture(Packing, EndOffset, Chunk) ->
-	FixtureDir = fixture_dir(chunks, [ar_serialize:encode_packing(Packing, true)]),
+	FixtureDir = fixture_dir(chunks, [big_serialize:encode_packing(Packing, true)]),
 	ok = filelib:ensure_dir(FixtureDir ++ "/"),
 	FixturePath = filename:join([FixtureDir, integer_to_list(EndOffset) ++ ".bin"]),
 	file:write_file(FixturePath, Chunk).
 
 -spec load_chunk_fixture(binary(), non_neg_integer()) -> binary().
 load_chunk_fixture(Packing, EndOffset) ->
-	FixtureDir = fixture_dir(chunks, [ar_serialize:encode_packing(Packing, true)]),
+	FixtureDir = fixture_dir(chunks, [big_serialize:encode_packing(Packing, true)]),
 	FixturePath = filename:join([FixtureDir, integer_to_list(EndOffset) ++ ".bin"]),
 	file:read_file(FixturePath).
 
@@ -357,7 +357,7 @@ assert_partition_size(Node, PartitionNumber, Packing) ->
 	assert_partition_size(Node, PartitionNumber, Packing, ?PARTITION_SIZE + Overlap).
 assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 	?LOG_INFO("~p: Asserting partition ~p,~p is size ~p",
-		[Node, PartitionNumber, ar_serialize:encode_packing(Packing, true), Size]),
+		[Node, PartitionNumber, big_serialize:encode_packing(Packing, true), Size]),
 	ar_util:do_until(
 		fun() -> 
 			ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
@@ -372,7 +372,7 @@ assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 			[PartitionNumber, Packing]),
 		iolist_to_binary(io_lib:format(
 			"~s partition ~p,~p was not the expected size.", 
-			[Node, PartitionNumber, ar_serialize:encode_packing(Packing, true)]))).
+			[Node, PartitionNumber, big_serialize:encode_packing(Packing, true)]))).
 
 assert_empty_partition(Node, PartitionNumber, Packing) ->
 	ar_util:do_until(
@@ -389,7 +389,7 @@ assert_empty_partition(Node, PartitionNumber, Packing) ->
 			[PartitionNumber, Packing]),
 		iolist_to_binary(io_lib:format(
 			"~s partition ~p,~p is not empty", [Node, PartitionNumber, 
-				ar_serialize:encode_packing(Packing, true)]))).
+				big_serialize:encode_packing(Packing, true)]))).
 
 assert_mine_and_validate(MinerNode, ValidatorNode, MinerPacking) ->
 	CurrentHeight = max(
@@ -458,10 +458,10 @@ assert_chunk(Node, RequestPacking, Packing, Block, EndOffset, ChunkSize) ->
 	?assertEqual(<<"200">>, StatusCode, iolist_to_binary(io_lib:format(
 		"Chunk not found. Node: ~p, Offset: ~p",
 		[Node, EndOffset]))),
-	Proof = ar_serialize:json_map_to_poa_map(
+	Proof = big_serialize:json_map_to_poa_map(
 		jiffy:decode(EncodedProof, [return_maps])
 	),
-	Proof = ar_serialize:json_map_to_poa_map(
+	Proof = big_serialize:json_map_to_poa_map(
 		jiffy:decode(EncodedProof, [return_maps])
 	),
 	{true, _} = ar_test_node:remote_call(Node, big_poa, validate_paths, [
@@ -478,7 +478,7 @@ assert_chunk(Node, RequestPacking, Packing, Block, EndOffset, ChunkSize) ->
 	?assertEqual(ExpectedPackedChunk, Chunk,
 		iolist_to_binary(io_lib:format(
 			"~p: Chunk at offset ~p, size ~p, packing ~p does not match packed chunk",
-			[Node, EndOffset, ChunkSize, ar_serialize:encode_packing(Packing, true)]))),
+			[Node, EndOffset, ChunkSize, big_serialize:encode_packing(Packing, true)]))),
 
 	{ok, UnpackedChunk} = ar_packing_server:unpack(
 		Packing, EndOffset, Block#block.tx_root, Chunk, ?DATA_CHUNK_SIZE),
@@ -525,7 +525,7 @@ write_wallet_fixtures() ->
 
 maybe_write_chunk_fixture(Packing, EndOffset, Chunk) when ?UPDATE_CHUNK_FIXTURES =:= true ->
 	?LOG_ERROR("WARNING: Updating chunk fixture! EndOffset: ~p, Packing: ~p", 
-		[EndOffset, ar_serialize:encode_packing(Packing, true)]),
+		[EndOffset, big_serialize:encode_packing(Packing, true)]),
 	ar_e2e:write_chunk_fixture(Packing, EndOffset, Chunk);
 maybe_write_chunk_fixture(_, _, _) ->
 	ok.

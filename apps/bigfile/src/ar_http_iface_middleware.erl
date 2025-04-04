@@ -160,7 +160,7 @@ handle4(<<"POST">>, [<<"mine">>], Req, _Pid) ->
 
 handle4(<<"GET">>, [<<"tx">>, <<"ready_for_mining">>], Req, _Pid) ->
 	{200, #{},
-			ar_serialize:jsonify(
+			big_serialize:jsonify(
 				lists:map(
 					fun ar_util:encode/1,
 					big_node:get_ready_for_mining_txs()
@@ -178,17 +178,17 @@ handle4(Method, SplitPath, Req, Pid) ->
 %% Return network information from a given node.
 %% GET request to endpoint /info.
 handle(<<"GET">>, [], Req, _Pid) ->
-	{200, #{}, ar_serialize:jsonify(big_info:get_info()), Req};
+	{200, #{}, big_serialize:jsonify(big_info:get_info()), Req};
 
 handle(<<"GET">>, [<<"info">>], Req, _Pid) ->
-	{200, #{}, ar_serialize:jsonify(big_info:get_info()), Req};
+	{200, #{}, big_serialize:jsonify(big_info:get_info()), Req};
 
 handle(<<"GET">>, [<<"recent">>], Req, _Pid) ->
 	case big_node:is_joined() of
 		false ->
 			not_joined(Req);
 		true ->
-			{200, #{}, ar_serialize:jsonify(big_info:get_recent()), Req}
+			{200, #{}, big_serialize:jsonify(big_info:get_recent()), Req}
 	end;
 	
 handle(<<"GET">>, [<<"is_tx_blacklisted">>, EncodedTXID], Req, _Pid) ->
@@ -231,7 +231,7 @@ handle(<<"GET">>, [<<"tx">>, <<"pending">>], Req, _Pid) ->
 			not_joined(Req);
 		true ->
 			{200, #{},
-					ar_serialize:jsonify(
+					big_serialize:jsonify(
 						%% Should encode
 						lists:map(
 							fun ar_util:encode/1,
@@ -452,7 +452,7 @@ handle(<<"POST">>, [<<"chunk">>], Req, Pid) ->
 handle(<<"POST">>, [<<"block_announcement">>], Req, Pid) ->
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
-			case catch ar_serialize:binary_to_block_announcement(Body) of
+			case catch big_serialize:binary_to_block_announcement(Body) of
 				{ok, Announcement} ->
 					handle_block_announcement(Announcement, Req2);
 				{'EXIT', _Reason} ->
@@ -569,7 +569,7 @@ handle(<<"POST">>, [<<"wallet">>], Req, _Pid) ->
 						{<<"wallet_address">>, ar_util:encode(big_wallet:to_address(Pub))},
 						{<<"wallet_access_code">>, WalletAccessCode}
 					],
-					{200, #{}, ar_serialize:jsonify({ResponseProps}), Req}
+					{200, #{}, big_serialize:jsonify({ResponseProps}), Req}
 			end;
 		{reject, {Status, Headers, Body}} ->
 			{Status, Headers, Body, Req}
@@ -596,10 +596,10 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 		{true, pass} ->
 			case read_complete_body(Req, Pid) of
 				{ok, Body, Req2} ->
-					{UnsignedTXProps} = ar_serialize:dejsonify(Body),
+					{UnsignedTXProps} = big_serialize:dejsonify(Body),
 					WalletAccessCode =
 						proplists:get_value(<<"wallet_access_code">>, UnsignedTXProps),
-					%% ar_serialize:json_struct_to_tx/1 requires all properties to be there,
+					%% big_serialize:json_struct_to_tx/1 requires all properties to be there,
 					%% so we're adding id, owner and signature with bogus values. These
 					%% will later be overwritten in ar_tx:sign/2
 					FullTxProps = lists:append(
@@ -612,7 +612,7 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 					),
 					KeyPair = big_wallet:load_keyfile(
 							big_wallet:wallet_filepath(WalletAccessCode)),
-					UnsignedTX = ar_serialize:json_struct_to_tx({FullTxProps}),
+					UnsignedTX = big_serialize:json_struct_to_tx({FullTxProps}),
 					Data = UnsignedTX#tx.data,
 					DataSize = byte_size(Data),
 					DataRoot = case DataSize > 0 of
@@ -629,7 +629,7 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 					},
 					SignedTX = ar_tx:sign(Format2TX, KeyPair),
 					Peer = big_http_util:bigfile_peer(Req),
-					Reply = ar_serialize:jsonify({[{<<"id">>,
+					Reply = big_serialize:jsonify({[{<<"id">>,
 							ar_util:encode(SignedTX#tx.id)}]}),
 					case handle_post_tx(Req2, Peer, SignedTX) of
 						ok ->
@@ -650,7 +650,7 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 %% GET request to endpoint /peers.
 handle(<<"GET">>, [<<"peers">>], Req, _Pid) ->
 	{200, #{},
-		ar_serialize:jsonify(
+		big_serialize:jsonify(
 			[
 				list_to_binary(ar_util:format_peer(P))
 			||
@@ -857,7 +857,7 @@ handle(<<"GET">>, [<<"reward_history">>, EncodedBH], Req, _Pid) ->
 									Height >= Fork_2_6 ->
 							RewardHistory2 = big_rewards:trim_buffered_reward_history(Height,
 									RewardHistory),
-							{200, #{}, ar_serialize:reward_history_to_binary(RewardHistory2),
+							{200, #{}, big_serialize:reward_history_to_binary(RewardHistory2),
 									Req};
 						_ ->
 							{404, #{}, <<>>, Req}
@@ -880,7 +880,7 @@ handle(<<"GET">>, [<<"block_time_history">>, EncodedBH], Req, _Pid) ->
 									block_time_history = BlockTimeHistory }, {Status, _}}
 								when (Status == on_chain orelse Status == validated),
 									Height >= Fork_2_7 ->
-							{200, #{}, ar_serialize:block_time_history_to_binary(
+							{200, #{}, big_serialize:block_time_history_to_binary(
 									BlockTimeHistory), Req};
 						_ ->
 							{404, #{}, <<>>, Req}
@@ -907,8 +907,8 @@ handle(<<"GET">>, [<<"block_index">>], Req, _Pid) ->
 				false ->
 					BI = big_node:get_block_index(),
 					{200, #{},
-						ar_serialize:jsonify(
-							ar_serialize:block_index_to_json_struct(
+						big_serialize:jsonify(
+							big_serialize:block_index_to_json_struct(
 								format_bi_for_peer(BI, Req)
 							)
 						),
@@ -929,7 +929,7 @@ handle(<<"GET">>, [<<"block_index2">>], Req, _Pid) ->
 					{400, #{}, jiffy:encode(#{ error => not_supported_since_fork_2_6 }), Req};
 				false ->
 					BI = big_node:get_block_index(),
-					Bin = ar_serialize:block_index_to_binary(BI),
+					Bin = big_serialize:block_index_to_binary(BI),
 					{200, #{}, Bin, Req}
 			end
 	end;
@@ -976,7 +976,7 @@ handle(<<"GET">>, [<<"recent_hash_list">>], Req, _Pid) ->
 			not_joined(Req);
 		true ->
 			Encoded = [ar_util:encode(H) || H <- big_node:get_block_anchors()],
-			{200, #{}, ar_serialize:jsonify(Encoded), Req}
+			{200, #{}, big_serialize:jsonify(Encoded), Req}
 	end;
 
 %% Accept the list of independent block hashes ordered from oldest to newest
@@ -1231,7 +1231,7 @@ handle(<<"GET">>, [<<"tx">>, Hash, Field], Req, _Pid) ->
 				{#tx{} = TX, _} ->
 					case Field of
 						<<"tags">> ->
-							{200, #{}, ar_serialize:jsonify(lists:map(
+							{200, #{}, big_serialize:jsonify(lists:map(
 									fun({Name, Value}) ->
 										{[{name, ar_util:encode(Name)},
 												{value, ar_util:encode(Value)}]}
@@ -1244,7 +1244,7 @@ handle(<<"GET">>, [<<"tx">>, Hash, Field], Req, _Pid) ->
 								{'EXIT', _} ->
 									{400, #{}, jiffy:encode(#{ error => invalid_field }), Req};
 								FieldAtom ->
-									{TXJSON} = ar_serialize:tx_to_json_struct(TX),
+									{TXJSON} = big_serialize:tx_to_json_struct(TX),
 									case catch val_for_key(FieldAtom, TXJSON) of
 										{'EXIT', _} ->
 											{400, #{}, jiffy:encode(#{ error => invalid_field }),
@@ -1407,7 +1407,7 @@ handle(<<"GET">>, [<<"coordinated_mining">>, <<"partition_table">>], Req, _Pid) 
 								%% does NOT aggregate peer partitions in this case.
 								big_coordination:get_unique_partitions_list()
 						end,
-					JSON = ar_serialize:jsonify(Partitions),
+					JSON = big_serialize:jsonify(Partitions),
 					{200, #{}, JSON, Req}
 			end;
 		{reject, {Status, Headers, Body}} ->
@@ -1428,7 +1428,7 @@ handle(<<"GET">>, [<<"coordinated_mining">>, <<"state">>], Req, _Pid) ->
 						Table = lists:map(
 							fun	(ListValue) ->
 								{Bucket, BucketSize, Addr, PackingDifficulty} = ListValue,
-								ar_serialize:partition_to_json_struct(Bucket, BucketSize,
+								big_serialize:partition_to_json_struct(Bucket, BucketSize,
 									Addr, PackingDifficulty)
 							end,
 							PartitionList
@@ -1443,7 +1443,7 @@ handle(<<"GET">>, [<<"coordinated_mining">>, <<"state">>], Req, _Pid) ->
 						[],
 						LastPeerResponse
 					),
-				{200, #{}, ar_serialize:jsonify(Peers), Req}
+				{200, #{}, big_serialize:jsonify(Peers), Req}
 			end;
 		{reject, {Status, Headers, Body}} ->
 			{Status, Headers, Body, Req}
@@ -1541,9 +1541,9 @@ handle_get_block_index_range(Start, End, CurrentHeight, RecentBI, Req, Encoding)
 		end,
 	case Encoding of
 		binary ->
-			{200, #{}, ar_serialize:block_index_to_binary(Range), Req};
+			{200, #{}, big_serialize:block_index_to_binary(Range), Req};
 		json ->
-			{200, #{}, ar_serialize:jsonify(ar_serialize:block_index_to_json_struct(
+			{200, #{}, big_serialize:jsonify(big_serialize:block_index_to_json_struct(
 					format_bi_for_peer(Range, Req))), Req}
 	end.
 
@@ -1582,7 +1582,7 @@ handle_get_tx_status(EncodedTXID, Req) ->
 									Status = PseudoTags
 											++ [{<<"number_of_confirmations">>,
 												NumberOfConfirmations}],
-									{200, #{}, ar_serialize:jsonify({Status}), Req};
+									{200, #{}, big_serialize:jsonify({Status}), Req};
 								_ ->
 									{404, #{}, <<"Not Found.">>, Req}
 							end;
@@ -1607,9 +1607,9 @@ handle_get_tx(Hash, Req, Encoding) ->
 					Body =
 						case Encoding of
 							json ->
-								ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX));
+								big_serialize:jsonify(big_serialize:tx_to_json_struct(TX));
 							binary ->
-								ar_serialize:tx_to_binary(TX)
+								big_serialize:tx_to_binary(TX)
 						end,
 					{200, #{}, Body, Req}
 			end
@@ -1627,9 +1627,9 @@ handle_get_unconfirmed_tx(Hash, Req, Encoding) ->
 					Body =
 						case Encoding of
 							json ->
-								ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX));
+								big_serialize:jsonify(big_serialize:tx_to_json_struct(TX));
 							binary ->
-								ar_serialize:tx_to_binary(TX)
+								big_serialize:tx_to_binary(TX)
 						end,
 					{200, #{}, Body, Req}
 			end
@@ -1860,9 +1860,9 @@ handle_get_block3(B, Req, Encoding) ->
 	Bin =
 		case Encoding of
 			json ->
-				ar_serialize:jsonify(ar_serialize:block_to_json_struct(B));
+				big_serialize:jsonify(big_serialize:block_to_json_struct(B));
 			binary ->
-				ar_serialize:block_to_binary(B)
+				big_serialize:block_to_binary(B)
 		end,
 	{200, #{}, Bin, Req}.
 
@@ -1992,7 +1992,7 @@ handle_get_chunk(OffsetBinary, Req, Encoding) ->
 			case << Offset:(?NOTE_SIZE * 8) >> of
 				%% A positive number represented by =< ?NOTE_SIZE bytes.
 				<< Offset:(?NOTE_SIZE * 8) >> ->
-					RequestedPacking = ar_serialize:decode_packing(
+					RequestedPacking = big_serialize:decode_packing(
 						cowboy_req:header(<<"x-packing">>, Req, <<"unpacked">>),
 						any
 					),
@@ -2046,10 +2046,10 @@ handle_get_chunk(OffsetBinary, Req, Encoding) ->
 										case Encoding of
 											json ->
 												jiffy:encode(
-													ar_serialize:poa_map_to_json_map(
+													big_serialize:poa_map_to_json_map(
 															Proof2));
 											binary ->
-												ar_serialize:poa_map_to_binary(Proof2)
+												big_serialize:poa_map_to_binary(Proof2)
 										end,
 									{200, #{}, Reply, Req};
 								{error, chunk_not_found} ->
@@ -2065,9 +2065,9 @@ handle_get_chunk(OffsetBinary, Req, Encoding) ->
 								{error, Error} ->
 									?LOG_ERROR([{event, get_chunk_error}, {offset, Offset},
 										{requested_packing, 
-											ar_serialize:encode_packing(RequestedPacking, false)},
+											big_serialize:encode_packing(RequestedPacking, false)},
 										{read_packing, 
-											ar_serialize:encode_packing(ReadPacking, false)},
+											big_serialize:encode_packing(ReadPacking, false)},
 										{error, Error}]),
 									{500, #{}, <<>>, Req}
 							end
@@ -2120,10 +2120,10 @@ handle_get_chunk_proof2(Offset, Req, Encoding) ->
 						case Encoding of
 							json ->
 								jiffy:encode(
-									ar_serialize:poa_no_chunk_map_to_json_map(
+									big_serialize:poa_no_chunk_map_to_json_map(
 											Proof));
 							binary ->
-								ar_serialize:poa_no_chunk_map_to_binary(Proof)
+								big_serialize:poa_no_chunk_map_to_binary(Proof)
 						end,
 					{200, #{}, Reply, Req};
 				{error, chunk_not_found} ->
@@ -2161,9 +2161,9 @@ get_data_root_from_headers(Req) ->
 parse_chunk(Req, Pid) ->
 	case read_complete_body(Req, Pid, ?MAX_SERIALIZED_CHUNK_PROOF_SIZE) of
 		{ok, Body, Req2} ->
-			case ar_serialize:json_decode(Body, [return_maps]) of
+			case big_serialize:json_decode(Body, [return_maps]) of
 				{ok, JSON} ->
-					case catch ar_serialize:json_map_to_poa_map(JSON) of
+					case catch big_serialize:json_map_to_poa_map(JSON) of
 						{'EXIT', _} ->
 							{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 						Proof ->
@@ -2291,12 +2291,12 @@ block_field_to_string(<<"last_retarget">>, Res) -> integer_to_list(Res);
 block_field_to_string(<<"diff">>, Res) -> integer_to_list(Res);
 block_field_to_string(<<"cumulative_diff">>, Res) -> integer_to_list(Res);
 block_field_to_string(<<"height">>, Res) -> integer_to_list(Res);
-block_field_to_string(<<"txs">>, Res) -> ar_serialize:jsonify(Res);
-block_field_to_string(<<"hash_list">>, Res) -> ar_serialize:jsonify(Res);
-block_field_to_string(<<"wallet_list">>, Res) -> ar_serialize:jsonify(Res);
-block_field_to_string(<<"usd_to_big_rate">>, Res) -> ar_serialize:jsonify(Res);
-block_field_to_string(<<"scheduled_usd_to_big_rate">>, Res) -> ar_serialize:jsonify(Res);
-block_field_to_string(<<"poa">>, Res) -> ar_serialize:jsonify(Res);
+block_field_to_string(<<"txs">>, Res) -> big_serialize:jsonify(Res);
+block_field_to_string(<<"hash_list">>, Res) -> big_serialize:jsonify(Res);
+block_field_to_string(<<"wallet_list">>, Res) -> big_serialize:jsonify(Res);
+block_field_to_string(<<"usd_to_big_rate">>, Res) -> big_serialize:jsonify(Res);
+block_field_to_string(<<"scheduled_usd_to_big_rate">>, Res) -> big_serialize:jsonify(Res);
+block_field_to_string(<<"poa">>, Res) -> big_serialize:jsonify(Res);
 block_field_to_string(_, Res) -> Res.
 
 %% @doc Return true if TXID is a pending tx.
@@ -2305,9 +2305,9 @@ is_a_pending_tx(TXID) ->
 
 decode_block(JSON, json) ->
 	try
-		{Struct} = ar_serialize:dejsonify(JSON),
+		{Struct} = big_serialize:dejsonify(JSON),
 		JSONB = val_for_key(<<"new_block">>, Struct),
-		BShadow = ar_serialize:json_struct_to_block(JSONB),
+		BShadow = big_serialize:json_struct_to_block(JSONB),
 		{ok, BShadow}
 	catch
 		Exception:Reason ->
@@ -2315,7 +2315,7 @@ decode_block(JSON, json) ->
 	end;
 decode_block(Bin, binary) ->
 	try
-		ar_serialize:binary_to_block(Bin)
+		big_serialize:binary_to_block(Bin)
 	catch
 		Exception:Reason ->
 			{error, {Exception, Reason}}
@@ -2353,7 +2353,7 @@ handle_block_announcement(#block_announcement{ indep_hash = H, previous_block = 
 							false ->
 								Response#block_announcement_response{ missing_chunk2 = true }
 						end,
-					{200, #{}, ar_serialize:block_announcement_response_to_binary(Response2),
+					{200, #{}, big_serialize:block_announcement_response_to_binary(Response2),
 							Req}
 			end
 	end.
@@ -2388,7 +2388,7 @@ post_block(check_joined, Peer, {Req, Pid, Encoding}, ReceiveTimestamp) ->
 				{json, true} ->
 					%% We gesticulate it explicitly here that POST /block is not
 					%% supported after the 2.6 fork. However, this check is not strictly
-					%% necessary because ar_serialize:json_struct_to_block/1 fails
+					%% necessary because big_serialize:json_struct_to_block/1 fails
 					%% unless the block height is smaller than the fork 2.6 height.
 					{400, #{}, <<>>, Req};
 				_ ->
@@ -2397,7 +2397,7 @@ post_block(check_joined, Peer, {Req, Pid, Encoding}, ReceiveTimestamp) ->
 			end;
 		false ->
 			%% The node is not ready to validate and accept blocks.
-			%% If the network adopts this block, ar_poller will catch up.
+			%% If the network adopts this block, big_poller will catch up.
 			{503, #{}, <<"Not joined.">>, Req}
 	end;
 post_block(check_block_hash_header, Peer, {Req, Pid, Encoding}, ReceiveTimestamp) ->
@@ -2519,14 +2519,14 @@ handle_post_partial_solution(Req, Pid) ->
 handle_post_partial_solution_pool_server(Req, Pid) ->
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
-			case catch ar_serialize:json_map_to_solution(
+			case catch big_serialize:json_map_to_solution(
 					jiffy:decode(Body, [return_maps])) of
 				{'EXIT', _} ->
 					{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 				Solution ->
 					Response = big_pool:process_partial_solution(Solution),
-					JSON = ar_serialize:partial_solution_response_to_json_struct(Response),
-					{200, #{}, ar_serialize:jsonify(JSON), Req2}
+					JSON = big_serialize:partial_solution_response_to_json_struct(Response),
+					{200, #{}, big_serialize:jsonify(JSON), Req2}
 			end;
 		{error, body_size_too_large} ->
 			{413, #{}, <<"Payload too large">>, Req};
@@ -2598,11 +2598,11 @@ handle_get_jobs_pool_server(PrevOutput, Req) ->
 	Jobs = #jobs{ jobs = JobList, seed = Info#nonce_limiter_info.seed,
 			next_seed = NextSeed, interval_number = IntervalNumber,
 			next_vdf_difficulty = NextVDFDiff, partial_diff = DiffPair },
-	{200, #{}, ar_serialize:jsonify(ar_serialize:jobs_to_json_struct(Jobs)), Req}.
+	{200, #{}, big_serialize:jsonify(big_serialize:jobs_to_json_struct(Jobs)), Req}.
 
 handle_get_jobs_cm_exit_peer_pool_client(PrevOutput, Req) ->
-	{200, #{}, ar_serialize:jsonify(
-			ar_serialize:jobs_to_json_struct(big_pool:get_jobs(PrevOutput))), Req}.
+	{200, #{}, big_serialize:jsonify(
+			big_serialize:jobs_to_json_struct(big_pool:get_jobs(PrevOutput))), Req}.
 
 %% Only for cm miners that are NOT exit peers.
 handle_post_pool_cm_jobs(Req, Pid) ->
@@ -2623,8 +2623,8 @@ handle_post_pool_cm_jobs2(Req, Pid) ->
 	Peer = big_http_util:bigfile_peer(Req),
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
-			case catch ar_serialize:json_map_to_pool_cm_jobs(
-					element(2, ar_serialize:json_decode(Body, [return_maps]))) of
+			case catch big_serialize:json_map_to_pool_cm_jobs(
+					element(2, big_serialize:json_decode(Body, [return_maps]))) of
 				{'EXIT', _} ->
 					{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 				Jobs ->
@@ -2729,7 +2729,7 @@ process_request(get_block, [Type, ID, <<"hash_list">>], Req) ->
 				false ->
 					CurrentBI = big_node:get_block_index(),
 					HL = big_block:generate_hash_list_for_block(B#block.indep_hash, CurrentBI),
-					{200, #{}, ar_serialize:jsonify(lists:map(fun ar_util:encode/1, HL)), Req}
+					{200, #{}, big_serialize:jsonify(lists:map(fun ar_util:encode/1, HL)), Req}
 			end
 	end;
 %% @doc Return the wallet list associated with a block.
@@ -2751,8 +2751,8 @@ process_request(get_block, [Type, ID, <<"wallet_list">>], Req) ->
 					ok = ar_semaphore:acquire(get_wallet_list, infinity),
 					case big_storage:read_wallet_list(B#block.wallet_list) of
 						{ok, Tree} ->
-							{200, #{}, ar_serialize:jsonify(
-								ar_serialize:wallet_list_to_json_struct(
+							{200, #{}, big_serialize:jsonify(
+								big_serialize:wallet_list_to_json_struct(
 									B#block.reward_addr, false, Tree
 								)), Req};
 						_ ->
@@ -2784,7 +2784,7 @@ process_request(get_block, [Type, ID, Field], Req) ->
 				unavailable ->
 					{404, #{}, <<"Not Found.">>, Req};
 				B ->
-					{BLOCKJSON} = ar_serialize:block_to_json_struct(B),
+					{BLOCKJSON} = big_serialize:block_to_json_struct(B),
 					case catch list_to_existing_atom(binary_to_list(Field)) of
 						{'EXIT', _} ->
 							{404, #{}, <<"Not Found.">>, Req};
@@ -2897,7 +2897,7 @@ wallet_list_chunk_to_json(#{ next_cursor := NextCursor, wallets := Wallets }) ->
 	SerializedWallets =
 		lists:map(
 			fun({Addr, Value}) ->
-				ar_serialize:wallet_to_json_struct(Addr, Value)
+				big_serialize:wallet_to_json_struct(Addr, Value)
 			end,
 			Wallets
 		),
@@ -2970,7 +2970,7 @@ post_tx_parse_id(read_body, {TXID, Req, Pid, Encoding}) ->
 			{error, timeout}
 	end;
 post_tx_parse_id(parse_json, {TXID, Req, Body}) ->
-	case catch ar_serialize:json_struct_to_tx(Body) of
+	case catch big_serialize:json_struct_to_tx(Body) of
 		{'EXIT', _} ->
 			case TXID of
 				not_set ->
@@ -3000,7 +3000,7 @@ post_tx_parse_id(parse_json, {TXID, Req, Body}) ->
 			post_tx_parse_id(verify_id_match, {TXID, Req, TX})
 	end;
 post_tx_parse_id(parse_binary, {TXID, Req, Body}) ->
-	case catch ar_serialize:binary_to_tx(Body) of
+	case catch big_serialize:binary_to_tx(Body) of
 		{'EXIT', _} ->
 			case TXID of
 				not_set ->
@@ -3060,7 +3060,7 @@ handle_post_vdf2(Req, Pid, Peer) ->
 		true ->
 			%% We are pulling the updates - tell the server not to push them.
 			Response = #nonce_limiter_update_response{ postpone = 120 },
-			Bin = ar_serialize:nonce_limiter_update_response_to_binary(Response),
+			Bin = big_serialize:nonce_limiter_update_response_to_binary(Response),
 			{202, #{}, Bin, Req};
 		false ->
 			handle_post_vdf3(Req, Pid, Peer)
@@ -3079,19 +3079,19 @@ handle_post_vdf3(Req, Pid, Peer) ->
 					false ->
 						2
 				end,
-			case ar_serialize:binary_to_nonce_limiter_update(Format, Body) of
+			case big_serialize:binary_to_nonce_limiter_update(Format, Body) of
 				{ok, Update} ->
 					case ar_nonce_limiter:apply_external_update(Update, Peer) of
 						ok ->
 							{200, #{}, <<>>, Req2};
 						#nonce_limiter_update_response{} = Response ->
-							Bin = ar_serialize:nonce_limiter_update_response_to_binary(Response),
+							Bin = big_serialize:nonce_limiter_update_response_to_binary(Response),
 							{202, #{}, Bin, Req2}
 					end;
 				{error, _} ->
 					%% We couldn't deserialize the update, ask for a different format
 					Response = #nonce_limiter_update_response{ format = Format },
-					Bin = ar_serialize:nonce_limiter_update_response_to_binary(Response),
+					Bin = big_serialize:nonce_limiter_update_response_to_binary(Response),
 					{202, #{}, Bin, Req}
 			end;
 		{error, body_size_too_large} ->
@@ -3167,9 +3167,9 @@ handle_mining_h1(Req, Pid) ->
 	Peer = big_http_util:bigfile_peer(Req),
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
-			case ar_serialize:json_decode(Body, [return_maps]) of
+			case big_serialize:json_decode(Body, [return_maps]) of
 				{ok, JSON} ->
-					case catch ar_serialize:json_map_to_candidate(JSON) of
+					case catch big_serialize:json_map_to_candidate(JSON) of
 						{'EXIT', _} ->
 							{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 						Candidate ->
@@ -3177,8 +3177,8 @@ handle_mining_h1(Req, Pid) ->
 								{true, true} ->
 									PoolPeer = big_pool:pool_peer(),
 									Jobs = #pool_cm_jobs{ h1_to_h2_jobs = [Candidate] },
-									Payload = ar_serialize:jsonify(
-											ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),
+									Payload = big_serialize:jsonify(
+											big_serialize:pool_cm_jobs_to_json_struct(Jobs)),
 									spawn(fun() ->
 										big_http_iface_client:post_pool_cm_jobs(PoolPeer,
 												Payload) end),
@@ -3199,9 +3199,9 @@ handle_mining_h2(Req, Pid) ->
 	Peer = big_http_util:bigfile_peer(Req),
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
-			case ar_serialize:json_decode(Body, [return_maps]) of
+			case big_serialize:json_decode(Body, [return_maps]) of
 				{ok, JSON} ->
-					case catch ar_serialize:json_map_to_candidate(JSON) of
+					case catch big_serialize:json_map_to_candidate(JSON) of
 						{'EXIT', _} ->
 							{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 						Candidate ->
@@ -3211,8 +3211,8 @@ handle_mining_h2(Req, Pid) ->
 								{true, true} ->
 									PoolPeer = big_pool:pool_peer(),
 									Jobs = #pool_cm_jobs{ h1_read_jobs = [Candidate] },
-									Payload = ar_serialize:jsonify(
-											ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),
+									Payload = big_serialize:jsonify(
+											big_serialize:pool_cm_jobs_to_json_struct(Jobs)),
 									spawn(fun() ->
 										big_http_iface_client:post_pool_cm_jobs(PoolPeer,
 												Payload) end),
@@ -3234,9 +3234,9 @@ handle_mining_cm_publish(Req, Pid) ->
 	Peer = big_http_util:bigfile_peer(Req),
 	case read_complete_body(Req, Pid) of
 		{ok, Body, Req2} ->
-			case ar_serialize:json_decode(Body, [return_maps]) of
+			case big_serialize:json_decode(Body, [return_maps]) of
 				{ok, JSON} ->
-					case catch ar_serialize:json_map_to_solution(JSON) of
+					case catch big_serialize:json_map_to_solution(JSON) of
 						{'EXIT', _} ->
 							{400, #{}, jiffy:encode(#{ error => invalid_json }), Req2};
 						Solution ->

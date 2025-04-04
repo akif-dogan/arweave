@@ -403,7 +403,7 @@ returns_error_when_txs_exceed_balance(BuildTXSetFun) ->
 			method => post,
 			peer => ar_test_node:peer_ip(peer1),
 			path => "/tx",
-			body => ar_serialize:jsonify(ar_serialize:tx_to_json_struct(ExceedBalanceTX))
+			body => big_serialize:jsonify(big_serialize:tx_to_json_struct(ExceedBalanceTX))
 		}),
 	?assertEqual({ok, ["overspend"]}, ar_test_node:remote_call(peer1, ar_tx_db, get_error_codes,
 			[ExceedBalanceTX#tx.id])).
@@ -965,7 +965,7 @@ recovers_from_forks(ForkHeight) ->
 					peer => {127, 0, 0, 1, MainPort},
 					path => "/tx",
 					headers => [{<<"x-p2p-port">>, integer_to_binary(MainPort, 10)}],
-					body => ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX))
+					body => big_serialize:jsonify(big_serialize:tx_to_json_struct(TX))
 				})
 		end,
 		MainPostForkTXs

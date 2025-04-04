@@ -65,12 +65,12 @@ test_block_to_binary([Fixture | Fixtures], TXFixtureDir) ->
 	test_block_to_binary(Fixtures, TXFixtureDir).
 
 test_block_to_binary(B) ->
-	{ok, B2} = ar_serialize:binary_to_block(ar_serialize:block_to_binary(B)),
+	{ok, B2} = big_serialize:binary_to_block(big_serialize:block_to_binary(B)),
 	?assertEqual(B#block{ txs = [] }, B2#block{ txs = [] }),
 	?assertEqual(true, compare_txs(B#block.txs, B2#block.txs)),
 	lists:foreach(
 		fun	(TX) when is_record(TX, tx)->
-				?assertEqual({ok, TX}, ar_serialize:binary_to_tx(ar_serialize:tx_to_binary(TX)));
+				?assertEqual({ok, TX}, big_serialize:binary_to_tx(big_serialize:tx_to_binary(TX)));
 			(_TXID) ->
 				ok
 		end,
@@ -91,54 +91,54 @@ compare_txs(_TXs, _TXs2) ->
 block_announcement_to_binary_test() ->
 	A = #block_announcement{ indep_hash = crypto:strong_rand_bytes(48),
 			previous_block = crypto:strong_rand_bytes(48) },
-	?assertEqual({ok, A}, ar_serialize:binary_to_block_announcement(
-			ar_serialize:block_announcement_to_binary(A))),
+	?assertEqual({ok, A}, big_serialize:binary_to_block_announcement(
+			big_serialize:block_announcement_to_binary(A))),
 	A2 = A#block_announcement{ recall_byte = 0 },
-	?assertEqual({ok, A2}, ar_serialize:binary_to_block_announcement(
-			ar_serialize:block_announcement_to_binary(A2))),
+	?assertEqual({ok, A2}, big_serialize:binary_to_block_announcement(
+			big_serialize:block_announcement_to_binary(A2))),
 	A3 = A#block_announcement{ recall_byte = 1000000000000000000000 },
-	?assertEqual({ok, A3}, ar_serialize:binary_to_block_announcement(
-			ar_serialize:block_announcement_to_binary(A3))),
+	?assertEqual({ok, A3}, big_serialize:binary_to_block_announcement(
+			big_serialize:block_announcement_to_binary(A3))),
 	A4 = A3#block_announcement{ tx_prefixes = [crypto:strong_rand_bytes(8)
 			|| _ <- lists:seq(1, 1000)] },
-	?assertEqual({ok, A4}, ar_serialize:binary_to_block_announcement(
-			ar_serialize:block_announcement_to_binary(A4))),
+	?assertEqual({ok, A4}, big_serialize:binary_to_block_announcement(
+			big_serialize:block_announcement_to_binary(A4))),
 	A5 = A#block_announcement{ recall_byte2 = 1,
 			solution_hash = crypto:strong_rand_bytes(32) },
-	?assertEqual({ok, A5}, ar_serialize:binary_to_block_announcement(
-			ar_serialize:block_announcement_to_binary(A5))),
+	?assertEqual({ok, A5}, big_serialize:binary_to_block_announcement(
+			big_serialize:block_announcement_to_binary(A5))),
 	A6 = A#block_announcement{ recall_byte2 = 1, recall_byte = 2,
 			solution_hash = crypto:strong_rand_bytes(32) },
-	?assertEqual({ok, A6}, ar_serialize:binary_to_block_announcement(
-			ar_serialize:block_announcement_to_binary(A6))).
+	?assertEqual({ok, A6}, big_serialize:binary_to_block_announcement(
+			big_serialize:block_announcement_to_binary(A6))).
 
 block_announcement_response_to_binary_test() ->
 	A = #block_announcement_response{},
-	?assertEqual({ok, A}, ar_serialize:binary_to_block_announcement_response(
-			ar_serialize:block_announcement_response_to_binary(A))),
+	?assertEqual({ok, A}, big_serialize:binary_to_block_announcement_response(
+			big_serialize:block_announcement_response_to_binary(A))),
 	A2 = A#block_announcement_response{ missing_chunk = true,
 			missing_tx_indices = lists:seq(0, 999) },
-	?assertEqual({ok, A2}, ar_serialize:binary_to_block_announcement_response(
-			ar_serialize:block_announcement_response_to_binary(A2))),
+	?assertEqual({ok, A2}, big_serialize:binary_to_block_announcement_response(
+			big_serialize:block_announcement_response_to_binary(A2))),
 	A3 = A#block_announcement_response{ missing_chunk = true, missing_chunk2 = false,
 			missing_tx_indices = lists:seq(0, 1) },
-	?assertEqual({ok, A3}, ar_serialize:binary_to_block_announcement_response(
-			ar_serialize:block_announcement_response_to_binary(A3))),
+	?assertEqual({ok, A3}, big_serialize:binary_to_block_announcement_response(
+			big_serialize:block_announcement_response_to_binary(A3))),
 	A4 = A#block_announcement_response{ missing_chunk2 = true,
 			missing_tx_indices = [731] },
-	?assertEqual({ok, A4}, ar_serialize:binary_to_block_announcement_response(
-			ar_serialize:block_announcement_response_to_binary(A4))).
+	?assertEqual({ok, A4}, big_serialize:binary_to_block_announcement_response(
+			big_serialize:block_announcement_response_to_binary(A4))).
 
 
 poa_map_to_json(Map) ->
-	jiffy:encode(ar_serialize:poa_map_to_json_map(Map)).
+	jiffy:encode(big_serialize:poa_map_to_json_map(Map)).
 
 json_to_poa_map(Body) ->
-	{ok, JSON} = ar_serialize:json_decode(Body, [return_maps]),
-	{ok, ar_serialize:json_map_to_poa_map(JSON)}.
+	{ok, JSON} = big_serialize:json_decode(Body, [return_maps]),
+	{ok, big_serialize:json_map_to_poa_map(JSON)}.
 
 poa_map_test() ->
-	test_poa_map(fun ar_serialize:poa_map_to_binary/1, fun ar_serialize:binary_to_poa/1, #{}),
+		test_poa_map(fun big_serialize:poa_map_to_binary/1, fun big_serialize:binary_to_poa/1, #{}),
 	test_poa_map(fun poa_map_to_json/1, fun json_to_poa_map/1,
 		#{ data_size => 0, data_root => <<>> }).
 
@@ -162,7 +162,7 @@ test_poa_map(Serialize, Deserialize, BaseProof) ->
 			Deserialize(Serialize(Proof5))).
 
 poa_no_chunk_map_test() ->
-	test_poa_no_chunk_map(fun ar_serialize:poa_no_chunk_map_to_binary/1, fun ar_serialize:binary_to_no_chunk_map/1).
+	test_poa_no_chunk_map(fun big_serialize:poa_no_chunk_map_to_binary/1, fun big_serialize:binary_to_no_chunk_map/1).
 
 test_poa_no_chunk_map(Serialize, Deserialize) ->
 	Proof = #{ data_path => crypto:strong_rand_bytes(500),
@@ -173,8 +173,8 @@ test_poa_no_chunk_map(Serialize, Deserialize) ->
 block_index_to_binary_test() ->
 	lists:foreach(
 		fun(BI) ->
-			?assertEqual({ok, BI}, ar_serialize:binary_to_block_index(
-				ar_serialize:block_index_to_binary(BI)))
+			?assertEqual({ok, BI}, big_serialize:binary_to_block_index(
+				big_serialize:block_index_to_binary(BI)))
 		end,
 		[[], [{crypto:strong_rand_bytes(48), rand:uniform(1000),
 				crypto:strong_rand_bytes(32)}],
@@ -193,8 +193,8 @@ block_roundtrip_test_() ->
 test_block_roundtrip() ->
 	[B] = ar_weave:init(),
 	TXIDs = [TX#tx.id || TX <- B#block.txs],
-	JSONStruct = ar_serialize:jsonify(ar_serialize:block_to_json_struct(B)),
-	BRes = ar_serialize:json_struct_to_block(JSONStruct),
+	JSONStruct = big_serialize:jsonify(big_serialize:block_to_json_struct(B)),
+	BRes = big_serialize:json_struct_to_block(JSONStruct),
 	?assertEqual(B#block{ txs = TXIDs, size_tagged_txs = [], account_tree = undefined },
 			BRes#block{ hash_list = B#block.hash_list, size_tagged_txs = [] }).
 
@@ -208,10 +208,10 @@ tx_roundtrip_test() ->
 			data_root = << 0:256 >>,
 			signature_type = ?DEFAULT_KEY_TYPE
 		},
-	JsonTX = ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX)),
+	JsonTX = big_serialize:jsonify(big_serialize:tx_to_json_struct(TX)),
 	?assertEqual(
 		TX,
-		ar_serialize:json_struct_to_tx(JsonTX)
+		big_serialize:json_struct_to_tx(JsonTX)
 	).
 
 wallet_list_roundtrip_test_() ->
@@ -220,11 +220,11 @@ wallet_list_roundtrip_test_() ->
 test_wallet_list_roundtrip() ->
 	[B] = ar_weave:init(),
 	WL = B#block.account_tree,
-	JSONWL = ar_serialize:jsonify(
-		ar_serialize:wallet_list_to_json_struct(B#block.reward_addr, false, WL)),
+	JSONWL = big_serialize:jsonify(
+		big_serialize:wallet_list_to_json_struct(B#block.reward_addr, false, WL)),
 	ExpectedWL = ar_patricia_tree:foldr(fun(K, V, Acc) -> [{K, V} | Acc] end, [], WL),
 	ActualWL = ar_patricia_tree:foldr(
-		fun(K, V, Acc) -> [{K, V} | Acc] end, [], ar_serialize:json_struct_to_wallet_list(JSONWL)
+		fun(K, V, Acc) -> [{K, V} | Acc] end, [], big_serialize:json_struct_to_wallet_list(JSONWL)
 	),
 	?assertEqual(ExpectedWL, ActualWL).
 
@@ -234,27 +234,27 @@ block_index_roundtrip_test_() ->
 test_block_index_roundtrip() ->
 	[B] = ar_weave:init(),
 	HL = [B#block.indep_hash, B#block.indep_hash],
-	JSONHL = ar_serialize:jsonify(ar_serialize:block_index_to_json_struct(HL)),
-	HL = ar_serialize:json_struct_to_block_index(ar_serialize:dejsonify(JSONHL)),
+	JSONHL = big_serialize:jsonify(big_serialize:block_index_to_json_struct(HL)),
+	HL = big_serialize:json_struct_to_block_index(big_serialize:dejsonify(JSONHL)),
 	BI = [{B#block.indep_hash, 1, <<"Root">>}, {B#block.indep_hash, 2, <<>>}],
-	JSONBI = ar_serialize:jsonify(ar_serialize:block_index_to_json_struct(BI)),
-	BI = ar_serialize:json_struct_to_block_index(ar_serialize:dejsonify(JSONBI)).
+	JSONBI = big_serialize:jsonify(big_serialize:block_index_to_json_struct(BI)),
+	BI = big_serialize:json_struct_to_block_index(big_serialize:dejsonify(JSONBI)).
 
 query_roundtrip_test() ->
 	Query = {'equals', <<"TestName">>, <<"TestVal">>},
-	QueryJSON = ar_serialize:jsonify(
-		ar_serialize:query_to_json_struct(
+	QueryJSON = big_serialize:jsonify(
+		big_serialize:query_to_json_struct(
 			Query
 		)
 	),
-	?assertEqual({ok, Query}, ar_serialize:json_struct_to_query(QueryJSON)).
+	?assertEqual({ok, Query}, big_serialize:json_struct_to_query(QueryJSON)).
 
 candidate_to_json_struct_test() ->
 
 	Test = fun(Candidate) ->
-        JSON = ar_serialize:jsonify(ar_serialize:candidate_to_json_struct(Candidate)),
-		{ok, JSONStruct} = ar_serialize:json_decode(JSON, [return_maps]),
-        CandidateAfter = ar_serialize:json_map_to_candidate(JSONStruct),
+        JSON = big_serialize	:jsonify(big_serialize:candidate_to_json_struct(Candidate)),
+		{ok, JSONStruct} = big_serialize:json_decode(JSON, [return_maps]),
+        CandidateAfter = big_serialize:json_map_to_candidate(JSONStruct),
         ExpectedCandidate = Candidate#mining_candidate{
             cache_ref = not_set,
             chunk1 = not_set,
@@ -314,9 +314,9 @@ candidate_to_json_struct_test() ->
 solution_to_json_struct_test() ->
 
 	Test = fun(Solution) ->
-        JSON = ar_serialize:jsonify(ar_serialize:solution_to_json_struct(Solution)),
-		{ok, JSONStruct} = ar_serialize:json_decode(JSON, [return_maps]),
-        SolutionAfter = ar_serialize:json_map_to_solution(JSONStruct),
+        JSON = big_serialize:jsonify(big_serialize:solution_to_json_struct(Solution)),
+		{ok, JSONStruct} = big_serialize:json_decode(JSON, [return_maps]),
+        SolutionAfter = big_serialize:json_map_to_solution(JSONStruct),
         ?assertEqual(Solution, SolutionAfter)
     end,
 
@@ -401,8 +401,8 @@ partial_solution_to_json_struct_test() ->
 	lists:foreach(
 		fun(Solution) ->
 			?assertEqual(Solution,
-					ar_serialize:json_map_to_solution(jiffy:decode(ar_serialize:jsonify(
-							ar_serialize:solution_to_json_struct(Solution)), [return_maps])))
+					big_serialize:json_map_to_solution(jiffy:decode(big_serialize:jsonify(
+							big_serialize:solution_to_json_struct(Solution)), [return_maps])))
 		end,
 		TestCases
 	).
@@ -415,8 +415,8 @@ partial_solution_response_to_json_struct_test() ->
 	],
 	lists:foreach(
 		fun({Case, ExpectedH, ExpectedStatus}) ->
-			{Struct} = ar_serialize:dejsonify(ar_serialize:jsonify(
-					ar_serialize:partial_solution_response_to_json_struct(Case))),
+			{Struct} = big_serialize:dejsonify(big_serialize:jsonify(
+					big_serialize:partial_solution_response_to_json_struct(Case))),
 			?assertEqual(ExpectedH,
 					ar_util:decode(proplists:get_value(<<"indep_hash">>, Struct))),
 			?assertEqual(ExpectedStatus, proplists:get_value(<<"status">>, Struct))
@@ -445,9 +445,9 @@ jobs_to_json_struct_test() ->
 	lists:foreach(
 		fun(Jobs) ->
 			?assertEqual(Jobs,
-					ar_serialize:json_struct_to_jobs(
-						ar_serialize:dejsonify(ar_serialize:jsonify(
-							ar_serialize:jobs_to_json_struct(Jobs)))))
+					big_serialize:json_struct_to_jobs(
+						big_serialize:dejsonify(big_serialize:jsonify(
+							big_serialize:jobs_to_json_struct(Jobs)))))
 		end,
 		TestCases
 	).

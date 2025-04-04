@@ -147,7 +147,7 @@ test_invalid_block_with_high_cumulative_difficulty() ->
 	ok = ar_events:subscribe(block),
 	?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
 			big_http_iface_client:send_block_binary(ar_test_node:peer_ip(main), B2#block.indep_hash,
-					ar_serialize:block_to_binary(B2))),
+					big_serialize:block_to_binary(B2))),
 	receive
 		{event, block, {rejected, invalid_cumulative_difficulty, B2H, _Peer2}} ->
 			ok;

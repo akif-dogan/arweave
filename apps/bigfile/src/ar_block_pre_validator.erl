@@ -203,7 +203,7 @@ pre_validate_previous_block(B, Peer) ->
 			%% We have not seen the previous block yet - might happen if two
 			%% successive blocks are distributed at the same time. Do not
 			%% ban the peer as the block might be valid. If the network adopts
-			%% this block, ar_poller will catch up.
+			%% this block, big_poller will catch up.
 			skipped;
 		#block{ height = PrevHeight } = PrevB ->
 			case B#block.height == PrevHeight + 1 of

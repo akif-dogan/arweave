@@ -99,14 +99,14 @@ validate_hash(H, History) ->
 
 hash(History) ->
 	History2 = lists:sublist(History, history_length()),
-	hash(History2, [ar_serialize:encode_int(length(History2), 8)]).
+	hash(History2, [big_serialize:encode_int(length(History2), 8)]).
 
 hash([], IOList) ->
 	crypto:hash(sha256, iolist_to_binary(IOList));
 hash([{BlockInterval, VDFInterval, ChunkCount} | History], IOList) ->
-	BlockIntervalBin = ar_serialize:encode_int(BlockInterval, 8),
-	VDFIntervalBin = ar_serialize:encode_int(VDFInterval, 8),
-	ChunkCountBin = ar_serialize:encode_int(ChunkCount, 8),
+	BlockIntervalBin = big_serialize:encode_int(BlockInterval, 8),
+	VDFIntervalBin = big_serialize:encode_int(VDFInterval, 8),
+	ChunkCountBin = big_serialize:encode_int(ChunkCount, 8),
 	hash(History, [BlockIntervalBin, VDFIntervalBin, ChunkCountBin | IOList]).
 
 update_history(B, PrevB) ->

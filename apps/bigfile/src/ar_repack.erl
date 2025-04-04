@@ -71,7 +71,7 @@ repack(Cursor, RangeStart, RangeEnd, Packing, StoreID) ->
 			{repack_interval_size, RepackIntervalSize},
 			{range_start, RangeStart},
 			{range_end, RangeEnd},
-			{packing, ar_serialize:encode_packing(Packing, true)}]),
+			{packing, big_serialize:encode_packing(Packing, true)}]),
 	case ar_sync_record:get_next_synced_interval(Cursor, RightBound,
 			big_data_sync, StoreID) of
 		not_found ->
@@ -105,7 +105,7 @@ repack_batch(Cursor, RangeStart, RangeEnd, RequiredPacking, StoreID) ->
 						{s, Cursor},
 						{range_start, RangeStart},
 						{range_end, RangeEnd},
-						{required_packing, ar_serialize:encode_packing(RequiredPacking, true)}]),
+						{required_packing, big_serialize:encode_packing(RequiredPacking, true)}]),
 				ar_util:cast_after(200, Server,
 						{repack, Cursor, RangeStart, RangeEnd, RequiredPacking}),
 				continue;
@@ -145,7 +145,7 @@ repack_further(StoreID, RepackFurtherArgs) ->
 		{s, Cursor},
 		{range_start, RangeStart},
 		{range_end, RangeEnd},
-		{required_packing, ar_serialize:encode_packing(RequiredPacking, true)}]),
+		{required_packing, big_serialize:encode_packing(RequiredPacking, true)}]),
 	gen_server:cast(big_chunk_storage:name(StoreID), RepackFurtherArgs).
 
 read_chunk_range(Start, Size, StoreID, RepackFurtherArgs) ->
@@ -221,7 +221,7 @@ send_chunk_for_repacking(AbsoluteOffset, ChunkMeta, Args) ->
 				{tags, [repack_in_place]},
 				{store_id, StoreID},
 				{packing,
-					ar_serialize:encode_packing(RequiredPacking,true)},
+					big_serialize:encode_packing(RequiredPacking,true)},
 				{offset, AbsoluteOffset}]),
 			ok;
 		{true, RequiredPacking} ->
@@ -229,7 +229,7 @@ send_chunk_for_repacking(AbsoluteOffset, ChunkMeta, Args) ->
 					{tags, [repack_in_place]},
 					{store_id, StoreID},
 					{packing,
-						ar_serialize:encode_packing(RequiredPacking, true)},
+						big_serialize:encode_packing(RequiredPacking, true)},
 					{offset, AbsoluteOffset}]),
 			ok;
 		{true, Packing} ->
@@ -327,7 +327,7 @@ chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 							{tags, [repack_in_place]},
 							{store_id, StoreID},
 							{padded_end_offset, PaddedEndOffset},
-							{requested_packing, ar_serialize:encode_packing(Packing, true)},
+							{requested_packing, big_serialize:encode_packing(Packing, true)},
 							{error, io_lib:format("~p", [Error3])}]),
 					{ok, FileIndex}
 			end;
@@ -336,7 +336,7 @@ chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 					{tags, [repack_in_place]},
 					{store_id, StoreID},
 					{padded_end_offset, PaddedEndOffset},
-					{requested_packing, ar_serialize:encode_packing(Packing, true)},
+					{requested_packing, big_serialize:encode_packing(Packing, true)},
 					{error, io_lib:format("~p", [Error4])}]),
 			{ok, FileIndex}
 	end.

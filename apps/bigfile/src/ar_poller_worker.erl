@@ -96,7 +96,7 @@ handle_cast({poll, Ref}, #state{ ref = Ref, peer = Peer,
 								{ok, TXs} ->
 									B2 = B#block{ txs = TXs },
 									ar_ignore_registry:remove_temporary(H),
-									gen_server:cast(ar_poller, {block, Peer, B2, TimeMicroseconds}),
+									gen_server:cast(big_poller, {block, Peer, B2, TimeMicroseconds}),
 									ok;
 								failed ->
 									?LOG_WARNING([{event, failed_to_get_block_txs_from_peer},
@@ -118,7 +118,7 @@ handle_cast({poll, Ref}, #state{ ref = Ref, peer = Peer,
 			{noreply, State};
 		{error, not_found} ->
 			?LOG_DEBUG([{event, peer_out_of_sync}, {peer, ar_util:format_peer(Peer)}]),
-			gen_server:cast(ar_poller, {peer_out_of_sync, Peer}),
+			gen_server:cast(big_poller, {peer_out_of_sync, Peer}),
 			{noreply, State#state{ pause = true }};
 		{error, Reason} ->
 			?LOG_DEBUG([{event, failed_to_get_recent_hash_list_diff},

@@ -532,7 +532,7 @@ handle_info({event, block, {new, B, _Source}}, State) ->
 			end;
 		_ ->
 			%% The block's already received from a different peer or
-			%% fetched by ar_poller.
+			%% fetched by big_poller.
 			{noreply, State}
 	end;
 
@@ -1356,7 +1356,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	big_block_cache:mark_tip(block_cache, BH),
 	big_block_cache:prune(block_cache, ?STORE_BLOCKS_BEHIND_CURRENT),
 	%% We could have missed a few blocks due to networking issues, which would then
-	%% be picked by ar_poller and end up waiting for missing transactions to be fetched.
+	%% be picked by big_poller and end up waiting for missing transactions to be fetched.
 	%% Thefore, it is possible (although not likely) that there are blocks above the new tip,
 	%% for which we trigger a block application here, in order not to wait for the next
 	%% arrived or fetched block to trigger it.
@@ -1846,7 +1846,7 @@ compute_poa_cache(B, PoA, RecallByte, Nonce, Packing) ->
 	{{BlockStart, RecallByte, TXRoot, BlockSize, Packing, SubChunkIndex}, ChunkID}.
 
 dump_mempool(TXs, MempoolSize) ->
-	SerializedTXs = maps:map(fun(_, {TX, St}) -> {ar_serialize:tx_to_binary(TX), St} end, TXs),
+	SerializedTXs = maps:map(fun(_, {TX, St}) -> {big_serialize:tx_to_binary(TX), St} end, TXs),
 	case big_storage:write_term(mempool, {SerializedTXs, MempoolSize}) of
 		ok ->
 			ok;

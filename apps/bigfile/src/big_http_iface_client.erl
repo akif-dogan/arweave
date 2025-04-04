@@ -44,7 +44,7 @@
 %% Port = 1984,
 %% Peer = {Host, Port},
 %% TXID = <<0:256>>,
-%% Bin = ar_serialize:tx_to_binary(#tx{}),
+%% Bin = big_serialize:tx_to_binary(#tx{}),
 %% send_tx_json(Peer, TXID, Bin).
 %% '''
 %%
@@ -64,7 +64,7 @@ send_tx_json(Peer, TXID, Bin) ->
 %% Port = 1984,
 %% Peer = {Host, Port},
 %% TXID = <<0:256>>,
-%% Bin = ar_serialize:tx_to_binary(#tx{}),
+%% Bin = big_serialize:tx_to_binary(#tx{}),
 %% Opts = #{ connect_timeout => 5
 %%         , timeout => 30
 %%         },
@@ -119,7 +119,7 @@ send_block_announcement(Peer, Announcement) ->
 		peer => Peer,
 		path => "/block_announcement",
 		headers => p2p_headers(),
-		body => ar_serialize:block_announcement_to_binary(Announcement),
+		body => big_serialize:block_announcement_to_binary(Announcement),
 		timeout => 10 * 1000
 	}).
 
@@ -161,7 +161,7 @@ add_peer(Peer) ->
 		peer => Peer,
 		path => "/peers",
 		headers => p2p_headers(),
-		body => ar_serialize:jsonify({[{network, list_to_binary(?NETWORK_NAME)}]}),
+		body => big_serialize:jsonify({[{network, list_to_binary(?NETWORK_NAME)}]}),
 		timeout => 3 * 1000
 	}).
 
@@ -273,7 +273,7 @@ get_wallet_list_chunk([Peer | Peers], H, Cursor) ->
 		}),
 	case Response of
 		{ok, {{<<"200">>, _}, _, Body, _, _}} ->
-			case ar_serialize:etf_to_wallet_chunk_response(Body) of
+			case big_serialize:etf_to_wallet_chunk_response(Body) of
 				{ok, #{ next_cursor := NextCursor, wallets := Wallets }} ->
 					{ok, {NextCursor, Wallets}};
 				DeserializationResult ->
@@ -309,7 +309,7 @@ get_wallet_list(Peer, H) ->
 		}),
 	case Response of
 		{ok, {{<<"200">>, _}, _, Body, _, _}} ->
-			{ok, ar_serialize:json_struct_to_wallet_list(Body)};
+			{ok, big_serialize:json_struct_to_wallet_list(Body)};
 		{ok, {{<<"404">>, _}, _, _, _, _}} -> not_found;
 		_ -> unavailable
 	end.
@@ -347,11 +347,11 @@ get_block_index(Peer, Start, End, Encoding) ->
 	end.
 
 decode_block_index(Bin, binary) ->
-	ar_serialize:binary_to_block_index(Bin);
+	big_serialize:binary_to_block_index(Bin);
 decode_block_index(Bin, json) ->
-	case ar_serialize:json_decode(Bin) of
+	case big_serialize:json_decode(Bin) of
 		{ok, Struct} ->
-			case catch ar_serialize:json_struct_to_block_index(Struct) of
+			case catch big_serialize:json_struct_to_block_index(Struct) of
 				{'EXIT', _} = Exc ->
 					{error, Exc};
 				BI ->
@@ -387,7 +387,7 @@ get_sync_record(Peer, Start, Limit) ->
 	}), Start, Limit).
 
 get_chunk_binary(Peer, Offset, RequestedPacking) ->
-	PackingBinary = iolist_to_binary(ar_serialize:encode_packing(RequestedPacking, false)),
+	PackingBinary = iolist_to_binary(big_serialize:encode_packing(RequestedPacking, false)),
 	Headers = [{<<"x-packing">>, PackingBinary},
 			%% The nodes not upgraded to the 2.5 version would ignore this header.
 			%% It is fine because all offsets before 2.5 are not bucket-based.
@@ -504,7 +504,7 @@ get_reward_history([Peer | Peers], B, ExpectedRewardHistoryHashes) ->
 				headers => p2p_headers()
 			}) of
 		{ok, {{<<"200">>, _}, _, Body, _, _}} ->
-			case ar_serialize:binary_to_reward_history(Body) of
+			case big_serialize:binary_to_reward_history(Body) of
 				{ok, RewardHistory} -> % when length(RewardHistory) == ExpectedLength ->
 					case big_rewards:validate_reward_history_hashes(Height, RewardHistory,
 							ExpectedRewardHistoryHashes) of
@@ -557,7 +557,7 @@ get_block_time_history([Peer | Peers], B, ExpectedBlockTimeHistoryHashes) ->
 				headers => p2p_headers()
 			}) of
 		{ok, {{<<"200">>, _}, _, Body, _, _}} ->
-			case ar_serialize:binary_to_block_time_history(Body) of
+			case big_serialize:binary_to_block_time_history(Body) of
 				{ok, BlockTimeHistory} when length(BlockTimeHistory) == ExpectedLength ->
 					case ar_block_time_history:validate_hashes(BlockTimeHistory,
 							ExpectedBlockTimeHistoryHashes) of
@@ -588,7 +588,7 @@ get_block_time_history([], _B, _RewardHistoryHashes) ->
 	not_found.
 
 push_nonce_limiter_update(Peer, Update, Format) ->
-	Body = ar_serialize:nonce_limiter_update_to_binary(Format, Update),
+	Body = big_serialize:nonce_limiter_update_to_binary(Format, Update),
 	case big_http:req(#{
 				peer => Peer,
 				method => post,
@@ -601,7 +601,7 @@ push_nonce_limiter_update(Peer, Update, Format) ->
 		{ok, {{<<"200">>, _}, _, <<>>, _, _}} ->
 			ok;
 		{ok, {{<<"202">>, _}, _, ResponseBody, _, _}} ->
-			ar_serialize:binary_to_nonce_limiter_update_response(ResponseBody);
+			big_serialize:binary_to_nonce_limiter_update_response(ResponseBody);
 		{ok, {{Status, _}, _, ResponseBody, _, _}} ->
 			{error, {Status, ResponseBody}};
 		Reply ->
@@ -613,7 +613,7 @@ get_vdf_update(Peer) ->
 			timeout => 2000, headers => p2p_headers()
 			}) of
 		{ok, {{<<"200">>, _}, _, Bin, _, _}} ->
-			ar_serialize:binary_to_nonce_limiter_update(2, Bin);
+			big_serialize:binary_to_nonce_limiter_update(2, Bin);
 		{ok, {{<<"404">>, _}, _, _, _, _}} ->
 			{error, not_found};
 		{ok, {{Status, _}, _, ResponseBody, _, _}} ->
@@ -636,7 +636,7 @@ get_vdf_session(Peer) ->
 		case big_http:req(#{ peer => Peer, method => get, path => Path,
 			timeout => 10000, headers => p2p_headers() }) of
 		{ok, {{<<"200">>, _}, _, Bin, _, _}} ->
-			ar_serialize:binary_to_nonce_limiter_update(Format, Bin);
+				big_serialize:binary_to_nonce_limiter_update(Format, Bin);
 		{ok, {{<<"404">>, _}, _, _, _, _}} ->
 			{error, not_found};
 		{ok, {{Status, _}, _, ResponseBody, _, _}} ->
@@ -659,7 +659,7 @@ get_previous_vdf_session(Peer) ->
 	case big_http:req(#{ peer => Peer, method => get, path => Path,
 			timeout => 10000, headers => p2p_headers() }) of
 		{ok, {{<<"200">>, _}, _, Bin, _, _}} ->
-			ar_serialize:binary_to_nonce_limiter_update(Format, Bin);
+			big_serialize:binary_to_nonce_limiter_update(Format, Bin);
 		{ok, {{<<"404">>, _}, _, _, _, _}} ->
 			{error, not_found};
 		{ok, {{Status, _}, _, ResponseBody, _, _}} ->
@@ -677,12 +677,12 @@ get_cm_partition_table(Peer) ->
 	handle_cm_partition_table_response(big_http:req(Req)).
 
 cm_h1_send(Peer, Candidate) ->
-	JSON = ar_serialize:jsonify(ar_serialize:candidate_to_json_struct(Candidate)),
+	JSON = big_serialize:jsonify(big_serialize:candidate_to_json_struct(Candidate)),
 	Req = build_cm_or_pool_request(post, Peer, "/coordinated_mining/h1", JSON),
 	handle_cm_noop_response(big_http:req(Req)).
 
 cm_h2_send(Peer, Candidate) ->
-	JSON = ar_serialize:jsonify(ar_serialize:candidate_to_json_struct(Candidate)),
+	JSON = big_serialize:jsonify(big_serialize:candidate_to_json_struct(Candidate)),
 	Req = build_cm_or_pool_request(post, Peer, "/coordinated_mining/h2", JSON),
 	handle_cm_noop_response(big_http:req(Req)).
 
@@ -692,7 +692,7 @@ cm_publish_send(Peer, Solution) ->
 		{step_number, Solution#mining_solution.step_number},
 		{start_interval_number, Solution#mining_solution.start_interval_number},
 		{seed, ar_util:encode(Solution#mining_solution.seed)}]),
-	JSON = ar_serialize:jsonify(ar_serialize:solution_to_json_struct(Solution)),
+	JSON = big_serialize:jsonify(big_serialize:solution_to_json_struct(Solution)),
 	Req = build_cm_or_pool_request(post, Peer, "/coordinated_mining/publish", JSON),
 	handle_cm_noop_response(big_http:req(Req)).
 
@@ -710,7 +710,7 @@ post_partial_solution(Peer, Solution) ->
 			true ->
 				Solution;
 			false ->
-				ar_serialize:jsonify(ar_serialize:solution_to_json_struct(Solution))
+				big_serialize:jsonify(big_serialize:solution_to_json_struct(Solution))
 		end,
 	Req = build_cm_or_pool_request(post, Peer, "/partial_solution", Payload),
 	handle_post_partial_solution_response(big_http:req(Req#{
@@ -719,7 +719,7 @@ post_partial_solution(Peer, Solution) ->
 	})).
 
 get_pool_cm_jobs(Peer, Jobs) ->
-	JSON = ar_serialize:jsonify(ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),
+	JSON = big_serialize:jsonify(big_serialize:pool_cm_jobs_to_json_struct(Jobs)),
 	Req = build_cm_or_pool_request(post, Peer, "/pool_cm_jobs", JSON),
 	handle_get_pool_cm_jobs_response(big_http:req(Req#{
 		connect_timeout => 1000
@@ -783,8 +783,8 @@ build_cm_or_pool_request(Method, Peer, Path, Body) ->
 	}.
 
 handle_get_pool_cm_jobs_response({ok, {{<<"200">>, _}, _, Body, _, _}}) ->
-	case catch ar_serialize:json_map_to_pool_cm_jobs(
-			element(2, ar_serialize:json_decode(Body, [return_maps]))) of
+	case catch big_serialize:json_map_to_pool_cm_jobs(
+			element(2, big_serialize:json_decode(Body, [return_maps]))) of
 		{'EXIT', _} ->
 			{error, invalid_json};
 		Jobs ->
@@ -809,7 +809,7 @@ handle_post_partial_solution_response(Reply) ->
 	{error, Reply}.
 
 handle_get_jobs_response({ok, {{<<"200">>, _}, _, Body, _, _}}) ->
-	case catch ar_serialize:json_struct_to_jobs(ar_serialize:dejsonify(Body)) of
+	case catch big_serialize:json_struct_to_jobs(big_serialize:dejsonify(Body)) of
 		{'EXIT', _} ->
 			{error, invalid_json};
 		Jobs ->
@@ -850,7 +850,7 @@ handle_sync_record_response(Reply, _, _) ->
 	{error, Reply}.
 
 handle_chunk_response({ok, {{<<"200">>, _}, _, Body, Start, End}}, RequestedPacking, Peer) ->
-	case catch ar_serialize:binary_to_poa(Body) of
+	case catch big_serialize:binary_to_poa(Body) of
 		{'EXIT', Reason} ->
 			{error, Reason};
 		{error, Reason} ->
@@ -877,8 +877,8 @@ handle_chunk_response({ok, {{<<"200">>, _}, _, Body, Start, End}}, RequestedPack
 					end;
 				false ->
 					?LOG_WARNING([{event, peer_served_proof_with_wrong_packing},
-						{requested_packing, ar_serialize:encode_packing(RequestedPacking, false)},
-						{got_packing, ar_serialize:encode_packing(Packing, false)},
+						{requested_packing, big_serialize:encode_packing(RequestedPacking, false)},
+						{got_packing, big_serialize:encode_packing(Packing, false)},
 						{peer, ar_util:format_peer(Peer)}]),
 					{error, wrong_packing}
 			end
@@ -941,7 +941,7 @@ handle_get_sync_buckets_response(Response) ->
 	{error, Response}.
 
 handle_get_recent_hash_list_response({ok, {{<<"200">>, _}, _, Body, _, _}}) ->
-	case ar_serialize:json_decode(Body) of
+	case big_serialize:json_decode(Body) of
 		{ok, HL} when is_list(HL) ->
 			decode_hash_list(HL);
 		{ok, _} ->
@@ -1226,7 +1226,7 @@ get_info(Peer) ->
 		})
 	of
 		{ok, {{<<"200">>, _}, _, JSON, _, _}} ->
-			case ar_serialize:json_decode(JSON, [return_maps]) of
+			case big_serialize:json_decode(JSON, [return_maps]) of
 				{ok, JsonMap} ->
 					JsonMap;
 				{error, _} ->
@@ -1248,7 +1248,7 @@ get_peers(Peer) ->
 					connect_timeout => 500,
 					timeout => 2 * 1000
 				}),
-			PeerArray = ar_serialize:dejsonify(Body),
+			PeerArray = big_serialize:dejsonify(Body),
 			lists:map(fun ar_util:parse_peer/1, PeerArray)
 		end
 	catch _:_ -> unavailable
@@ -1263,8 +1263,8 @@ handle_block_response(_Peer, _Encoding, {ok, {{<<"404">>, _}, _, _, _, _}}) ->
 handle_block_response(Peer, Encoding, {ok, {{<<"200">>, _}, _, Body, Start, End}}) ->
 	DecodeFun = case Encoding of json ->
 			fun(Input) ->
-				ar_serialize:json_struct_to_block(ar_serialize:dejsonify(Input))
-			end; binary -> fun ar_serialize:binary_to_block/1 end,
+				big_serialize:json_struct_to_block(big_serialize:dejsonify(Input))
+			end; binary -> fun big_serialize:binary_to_block/1 end,
 	case catch DecodeFun(Body) of
 		{'EXIT', Reason} ->
 			?LOG_INFO(
@@ -1293,8 +1293,8 @@ handle_tx_response(_Peer, _Encoding, {ok, {{<<"404">>, _}, _, _, _, _}}) ->
 handle_tx_response(_Peer, _Encoding, {ok, {{<<"400">>, _}, _, _, _, _}}) ->
 	{error, bad_request};
 handle_tx_response(Peer, Encoding, {ok, {{<<"200">>, _}, _, Body, Start, End}}) ->
-	DecodeFun = case Encoding of json -> fun ar_serialize:json_struct_to_tx/1;
-			binary -> fun ar_serialize:binary_to_tx/1 end,
+	DecodeFun = case Encoding of json -> fun big_serialize:json_struct_to_tx/1;
+			binary -> fun big_serialize:binary_to_tx/1 end,
 	case catch DecodeFun(Body) of
 		{ok, TX} ->
 			Size = byte_size(term_to_binary(TX)),

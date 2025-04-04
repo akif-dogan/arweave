@@ -306,15 +306,15 @@ entity_id(#tx{ id = ID }) -> ar_util:encode(ID);
 entity_id(#{ txid := TXID }) -> TXID.
 
 to_json(#block{} = Block) ->
-	{JSONKVPairs} = ar_serialize:block_to_json_struct(Block),
+	{JSONKVPairs} = big_serialize:block_to_json_struct(Block),
 	JSONStruct = {lists:keydelete(wallet_list, 1, JSONKVPairs)},
-	ar_serialize:jsonify({[{block, JSONStruct}]});
+	big_serialize:jsonify({[{block, JSONStruct}]});
 to_json(#tx{} = TX) ->
-	{JSONKVPairs1} = ar_serialize:tx_to_json_struct(TX),
+	{JSONKVPairs1} = big_serialize:tx_to_json_struct(TX),
 	JSONKVPairs2 = lists:keydelete(data, 1, JSONKVPairs1),
 	JSONKVPairs3 = [{data_size, TX#tx.data_size} | JSONKVPairs2],
 	JSONStruct = {JSONKVPairs3},
-	ar_serialize:jsonify({[{transaction, JSONStruct}]});
+	big_serialize:jsonify({[{transaction, JSONStruct}]});
 to_json(Map) when is_map(Map) ->
 	jiffy:encode(Map).
 

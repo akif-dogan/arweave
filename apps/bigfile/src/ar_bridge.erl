@@ -228,7 +228,7 @@ send_to_worker(Peer, {JSON, B}, W) ->
 								true ->
 									%% POST /block is not supported after 2.6.
 									%% The recipient would have to download this block
-									%% along with its transactions via ar_poller (which
+									%% along with its transactions via big_poller (which
 									%% we made trustless in the 2.6 release).
 									ok;
 								false ->
@@ -240,7 +240,7 @@ send_to_worker(Peer, {JSON, B}, W) ->
 							PoA2 = case MissingChunk2 of false ->
 									(B#block.poa2)#poa{ chunk = <<>> };
 									_ -> B#block.poa2 end,
-							Bin = ar_serialize:block_to_binary(B#block{ txs = TXs2,
+							Bin = big_serialize:block_to_binary(B#block{ txs = TXs2,
 									poa = PoA, poa2 = PoA2 }),
 							send_and_log(Peer, H, Height, binary, Bin, B#block.recall_byte)
 					end
@@ -274,7 +274,7 @@ send_and_log(Peer, H, Height, Format, Bin, RecallByte) ->
 
 block_to_json(B) ->
 	BDS = big_block:generate_block_data_segment(B),
-	{BlockProps} = ar_serialize:block_to_json_struct(B),
+	{BlockProps} = big_serialize:block_to_json_struct(B),
 	PostProps = [
 		{<<"new_block">>, {BlockProps}},
 		%% Add the P2P port field to be backwards compatible with nodes
@@ -282,7 +282,7 @@ block_to_json(B) ->
 		{<<"port">>, ?DEFAULT_HTTP_IFACE_PORT},
 		{<<"block_data_segment">>, ar_util:encode(BDS)}
 	],
-	ar_serialize:jsonify({PostProps}).
+	big_serialize:jsonify({PostProps}).
 
 %% @doc Return the list of transactions to gossip or 'missing'. TXs is a list of possibly
 %% both tx records and transaction identifiers - whatever is found in the gossiped block.

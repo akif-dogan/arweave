@@ -251,7 +251,7 @@ record_chunk(PaddedEndOffset,
                 ?LOG_WARNING([{event, missing_entropy},
                               {padded_end_offset, PaddedEndOffset},
                               {store_id, StoreID},
-                              {packing, ar_serialize:encode_packing(Packing, true)}]),
+                              {packing, big_serialize:encode_packing(Packing, true)}]),
                 Entropy = generate_missing_entropy(PaddedEndOffset, RewardAddr),
                 case Entropy of
                     {error, Reason} ->

@@ -391,7 +391,7 @@ tx_mempool_size(#tx{ format = 2, data = Data }) ->
 	{?TX_SIZE_BASE, byte_size(Data)}.
 
 deserialize_tx(Bin) when is_binary(Bin) ->
-	{ok, TX} = ar_serialize:binary_to_tx(Bin),
+	{ok, TX} = big_serialize:binary_to_tx(Bin),
 	TX;
 deserialize_tx(TX) ->
 	big_storage:migrate_tx_record(TX).

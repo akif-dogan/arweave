@@ -17,7 +17,7 @@ test_rejects_invalid_chunks() ->
 	ar_test_data_sync:setup_nodes(),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"chunk_too_big\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(#{
+		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
 			chunk => ar_util:encode(crypto:strong_rand_bytes(?DATA_CHUNK_SIZE + 1)),
 			data_path => <<>>,
 			offset => <<"0">>,
@@ -26,7 +26,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"data_path_too_big\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(#{
+		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
 			data_path => ar_util:encode(crypto:strong_rand_bytes(?MAX_PATH_SIZE + 1)),
 			chunk => <<>>,
 			offset => <<"0">>,
@@ -35,7 +35,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"offset_too_big\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(#{
+		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
 			offset => integer_to_binary(trunc(math:pow(2, 256))),
 			data_path => <<>>,
 			chunk => <<>>,
@@ -44,7 +44,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"data_size_too_big\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(#{
+		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
 			data_size => integer_to_binary(trunc(math:pow(2, 256))),
 			data_path => <<>>,
 			chunk => <<>>,
@@ -53,7 +53,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"chunk_proof_ratio_not_attractive\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(#{
+		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
 			chunk => ar_util:encode(<<"a">>),
 			data_path => ar_util:encode(<<"bb">>),
 			offset => <<"0">>,
@@ -69,7 +69,7 @@ test_rejects_invalid_chunks() ->
 	DataPath = big_merkle:generate_path(DataRoot, 0, DataTree),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"data_root_not_found\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(#{
+		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
 			data_root => ar_util:encode(DataRoot),
 			chunk => ar_util:encode(Chunk),
 			data_path => ar_util:encode(DataPath),
@@ -157,7 +157,7 @@ test_does_not_store_small_chunks_after_2_5() ->
 					%% All chunks are accepted because we do not know their offsets yet -
 					%% in theory they may end up below the strict data split threshold.
 					?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-							ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof)), Title)
+							ar_test_node:post_chunk(main, big_serialize:jsonify(Proof)), Title)
 				end,
 				[{FirstChunk, O} || O <- FirstPublishOffsets]
 						++ [{SecondChunk, O} || O <- SecondPublishOffsets]
@@ -211,7 +211,7 @@ test_rejects_chunks_with_merkle_tree_borders_exceeding_max_chunk_size() ->
 			chunk => ar_util:encode(BigOutOfBoundsOffsetChunk), offset => <<"0">>,
 			data_size => integer_to_binary(?DATA_CHUNK_SIZE)},
 	?assertMatch({ok, {{<<"400">>, _}, _, <<"{\"error\":\"invalid_proof\"}">>, _, _}},
-			ar_test_node:post_chunk(main, ar_serialize:jsonify(BigProof))).
+			ar_test_node:post_chunk(main, big_serialize:jsonify(BigProof))).
 
 rejects_chunks_exceeding_disk_pool_limit_test_() ->
 	{timeout, 240, fun test_rejects_chunks_exceeding_disk_pool_limit/0}.
@@ -234,14 +234,14 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 		fun({_, Proof}) ->
 			?assertMatch(
 				{ok, {{<<"200">>, _}, _, _, _, _}},
-				ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof))
+				ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))
 			)
 		end,
 		Proofs1
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"exceeds_disk_pool_size_limit\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(FirstProof1))
+		ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1))
 	),
 	Data2 = crypto:strong_rand_bytes(
 		min(
@@ -264,7 +264,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 			%% in the bucket of the previous chunk (the chunk sizes are 131072).
 			?assertMatch(
 				{ok, {{<<"200">>, _}, _, _, _, _}},
-				ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof))
+				ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))
 			)
 		end,
 		Proofs2
@@ -290,14 +290,14 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 			%% in the bucket of the previous chunk (the chunk sizes are 131072).
 			?assertMatch(
 				{ok, {{<<"200">>, _}, _, _, _, _}},
-				ar_test_node:post_chunk(main, ar_serialize:jsonify(Proof))
+				ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))
 			)
 		end,
 		Proofs3
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"exceeds_disk_pool_size_limit\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(FirstProof3))
+		ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof3))
 	),
 	ar_test_node:mine(peer1),
 	true = ar_util:do_until(
@@ -309,7 +309,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 			%% a 262144-byte chunk. Also, expect 303 instead of 200 because the last block
 			%% was large such that the configured partitions do not cover at least two
 			%% times as much space ahead of the current weave size.
-			case ar_test_node:post_chunk(main, ar_serialize:jsonify(FirstProof3)) of
+			case ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof3)) of
 				{ok, {{<<"303">>, _}, _, _, _, _}} ->
 					true;
 				_ ->
@@ -322,7 +322,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 	%% Now we do not have free space again.
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"exceeds_disk_pool_size_limit\"}">>, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(FirstProof1))
+		ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1))
 	),
 	%% Mine two more blocks to make the chunks mature so that we can remove them from the
 	%% disk pool (they will stay in the corresponding storage modules though, if any).
@@ -331,7 +331,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 	ar_test_node:mine(peer1),
 	true = ar_util:do_until(
 		fun() ->
-			case ar_test_node:post_chunk(main, ar_serialize:jsonify(FirstProof1)) of
+			case ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1)) of
 				{ok, {{<<"200">>, _}, _, _, _, _}} ->
 					true;
 				_ ->
@@ -360,7 +360,7 @@ test_accepts_chunks(Split) ->
 	%% Post the third proof to the disk pool.
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(ThirdProof))
+		ar_test_node:post_chunk(main, big_serialize:jsonify(ThirdProof))
 	),
 	ar_test_node:mine(peer1),
 	[{BH, _, _} | _] = wait_until_height(main, 1),
@@ -371,7 +371,7 @@ test_accepts_chunks(Split) ->
 	),
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
-		ar_test_node:post_chunk(main, ar_serialize:jsonify(FirstProof))
+		ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof))
 	),
 	%% Expect the chunk to be retrieved by any offset within
 	%% (EndOffset - ChunkSize, EndOffset], but not outside of it.
@@ -389,7 +389,7 @@ test_accepts_chunks(Split) ->
 	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, ar_test_node:get_chunk(main, 0)),
 	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, ar_test_node:get_chunk(main, EndOffset + 1)),
 	TXSize = byte_size(binary:list_to_bin(Chunks)),
-	ExpectedOffsetInfo = ar_serialize:jsonify(#{
+	ExpectedOffsetInfo = big_serialize:jsonify(#{
 		offset => integer_to_binary(TXSize + ?STRICT_DATA_SPLIT_THRESHOLD),
 		size => integer_to_binary(TXSize)
 	}),
@@ -399,7 +399,7 @@ test_accepts_chunks(Split) ->
 	?assertMatch({ok, {{<<"404">>, _}, _, _Binary, _, _}},
 		ar_test_data_sync:get_tx_data(TX#tx.id)),
 	?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-			ar_test_node:post_chunk(main, ar_serialize:jsonify(SecondProof))),
+			ar_test_node:post_chunk(main, big_serialize:jsonify(SecondProof))),
 	ExpectedSecondProof = #{
 		data_path => maps:get(data_path, SecondProof),
 		tx_path => maps:get(tx_path, SecondProof),

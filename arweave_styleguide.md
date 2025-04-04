@@ -15,9 +15,9 @@ Each module should have a simplistic comment at the top that encompasses and des
 Module description comments should be prefixed with '%%%' .
 
 ```erlang
-%% Example: head of ar_serialize.
+%% Example: head of big_serialize.
 
--module(ar_serialize).
+-module(big_serialize ).
 -export([full_block_to_json_struct/1, block_to_json_struct/1, ...]).
 -export([tx_to_json_struct/1, json_struct_to_tx/1]).
 -export([wallet_list_to_json_struct/1, block_index_to_json_struct/1, ...]).
@@ -98,7 +98,7 @@ ar_retarget:is_current_block_retarget_block(Block).
 %% Good function names
 ar_tx:to_binary(TX).
 big_block:generate_block_from_shadow(BShadow).
-ar_serialize:block_to_json_struct(Block).
+big_serialize:block_to_json_struct(Block).
 ```
 
 

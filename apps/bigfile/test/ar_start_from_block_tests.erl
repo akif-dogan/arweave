@@ -157,7 +157,7 @@ get_reward_history(Peer, H) ->
         timeout => 30000
     }) of
         {ok, {{<<"200">>, _}, _, Body, _, _}} ->
-            case ar_serialize:binary_to_reward_history(Body) of
+            case big_serialize:binary_to_reward_history(Body) of
                 {ok, RewardHistory} ->
                     RewardHistory;
                 {error, Error} ->

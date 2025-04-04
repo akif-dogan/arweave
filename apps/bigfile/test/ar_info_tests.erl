@@ -286,7 +286,7 @@ get_recent(Peer) ->
 		})
 	of
 		{ok, {{<<"200">>, _}, _, JSON, _, _}} -> 
-			case ar_serialize:json_decode(JSON, [return_maps]) of
+			case big_serialize:json_decode(JSON, [return_maps]) of
 				{ok, JsonMap} ->
 					JsonMap;
 				{error, _} ->

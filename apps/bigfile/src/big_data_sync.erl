@@ -1679,8 +1679,8 @@ get_chunk(Offset, SeekOffset, Pack, Packing, StoredPacking, StoreID, RequestOrig
 			case {PackResult, ChunkID} of
 				{{error, Reason}, _} ->
 					log_chunk_error(failed_to_repack_chunk,
-							[{packing, ar_serialize:encode_packing(Packing, true)},
-							{stored_packing, ar_serialize:encode_packing(StoredPacking, true)},
+							[{packing, big_serialize:encode_packing(Packing, true)},
+							{stored_packing, big_serialize:encode_packing(StoredPacking, true)},
 							{absolute_end_offset, AbsoluteOffset},
 							{store_id, StoreID},
 							{error, io_lib:format("~p", [Reason])}]),
@@ -1723,9 +1723,9 @@ get_chunk(Offset, SeekOffset, Pack, Packing, StoredPacking, StoreID, RequestOrig
 											[{chunk_size, ChunkSize},
 											{actual_chunk_size, byte_size(MaybeUnpackedChunk)},
 											{requested_packing,
-												ar_serialize:encode_packing(Packing, true)},
+												big_serialize:encode_packing(Packing, true)},
 											{stored_packing,
-												ar_serialize:encode_packing(StoredPacking, true)},
+												big_serialize:encode_packing(StoredPacking, true)},
 											{absolute_end_offset, AbsoluteOffset},
 											{store_id, StoreID},
 											{expected_chunk_id, ar_util:encode(ChunkID)},
@@ -1758,7 +1758,7 @@ get_chunk_proof(Offset, SeekOffset, StoredPacking, StoreID, RequestOrigin) ->
 					log_chunk_error(RequestOrigin, chunk_proof_failed_validation,
 							[{offset, Offset},
 							{seek_offset, SeekOffset},
-							{stored_packing, ar_serialize:encode_packing(StoredPacking, true)},
+							{stored_packing, big_serialize:encode_packing(StoredPacking, true)},
 							{store_id, StoreID}]),
 					{error, chunk_not_found};
 				_ ->
@@ -1794,7 +1794,7 @@ read_chunk_with_metadata(
 			log_chunk_error(RequestOrigin, failed_to_fetch_chunk_metadata,
 				[{seek_offset, SeekOffset},
 				{store_id, StoreID},
-				{stored_packing, ar_serialize:encode_packing(StoredPacking, true)},
+				{stored_packing, big_serialize:encode_packing(StoredPacking, true)},
 				{modules_covering_seek_offset, ModuleIDs},
 				{error, io_lib:format("~p", [Err])}]),
 			{error, chunk_not_found};
@@ -1804,7 +1804,7 @@ read_chunk_with_metadata(
 					[{absolute_offset, AbsoluteOffset},
 					{seek_offset, SeekOffset},
 					{store_id, StoreID},
-					{stored_packing, ar_serialize:encode_packing(StoredPacking, true)}]),
+					{stored_packing, big_serialize:encode_packing(StoredPacking, true)}]),
 			{error, chunk_not_found};
 		{ok, _, {AbsoluteOffset, ChunkDataKey, TXRoot, _, TXPath, _, ChunkSize}} ->
 			ReadFun =
@@ -1823,7 +1823,7 @@ read_chunk_with_metadata(
 						{absolute_offset, AbsoluteOffset},
 						{store_id, StoreID},
 						{stored_packing,
-							ar_serialize:encode_packing(StoredPacking, true)},
+							big_serialize:encode_packing(StoredPacking, true)},
 						{modules_covering_seek_offset, ModuleIDs},
 						{chunk_data_key, ar_util:encode(ChunkDataKey)},
 						{read_fun, ReadFun}]),
@@ -1850,7 +1850,7 @@ read_chunk_with_metadata(
 								{modules_covering_seek_offset, ModuleIDs},
 								{root_sync_records, RootRecords},
 								{stored_packing, 
-									ar_serialize:encode_packing(StoredPacking, true)}]),
+									big_serialize:encode_packing(StoredPacking, true)}]),
 							%% The chunk should have been re-packed
 							%% in the meantime - very unlucky timing.
 							{error, chunk_not_found};
@@ -2055,7 +2055,7 @@ get_data_root_offset(DataRootKey, StoreID) ->
 	<< DataRoot:32/binary, TXSize:?OFFSET_KEY_BITSIZE >> = DataRootKey,
 	DataRootIndex = {data_root_index, StoreID},
 	case ar_kv:get_prev(DataRootIndex, << DataRoot:32/binary,
-			(ar_serialize:encode_int(TXSize, 8))/binary, <<"a">>/binary >>) of
+			(big_serialize:encode_int(TXSize, 8))/binary, <<"a">>/binary >>) of
 		none ->
 			not_found;
 		{ok, << DataRoot:32/binary, TXSizeSize:8, TXSize:(TXSizeSize * 8),
@@ -2236,8 +2236,8 @@ move_data_root_index(DataRoot, TXSize, Iterator, DB) ->
 	end.
 
 data_root_key_v2(DataRoot, TXSize, Offset) ->
-	<< DataRoot:32/binary, (ar_serialize:encode_int(TXSize, 8))/binary,
-			(ar_serialize:encode_int(Offset, 8))/binary >>.
+	<< DataRoot:32/binary, (big_serialize:encode_int(TXSize, 8))/binary,
+			(big_serialize:encode_int(Offset, 8))/binary >>.
 
 record_disk_pool_chunks_count() ->
 	DB = {disk_pool_chunks_index, "default"},

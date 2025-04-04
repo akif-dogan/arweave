@@ -216,7 +216,7 @@ handle_call(get_cluster_partitions_list, _From, State) ->
 					fun	({{pool, _}, _, _}, Acc2) ->
 							Acc2;
 						({_Peer, PackingAddr, PackingDifficulty}, Acc2) ->
-							sets:add_element(ar_serialize:partition_to_json_struct(
+							sets:add_element(big_serialize:partition_to_json_struct(
 									PartitionID, ?PARTITION_SIZE, PackingAddr,
 									PackingDifficulty), Acc2)
 					end,
@@ -497,7 +497,7 @@ get_unique_partitions_set([{PartitionID, MiningAddress, PackingDifficulty} | Par
 		UniquePartitions) ->
 	get_unique_partitions_set(
 		Partitions,
-		sets:add_element(ar_serialize:partition_to_json_struct(PartitionID, ?PARTITION_SIZE,
+		sets:add_element(big_serialize:partition_to_json_struct(PartitionID, ?PARTITION_SIZE,
 				MiningAddress, PackingDifficulty), UniquePartitions)
 	);
 get_unique_partitions_set([{PartitionID, BucketSize, MiningAddress, PackingDifficulty}
@@ -505,13 +505,13 @@ get_unique_partitions_set([{PartitionID, BucketSize, MiningAddress, PackingDiffi
 	get_unique_partitions_set(
 		Partitions,
 		sets:add_element(
-			ar_serialize:partition_to_json_struct(PartitionID, BucketSize,
+			big_serialize:partition_to_json_struct(PartitionID, BucketSize,
 					MiningAddress, PackingDifficulty), UniquePartitions)
 	).
 
 refetch_pool_peer_partitions(UniquePeerPartitions) ->
 	spawn(fun() ->
-		JSON = ar_serialize:jsonify(lists:sort(sets:to_list(UniquePeerPartitions))),
+		JSON = big_serialize:jsonify(lists:sort(sets:to_list(UniquePeerPartitions))),
 		PoolPeer = big_pool:pool_peer(),
 		case big_http_iface_client:post_cm_partition_table_to_pool(PoolPeer, JSON) of
 			{ok, PartitionList} ->

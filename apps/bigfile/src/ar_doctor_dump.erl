@@ -45,7 +45,7 @@ dump_blocks(BH, MinHeight, OutputDir, IncludeTXs) ->
 	case ar_kv:get(block_db, BH) of
 		{ok, Bin} ->
 			try
-				case ar_serialize:binary_to_block(Bin) of
+				case big_serialize:binary_to_block(Bin) of
 					{ok, B} ->
 						case B#block.height >= MinHeight of
 							true ->
@@ -65,8 +65,8 @@ dump_blocks(BH, MinHeight, OutputDir, IncludeTXs) ->
 											false ->
 												ok
 										end,
-										Json = ar_serialize:block_to_json_struct(B),
-										JsonString = ar_serialize:jsonify(Json),
+										Json = big_serialize:block_to_json_struct(B),
+										JsonString = big_serialize:jsonify(Json),
 										file:write_file(OutputFilePath, JsonString)
 								end,
 								PrevBH = B#block.previous_block,
@@ -90,9 +90,9 @@ dump_txs([], _OutputDir) ->
 dump_txs([TXID | TXIDs], OutputDir) ->
 	case ar_kv:get(tx_db, TXID) of
 		{ok, Bin} ->
-			{ok, TX} = ar_serialize:binary_to_tx(Bin),
-			Json = ar_serialize:tx_to_json_struct(TX),
-			JsonString = ar_serialize:jsonify(Json),
+			{ok, TX} = big_serialize:binary_to_tx(Bin),
+			Json = big_serialize:tx_to_json_struct(TX),
+			JsonString = big_serialize:jsonify(Json),
 			JsonFilename = io_lib:format("~s.json", [ar_util:encode(TXID)]),
 			OutputFilePath = filename:join([OutputDir, "txs", JsonFilename]),
 			file:write_file(OutputFilePath, JsonString);

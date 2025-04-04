@@ -74,7 +74,7 @@ terminate(_Reason, _State) ->
 push_cm_jobs_to_cm_peers(Jobs) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	Peers = Config#config.cm_peers,
-	Payload = ar_serialize:jsonify(ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),
+	Payload = big_serialize:jsonify(big_serialize:pool_cm_jobs_to_json_struct(Jobs)),
 	push_cm_jobs_to_cm_peers(Payload, Peers).
 
 push_cm_jobs_to_cm_peers(_Payload, []) ->

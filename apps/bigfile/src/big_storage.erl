@@ -545,7 +545,7 @@ delete_blacklisted_tx(Hash) ->
 	end.
 
 parse_tx_kv_binary(Bin) ->
-	case catch ar_serialize:binary_to_tx(Bin) of
+	case catch big_serialize:binary_to_tx(Bin) of
 		{ok, TX} ->
 			TX;
 		_ ->
@@ -554,7 +554,7 @@ parse_tx_kv_binary(Bin) ->
 
 %% Convert the stored tx record to its latest state in the code
 %% (assign the default values to all missing fields). Since the version introducing
-%% the fork 2.6, the transactions are serialized via ar_serialize:tx_to_binary/1, which
+%% the fork 2.6, the transactions are serialized via big_serialize:tx_to_binary/1, which
 %% is maintained compatible with all past versions, so this code is only used
 %% on the nodes synced before the corresponding release.
 migrate_tx_record(#tx{} = TX) ->
@@ -568,7 +568,7 @@ migrate_tx_record({tx, Format, ID, LastTX, Owner, Tags, Target, Quantity, Data,
 			reward = Reward, data_tree = DataTree }.
 
 parse_block_kv_binary(Bin) ->
-	case catch ar_serialize:binary_to_block(Bin) of
+	case catch big_serialize:binary_to_block(Bin) of
 		{ok, B} ->
 			B;
 		_ ->
@@ -577,7 +577,7 @@ parse_block_kv_binary(Bin) ->
 
 %% Convert the stored block record to its latest state in the code
 %% (assign the default values to all missing fields). Since the version introducing
-%% the fork 2.6, the blocks are serialized via ar_serialize:block_to_binary/1, which
+%% the fork 2.6, the blocks are serialized via big_serialize:block_to_binary/1, which
 %% is maintained compatible with all past block versions, so this code is only used
 %% on the nodes synced before the corresponding release.
 migrate_block_record(#block{} = B) ->
@@ -671,7 +671,7 @@ write_tx_header(TX) ->
 			_ ->
 				TX#tx{ data = <<>> }
 		end,
-	ar_kv:put(tx_db, TX#tx.id, ar_serialize:tx_to_binary(TX2)).
+	ar_kv:put(tx_db, TX#tx.id, big_serialize:tx_to_binary(TX2)).
 
 write_tx_data(ExpectedDataRoot, Data, TXID) ->
 	Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, Data),
@@ -802,7 +802,7 @@ read_tx_file(Filename) ->
 					{filename, Filename}]),
 			{error, tx_file_empty};
 		{ok, Binary} ->
-			case catch ar_serialize:json_struct_to_tx(Binary) of
+			case catch big_serialize:json_struct_to_tx(Binary) of
 				TX when is_record(TX, tx) ->
 					{ok, TX};
 				_ ->
@@ -832,7 +832,7 @@ read_file_raw(Filename) ->
 read_migrated_v1_tx_file(Filename) ->
 	case read_file_raw(Filename) of
 		{ok, Binary} ->
-			case catch ar_serialize:json_struct_to_v1_tx(Binary) of
+			case catch big_serialize:json_struct_to_v1_tx(Binary) of
 				#tx{ id = ID } = TX ->
 					case read_tx_data_from_kv_storage(ID) of
 						{ok, Data} ->
@@ -979,9 +979,9 @@ read_wallet_list_chunk(RootHash, Position, Tree) ->
 	end.
 
 parse_wallet_list_json(JSON) ->
-	case ar_serialize:json_decode(JSON) of
+	case big_serialize:json_decode(JSON) of
 		{ok, JiffyStruct} ->
-			{ok, ar_serialize:json_struct_to_wallet_list(JiffyStruct)};
+			{ok, big_serialize:json_struct_to_wallet_list(JiffyStruct)};
 		{error, Reason} ->
 			{error, {invalid_json, Reason}}
 	end.
@@ -1094,7 +1094,7 @@ write_block(B) ->
 	end,
 	TXIDs = lists:map(fun(TXID) when is_binary(TXID) -> TXID;
 			(#tx{ id = TXID }) -> TXID end, B#block.txs),
-	ar_kv:put(block_db, B#block.indep_hash, ar_serialize:block_to_binary(B#block{
+	ar_kv:put(block_db, B#block.indep_hash, big_serialize:block_to_binary(B#block{
 			txs = TXIDs })).
 
 write_full_block2(BShadow, _) ->
@@ -1106,9 +1106,9 @@ write_full_block2(BShadow, _) ->
 	end.
 
 parse_block_json(JSON) ->
-	case catch ar_serialize:json_decode(JSON) of
+	case catch big_serialize:json_decode(JSON) of
 		{ok, JiffyStruct} ->
-			case catch ar_serialize:json_struct_to_block(JiffyStruct) of
+			case catch big_serialize:json_struct_to_block(JiffyStruct) of
 				B when is_record(B, block) ->
 					B;
 				Error ->
@@ -1123,7 +1123,7 @@ parse_block_json(JSON) ->
 	end.
 
 parse_block_binary(Bin) ->
-	case catch ar_serialize:binary_to_block(Bin) of
+	case catch big_serialize:binary_to_block(Bin) of
 		{ok, B} ->
 			B;
 		Error ->

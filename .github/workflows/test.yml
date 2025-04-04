@@ -287,7 +287,7 @@ jobs:
             ar_pricing,
             ar_replica_2_9,
             ar_retarget,
-            ar_serialize,
+            big_serialize,
             big_storage_module,
             big_storage,
             big_sync_buckets,

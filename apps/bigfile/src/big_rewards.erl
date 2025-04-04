@@ -141,12 +141,12 @@ reward_history_hash(Height, PreviousRewardHistoryHash, History) ->
 			Preimage = << Element/binary, PreviousRewardHistoryHash/binary >>,
 			crypto:hash(sha256, Preimage);
 		false ->
-			reward_history_hash(History, [ar_serialize:encode_int(length(History), 8)])
+			reward_history_hash(History, [big_serialize:encode_int(length(History), 8)])
 	end.
 
 encode_reward_history_element({Addr, HashRate, Reward, Denomination}) ->
-	HashRateBin = ar_serialize:encode_int(HashRate, 8),
-	RewardBin = ar_serialize:encode_int(Reward, 8),
+	HashRateBin = big_serialize:encode_int(HashRate, 8),
+	RewardBin = big_serialize:encode_int(Reward, 8),
 	DenominationBin = << Denomination:24 >>,
 	crypto:hash(sha256, << Addr/binary, HashRateBin/binary,
 			RewardBin/binary, DenominationBin/binary >>).
@@ -154,8 +154,8 @@ encode_reward_history_element({Addr, HashRate, Reward, Denomination}) ->
 reward_history_hash([], IOList) ->
 	crypto:hash(sha256, iolist_to_binary(IOList));
 reward_history_hash([{Addr, HashRate, Reward, Denomination} | History], IOList) ->
-	HashRateBin = ar_serialize:encode_int(HashRate, 8),
-	RewardBin = ar_serialize:encode_int(Reward, 8),
+	HashRateBin = big_serialize:encode_int(HashRate, 8),
+	RewardBin = big_serialize:encode_int(Reward, 8),
 	DenominationBin = << Denomination:24 >>,
 	reward_history_hash(History, [Addr, HashRateBin, RewardBin, DenominationBin | IOList]).
 

@@ -117,7 +117,7 @@ set_repack_cursor(StoreID, RepackCursor) ->
 init({StoreID, Packing}) ->
 	?LOG_INFO([{event, ar_entropy_storage_init},
         {name, name(StoreID)}, {store_id, StoreID},
-        {packing, ar_serialize:encode_packing(Packing, true)}]),
+        {packing, big_serialize:encode_packing(Packing, true)}]),
 
     %% Senity checks
     {replica_2_9, _} = Packing,
@@ -135,7 +135,7 @@ init({StoreID, Packing}) ->
                 %% ar_entropy_gen is only used for replica_2_9 packing
                 ?LOG_ERROR([{event, invalid_packing_for_entropy}, {module, ?MODULE},
                     {store_id, StoreID},
-                    {packing, ar_serialize:encode_packing(Packing, true)}]),
+                    {packing, big_serialize:encode_packing(Packing, true)}]),
                 off;
             {false, _} ->
                 gen_server:cast(self(), prepare_entropy),

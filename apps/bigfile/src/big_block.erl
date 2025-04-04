@@ -344,15 +344,15 @@ generate_signed_hash(#block{ previous_block = PrevH, timestamp = TS,
 			VDFDifficultyBin, NextVDFDifficultyBin} =
 		case Height >= ar_fork:height_2_7() of
 			true ->
-				{encode_int(RebaseThreshold, 16), ar_serialize:encode_bin(DataPath, 24),
-						ar_serialize:encode_bin(TXPath, 24),
-						ar_serialize:encode_bin(DataPath2, 24),
-						ar_serialize:encode_bin(TXPath2, 24),
+				{encode_int(RebaseThreshold, 16), big_serialize:encode_bin(DataPath, 24),
+						big_serialize:encode_bin(TXPath, 24),
+						big_serialize:encode_bin(DataPath2, 24),
+						big_serialize:encode_bin(TXPath2, 24),
 						<< ChunkHash:32/binary >>,
-						ar_serialize:encode_bin(Chunk2Hash, 8),
+						big_serialize:encode_bin(Chunk2Hash, 8),
 						<< BlockTimeHistoryHash:32/binary >>,
-						ar_serialize:encode_int(VDFDifficulty, 8),
-						ar_serialize:encode_int(NextVDFDifficulty, 8)};
+						big_serialize:encode_int(VDFDifficulty, 8),
+						big_serialize:encode_int(NextVDFDifficulty, 8)};
 			false ->
 				{<<>>, <<>>, <<>>, <<>>, <<>>, <<>>, <<>>, <<>>, <<>>, <<>>}
 		end,
@@ -360,8 +360,8 @@ generate_signed_hash(#block{ previous_block = PrevH, timestamp = TS,
 		case Height >= ar_fork:height_2_8() of
 			true ->
 				{<< PackingDifficulty:8 >>,
-						ar_serialize:encode_bin(UnpackedChunkHash, 8),
-						ar_serialize:encode_bin(UnpackedChunk2Hash, 8)};
+						big_serialize:encode_bin(UnpackedChunkHash, 8),
+						big_serialize:encode_bin(UnpackedChunk2Hash, 8)};
 			false ->
 				{<<>>, <<>>, <<>>}
 		end,
@@ -373,7 +373,7 @@ generate_signed_hash(#block{ previous_block = PrevH, timestamp = TS,
 				<<>>
 		end,
 	%% The elements must be either fixed-size or separated by the size separators (
-	%% the ar_serialize:encode_* functions).
+	%% the big_serialize:encode_* functions).
 	Segment = << (encode_bin(PrevH, 8))/binary, (encode_int(TS, 8))/binary,
 			(encode_bin(Nonce2, 16))/binary, (encode_int(Height, 8))/binary,
 			(encode_int(Diff, 16))/binary, (encode_int(CDiff, 16))/binary,
@@ -404,7 +404,7 @@ generate_signed_hash(#block{ previous_block = PrevH, timestamp = TS,
 			RewardHistoryHash:32/binary, (encode_int(DebtSupply, 8))/binary,
 			KryderPlusRateMultiplier:24, KryderPlusRateMultiplierLatch:8, Denomination:24,
 			(encode_int(RedenominationHeight, 8))/binary,
-			(ar_serialize:encode_double_signing_proof(DoubleSigningProof, Height))/binary,
+			(big_serialize:encode_double_signing_proof(DoubleSigningProof, Height))/binary,
 			(encode_int(PrevCDiff, 16))/binary, RebaseThresholdBin/binary,
 			DataPathBin/binary, TXPathBin/binary, DataPath2Bin/binary, TXPath2Bin/binary,
 			ChunkHashBin/binary, Chunk2HashBin/binary, BlockTimeHistoryHashBin/binary,
@@ -429,8 +429,8 @@ indep_hash(BDS, B) ->
 
 %% @doc Return the signed block signature preimage.
 get_block_signature_preimage(CDiff, PrevCDiff, Preimage, Height) ->
-	EncodedCDiff = ar_serialize:encode_int(CDiff, 16),
-	EncodedPrevCDiff = ar_serialize:encode_int(PrevCDiff, 16),
+	EncodedCDiff = big_serialize:encode_int(CDiff, 16),
+	EncodedPrevCDiff = big_serialize:encode_int(PrevCDiff, 16),
 	SignaturePreimage = << EncodedCDiff/binary,
 			EncodedPrevCDiff/binary, Preimage/binary >>,
 	case Height >= ar_fork:height_2_9() of
@@ -668,9 +668,9 @@ validate_tags_length([_ | Tags], N) ->
 validate_tags_length([], _) ->
 	true.
 
-encode_int(N, S) -> ar_serialize:encode_int(N, S).
-encode_bin(N, S) -> ar_serialize:encode_bin(N, S).
-encode_bin_list(L, LS, ES) -> ar_serialize:encode_bin_list(L, LS, ES).
+encode_int(N, S) -> big_serialize:encode_int(N, S).
+encode_bin(N, S) -> big_serialize:encode_bin(N, S).
+encode_bin_list(L, LS, ES) -> big_serialize:encode_bin_list(L, LS, ES).
 
 hash_wallet_list(WalletList) ->
 	ar_patricia_tree:compute_hash(WalletList,
@@ -685,10 +685,10 @@ hash_wallet_list(WalletList) ->
 						false ->
 							<<0>>
 					end,
-				Preimage = << (ar_serialize:encode_bin(Addr, 8))/binary,
-						(ar_serialize:encode_int(Balance, 8))/binary,
-						(ar_serialize:encode_bin(LastTX, 8))/binary,
-						(ar_serialize:encode_int(Denomination, 8))/binary,
+				Preimage = << (big_serialize:encode_bin(Addr, 8))/binary,
+						(big_serialize:encode_int(Balance, 8))/binary,
+						(big_serialize:encode_bin(LastTX, 8))/binary,
+						(big_serialize:encode_int(Denomination, 8))/binary,
 						MiningPermissionBin/binary >>,
 				crypto:hash(sha384, Preimage)
 		end
@@ -918,8 +918,8 @@ test_wallet_list_performance2(Length, Algo, Denominations) ->
 	{Time2, Binary} =
 		timer:tc(
 			fun() ->
-				ar_serialize:jsonify(
-					ar_serialize:wallet_list_to_json_struct(unclaimed, false, T1)
+				big_serialize:jsonify(
+					big_serialize:wallet_list_to_json_struct(unclaimed, false, T1)
 				)
 			end
 		),
@@ -934,10 +934,10 @@ test_wallet_list_performance2(Length, Algo, Denominations) ->
 					_ ->
 						Denomination = 0,
 						MiningPermissionBin = <<1>>,
-						Preimage = << (ar_serialize:encode_bin(Addr, 8))/binary,
-								(ar_serialize:encode_int(Balance, 8))/binary,
-								(ar_serialize:encode_bin(LastTX, 8))/binary,
-								(ar_serialize:encode_int(Denomination, 8))/binary,
+						Preimage = << (big_serialize:encode_bin(Addr, 8))/binary,
+								(big_serialize:encode_int(Balance, 8))/binary,
+								(big_serialize:encode_bin(LastTX, 8))/binary,
+								(big_serialize:encode_int(Denomination, 8))/binary,
 								MiningPermissionBin/binary >>,
 						case Algo of
 							no_ar_deep_hash_sha384 ->
@@ -954,10 +954,10 @@ test_wallet_list_performance2(Length, Algo, Denominations) ->
 						false ->
 							<<0>>
 					end,
-				Preimage = << (ar_serialize:encode_bin(Addr, 8))/binary,
-						(ar_serialize:encode_int(Balance, 8))/binary,
-						(ar_serialize:encode_bin(LastTX, 8))/binary,
-						(ar_serialize:encode_int(Denomination, 8))/binary,
+				Preimage = << (big_serialize:encode_bin(Addr, 8))/binary,
+						(big_serialize:encode_int(Balance, 8))/binary,
+						(big_serialize:encode_bin(LastTX, 8))/binary,
+						(big_serialize:encode_int(Denomination, 8))/binary,
 						MiningPermissionBin/binary >>,
 				case Algo of
 					sha256 ->

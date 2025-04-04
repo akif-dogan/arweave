@@ -9,7 +9,7 @@
 %%% - allows following the network in the absence of a public IP;
 %%% - protects the node from lagging behind when there are networking issues.
 
--module(ar_poller).
+-module(big_poller).
 
 -behaviour(gen_server).
 

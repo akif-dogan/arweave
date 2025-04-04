@@ -397,7 +397,7 @@ init({StoreID, RepackInPlacePacking}) ->
 					{range_end, RangeEnd},
 					{cursor, RepackCursor},
 					{store_id, StoreID},
-					{target_packing, ar_serialize:encode_packing(Packing, true)}]),
+					{target_packing, big_serialize:encode_packing(Packing, true)}]),
 			ar_device_lock:set_device_lock_metric(StoreID, repack, paused),
 			State#state{ 
 				repack_cursor = RepackCursor, 
@@ -551,7 +551,7 @@ handle_info({chunk, {packed, Ref, ChunkArgs}},
 			{Packing, _, Offset, _, ChunkSize} = ChunkArgs,
 			?LOG_WARNING([{event, chunk_repack_request_not_found}, 
 					{offset, Offset}, {chunk_size, ChunkSize},
-					{packing, ar_serialize:encode_packing(Packing, true)}]),
+					{packing, big_serialize:encode_packing(Packing, true)}]),
 			{noreply, State};
 		Args ->
 			State2 = State#state{ packing_map = maps:remove(Ref, Map) },
@@ -613,7 +613,7 @@ maybe_log_repacking_complete(State) ->
 			"node with the new storage module.~n", [StoreID]),
 			?LOG_INFO([{event, repacking_complete},
 					{store_id, StoreID},
-					{target_packing, ar_serialize:encode_packing(TargetPacking, true)}]);
+					{target_packing, big_serialize:encode_packing(TargetPacking, true)}]);
 		_ ->
 			ok
 	end.

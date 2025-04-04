@@ -128,10 +128,10 @@ test_addresses_with_checksum({_, Wallet1, {_, Pub2}, _}) ->
 	Address20 = crypto:strong_rand_bytes(20),
 	Address32 = big_wallet:to_address(Pub2),
 	TX = ar_test_node:sign_tx(Wallet1, #{ last_tx => ar_test_node:get_tx_anchor(peer1) }),
-	{JSON} = ar_serialize:tx_to_json_struct(TX),
+	{JSON} = big_serialize:tx_to_json_struct(TX),
 	JSON2 = proplists:delete(<<"target">>, JSON),
 	TX2 = ar_test_node:sign_tx(Wallet1, #{ last_tx => ar_test_node:get_tx_anchor(peer1), target => Address32 }),
-	{JSON3} = ar_serialize:tx_to_json_struct(TX2),
+	{JSON3} = big_serialize:tx_to_json_struct(TX2),
 	InvalidPayloads = [
 		[{<<"target">>, <<":">>} | JSON2],
 		[{<<"target">>, << <<":">>/binary, (ar_util:encode(<< 0:32 >>))/binary >>} | JSON2],
@@ -150,7 +150,7 @@ test_addresses_with_checksum({_, Wallet1, {_, Pub2}, _}) ->
 	],
 	lists:foreach(
 		fun(Struct) ->
-			Payload = ar_serialize:jsonify({Struct}),
+			Payload = big_serialize:jsonify({Struct}),
 			?assertMatch({ok, {{<<"400">>, _}, _, <<"Invalid JSON.">>, _, _}},
 					ar_test_node:post_tx_json(main, Payload))
 		end,
@@ -163,7 +163,7 @@ test_addresses_with_checksum({_, Wallet1, {_, Pub2}, _}) ->
 	],
 	lists:foreach(
 		fun(Struct) ->
-			Payload = ar_serialize:jsonify({Struct}),
+			Payload = big_serialize:jsonify({Struct}),
 			?assertMatch({ok, {{<<"200">>, _}, _, <<"OK">>, _, _}},
 					ar_test_node:post_tx_json(main, Payload))
 		end,
@@ -261,22 +261,22 @@ test_single_regossip(_) ->
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
 		big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TX#tx.id,
-				ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX)))
+				big_serialize:jsonify(big_serialize:tx_to_json_struct(TX)))
 	),
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
 		ar_test_node:remote_call(peer1, big_http_iface_client, send_tx_binary, [ar_test_node:peer_ip(peer1), TX#tx.id,
-				ar_serialize:tx_to_binary(TX)])
+				big_serialize:tx_to_binary(TX)])
 	),
 	?assertMatch(
 		{ok, {{<<"208">>, _}, _, _, _, _}},
 		ar_test_node:remote_call(peer1, big_http_iface_client, send_tx_binary, [ar_test_node:peer_ip(peer1), TX#tx.id,
-				ar_serialize:tx_to_binary(TX)])
+				big_serialize:tx_to_binary(TX)])
 	),
 	?assertMatch(
 		{ok, {{<<"208">>, _}, _, _, _, _}},
 		ar_test_node:remote_call(peer1, big_http_iface_client, send_tx_json, [ar_test_node:peer_ip(peer1), TX#tx.id,
-				ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX))])
+				big_serialize:jsonify(big_serialize:tx_to_json_struct(TX))])
 	).
 
 test_node_blacklisting_get_spammer() ->
@@ -307,7 +307,7 @@ get_fun_msg_pair(send_tx_binary) ->
 	{ fun(_) ->
 			InvalidTX = (ar_tx:new())#tx{ owner = <<"key">>, signature = <<"invalid">> },
 			case big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main),
-					InvalidTX#tx.id, ar_serialize:tx_to_binary(InvalidTX)) of
+					InvalidTX#tx.id, big_serialize:tx_to_binary(InvalidTX)) of
 				{ok,
 					{{<<"429">>, <<"Too Many Requests">>}, _,
 						<<"Too Many Requests">>, _, _}} ->
@@ -521,19 +521,19 @@ test_get_format_2_tx(_) ->
 	EncodedInvalidTXID = binary_to_list(ar_util:encode(InvalidTXID)),
 	EncodedEmptyTXID = binary_to_list(ar_util:encode(EmptyTXID)),
 	big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), ValidTX#tx.id,
-			ar_serialize:jsonify(ar_serialize:tx_to_json_struct(ValidTX))),
+			big_serialize:jsonify(big_serialize:tx_to_json_struct(ValidTX))),
 	{ok, {{<<"400">>, _}, _, <<"The attached data is split in an unknown way.">>, _, _}} =
 		big_http:req(#{
 			method => post,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx",
-			body => ar_serialize:jsonify(ar_serialize:tx_to_json_struct(InvalidDataRootTX))
+			body => big_serialize:jsonify(big_serialize:tx_to_json_struct(InvalidDataRootTX))
 		}),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main),
 			InvalidDataRootTX#tx.id,
-			ar_serialize:tx_to_binary(InvalidDataRootTX#tx{ data = <<>> })),
+			big_serialize:tx_to_binary(InvalidDataRootTX#tx{ data = <<>> })),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), EmptyTX#tx.id,
-			ar_serialize:tx_to_binary(EmptyTX)),
+			big_serialize:tx_to_binary(EmptyTX)),
 	wait_until_receives_txs([ValidTX, EmptyTX, InvalidDataRootTX]),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
@@ -548,7 +548,7 @@ test_get_format_2_tx(_) ->
 	?assertEqual(ValidTX#tx{
 			data = <<>>,
 			data_size = 4
-		}, ar_serialize:json_struct_to_tx(Body)),
+		}, big_serialize:json_struct_to_tx(Body)),
 	%% Ensure data can be fetched for format=2 transactions via /tx/[ID]/data.
 	{ok, Data} = wait_until_syncs_tx_data(TXID),
 	?assertEqual(ar_util:encode(<<"DATA">>), Data),
@@ -583,7 +583,7 @@ test_get_format_1_tx(_) ->
 	TX = #tx{ id = TXID } = ar_tx:new(<<"DATA">>),
 	EncodedTXID = binary_to_list(ar_util:encode(TXID)),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
-			ar_serialize:tx_to_binary(TX)),
+			big_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
@@ -604,7 +604,7 @@ test_get_format_1_tx(_) ->
 			100,
 			2000
 		),
-	?assertEqual(TX, ar_serialize:json_struct_to_tx(Body)).
+	?assertEqual(TX, big_serialize:json_struct_to_tx(Body)).
 
 %% @doc Test adding transactions to a block.
 test_add_external_tx_with_tags(_) ->
@@ -619,7 +619,7 @@ test_add_external_tx_with_tags(_) ->
 				]
 		},
 	big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TaggedTX#tx.id,
-			ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TaggedTX))),
+			big_serialize:jsonify(big_serialize:tx_to_json_struct(TaggedTX))),
 	wait_until_receives_txs([TaggedTX]),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
@@ -634,7 +634,7 @@ test_find_external_tx(_) ->
 	LocalHeight = big_node:get_height(),
 	TX = ar_tx:new(<<"DATA">>),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
-			ar_serialize:tx_to_binary(TX)),
+			big_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
@@ -665,7 +665,7 @@ test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
 		reward => ?BIG(1)}),
 	ID = SignedTX#tx.id,
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), SignedTX#tx.id,
-			ar_serialize:tx_to_binary(SignedTX)),
+			big_serialize:tx_to_binary(SignedTX)),
 	wait_until_receives_txs([SignedTX]),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
@@ -684,7 +684,7 @@ test_get_subfields_of_tx(_) ->
 	LocalHeight = big_node:get_height(),
 	TX = ar_tx:new(<<"DATA">>),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
-			ar_serialize:tx_to_binary(TX)),
+			big_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
@@ -696,7 +696,7 @@ test_get_subfields_of_tx(_) ->
 test_get_pending_tx(_) ->
 	TX = ar_tx:new(<<"DATA1">>),
 	big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TX#tx.id,
-			ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX))),
+			big_serialize:jsonify(big_serialize:tx_to_json_struct(TX))),
 	wait_until_receives_txs([TX]),
 	{ok, {{<<"202">>, _}, _, Body, _, _}} =
 		big_http:req(#{
@@ -735,7 +735,7 @@ test_get_tx_status(_) ->
 	ar_test_node:mine(),
 	wait_until_height(main, Height + 1),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} = FetchStatus(),
-	{Res} = ar_serialize:dejsonify(Body),
+	{Res} = big_serialize:dejsonify(Body),
 	BI = big_node:get_block_index(),
 	?assertEqual(
 		#{
@@ -750,7 +750,7 @@ test_get_tx_status(_) ->
 	ar_util:do_until(
 		fun() ->
 			{ok, {{<<"200">>, _}, _, Body2, _, _}} = FetchStatus(),
-			{Res2} = ar_serialize:dejsonify(Body2),
+			{Res2} = big_serialize:dejsonify(Body2),
 			#{
 				<<"block_height">> => length(BI) - 1,
 				<<"block_indep_hash">> => ar_util:encode(element(1, hd(BI))),
@@ -799,7 +799,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				headers => [{<<"X-Internal-Api-Secret">>, <<"correct_secret">>}]
 			}),
 		application:set_env(bigfile, config, Config#config{ internal_api_secret = not_set }),
-		{CreateWalletRes} = ar_serialize:dejsonify(CreateWalletBody),
+		{CreateWalletRes} = big_serialize:dejsonify(CreateWalletBody),
 		[WalletAccessCode] = proplists:get_all_values(<<"wallet_access_code">>, CreateWalletRes),
 		[Address] = proplists:get_all_values(<<"wallet_address">>, CreateWalletRes),
 		%% Top up the new wallet.
@@ -814,7 +814,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				method => post,
 				peer => ar_test_node:peer_ip(main),
 				path => "/tx",
-				body => ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TopUpTX))
+				body => big_serialize:jsonify(big_serialize:tx_to_json_struct(TopUpTX))
 			}),
 		wait_until_receives_txs([TopUpTX]),
 		ar_test_node:mine(),
@@ -835,7 +835,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				method => post,
 				peer => ar_test_node:peer_ip(main),
 				path => "/unsigned_tx",
-				body => ar_serialize:jsonify({UnsignedTXProps})
+				body => big_serialize:jsonify({UnsignedTXProps})
 			}),
 		application:set_env(bigfile, config,
 				Config#config{ internal_api_secret = <<"correct_secret">> }),
@@ -845,7 +845,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				peer => ar_test_node:peer_ip(main),
 				path => "/unsigned_tx",
 				headers => [{<<"X-Internal-Api-Secret">>, <<"incorrect_secret">>}],
-				body => ar_serialize:jsonify({UnsignedTXProps})
+				body => big_serialize:jsonify({UnsignedTXProps})
 			}),
 		{ok, {{<<"200">>, <<"OK">>}, _, Body, _, _}} =
 			big_http:req(#{
@@ -853,10 +853,10 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				peer => ar_test_node:peer_ip(main),
 				path => "/unsigned_tx",
 				headers => [{<<"X-Internal-Api-Secret">>, <<"correct_secret">>}],
-				body => ar_serialize:jsonify({UnsignedTXProps})
+				body => big_serialize:jsonify({UnsignedTXProps})
 			}),
 		application:set_env(bigfile, config, Config#config{ internal_api_secret = not_set }),
-		{Res} = ar_serialize:dejsonify(Body),
+		{Res} = big_serialize:dejsonify(Body),
 		TXID = proplists:get_value(<<"id">>, Res),
 		timer:sleep(200),
 		ar_test_node:mine(),
@@ -868,7 +868,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				peer => ar_test_node:peer_ip(main),
 				path => "/tx/" ++ binary_to_list(TXID) ++ "/status"
 			}),
-		{GetTXRes} = ar_serialize:dejsonify(GetTXBody),
+		{GetTXRes} = big_serialize:dejsonify(GetTXBody),
 		?assertMatch(
 			#{
 				<<"number_of_confirmations">> := 1
@@ -886,7 +886,7 @@ test_get_error_of_data_limit(_) ->
 	Limit = 1460,
 	TX = ar_tx:new(<< <<0>> || _ <- lists:seq(1, Limit * 2) >>),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
-			ar_serialize:tx_to_binary(TX)),
+			big_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),

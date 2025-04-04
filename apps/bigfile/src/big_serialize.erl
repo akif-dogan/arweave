@@ -1,6 +1,6 @@
 %%% @doc The module contains the serialization and deserialization utilities for the
 %%% various protocol entitities - transactions, blocks, proofs, etc
--module(ar_serialize).
+-module(big_serialize).
 
 -export([block_to_binary/1, binary_to_block/1, json_struct_to_block/1,
 		block_to_json_struct/1,
@@ -345,8 +345,8 @@ reward_history_to_binary(RewardHistory) ->
 reward_history_to_binary([], IOList) ->
 	iolist_to_binary(IOList);
 reward_history_to_binary([{Addr, HashRate, Reward, Denomination} | RewardHistory], IOList) ->
-	reward_history_to_binary(RewardHistory, [Addr, ar_serialize:encode_int(HashRate, 8),
-			ar_serialize:encode_int(Reward, 8), << Denomination:24 >> | IOList]).
+	reward_history_to_binary(RewardHistory, [Addr, big_serialize:encode_int(HashRate, 8),
+			big_serialize:encode_int(Reward, 8), << Denomination:24 >> | IOList]).
 
 binary_to_reward_history(Bin) ->
 	binary_to_reward_history(Bin, []).
@@ -368,9 +368,9 @@ block_time_history_to_binary([], IOList) ->
 block_time_history_to_binary([{BlockInterval, VDFInterval, ChunkCount} | BlockTimeHistory],
 		IOList) ->
 	block_time_history_to_binary(BlockTimeHistory, [
-			ar_serialize:encode_int(BlockInterval, 8),
-			ar_serialize:encode_int(VDFInterval, 8),
-			ar_serialize:encode_int(ChunkCount, 8)
+			big_serialize:encode_int(BlockInterval, 8),
+			big_serialize:encode_int(VDFInterval, 8),
+			big_serialize:encode_int(ChunkCount, 8)
 	| IOList]).
 
 binary_to_block_time_history(Bin) ->
@@ -401,7 +401,7 @@ nonce_limiter_update_to_binary(2 = _Format, #nonce_limiter_update{
 	Checkpoints = maps:get(StepNumber, Map, []),
 	IsPartialBin = case IsPartial of true -> << 1:8 >>; _ -> << 0:8 >> end,
 	CheckpointLen = length(Checkpoints),
-	<< NextSeed:48/binary, (ar_serialize:encode_int(NextVDFDifficulty, 8))/binary,
+	<< NextSeed:48/binary, (big_serialize:encode_int(NextVDFDifficulty, 8))/binary,
 			Interval:64, IsPartialBin/binary, CheckpointLen:16,
 			(iolist_to_binary(Checkpoints))/binary, (encode_vdf_session(2, Session))/binary >>;
 
@@ -412,7 +412,7 @@ nonce_limiter_update_to_binary(3 = _Format, #nonce_limiter_update{
 	CheckpointsMapBin = encode_step_checkpoints_map(Map),
 	CheckpointsMapSize = byte_size(CheckpointsMapBin),
 	IsPartialBin = case IsPartial of true -> << 1:8 >>; _ -> << 0:8 >> end,
-	<< NextSeed:48/binary, (ar_serialize:encode_int(NextVDFDifficulty, 8))/binary,
+	<< NextSeed:48/binary, (big_serialize:encode_int(NextVDFDifficulty, 8))/binary,
 			Interval:64, IsPartialBin/binary, CheckpointsMapSize:24,
 			CheckpointsMapBin:CheckpointsMapSize/binary,
 			(encode_vdf_session(2, Session))/binary >>;
@@ -424,7 +424,7 @@ nonce_limiter_update_to_binary(4 = _Format, #nonce_limiter_update{
 	CheckpointsMapBin = encode_step_checkpoints_map(Map),
 	CheckpointsMapSize = byte_size(CheckpointsMapBin),
 	IsPartialBin = case IsPartial of true -> << 1:8 >>; _ -> << 0:8 >> end,
-	<< NextSeed:48/binary, (ar_serialize:encode_int(NextVDFDifficulty, 8))/binary,
+	<< NextSeed:48/binary, (big_serialize:encode_int(NextVDFDifficulty, 8))/binary,
 			Interval:64, IsPartialBin/binary, CheckpointsMapSize:24,
 			CheckpointsMapBin:CheckpointsMapSize/binary,
 			(encode_vdf_session(4, Session))/binary >>.
@@ -464,7 +464,7 @@ encode_vdf_session(4 = _Format, #vdf_session{
 encode_session_key(undefined) ->
 	<<>>;
 encode_session_key({NextSeed, Interval, NextDifficulty}) ->
-	<< NextSeed:48/binary, (ar_serialize:encode_int(NextDifficulty, 8))/binary, Interval:64 >>.
+	<< NextSeed:48/binary, (big_serialize:encode_int(NextDifficulty, 8))/binary, Interval:64 >>.
 
 encode_session_key(2 = _Format, SessionKey) ->
 	encode_session_key(SessionKey).
@@ -638,18 +638,18 @@ encode_double_signing_proof(Proof, Height) ->
 	case Height >= ar_fork:height_2_9() of
 		false ->
 			<< 1:8, Key:512/binary, Sig1:512/binary,
-				(ar_serialize:encode_int(CDiff1, 16))/binary,
-				(ar_serialize:encode_int(PrevCDiff1, 16))/binary, Preimage1:64/binary,
-				Sig2:512/binary, (ar_serialize:encode_int(CDiff2, 16))/binary,
-				(ar_serialize:encode_int(PrevCDiff2, 16))/binary, Preimage2:64/binary >>;
+				(big_serialize:encode_int(CDiff1, 16))/binary,
+				(big_serialize:encode_int(PrevCDiff1, 16))/binary, Preimage1:64/binary,
+				Sig2:512/binary, (big_serialize:encode_int(CDiff2, 16))/binary,
+				(big_serialize:encode_int(PrevCDiff2, 16))/binary, Preimage2:64/binary >>;
 		true ->
-			<< 1:8, (ar_serialize:encode_bin(Key, 16))/binary,
-				(ar_serialize:encode_bin(Sig1, 16))/binary,
-				(ar_serialize:encode_int(CDiff1, 16))/binary,
-				(ar_serialize:encode_int(PrevCDiff1, 16))/binary, Preimage1:64/binary,
-				(ar_serialize:encode_bin(Sig2, 16))/binary,
-				(ar_serialize:encode_int(CDiff2, 16))/binary,
-				(ar_serialize:encode_int(PrevCDiff2, 16))/binary, Preimage2:64/binary >>
+			<< 1:8, (big_serialize:encode_bin(Key, 16))/binary,
+				(big_serialize:encode_bin(Sig1, 16))/binary,
+				(big_serialize:encode_int(CDiff1, 16))/binary,
+				(big_serialize:encode_int(PrevCDiff1, 16))/binary, Preimage1:64/binary,
+				(big_serialize:encode_bin(Sig2, 16))/binary,
+				(big_serialize:encode_int(CDiff2, 16))/binary,
+				(big_serialize:encode_int(PrevCDiff2, 16))/binary, Preimage2:64/binary >>
 	end.
 
 %%%===================================================================
@@ -720,10 +720,10 @@ encode_post_2_8_fields(#block{ height = Height,
 			<<>>;
 		true ->
 			<< PackingDifficulty:8,
-				(ar_serialize:encode_bin(UnpackedChunkHash, 8))/binary,
-				(ar_serialize:encode_bin(UnpackedChunk2Hash, 8))/binary,
-				(ar_serialize:encode_bin(UnpackedChunk, 24))/binary,
-				(ar_serialize:encode_bin(UnpackedChunk2, 24))/binary,
+				(big_serialize:encode_bin(UnpackedChunkHash, 8))/binary,
+				(big_serialize:encode_bin(UnpackedChunk2Hash, 8))/binary,
+				(big_serialize:encode_bin(UnpackedChunk, 24))/binary,
+				(big_serialize:encode_bin(UnpackedChunk2, 24))/binary,
 				(encode_post_2_9_fields(B))/binary >>
 	end.
 

@@ -8,7 +8,7 @@ wallet_sign_verify_test_() ->
 test_wallet_sign_verify() ->
 	TestWalletSignVerify = fun(KeyTypeEnc) ->
 		fun() ->
-			KeyType = ar_serialize:binary_to_signature_type(KeyTypeEnc),
+			KeyType = big_serialize:binary_to_signature_type(KeyTypeEnc),
 			{Priv, Pub} = big_wallet:new(KeyType),
 			TestData = <<"TEST DATA">>,
 			Signature = big_wallet:sign(Priv, TestData),
@@ -24,7 +24,7 @@ test_wallet_sign_verify() ->
 invalid_signature_test_() ->
     TestInvalidSignature = fun(KeyTypeEnc) ->
         fun() ->
-			KeyType = ar_serialize:binary_to_signature_type(KeyTypeEnc),
+			KeyType = big_serialize:binary_to_signature_type(KeyTypeEnc),
 			{Priv, Pub} = big_wallet:new(KeyType),
            	TestData = <<"TEST DATA">>,
 			<< _:32, Signature/binary >> = big_wallet:sign(Priv, TestData),
@@ -41,7 +41,7 @@ invalid_signature_test_() ->
 generate_keyfile_test_() ->
 	GenerateKeyFile = fun(KeyTypeEnc) ->
 		fun() ->
-			KeyType = ar_serialize:binary_to_signature_type(KeyTypeEnc),
+			KeyType = big_serialize:binary_to_signature_type(KeyTypeEnc),
 			{Priv, Pub} = big_wallet:new_keyfile(KeyType),
 			FileName = big_wallet:wallet_filepath(ar_util:encode(big_wallet:to_address(Pub))),
 			{Priv, Pub} = big_wallet:load_keyfile(FileName)
@@ -57,7 +57,7 @@ load_keyfile_test_() ->
     TestLoadKeyfile = fun(KeyTypeEnc) ->
         fun() ->
             {Priv, Pub = {KeyType, _}} = big_wallet:load_keyfile(wallet_fixture_path(KeyTypeEnc)),
-            KeyType = ar_serialize:binary_to_signature_type(KeyTypeEnc),
+            KeyType = big_serialize:binary_to_signature_type(KeyTypeEnc),
             TestData = <<"TEST DATA">>,
             Signature = big_wallet:sign(Priv, TestData),
             true = big_wallet:verify(Pub, TestData, Signature)

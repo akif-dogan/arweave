@@ -1,4 +1,4 @@
--module(ar_poller_sup).
+-module(big_poller_sup).
 
 -behaviour(supervisor).
 
@@ -31,5 +31,5 @@ init([]) ->
 		lists:seq(1, Config#config.block_pollers)
 	),
 	Workers = [element(1, El) || El <- Children],
-	Children2 = [?CHILD_WITH_ARGS(ar_poller, worker, ar_poller, [ar_poller, Workers]) | Children],
+	Children2 = [?CHILD_WITH_ARGS(big_poller, worker, big_poller, [big_poller, Workers]) | Children],
 	{ok, {{one_for_one, 5, 10}, Children2}}.

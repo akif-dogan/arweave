@@ -575,7 +575,7 @@ validate_block(txs, {NewB = #block{ timestamp = Timestamp, height = Height, txs 
 		valid ->
 			true = Height >= ar_fork:height_2_6(),
 			%% The field size limits in 2.6 are naturally asserted in
-			%% ar_serialize:binary_to_block/1.
+			%% big_serialize:binary_to_block/1.
 			validate_block(tx_root, {NewB, OldB})
 	end;
 
@@ -792,8 +792,8 @@ test_update_accounts_rejects_same_signature_in_double_signing_proof() ->
 	Key = big_wallet:new(),
 	Pub = element(2, element(2, Key)),
 	Random = crypto:strong_rand_bytes(64),
-	Preimage = << (ar_serialize:encode_int(1, 16))/binary,
-			(ar_serialize:encode_int(1, 16))/binary, Random/binary >>,
+	Preimage = << (big_serialize:encode_int(1, 16))/binary,
+			(big_serialize:encode_int(1, 16))/binary, Random/binary >>,
 	Sig1 = big_wallet:sign(element(1, Key), Preimage),
 	DoubleSigningProof = {Pub, Sig1, 1, 1, Random, Sig1, 1, 1, Random},
 	BannedAddr = big_wallet:to_address(Key),
@@ -834,8 +834,8 @@ test_update_accounts_receives_released_reward_and_prover_reward() ->
 	Key = big_wallet:new(),
 	Pub = element(2, element(2, Key)),
 	Random = crypto:strong_rand_bytes(64),
-	Preimage = << 0:256, (ar_serialize:encode_int(1, 16))/binary,
-			(ar_serialize:encode_int(1, 16))/binary, Random/binary >>,
+	Preimage = << 0:256, (big_serialize:encode_int(1, 16))/binary,
+			(big_serialize:encode_int(1, 16))/binary, Random/binary >>,
 	Sig1 = big_wallet:sign(element(1, Key), Preimage),
 	Sig2 = big_wallet:sign(element(1, Key), Preimage),
 	DoubleSigningProof = {Pub, Sig1, 1, 1, Random, Sig2, 1, 1, Random},
@@ -866,8 +866,8 @@ test_update_accounts_does_not_let_banned_account_take_reward() ->
 	Key = big_wallet:new(),
 	Pub = element(2, element(2, Key)),
 	Random = crypto:strong_rand_bytes(64),
-	Preimage = << 0:256, (ar_serialize:encode_int(1, 16))/binary,
-			(ar_serialize:encode_int(1, 16))/binary, Random/binary >>,
+	Preimage = << 0:256, (big_serialize:encode_int(1, 16))/binary,
+			(big_serialize:encode_int(1, 16))/binary, Random/binary >>,
 	Sig1 = big_wallet:sign(element(1, Key), Preimage),
 	Sig2 = big_wallet:sign(element(1, Key), Preimage),
 	DoubleSigningProof = {Pub, Sig1, 1, 1, Random, Sig2, 1, 1, Random},
