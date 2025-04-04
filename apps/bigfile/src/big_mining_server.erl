@@ -263,7 +263,7 @@ handle_cast({manual_garbage_collect, Ref}, #state{ gc_process_ref = Ref } = Stat
 	?LOG_DEBUG([{event, mining_debug_garbage_collect_start},
 		{frequency, State#state.gc_frequency_ms}]),
 	big_mining_io:garbage_collect(),
-	ar_mining_hash:garbage_collect(),
+	big_mining_hash:garbage_collect(),
 	erlang:garbage_collect(self(), [{async, erlang:monotonic_time()}]),
 	maps:foreach(
 		fun(_Partition, Worker) ->

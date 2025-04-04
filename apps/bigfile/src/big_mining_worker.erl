@@ -328,21 +328,21 @@ extract_sub_chunk(Chunk, _Candidate) ->
 	{SubChunk, Rest}.
 
 process_sub_chunk(chunk1, Candidate, SubChunk, State) ->
-	ar_mining_hash:compute_h1(self(), Candidate#mining_candidate{ chunk1 = SubChunk }),
+	big_mining_hash:compute_h1(self(), Candidate#mining_candidate{ chunk1 = SubChunk }),
 	State;
 process_sub_chunk(chunk2, Candidate, SubChunk, State) ->
 	#mining_candidate{ session_key = SessionKey } = Candidate,
 	Candidate2 = Candidate#mining_candidate{ chunk2 = SubChunk },
 	case cycle_sub_chunk_cache(Candidate2, {chunk2, SubChunk}, State) of
 		{{chunk1, Chunk1, H1}, State2} ->
-			ar_mining_hash:compute_h2(
+			big_mining_hash:compute_h2(
 				self(), Candidate2#mining_candidate{ chunk1 = Chunk1, h1 = H1 }),
 			%% Decrement 2 for chunk1 and chunk2:
 			%% 1. chunk1 was previously read and cached
 			%% 2. chunk2 that was just read and will shortly be used to compute h2
 			update_sub_chunk_cache_size(-2, SessionKey, State2);
 		{{chunk1, H1}, State2} ->
-			ar_mining_hash:compute_h2(self(), Candidate2#mining_candidate{ h1 = H1 }),
+			big_mining_hash:compute_h2(self(), Candidate2#mining_candidate{ h1 = H1 }),
 			%% Decrement 1 for chunk2:
 			%% we're computing h2 for a peer so chunk1 was not previously read or cached 
 			%% on this node
@@ -398,7 +398,7 @@ handle_task({compute_h0, Candidate, _ExtraArgs}, State) ->
 	State2 = report_hashes(State),
 	State4 = case try_to_reserve_cache_space(SessionKey, State2) of
 		{true, State3} ->
-			ar_mining_hash:compute_h0(self(), Candidate),
+			big_mining_hash:compute_h0(self(), Candidate),
 			case StepNumber > LatestVDFStepNumber of
 				true ->
 					State3#state{ latest_vdf_step_number = StepNumber };
@@ -504,7 +504,7 @@ handle_task({computed_h1, Candidate, _ExtraArgs}, State) ->
 					{noreply, update_sub_chunk_cache_size(-1, SessionKey, State3)};
 				{{chunk2, Chunk2}, State3} ->
 					%% Chunk2 has already been read, so we can compute H2 now.
-					ar_mining_hash:compute_h2(
+					big_mining_hash:compute_h2(
 						self(), Candidate#mining_candidate{ chunk2 = Chunk2 }),
 					%% Decrement 2 for chunk1 and chunk2:
 					%% 1. chunk2 was previously read and cached

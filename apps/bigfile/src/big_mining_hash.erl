@@ -1,4 +1,4 @@
--module(ar_mining_hash).
+-module(big_mining_hash).
 
 -behaviour(gen_server).
 
@@ -63,7 +63,7 @@ handle_cast({compute, HashType, Worker, Candidate},
 
 handle_cast(garbage_collect, State) ->
 	erlang:garbage_collect(self(),
-		[{async, {ar_mining_hash, self(), erlang:monotonic_time()}}]),
+		[{async, {big_mining_hash, self(), erlang:monotonic_time()}}]),
 	queue:fold(
 		fun(Thread, _) ->
 			erlang:garbage_collect(Thread,

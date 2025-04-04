@@ -34,7 +34,7 @@ init([]) ->
 	),
 	Children = MiningWorkers ++ [
 		?CHILD(big_mining_server, worker),
-		?CHILD(ar_mining_hash, worker),
+		?CHILD(big_mining_hash, worker),
 		?CHILD(big_mining_io, worker),
 		?CHILD(big_mining_stats, worker)
 	],
