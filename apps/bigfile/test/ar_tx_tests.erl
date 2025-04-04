@@ -399,7 +399,7 @@ returns_error_when_txs_exceed_balance(BuildTXSetFun) ->
 	%% and expect the balance exceeded error.
 	ar_test_node:remote_call(peer1, ets, delete, [ignored_ids, ExceedBalanceTX#tx.id]),
 	{ok, {{<<"400">>, _}, _, _Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => post,
 			peer => ar_test_node:peer_ip(peer1),
 			path => "/tx",
@@ -538,7 +538,7 @@ test_does_not_allow_to_replay_empty_wallet_txs() ->
 	assert_wait_until_height(peer1, 1),
 	GetBalancePath = binary_to_list(ar_util:encode(big_wallet:to_address(Pub2))),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(peer1),
 			path => "/wallet/" ++ GetBalancePath ++ "/balance"
@@ -550,7 +550,7 @@ test_does_not_allow_to_replay_empty_wallet_txs() ->
 	ar_test_node:mine(peer1),
 	assert_wait_until_height(peer1, 2),
 	{ok, {{<<"200">>, _}, _, Body2, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(peer1),
 			path => "/wallet/" ++ GetBalancePath ++ "/balance"
@@ -960,7 +960,7 @@ recovers_from_forks(ForkHeight) ->
 	lists:foreach(
 		fun(TX) ->
 			{ok, {{<<"208">>, _}, _, <<"Transaction already processed.">>, _, _}} =
-				ar_http:req(#{
+				big_http:req(#{
 					method => post,
 					peer => {127, 0, 0, 1, MainPort},
 					path => "/tx",

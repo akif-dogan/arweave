@@ -150,7 +150,7 @@ get_block_index(Peer) ->
 
 get_reward_history(Peer, H) ->
     PeerIP = ar_test_node:peer_ip(Peer),
-    case ar_http:req(#{
+    case big_http:req(#{
         peer => PeerIP,
         method => get,
         path => "/reward_history/" ++ binary_to_list(ar_util:encode(H)),

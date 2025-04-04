@@ -655,7 +655,7 @@ get_balance(Pub) ->
 	Address = big_wallet:to_address(Pub),
 	Peer = ar_test_node:peer_ip(main),
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/wallet/" ++ binary_to_list(ar_util:encode(Address)) ++ "/balance"
@@ -663,7 +663,7 @@ get_balance(Pub) ->
 	Balance = binary_to_integer(Reply),
 	B = big_node:get_current_block(),
 	{ok, {{<<"200">>, _}, _, Reply2, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/wallet_list/" ++ binary_to_list(ar_util:encode(B#block.wallet_list))
@@ -680,7 +680,7 @@ get_balance(Pub) ->
 get_reserved_balance(Address) ->
 	Peer = ar_test_node:peer_ip(main),
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/wallet/" ++ binary_to_list(ar_util:encode(Address))

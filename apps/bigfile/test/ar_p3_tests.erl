@@ -1010,7 +1010,7 @@ http_request(#{method := M, path := P, headers := H}) ->
 	Path = binary_to_list(P),
 	% Headers = maps:to_list(H#{<<"x-p2p-port">> => integer_to_binary(Port)}),
 	Headers = maps:to_list(H),
-	ar_http:req(#{
+	big_http:req(#{
 		method => Method,
 		peer => Peer,
 		path => Path,

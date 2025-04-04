@@ -257,7 +257,7 @@ do_call_webhook(URL, Headers, Entity, Event, N) when N < ?NUMBER_OF_TRIES ->
 			{binary_to_list(Host), Port}
 	end,
 	case catch
-		ar_http:req(#{
+		big_http:req(#{
 			method => post,
 			peer => Peer,
 			path => binary_to_list(<<Path/binary, Query/binary>>),

@@ -243,7 +243,7 @@ build_proofs(TX, Chunks, TXs, BlockStartOffset, Height) ->
 
 get_tx_offset(Node, TXID) ->
 	Peer = ar_test_node:peer_ip(Node),
-	ar_http:req(#{
+	big_http:req(#{
 		method => get,
 		peer => Peer,
 		path => "/tx/" ++ binary_to_list(ar_util:encode(TXID)) ++ "/offset"
@@ -251,7 +251,7 @@ get_tx_offset(Node, TXID) ->
 
 get_tx_data(TXID) ->
   {ok, Config} = application:get_env(bigfile, config),
-	ar_http:req(#{
+	big_http:req(#{
 		method => get,
 		peer => {127, 0, 0, 1, Config#config.port},
 		path => "/tx/" ++ binary_to_list(ar_util:encode(TXID)) ++ "/data"

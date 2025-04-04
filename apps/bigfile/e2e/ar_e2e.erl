@@ -115,7 +115,7 @@ start_source_node(Node, unpacked, _WalletFixture) ->
 	%% pack_served_chunks is not enabled but the data is stored unpacked, so we should
 	%% return it
 	{ok, {{<<"200">>, _}, _, Data, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(Node),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TX2#tx.id)) ++ "/data"
@@ -193,7 +193,7 @@ start_source_node(Node, PackingType, WalletFixture) ->
 
 	%% pack_served_chunks is not enabled so we shouldn't return unpacked data
 	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}},
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(Node),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TX1#tx.id)) ++ "/data"

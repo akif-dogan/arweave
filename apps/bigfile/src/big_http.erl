@@ -1,5 +1,5 @@
 %%% A wrapper library for gun.
--module(ar_http).
+-module(big_http).
 
 -behaviour(gen_server).
 

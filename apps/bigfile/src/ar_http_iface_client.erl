@@ -76,7 +76,7 @@ send_tx_json(Peer, TXID, Bin) ->
 send_tx_json(Peer, TXID, Bin, Opts) ->
 	ConnectTimeout = maps:get(connect_timeout, Opts, 5),
 	Timeout = maps:get(timeout, Opts, 30),
-	ar_http:req(#{
+	big_http:req(#{
 		method => post,
 		peer => Peer,
 		path => "/tx",
@@ -102,7 +102,7 @@ send_tx_binary(Peer, TXID, Bin) ->
 send_tx_binary(Peer, TXID, Bin, Opts) ->
 	ConnectTimeout = maps:get(connect_timeout, Opts, 5),
 	Timeout = maps:get(timeout, Opts, 30),
-	ar_http:req(#{
+	big_http:req(#{
 		method => post,
 		peer => Peer,
 		path => "/tx2",
@@ -114,7 +114,7 @@ send_tx_binary(Peer, TXID, Bin, Opts) ->
 
 %% @doc Announce a block to Peer.
 send_block_announcement(Peer, Announcement) ->
-	ar_http:req(#{
+	big_http:req(#{
 		method => post,
 		peer => Peer,
 		path => "/block_announcement",
@@ -125,7 +125,7 @@ send_block_announcement(Peer, Announcement) ->
 
 %% @doc Send the given JSON-encoded block to the given peer.
 send_block_json(Peer, H, Payload) ->
-	ar_http:req(#{
+	big_http:req(#{
 		method => post,
 		peer => Peer,
 		path => "/block",
@@ -145,7 +145,7 @@ send_block_binary(Peer, H, Payload, RecallByte) ->
 	%% 2.6. Since the fork 2.6 blocks have a "recall_byte" field.
 	Headers2 = case RecallByte of undefined -> Headers; _ ->
 			add_header(<<"bigfile-recall-byte">>, integer_to_binary(RecallByte), Headers) end,
-	ar_http:req(#{
+	big_http:req(#{
 		method => post,
 		peer => Peer,
 		path => "/block2",
@@ -156,7 +156,7 @@ send_block_binary(Peer, H, Payload, RecallByte) ->
 
 %% @doc Request to be added as a peer to a remote host.
 add_peer(Peer) ->
-	ar_http:req(#{
+	big_http:req(#{
 		method => post,
 		peer => Peer,
 		path => "/peers",
@@ -169,7 +169,7 @@ add_peer(Peer) ->
 %% transactions at the given positions (in the sorted transaction list).
 get_block(Peer, H, TXIndices) ->
 	case handle_block_response(Peer, binary,
-			ar_http:req(#{
+			big_http:req(#{
 				method => get,
 				peer => Peer,
 				path => "/block2/hash/" ++ binary_to_list(ar_util:encode(H)),
@@ -218,7 +218,7 @@ get_block_shadow(Peers, ID, Opts) ->
 %%--------------------------------------------------------------------
 get_block_shadow(ID, Peer, Encoding, _Opts) ->
 	handle_block_response(Peer, Encoding,
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => get_block_path(ID, Encoding),
@@ -262,7 +262,7 @@ get_wallet_list_chunk([Peer | Peers], H, Cursor) ->
 				BasePath ++ "/" ++ binary_to_list(ar_util:encode(Cursor))
 		end,
 	Response =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => Path,
@@ -301,7 +301,7 @@ get_wallet_list([Peer | Peers], H) ->
 	end;
 get_wallet_list(Peer, H) ->
 	Response =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/block/hash/" ++ binary_to_list(ar_util:encode(H)) ++ "/wallet_list",
@@ -321,7 +321,7 @@ get_block_index(Peer, Start, End, Encoding) ->
 	StartList = integer_to_list(Start),
 	EndList = integer_to_list(End),
 	Root = case Encoding of binary -> "/block_index2/"; json -> "/block_index/" end,
-	case ar_http:req(#{
+	case big_http:req(#{
 				method => get,
 				peer => Peer,
 				path => Root ++ StartList ++ "/" ++ EndList,
@@ -363,7 +363,7 @@ decode_block_index(Bin, json) ->
 
 get_sync_record(Peer) ->
 	Headers = [{<<"Content-Type">>, <<"application/etf">>}],
-	handle_sync_record_response(ar_http:req(#{
+	handle_sync_record_response(big_http:req(#{
 		peer => Peer,
 		method => get,
 		path => "/data_sync_record",
@@ -375,7 +375,7 @@ get_sync_record(Peer) ->
 
 get_sync_record(Peer, Start, Limit) ->
 	Headers = [{<<"Content-Type">>, <<"application/etf">>}],
-	handle_sync_record_response(ar_http:req(#{
+	handle_sync_record_response(big_http:req(#{
 		peer => Peer,
 		method => get,
 		path => "/data_sync_record/" ++ integer_to_list(Start) ++ "/"
@@ -402,7 +402,7 @@ get_chunk_binary(Peer, Offset, RequestedPacking) ->
 			%% are smaller than 256 KiB.
 			{<<"x-bucket-based-offset">>, <<"true">>}],
 	StartTime = erlang:monotonic_time(),
-	Response = ar_http:req(#{
+	Response = big_http:req(#{
 		peer => Peer,
 		method => get,
 		path => "/chunk2/" ++ integer_to_binary(Offset),
@@ -436,7 +436,7 @@ get_mempool([Peer | Peers]) ->
     end;
 
 get_mempool(Peer) ->
-	handle_mempool_response(ar_http:req(#{
+	handle_mempool_response(big_http:req(#{
 		peer => Peer,
 		method => get,
 		path => "/tx/pending",
@@ -449,7 +449,7 @@ get_mempool(Peer) ->
 	})).
 
 get_sync_buckets(Peer) ->
-	handle_get_sync_buckets_response(ar_http:req(#{
+	handle_get_sync_buckets_response(big_http:req(#{
 		peer => Peer,
 		method => get,
 		path => "/sync_buckets",
@@ -460,7 +460,7 @@ get_sync_buckets(Peer) ->
 	})).
 
 get_recent_hash_list(Peer) ->
-	handle_get_recent_hash_list_response(ar_http:req(#{
+	handle_get_recent_hash_list_response(big_http:req(#{
 		peer => Peer,
 		method => get,
 		path => "/recent_hash_list",
@@ -472,7 +472,7 @@ get_recent_hash_list(Peer) ->
 
 get_recent_hash_list_diff(Peer, HL) ->
 	ReverseHL = lists:reverse(HL),
-	handle_get_recent_hash_list_diff_response(ar_http:req(#{
+	handle_get_recent_hash_list_diff_response(big_http:req(#{
 		peer => Peer,
 		method => get,
 		path => "/recent_hash_list_diff",
@@ -496,7 +496,7 @@ get_reward_history([Peer | Peers], B, ExpectedRewardHistoryHashes) ->
 	true = length(ExpectedRewardHistoryHashes) == min(
 													Height - ar_fork:height_2_6() + 1,
 													DoubleCheckLength),
-	case ar_http:req(#{
+	case big_http:req(#{
 				peer => Peer,
 				method => get,
 				path => "/reward_history/" ++ binary_to_list(ar_util:encode(H)),
@@ -549,7 +549,7 @@ get_block_time_history([Peer | Peers], B, ExpectedBlockTimeHistoryHashes) ->
 			ar_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
 	true = length(ExpectedBlockTimeHistoryHashes) == min(Height - Fork_2_7 + 1,
 			?STORE_BLOCKS_BEHIND_CURRENT),
-	case ar_http:req(#{
+	case big_http:req(#{
 				peer => Peer,
 				method => get,
 				path => "/block_time_history/" ++ binary_to_list(ar_util:encode(H)),
@@ -589,7 +589,7 @@ get_block_time_history([], _B, _RewardHistoryHashes) ->
 
 push_nonce_limiter_update(Peer, Update, Format) ->
 	Body = ar_serialize:nonce_limiter_update_to_binary(Format, Update),
-	case ar_http:req(#{
+	case big_http:req(#{
 				peer => Peer,
 				method => post,
 				path => "/vdf",
@@ -609,7 +609,7 @@ push_nonce_limiter_update(Peer, Update, Format) ->
 	end.
 
 get_vdf_update(Peer) ->
-	case ar_http:req(#{ peer => Peer, method => get, path => "/vdf2",
+	case big_http:req(#{ peer => Peer, method => get, path => "/vdf2",
 			timeout => 2000, headers => p2p_headers()
 			}) of
 		{ok, {{<<"200">>, _}, _, Bin, _, _}} ->
@@ -633,7 +633,7 @@ get_vdf_session(Peer) ->
 			false ->
 				{"/vdf3/session", 3}
 		end,
-	case ar_http:req(#{ peer => Peer, method => get, path => Path,
+		case big_http:req(#{ peer => Peer, method => get, path => Path,
 			timeout => 10000, headers => p2p_headers() }) of
 		{ok, {{<<"200">>, _}, _, Bin, _, _}} ->
 			ar_serialize:binary_to_nonce_limiter_update(Format, Bin);
@@ -656,7 +656,7 @@ get_previous_vdf_session(Peer) ->
 			false ->
 				{"/vdf2/previous_session", 2}
 		end,
-	case ar_http:req(#{ peer => Peer, method => get, path => Path,
+	case big_http:req(#{ peer => Peer, method => get, path => Path,
 			timeout => 10000, headers => p2p_headers() }) of
 		{ok, {{<<"200">>, _}, _, Bin, _, _}} ->
 			ar_serialize:binary_to_nonce_limiter_update(Format, Bin);
@@ -674,17 +674,17 @@ get_previous_vdf_session(Peer) ->
 
 get_cm_partition_table(Peer) ->
 	Req = build_cm_or_pool_request(get, Peer, "/coordinated_mining/partition_table"),
-	handle_cm_partition_table_response(ar_http:req(Req)).
+	handle_cm_partition_table_response(big_http:req(Req)).
 
 cm_h1_send(Peer, Candidate) ->
 	JSON = ar_serialize:jsonify(ar_serialize:candidate_to_json_struct(Candidate)),
 	Req = build_cm_or_pool_request(post, Peer, "/coordinated_mining/h1", JSON),
-	handle_cm_noop_response(ar_http:req(Req)).
+	handle_cm_noop_response(big_http:req(Req)).
 
 cm_h2_send(Peer, Candidate) ->
 	JSON = ar_serialize:jsonify(ar_serialize:candidate_to_json_struct(Candidate)),
 	Req = build_cm_or_pool_request(post, Peer, "/coordinated_mining/h2", JSON),
-	handle_cm_noop_response(ar_http:req(Req)).
+	handle_cm_noop_response(big_http:req(Req)).
 
 cm_publish_send(Peer, Solution) ->
 	?LOG_DEBUG([{event, cm_publish_send}, {peer, ar_util:format_peer(Peer)},
@@ -694,14 +694,14 @@ cm_publish_send(Peer, Solution) ->
 		{seed, ar_util:encode(Solution#mining_solution.seed)}]),
 	JSON = ar_serialize:jsonify(ar_serialize:solution_to_json_struct(Solution)),
 	Req = build_cm_or_pool_request(post, Peer, "/coordinated_mining/publish", JSON),
-	handle_cm_noop_response(ar_http:req(Req)).
+	handle_cm_noop_response(big_http:req(Req)).
 
 %% @doc Fetch the jobs from the pool or coordinated mining exit peer.
 get_jobs(Peer, PrevOutput) ->
 	prometheus_counter:inc(pool_job_request_count),
 	Req = build_cm_or_pool_request(get, Peer,
 		"/jobs/" ++ binary_to_list(ar_util:encode(PrevOutput))),
-	handle_get_jobs_response(ar_http:req(Req)).
+	handle_get_jobs_response(big_http:req(Req)).
 
 %% @doc Post the partial solution to the pool or coordinated mining exit peer.
 post_partial_solution(Peer, Solution) ->
@@ -713,7 +713,7 @@ post_partial_solution(Peer, Solution) ->
 				ar_serialize:jsonify(ar_serialize:solution_to_json_struct(Solution))
 		end,
 	Req = build_cm_or_pool_request(post, Peer, "/partial_solution", Payload),
-	handle_post_partial_solution_response(ar_http:req(Req#{
+	handle_post_partial_solution_response(big_http:req(Req#{
 		timeout => 20 * 1000,
 		connect_timeout => 5 * 1000
 	})).
@@ -721,20 +721,20 @@ post_partial_solution(Peer, Solution) ->
 get_pool_cm_jobs(Peer, Jobs) ->
 	JSON = ar_serialize:jsonify(ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),
 	Req = build_cm_or_pool_request(post, Peer, "/pool_cm_jobs", JSON),
-	handle_get_pool_cm_jobs_response(ar_http:req(Req#{
+	handle_get_pool_cm_jobs_response(big_http:req(Req#{
 		connect_timeout => 1000
 	})).
 
 post_pool_cm_jobs(Peer, Payload) ->
 	Req = build_cm_or_pool_request(post, Peer, "/pool_cm_jobs", Payload),
-	handle_post_pool_cm_jobs_response(ar_http:req(Req#{
+	handle_post_pool_cm_jobs_response(big_http:req(Req#{
 		timeout => 10 * 1000,
 		connect_timeout => 2000
 	})).
 
 post_cm_partition_table_to_pool(Peer, Payload) ->
 	Req = build_cm_or_pool_request(post, Peer, "/coordinated_mining/partition_table", Payload),
-	handle_cm_partition_table_response(ar_http:req(Req#{
+	handle_cm_partition_table_response(big_http:req(Req#{
 		timeout => 10 * 1000,
 		connect_timeout => 2000
 	})).
@@ -1034,7 +1034,7 @@ parse_txids(<<>>) ->
 %% @doc Return the current height of a remote node.
 get_height(Peer) ->
 	Response =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/height",
@@ -1116,7 +1116,7 @@ get_tx_from_remote_peer(Peer, TXID, RatePeer) ->
 	Release = big_peers:get_peer_release(Peer),
 	Encoding = case Release >= 52 of true -> binary; _ -> json end,
 	case handle_tx_response(Peer, Encoding,
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => get_tx_path(TXID, Encoding),
@@ -1169,7 +1169,7 @@ get_tx_data(Peers, Hash) when is_list(Peers) ->
 	end;
 get_tx_data(Peer, Hash) ->
 	Reply =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/tx/" ++ binary_to_list(ar_util:encode(Hash)) ++ "/data",
@@ -1194,7 +1194,7 @@ get_tx_data(Peer, Hash) ->
 
 %% @doc Retreive the current universal time as claimed by a foreign node.
 get_time(Peer, Timeout) ->
-	case ar_http:req(#{method => get, peer => Peer, path => "/time",
+	case big_http:req(#{method => get, peer => Peer, path => "/time",
 			headers => p2p_headers(), timeout => Timeout + 100}) of
 		{ok, {{<<"200">>, _}, _, Body, Start, End}} ->
 			Time = binary_to_integer(Body),
@@ -1216,7 +1216,7 @@ get_info(Peer, Type) ->
 	end.
 get_info(Peer) ->
 	case
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/info",
@@ -1240,7 +1240,7 @@ get_peers(Peer) ->
 	try
 		begin
 			{ok, {{<<"200">>, _}, _, Body, _, _}} =
-				ar_http:req(#{
+				big_http:req(#{
 					method => get,
 					peer => Peer,
 					path => "/peers",

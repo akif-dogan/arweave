@@ -62,7 +62,7 @@ register() ->
         {labels, [http_method, route, status_class]},
 		{
 			help,
-			"The total duration of an ar_http:req call. This includes more than just the GUN "
+			"The total duration of an big_http:req call. This includes more than just the GUN "
 			"request itself (e.g. establishing a connection, throttling, etc...)"
 		}
 	]),

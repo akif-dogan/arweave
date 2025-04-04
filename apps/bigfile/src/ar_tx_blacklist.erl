@@ -540,7 +540,7 @@ load_from_url(URL) ->
 		Query = case maps:get(query, M, not_found) of not_found -> <<>>; Q -> [<<"?">>, Q] end,
 		Port = maps:get(port, M, case Scheme of "http" -> 80; "https" -> 443 end),
 		Reply =
-			ar_http:req(#{
+			big_http:req(#{
 				method => get,
 				peer => {Host, Port},
 				path => binary_to_list(iolist_to_binary([Path, Query])),

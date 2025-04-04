@@ -165,7 +165,7 @@ test_vdf_server_push_fast_block() ->
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
-	ar_test_node:remote_call(peer1, ar_http, block_peer_connections, []),
+	ar_test_node:remote_call(peer1, big_http, block_peer_connections, []),
 	timer:sleep(3000),
 
 	{ok, Config} = application:get_env(bigfile, config),
@@ -214,7 +214,7 @@ test_vdf_server_push_slow_block() ->
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
-	ar_test_node:remote_call(peer1, ar_http, block_peer_connections, []),
+	ar_test_node:remote_call(peer1, big_http, block_peer_connections, []),
 
 	%% Setup a server to listen for VDF pushes
 	Routes = [{"/[...]", ar_vdf_server_tests, []}],
@@ -274,7 +274,7 @@ test_vdf_client_fast_block() ->
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
-	ar_test_node:remote_call(peer1, ar_http, block_peer_connections, []),
+	ar_test_node:remote_call(peer1, big_http, block_peer_connections, []),
 	timer:sleep(20000),
 
 	%% Mine a block that will be ahead of main in the VDF chain
@@ -321,7 +321,7 @@ test_vdf_client_fast_block_pull_interface() ->
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
-	_ = ar_test_node:remote_call(peer1, ar_http, block_peer_connections, []),
+	_ = ar_test_node:remote_call(peer1, big_http, block_peer_connections, []),
 	timer:sleep(20000),
 
 	%% Mine a block that will be ahead of main in the VDF chain
@@ -367,7 +367,7 @@ test_vdf_client_slow_block() ->
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
-	ar_test_node:remote_call(peer1, ar_http, block_peer_connections, []),
+	ar_test_node:remote_call(peer1, big_http, block_peer_connections, []),
 
 	%% Mine a block that will be ahead of main in the VDF chain
 	ar_test_node:mine(peer1),
@@ -405,7 +405,7 @@ test_vdf_client_slow_block_pull_interface() ->
 
 	%% Let peer1 get ahead of main in the VDF chain
 	_ = ar_test_node:start_peer(peer1, B0),
-	ar_test_node:remote_call(peer1, ar_http, block_peer_connections, []),
+	ar_test_node:remote_call(peer1, big_http, block_peer_connections, []),
 
 	%% Mine a block that will be ahead of main in the VDF chain
 	ar_test_node:mine(peer1),

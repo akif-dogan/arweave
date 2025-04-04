@@ -343,7 +343,7 @@ http_get_block(H, Node) ->
 	{ok, Config} = remote_call(Node, application, get_env, [bigfile, config]),
 	Port = Config#config.port,
 	Peer = {127, 0, 0, 1, Port},
-	case ar_http:req(#{ peer => Peer, method => get,
+	case big_http:req(#{ peer => Peer, method => get,
 			path => "/block2/hash/" ++ binary_to_list(ar_util:encode(H)) }) of
 		{ok, {{<<"200">>, _}, _, BlockBin, _, _}} ->
 			ar_serialize:binary_to_block(BlockBin);
@@ -654,7 +654,7 @@ get_tx_price(Node, DataSize, Target) ->
 	Path = "/price/" ++ integer_to_list(DataSize) ++ "/"
 			++ binary_to_list(ar_util:encode(Target)),
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => Path
@@ -663,7 +663,7 @@ get_tx_price(Node, DataSize, Target) ->
 	Path2 = "/price2/" ++ integer_to_list(DataSize) ++ "/"
 			++ binary_to_list(ar_util:encode(Target)),
 	{ok, {{<<"200">>, _}, _, Reply2, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => Path2
@@ -686,7 +686,7 @@ get_optimistic_tx_price(Node, DataSize, Target) ->
 	Path = "/optimistic_price/" ++ integer_to_list(DataSize) ++ "/"
 			++ binary_to_list(ar_util:encode(Target)),
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => peer_ip(Node),
 			path => Path
@@ -855,13 +855,13 @@ get_default_storage_module_packing(RewardAddr, Index, Options) ->
 
 connect_to_peer(Node) ->
 	%% Unblock connections possibly blocked in the prior test code.
-	ar_http:unblock_peer_connections(),
-	remote_call(Node, ar_http, unblock_peer_connections, []),
+	big_http:unblock_peer_connections(),
+	remote_call(Node, big_http, unblock_peer_connections, []),
 	Peer = peer_ip(Node),
 	Self = self_node(),
 	%% Make requests to the nodes to make them discover each other.
 	{ok, {{<<"200">>, <<"OK">>}, _, _, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/info",
@@ -876,7 +876,7 @@ connect_to_peer(Node) ->
 		?CONNECT_TO_PEER_TIMEOUT
 	),
 	{ok, {{<<"200">>, <<"OK">>}, _, _, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => peer_ip(Self),
 			path => "/info",
@@ -891,8 +891,8 @@ connect_to_peer(Node) ->
 	).
 
 disconnect_from(Node) ->
-	ar_http:block_peer_connections(),
-	remote_call(Node, ar_http, block_peer_connections, []).
+	big_http:block_peer_connections(),
+	remote_call(Node, big_http, block_peer_connections, []).
 
 wait_until_syncs_genesis_data(Node) ->
 	ok = remote_call(Node, ar_test_node, wait_until_syncs_genesis_data, [], 100_000).
@@ -1095,7 +1095,7 @@ post_tx_to_peer(Node, TX, Wait) ->
 	Reply.
 
 post_tx_json(Node, JSON) ->
-	ar_http:req(#{
+	big_http:req(#{
 		method => post,
 		peer => peer_ip(Node),
 		path => "/tx",
@@ -1104,7 +1104,7 @@ post_tx_json(Node, JSON) ->
 
 get_tx_anchor(Node) ->
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => peer_ip(Node),
 			path => "/tx_anchor"
@@ -1113,7 +1113,7 @@ get_tx_anchor(Node) ->
 
 get_tx_confirmations(Node, TXID) ->
 	Response =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => peer_ip(Node),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TXID)) ++ "/status"
@@ -1334,7 +1334,7 @@ get_chunk(Node, Offset, Packing) ->
 			PackingBinary = iolist_to_binary(ar_serialize:encode_packing(Packing, false)),
 			[{<<"x-packing">>, PackingBinary}]
 	end,
-	ar_http:req(#{
+	big_http:req(#{
 		method => get,
 		peer => peer_ip(Node),
 		path => "/chunk/" ++ integer_to_list(Offset),
@@ -1342,7 +1342,7 @@ get_chunk(Node, Offset, Packing) ->
 	}).
 
 get_chunk_proof(Node, Offset) ->
-	ar_http:req(#{
+	big_http:req(#{
 		method => get,
 		peer => peer_ip(Node),
 		path => "/chunk_proof/" ++ integer_to_list(Offset),
@@ -1351,7 +1351,7 @@ get_chunk_proof(Node, Offset) ->
 
 post_chunk(Node, Proof) ->
 	Peer = peer_ip(Node),
-	ar_http:req(#{
+	big_http:req(#{
 		method => post,
 		peer => Peer,
 		path => "/chunk",
@@ -1367,7 +1367,7 @@ assert_get_tx_data(Node, TXID, ExpectedData) ->
 	Peer = peer_ip(Node),
 	true = ar_util:do_until(
 		fun() ->
-			case ar_http:req(#{ method => get, peer => Peer,
+			case big_http:req(#{ method => get, peer => Peer,
 					path => "/tx/" ++ binary_to_list(ar_util:encode(TXID)) ++ "/data" }) of
 				{ok, {{<<"200">>, _}, _, ExpectedData, _, _}} ->
 					true;
@@ -1390,7 +1390,7 @@ assert_get_tx_data(Node, TXID, ExpectedData) ->
 		?GET_TX_DATA_TIMEOUT
 	),
 	{ok, {{<<"200">>, _}, _, OffsetJSON, _, _}}
-			= ar_http:req(#{ method => get, peer => Peer,
+			= big_http:req(#{ method => get, peer => Peer,
 					path => "/tx/" ++ binary_to_list(ar_util:encode(TXID)) ++ "/offset" }),
 	Map = jiffy:decode(OffsetJSON, [return_maps]),
 	Offset = binary_to_integer(maps:get(<<"offset">>, Map)),
@@ -1405,7 +1405,7 @@ get_tx_data_in_chunks(Offset, Start, _Peer, Bin) when Offset =< Start ->
 	ar_util:encode(iolist_to_binary(Bin));
 get_tx_data_in_chunks(Offset, Start, Peer, Bin) ->
 	{ok, {{<<"200">>, _}, _, JSON, _, _}}
-			= ar_http:req(#{ method => get, peer => Peer,
+			= big_http:req(#{ method => get, peer => Peer,
 					path => "/chunk/" ++ integer_to_list(Offset) }),
 	Map = jiffy:decode(JSON, [return_maps]),
 	Chunk = ar_util:decode(maps:get(<<"chunk">>, Map)),
@@ -1418,7 +1418,7 @@ get_tx_data_in_chunks_traverse_forward(Offset, Start, _Peer, Bin) when Offset =<
 	ar_util:encode(iolist_to_binary(lists:reverse(Bin)));
 get_tx_data_in_chunks_traverse_forward(Offset, Start, Peer, Bin) ->
 	{ok, {{<<"200">>, _}, _, JSON, _, _}}
-			= ar_http:req(#{ method => get, peer => Peer,
+			= big_http:req(#{ method => get, peer => Peer,
 					path => "/chunk/" ++ integer_to_list(Start + 1) }),
 	Map = jiffy:decode(JSON, [return_maps]),
 	Chunk = ar_util:decode(maps:get(<<"chunk">>, Map)),
@@ -1428,7 +1428,7 @@ get_tx_data_in_chunks_traverse_forward(Offset, Start, Peer, Bin) ->
 assert_data_not_found(Node, TXID) ->
 	Peer = peer_ip(Node),
 	?assertMatch({ok, {{<<"404">>, _}, _, _Binary, _, _}},
-			ar_http:req(#{ method => get, peer => Peer,
+			big_http:req(#{ method => get, peer => Peer,
 					path => "/tx/" ++ binary_to_list(ar_util:encode(TXID)) ++ "/data" })).
 
 get_node_namespace() ->

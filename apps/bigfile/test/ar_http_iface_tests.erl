@@ -189,7 +189,7 @@ get_balance(EncodedAddr) ->
 	Peer = ar_test_node:peer_ip(main),
 	{_, _, _, _, Port} = Peer,
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/wallet/" ++ binary_to_list(EncodedAddr) ++ "/balance",
@@ -201,7 +201,7 @@ get_last_tx(EncodedAddr) ->
 	Peer = ar_test_node:peer_ip(main),
 	{_, _, _, _, Port} = Peer,
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/wallet/" ++ binary_to_list(EncodedAddr) ++ "/last_tx",
@@ -213,7 +213,7 @@ get_price(EncodedAddr) ->
 	Peer = ar_test_node:peer_ip(main),
 	{_, _, _, _, Port} = Peer,
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/price/0/" ++ binary_to_list(EncodedAddr),
@@ -225,7 +225,7 @@ get_tx(ID) ->
 	Peer = ar_test_node:peer_ip(main),
 	{_, _, _, _, Port} = Peer,
 	{ok, {{<<"200">>, _}, _, Reply, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/tx/" ++ binary_to_list(ar_util:encode(ID)),
@@ -370,7 +370,7 @@ test_get_balance({B0, _, _, {_, Pub1}}) ->
 	LocalHeight = big_node:get_height(),
 	Addr = binary_to_list(ar_util:encode(big_wallet:to_address(Pub1))),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet/" ++ Addr ++ "/balance"
@@ -378,7 +378,7 @@ test_get_balance({B0, _, _, {_, Pub1}}) ->
 	?assertEqual(?BIG(10), binary_to_integer(Body)),
 	RootHash = binary_to_list(ar_util:encode(B0#block.wallet_list)),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet_list/" ++ RootHash ++ "/" ++ Addr ++ "/balance"
@@ -386,7 +386,7 @@ test_get_balance({B0, _, _, {_, Pub1}}) ->
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet_list/" ++ RootHash ++ "/" ++ Addr ++ "/balance"
@@ -398,7 +398,7 @@ test_get_wallet_list_in_chunks({B0, {_, Pub1}, {_, Pub2}, {_, StaticPub}}) ->
 	StaticAddr = big_wallet:to_address(StaticPub),
 	NonExistentRootHash = binary_to_list(ar_util:encode(crypto:strong_rand_bytes(32))),
 	{ok, {{<<"404">>, _}, _, <<"Root hash not found.">>, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet_list/" ++ NonExistentRootHash
@@ -415,7 +415,7 @@ test_get_wallet_list_in_chunks({B0, {_, Pub1}, {_, Pub2}, {_, StaticPub}}) ->
 	{ExpectedWallets1, ExpectedWallets2} = lists:split(2, ExpectedWallets),
 	RootHash = binary_to_list(ar_util:encode(B0#block.wallet_list)),
 	{ok, {{<<"200">>, _}, _, Body1, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet_list/" ++ RootHash
@@ -427,7 +427,7 @@ test_get_wallet_list_in_chunks({B0, {_, Pub1}, {_, Pub2}, {_, StaticPub}}) ->
 		}, binary_to_term(Body1)),
 
 	{ok, {{<<"200">>, _}, _, Body2, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet_list/" ++ RootHash ++ "/" ++ ar_util:encode(Cursor)
@@ -448,7 +448,7 @@ test_get_height(_) ->
 test_get_last_tx_single({_, _, _, {_, StaticPub}}) ->
 	Addr = binary_to_list(ar_util:encode(big_wallet:to_address(StaticPub))),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet/" ++ Addr ++ "/last_tx"
@@ -479,7 +479,7 @@ test_get_current_block({B0, _, _, _}) ->
 	?assertEqual(B0#block{ size_tagged_txs = unset, txs = TXIDs, reward_history = [],
 			block_time_history = [], account_tree = undefined }, B1),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block/current" }),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block/current" }),
 	{JSONStruct} = jiffy:decode(Body),
 	?assertEqual(ar_util:encode(B0#block.indep_hash),
 			proplists:get_value(<<"indep_hash">>, JSONStruct)).
@@ -488,24 +488,24 @@ test_get_current_block({B0, _, _, _}) ->
 %% correctly if the block cannot be found.
 test_get_non_existent_block(_) ->
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block/height/100" }),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block/height/100" }),
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block2/height/100" }),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block2/height/100" }),
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block/hash/abcd" }),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block/hash/abcd" }),
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block2/hash/abcd" }),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/block2/hash/abcd" }),
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
 				path => "/block/height/101/wallet_list" }),
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
 				path => "/block/hash/abcd/wallet_list" }),
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
 				path => "/block/height/101/hash_list" }),
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
 				path => "/block/hash/abcd/hash_list" }).
 
 %% @doc A test for retrieving format=2 transactions from HTTP API.
@@ -523,7 +523,7 @@ test_get_format_2_tx(_) ->
 	ar_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), ValidTX#tx.id,
 			ar_serialize:jsonify(ar_serialize:tx_to_json_struct(ValidTX))),
 	{ok, {{<<"400">>, _}, _, <<"The attached data is split in an unknown way.">>, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => post,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx",
@@ -540,7 +540,7 @@ test_get_format_2_tx(_) ->
 	%% Ensure format=2 transactions can be retrieved over the HTTP
 	%% interface with no populated data, while retaining info on all other fields.
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx/" ++ EncodedTXID
@@ -553,21 +553,21 @@ test_get_format_2_tx(_) ->
 	{ok, Data} = wait_until_syncs_tx_data(TXID),
 	?assertEqual(ar_util:encode(<<"DATA">>), Data),
 	{ok, {{<<"404">>, _}, _, _, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx/" ++ EncodedInvalidTXID ++ "/data"
 		}),
 	%% Ensure /tx/[ID]/data works for format=2 transactions when the data is empty.
 	{ok, {{<<"200">>, _}, _, <<>>, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx/" ++ EncodedEmptyTXID ++ "/data"
 		}),
 	%% Ensure data can be fetched for format=2 transactions via /tx/[ID]/data.html.
 	{ok, {{<<"200">>, _}, Headers, HTMLData, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx/" ++ EncodedTXID ++ "/data.html"
@@ -590,7 +590,7 @@ test_get_format_1_tx(_) ->
 	{ok, Body} =
 		ar_util:do_until(
 			fun() ->
-				case ar_http:req(#{
+				case big_http:req(#{
 					method => get,
 					peer => ar_test_node:peer_ip(main),
 					path => "/tx/" ++ EncodedTXID
@@ -670,7 +670,7 @@ test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
 	{ok, {{<<"200">>, _}, _, Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet/"
@@ -699,7 +699,7 @@ test_get_pending_tx(_) ->
 			ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX))),
 	wait_until_receives_txs([TX]),
 	{ok, {{<<"202">>, _}, _, Body, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TX#tx.id))
@@ -725,7 +725,7 @@ test_get_tx_status(_) ->
 	TX = (ar_tx:new())#tx{ tags = [{<<"TestName">>, <<"TestVal">>}] },
 	ar_test_node:assert_post_tx_to_peer(main, TX),
 	FetchStatus = fun() ->
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TX#tx.id)) ++ "/status"
@@ -775,7 +775,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 	{_, Pub} = Wallet = Wallet1,
 	%% Generate a wallet and receive a wallet access code.
 	{ok, {{<<"421">>, _}, _, _, _, _}} =
-		ar_http:req(#{
+		big_http:req(#{
 			method => post,
 			peer => ar_test_node:peer_ip(main),
 			path => "/wallet"
@@ -785,14 +785,14 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 		application:set_env(bigfile, config,
 				Config#config{ internal_api_secret = <<"correct_secret">> }),
 		{ok, {{<<"421">>, _}, _, _, _, _}} =
-			ar_http:req(#{
+			big_http:req(#{
 				method => post,
 				peer => ar_test_node:peer_ip(main),
 				path => "/wallet",
 				headers => [{<<"X-Internal-Api-Secret">>, <<"incorrect_secret">>}]
 			}),
 		{ok, {{<<"200">>, <<"OK">>}, _, CreateWalletBody, _, _}} =
-			ar_http:req(#{
+			big_http:req(#{
 				method => post,
 				peer => ar_test_node:peer_ip(main),
 				path => "/wallet",
@@ -810,7 +810,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 			reward => ?BIG(1)
 			}),
 		{ok, {{<<"200">>, _}, _, _, _, _}} =
-			ar_http:req(#{
+			big_http:req(#{
 				method => post,
 				peer => ar_test_node:peer_ip(main),
 				path => "/tx",
@@ -831,7 +831,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 			{<<"wallet_access_code">>, WalletAccessCode}
 		],
 		{ok, {{<<"421">>, _}, _, _, _, _}} =
-			ar_http:req(#{
+			big_http:req(#{
 				method => post,
 				peer => ar_test_node:peer_ip(main),
 				path => "/unsigned_tx",
@@ -840,7 +840,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 		application:set_env(bigfile, config,
 				Config#config{ internal_api_secret = <<"correct_secret">> }),
 		{ok, {{<<"421">>, _}, _, _, _, _}} =
-			ar_http:req(#{
+			big_http:req(#{
 				method => post,
 				peer => ar_test_node:peer_ip(main),
 				path => "/unsigned_tx",
@@ -848,7 +848,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 				body => ar_serialize:jsonify({UnsignedTXProps})
 			}),
 		{ok, {{<<"200">>, <<"OK">>}, _, Body, _, _}} =
-			ar_http:req(#{
+			big_http:req(#{
 				method => post,
 				peer => ar_test_node:peer_ip(main),
 				path => "/unsigned_tx",
@@ -863,7 +863,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 		wait_until_height(main, LocalHeight + 2),
 		timer:sleep(200),
 		{ok, {{<<"200">>, <<"OK">>}, _, GetTXBody, _, _}} =
-			ar_http:req(#{
+			big_http:req(#{
 				method => get,
 				peer => ar_test_node:peer_ip(main),
 				path => "/tx/" ++ binary_to_list(TXID) ++ "/status"
@@ -892,7 +892,7 @@ test_get_error_of_data_limit(_) ->
 	wait_until_height(main, LocalHeight + 1),
 	{ok, _} = wait_until_syncs_tx_data(TX#tx.id),
 	Resp =
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => ar_test_node:peer_ip(main),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TX#tx.id)) ++ "/data",
@@ -937,24 +937,24 @@ test_get_recent_hash_list_diff({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 	LocalHeight = big_node:get_height(),
 	BTip = big_node:get_current_block(),
 	ar_test_node:disconnect_from(peer1),
-	{ok, {{<<"404">>, _}, _, <<>>, _, _}} = ar_http:req(#{ method => get,
+	{ok, {{<<"404">>, _}, _, <<>>, _, _}} = big_http:req(#{ method => get,
 		peer => ar_test_node:peer_ip(main), path => "/recent_hash_list_diff",
 		headers => [], body => <<>> }),
-	{ok, {{<<"400">>, _}, _, <<>>, _, _}} = ar_http:req(#{ method => get,
+	{ok, {{<<"400">>, _}, _, <<>>, _, _}} = big_http:req(#{ method => get,
 		peer => ar_test_node:peer_ip(main), path => "/recent_hash_list_diff",
 		headers => [], body => crypto:strong_rand_bytes(47) }),
-	{ok, {{<<"404">>, _}, _, <<>>, _, _}} = ar_http:req(#{ method => get,
+	{ok, {{<<"404">>, _}, _, <<>>, _, _}} = big_http:req(#{ method => get,
 		peer => ar_test_node:peer_ip(main), path => "/recent_hash_list_diff",
 		headers => [], body => crypto:strong_rand_bytes(48) }),
 	B0H = BTip#block.indep_hash,
-	{ok, {{<<"200">>, _}, _, B0H, _, _}} = ar_http:req(#{ method => get,
+	{ok, {{<<"200">>, _}, _, B0H, _, _}} = big_http:req(#{ method => get,
 		peer => ar_test_node:peer_ip(main), path => "/recent_hash_list_diff",
 		headers => [], body => B0H }),
 	ar_test_node:mine(),
 	BI1 = wait_until_height(main, LocalHeight + 1),
 	{B1H, _, _} = hd(BI1),
 	{ok, {{<<"200">>, _}, _, << B0H:48/binary, B1H:48/binary, 0:16 >> , _, _}} =
-		ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
+		big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
 				path => "/recent_hash_list_diff", headers => [], body => B0H }),
 	TXs = [ar_test_node:sign_tx(main, Wallet1, #{ last_tx => ar_test_node:get_tx_anchor(peer1) }) || _ <- lists:seq(1, 3)],
 	lists:foreach(fun(TX) -> ar_test_node:assert_post_tx_to_peer(main, TX) end, TXs),
@@ -964,16 +964,16 @@ test_get_recent_hash_list_diff({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 	[TXID1, TXID2, TXID3] = [TX#tx.id || TX <- (big_node:get_current_block())#block.txs],
 	{ok, {{<<"200">>, _}, _, << B0H:48/binary, B1H:48/binary, 0:16, B2H:48/binary,
 			3:16, TXID1:32/binary, TXID2:32/binary, TXID3/binary >> , _, _}}
-			= ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
+			= big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
 			path => "/recent_hash_list_diff", headers => [], body => B0H }),
 	{ok, {{<<"200">>, _}, _, << B0H:48/binary, B1H:48/binary, 0:16, B2H:48/binary,
 			3:16, TXID1:32/binary, TXID2:32/binary, TXID3/binary >> , _, _}}
-			= ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
+			= big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
 			path => "/recent_hash_list_diff", headers => [],
 			body => << B0H/binary, (crypto:strong_rand_bytes(48))/binary >>}),
 	{ok, {{<<"200">>, _}, _, << B1H:48/binary, B2H:48/binary,
 			3:16, TXID1:32/binary, TXID2:32/binary, TXID3/binary >> , _, _}}
-			= ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
+			= big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main),
 			path => "/recent_hash_list_diff", headers => [],
 			body => << B0H/binary, B1H/binary, (crypto:strong_rand_bytes(48))/binary >>}).
 
@@ -991,12 +991,12 @@ test_get_total_supply(_Args) ->
 		),
 	TotalSupplyBin = integer_to_binary(TotalSupply),
 	?assertMatch({ok, {{<<"200">>, _}, _, TotalSupplyBin, _, _}},
-			ar_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/total_supply" })).
+			big_http:req(#{ method => get, peer => ar_test_node:peer_ip(main), path => "/total_supply" })).
 
 wait_until_syncs_tx_data(TXID) ->
 	ar_util:do_until(
 		fun() ->
-			case ar_http:req(#{
+			case big_http:req(#{
 				method => get,
 				peer => ar_test_node:peer_ip(main),
 				path => "/tx/" ++ binary_to_list(ar_util:encode(TXID)) ++ "/data"

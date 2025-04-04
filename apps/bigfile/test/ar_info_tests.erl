@@ -277,7 +277,7 @@ get_recent(Peer, Type) ->
 	end.
 get_recent(Peer) ->
 	case
-		ar_http:req(#{
+		big_http:req(#{
 			method => get,
 			peer => Peer,
 			path => "/recent",
