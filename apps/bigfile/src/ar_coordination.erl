@@ -261,7 +261,7 @@ handle_cast({compute_h2_for_peer, Candidate}, State) ->
 	%% No don't need to batch inbound batches since ar_mining_io will cache the recall
 	%% range for a short period greatly lowering the cost of processing the same
 	%% multiple times across several batches.
-	ar_mining_server:compute_h2_for_peer(Candidate),
+	big_mining_server:compute_h2_for_peer(Candidate),
 	{noreply, State};
 
 handle_cast({computed_h2_for_peer, Candidate}, State) ->

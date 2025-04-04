@@ -273,7 +273,7 @@ jobs:
             big_join,
             ar_kv,
             ar_merkle,
-            ar_mining_server,
+            big_mining_server,
             big_mining_stats,
             ar_node,
             big_node_utils,

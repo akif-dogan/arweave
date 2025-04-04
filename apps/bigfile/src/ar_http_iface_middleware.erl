@@ -3218,7 +3218,7 @@ handle_mining_h2(Req, Pid) ->
 												Payload) end),
 									{200, #{}, <<>>, Req2};
 								_ ->
-									ar_mining_server:prepare_and_post_solution(Candidate),
+									big_mining_server:prepare_and_post_solution(Candidate),
 									big_mining_stats:h2_received_from_peer(Peer),
 									{200, #{}, <<>>, Req}
 							end
@@ -3246,7 +3246,7 @@ handle_mining_cm_publish(Req, Pid) ->
 							?LOG_INFO("Block candidate ~p from ~p ~n", [
 								ar_util:encode(Solution#mining_solution.solution_hash),
 								ar_util:format_peer(Peer)]),
-							ar_mining_server:prepare_and_post_solution(Solution),
+							big_mining_server:prepare_and_post_solution(Solution),
 							{200, #{}, <<>>, Req}
 					end;
 				{error, _} ->

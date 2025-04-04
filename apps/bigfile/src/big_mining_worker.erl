@@ -145,7 +145,7 @@ handle_cast({chunks_read, {WhichChunk, Candidate, RangeStart, ChunkOffsets}}, St
 			?LOG_DEBUG([{event, mining_debug_add_stale_chunks},
 				{worker, State#state.name},
 				{active_sessions,
-					ar_mining_server:encode_sessions(State#state.active_sessions)},
+					big_mining_server:encode_sessions(State#state.active_sessions)},
 				{candidate_session, 
 					ar_nonce_limiter:encode_session_key(Candidate#mining_candidate.session_key)},
 				{partition_number, Candidate#mining_candidate.partition_number},
@@ -162,7 +162,7 @@ handle_cast({add_task, {TaskType, Candidate, _ExtraArgs} = Task}, State) ->
 				{worker, State#state.name},
 				{task, TaskType},
 				{active_sessions,
-					ar_mining_server:encode_sessions(State#state.active_sessions)},
+					big_mining_server:encode_sessions(State#state.active_sessions)},
 				{candidate_session, 
 					ar_nonce_limiter:encode_session_key(Candidate#mining_candidate.session_key)},
 				{partition_number, Candidate#mining_candidate.partition_number},
@@ -189,7 +189,7 @@ handle_cast(handle_task, #state{ task_queue = Q } = State) ->
 						{worker, State#state.name},
 						{task, TaskType},
 						{active_sessions,
-							ar_mining_server:encode_sessions(State#state.active_sessions)},
+							big_mining_server:encode_sessions(State#state.active_sessions)},
 						{candidate_session, ar_nonce_limiter:encode_session_key(
 							Candidate#mining_candidate.session_key)},
 						{partition_number, Candidate#mining_candidate.partition_number},
@@ -468,12 +468,12 @@ handle_task({computed_h1, Candidate, _ExtraArgs}, State) ->
 			%% Since we found a solution we won't need chunk2 (and it will be evicted if
 			%% necessary below)
 			State3 = remove_sub_chunks_from_cache(Candidate, 1, State2),
-			ar_mining_server:prepare_and_post_solution(Candidate),
+			big_mining_server:prepare_and_post_solution(Candidate),
 			{noreply, State3};
 		Result ->
 			case Result of
 				partial ->
-					ar_mining_server:prepare_and_post_solution(Candidate);
+					big_mining_server:prepare_and_post_solution(Candidate);
 				_ ->
 					ok
 			end,
@@ -543,9 +543,9 @@ handle_task({computed_h2, Candidate, _ExtraArgs}, State) ->
 		{false, _} ->
 			ok;
 		{_, not_set} ->
-			ar_mining_server:prepare_and_post_solution(Candidate);
+			big_mining_server:prepare_and_post_solution(Candidate);
 		_ ->
-			PoA2 = case ar_mining_server:prepare_poa(poa2, Candidate, #poa{}) of
+			PoA2 = case big_mining_server:prepare_poa(poa2, Candidate, #poa{}) of
 				{ok, PoA} ->
 					PoA;
 				{error, _Error} ->

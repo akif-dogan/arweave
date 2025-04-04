@@ -457,7 +457,7 @@ assert_empty_cache(_Node) ->
 	%% wait until the mining has stopped, then assert that the cache is empty
 	timer:sleep(10000),
 	ok.
-	% [{_, Size}] = ar_test_node:remote_call(Node, ets, lookup, [ar_mining_server, chunk_cache_size]),
+	% [{_, Size}] = ar_test_node:remote_call(Node, ets, lookup, [big_mining_server, chunk_cache_size]),
 	%% We should assert that the size is 0, but there is a lot of concurrency in these tests
 	%% so it's been hard to guarantee the cache is always empty by the time this check runs.
 	%% It's possible there is a bug in the cache management code, but that code is pretty complex.

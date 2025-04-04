@@ -177,34 +177,34 @@ test_pool_job_no_cached_sessions() ->
 	Seed2 = crypto:strong_rand_bytes(32),
 	Seed3 = crypto:strong_rand_bytes(32),
 	PartialDiff = {1, 1},
-	ar_mining_server:add_pool_job(
+	big_mining_server:add_pool_job(
 		SessionKey1, 1, Output, PartitionUpperBound, Seed1, PartialDiff),
-	ar_mining_server:add_pool_job(
+	big_mining_server:add_pool_job(
 		SessionKey1, 2, Output, PartitionUpperBound, Seed1, PartialDiff),
 	timer:sleep(?WAIT_TIME),
-	?assertEqual(sets:from_list([SessionKey1]), ar_mining_server:active_sessions()),
+	?assertEqual(sets:from_list([SessionKey1]), big_mining_server:active_sessions()),
 	?assertEqual([1, 1, 2, 2], lists:sort(mined_steps())),
 
-	ar_mining_server:add_pool_job(
+	big_mining_server:add_pool_job(
 		SessionKey2, 5, Output, PartitionUpperBound, Seed2, PartialDiff),
-	ar_mining_server:add_pool_job(
+	big_mining_server:add_pool_job(
 		SessionKey2, 6, Output, PartitionUpperBound, Seed2, PartialDiff),
 	timer:sleep(?WAIT_TIME),
-	?assertEqual(sets:from_list([SessionKey1, SessionKey2]), ar_mining_server:active_sessions()),
+	?assertEqual(sets:from_list([SessionKey1, SessionKey2]), big_mining_server:active_sessions()),
 	?assertEqual([5, 5, 6, 6], lists:sort(mined_steps())),
 
-	ar_mining_server:add_pool_job(
+	big_mining_server:add_pool_job(
 		SessionKey3, 10, Output, PartitionUpperBound, Seed3, PartialDiff),
-	ar_mining_server:add_pool_job(
+	big_mining_server:add_pool_job(
 		SessionKey3, 12, Output, PartitionUpperBound, Seed3, PartialDiff),
 	timer:sleep(?WAIT_TIME),
-	?assertEqual(sets:from_list([SessionKey2, SessionKey3]), ar_mining_server:active_sessions()),
+	?assertEqual(sets:from_list([SessionKey2, SessionKey3]), big_mining_server:active_sessions()),
 	?assertEqual([10, 10, 12, 12],lists:sort(mined_steps())),
 
-	ar_mining_server:add_pool_job(
+	big_mining_server:add_pool_job(
 		SessionKey1, 4, Output, PartitionUpperBound, Seed1, PartialDiff),
 	timer:sleep(?WAIT_TIME),
-	?assertEqual(sets:from_list([SessionKey2, SessionKey3]), ar_mining_server:active_sessions()),
+	?assertEqual(sets:from_list([SessionKey2, SessionKey3]), big_mining_server:active_sessions()),
 	?assertEqual([], mined_steps()).
 
 
@@ -283,7 +283,7 @@ get_chunk_cache_size() ->
     Entries = ets:match(mock_counter, Pattern),
     lists:foldl(
         fun(PartitionNumber, Acc) ->
-			case ets:lookup(ar_mining_server, {chunk_cache_size, PartitionNumber}) of
+			case ets:lookup(big_mining_server, {chunk_cache_size, PartitionNumber}) of
 				[] ->
 					Acc;
 				[{_, Size}] ->

@@ -196,7 +196,7 @@ set_storage_module_data_size(
 	StoreLabel = big_storage_module:label_by_id(StoreID),
 	PackingLabel = big_storage_module:packing_label(Packing),
 	try	
-		PackingDifficulty = ar_mining_server:get_packing_difficulty(Packing),
+		PackingDifficulty = big_mining_server:get_packing_difficulty(Packing),
 		prometheus_gauge:set(v2_index_data_size_by_packing,
 			[StoreLabel, PackingLabel, PartitionNumber,
 			 StorageModuleSize, StorageModuleIndex,
@@ -410,7 +410,7 @@ vdf_speed(Now) ->
 get_hash_hps(PoA1Multiplier, Packing, PartitionNumber, TotalCurrent, Now) ->
 	H1 = get_average_count_by_time({partition, PartitionNumber, h1, TotalCurrent}, Now),
 	H2 = get_average_count_by_time({partition, PartitionNumber, h2, TotalCurrent}, Now),
-	PackingDifficulty = ar_mining_server:get_packing_difficulty(Packing),
+	PackingDifficulty = big_mining_server:get_packing_difficulty(Packing),
 	((H1 / PoA1Multiplier) + H2) / get_hashrate_divisor(PackingDifficulty).
 
 %% @doc calculate the maximum hash rate (in MiB per second read from disk) for the given VDF
@@ -418,7 +418,7 @@ get_hash_hps(PoA1Multiplier, Packing, PartitionNumber, TotalCurrent, Now) ->
 optimal_partition_read_mibps(_Packing, undefined, _PartitionDataSize, _TotalDataSize, _WeaveSize) ->
 	0.0;	
 optimal_partition_read_mibps(Packing, VDFSpeed, PartitionDataSize, TotalDataSize, WeaveSize) ->
-	PackingDifficulty = ar_mining_server:get_packing_difficulty(Packing),
+	PackingDifficulty = big_mining_server:get_packing_difficulty(Packing),
 	RecallRangeSize = big_block:get_recall_range_size(PackingDifficulty) / ?MiB,
 	(RecallRangeSize / VDFSpeed) *
 	min(1.0, (PartitionDataSize / ?PARTITION_SIZE)) *
@@ -1215,7 +1215,7 @@ test_optimal_stats_poa1_multiple_2() ->
 	test_optimal_stats({composite, <<"MINING">>, 2}, 2).
 
 test_optimal_stats(Packing, PoA1Multiplier) ->
-	PackingDifficulty = ar_mining_server:get_packing_difficulty(Packing),
+	PackingDifficulty = big_mining_server:get_packing_difficulty(Packing),
 	RecallRangeSize = case PackingDifficulty of
 		0 ->
 			0.5;
@@ -1289,7 +1289,7 @@ test_report(Mining, Packing, PoA1Multiplier) ->
 		{composite, Addr, _} ->
 			Addr
 	end,
-	PackingDifficulty = ar_mining_server:get_packing_difficulty(Mining),
+	PackingDifficulty = big_mining_server:get_packing_difficulty(Mining),
 	DifficultyDivisor = case PackingDifficulty of
 		0 ->
 			1.0;

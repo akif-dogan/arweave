@@ -386,7 +386,7 @@ process_partial_solution_poa2_size(Solution, Ref) ->
 	#mining_solution{
 		poa2 = #poa{ chunk = C, data_path = DP, tx_path = TP, unpacked_chunk = U }
 	} = Solution,
-	case ar_mining_server:is_one_chunk_solution(Solution) of
+	case big_mining_server:is_one_chunk_solution(Solution) of
 		true ->
 			case {C, DP, TP, U} of
 				{<<>>, <<>>, <<>>, <<>>} ->
@@ -459,7 +459,7 @@ process_partial_solution_pow(Solution, Ref, H0) ->
 	{H1, Preimage1} = big_block:compute_h1(H0, Nonce, Chunk1),
 
 	case {H1 == SolutionH andalso Preimage1 == Preimage,
-			ar_mining_server:is_one_chunk_solution(Solution)} of
+			big_mining_server:is_one_chunk_solution(Solution)} of
 		{true, false} ->
 			#partial_solution_response{ status = <<"rejected_bad_poa">> };
 		{true, true} ->
@@ -609,7 +609,7 @@ process_h1_read_jobs([], _Partitions) ->
 process_h1_read_jobs([Candidate | Jobs], Partitions) ->
 	case we_have_partition_for_the_first_recall_byte(Candidate, Partitions) of
 		true ->
-			ar_mining_server:prepare_and_post_solution(Candidate),
+			big_mining_server:prepare_and_post_solution(Candidate),
 			big_mining_stats:h2_received_from_peer(pool);
 		false ->
 			ok

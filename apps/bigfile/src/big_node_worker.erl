@@ -728,7 +728,7 @@ handle_task(compute_mining_difficulty, State) ->
 		undefined ->
 			ok;
 		_ ->
-			ar_mining_server:set_difficulty(Diff)
+			big_mining_server:set_difficulty(Diff)
 	end,
 	ar_util:cast_after((?COMPUTE_MINING_DIFFICULTY_INTERVAL) * 1000, ?MODULE,
 			compute_mining_difficulty),
@@ -1604,7 +1604,7 @@ maybe_reset_miner(#{ miner_2_6 := Miner_2_6, automine := false } = State) ->
 		undefined ->
 			ok;
 		_ ->
-			ar_mining_server:pause()
+			big_mining_server:pause()
 	end,
 	State#{ miner_2_6 => undefined };
 maybe_reset_miner(State) ->
@@ -1617,12 +1617,12 @@ start_mining(State) ->
 	[{_, Height}] = ets:lookup(node_state, height),
 	case maps:get(miner_2_6, State) of
 		undefined ->
-			ar_mining_server:start_mining({DiffPair, MerkleRebaseThreshold, Height}),
+			big_mining_server:start_mining({DiffPair, MerkleRebaseThreshold, Height}),
 			State#{ miner_2_6 => running };
 		_ ->
-			ar_mining_server:set_difficulty(DiffPair),
-			ar_mining_server:set_merkle_rebase_threshold(MerkleRebaseThreshold),
-			ar_mining_server:set_height(Height),
+			big_mining_server:set_difficulty(DiffPair),
+			big_mining_server:set_merkle_rebase_threshold(MerkleRebaseThreshold),
+			big_mining_server:set_height(Height),
 			State
 	end.
 
@@ -1910,7 +1910,7 @@ handle_found_solution(Args, PrevB, State) ->
 			true ->
 				ar_events:send(solution, {rejected, #{ reason => mining_address_banned,
 						source => Source }}),
-				ar_mining_server:log_prepare_solution_failure(Solution,
+				big_mining_server:log_prepare_solution_failure(Solution,
 						mining_address_banned, []),
 				{false, address_banned};
 			false ->
@@ -1918,7 +1918,7 @@ handle_found_solution(Args, PrevB, State) ->
 					false ->
 						ar_events:send(solution, {rejected,
 								#{ reason => invalid_packing_difficulty, source => Source }}),
-						ar_mining_server:log_prepare_solution_failure(Solution,
+						big_mining_server:log_prepare_solution_failure(Solution,
 								invalid_packing_difficulty, []),
 						{false, invalid_packing_difficulty};
 					true ->
@@ -1930,7 +1930,7 @@ handle_found_solution(Args, PrevB, State) ->
 								PrevBlockVDF =
 									PrevNonceLimiterInfo#nonce_limiter_info.global_step_number,
 								ar_events:send(solution, {stale, #{ source => Source }}),
-								ar_mining_server:log_prepare_solution_failure(Solution,
+								big_mining_server:log_prepare_solution_failure(Solution,
 									stale_solution, [
 										{solution_vdf, SolutionVDF},
 										{prev_block_vdf, PrevBlockVDF}
@@ -1956,7 +1956,7 @@ handle_found_solution(Args, PrevB, State) ->
 						== {PrevIntervalNumber, PrevNextSeed, PrevNextVDFDifficulty} of
 					false ->
 						ar_events:send(solution, {stale, #{ source => Source }}),
-						ar_mining_server:log_prepare_solution_failure(Solution,
+						big_mining_server:log_prepare_solution_failure(Solution,
 							vdf_seed_data_does_not_match_current_block, [
 								{interval_number, IntervalNumber},
 								{prev_interval_number, PrevIntervalNumber},
@@ -1985,7 +1985,7 @@ handle_found_solution(Args, PrevB, State) ->
 				case big_node_utils:solution_passes_diff_check(Solution, DiffPair) of
 					false ->
 						ar_events:send(solution, {partial, #{ source => Source }}),
-						ar_mining_server:log_prepare_solution_failure(Solution,
+						big_mining_server:log_prepare_solution_failure(Solution,
 								does_not_pass_diff_check, []),
 						{false, diff};
 					true ->
@@ -2011,7 +2011,7 @@ handle_found_solution(Args, PrevB, State) ->
 					not_found ->
 						ar_events:send(solution,
 							{rejected, #{ reason => missing_key_file, source => Source }}),
-						ar_mining_server:log_prepare_solution_failure(Solution,
+						big_mining_server:log_prepare_solution_failure(Solution,
 								mining_key_not_found, []),
 						{false, wallet_not_found};
 					_ ->
@@ -2028,7 +2028,7 @@ handle_found_solution(Args, PrevB, State) ->
 					MerkleRebaseThreshold ->
 						true;
 					_ ->
-						ar_mining_server:log_prepare_solution_failure(Solution,
+						big_mining_server:log_prepare_solution_failure(Solution,
 								invalid_merkle_rebase_threshold, []),
 						{false, rebase_threshold}
 				end
@@ -2063,7 +2063,7 @@ handle_found_solution(Args, PrevB, State) ->
 			?LOG_WARNING([{event, did_not_find_steps_for_mined_block},
 					{seed, ar_util:encode(PrevNextSeed)}, {prev_step_number, PrevStepNumber},
 					{step_number, StepNumber}]),
-			ar_mining_server:log_prepare_solution_failure(Solution,
+			big_mining_server:log_prepare_solution_failure(Solution,
 					vdf_steps_not_found, []),
 			{noreply, State};
 		[NonceLimiterOutput | _] = Steps ->

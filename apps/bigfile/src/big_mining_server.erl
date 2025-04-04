@@ -1,5 +1,5 @@
 %%% @doc The 2.6 mining server.
--module(ar_mining_server).
+-module(big_mining_server).
 
 -behaviour(gen_server).
 
@@ -305,7 +305,7 @@ handle_info({garbage_collect, StartTime, GCResult}, State) ->
 	case GCResult == false orelse ElapsedTime > ?GC_LOG_THRESHOLD of
 		true ->
 			?LOG_DEBUG([
-				{event, mining_debug_garbage_collect}, {process, ar_mining_server},
+				{event, mining_debug_garbage_collect}, {process, big_mining_server},
 				{pid, self()}, {gc_time, ElapsedTime}, {gc_result, GCResult}]);
 		false ->
 			ok

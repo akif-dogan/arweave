@@ -87,7 +87,7 @@ h2_passes_diff_check(H2, DiffPair, PackingDifficulty) ->
 solution_passes_diff_check(Solution, DiffPair) ->
 	SolutionHash = Solution#mining_solution.solution_hash,
 	PackingDifficulty = Solution#mining_solution.packing_difficulty,
-	IsPoA1 = ar_mining_server:is_one_chunk_solution(Solution),
+	IsPoA1 = big_mining_server:is_one_chunk_solution(Solution),
 	passes_diff_check(SolutionHash, IsPoA1, DiffPair, PackingDifficulty).
 
 block_passes_diff_check(Block) ->

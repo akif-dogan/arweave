@@ -941,8 +941,8 @@ validate_repack_in_place([{Module, ToPacking} | L], Modules) ->
 	{_BucketSize, _Bucket, Packing} = Module,
 	ID = big_storage_module:id(Module),
 	ModuleInUse = lists:member(ID, Modules),
-	FromPackingType = ar_mining_server:get_packing_type(Packing),
-	ToPackingType = ar_mining_server:get_packing_type(ToPacking),
+	FromPackingType = big_mining_server:get_packing_type(Packing),
+	ToPackingType = big_mining_server:get_packing_type(ToPacking),
 	case {ModuleInUse, FromPackingType, ToPackingType} of
 		{true, _, _} ->
 			io:format("~nCannot use the storage module ~s "

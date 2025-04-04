@@ -90,6 +90,6 @@ emit_pool_jobs([Job | Jobs], SessionKey, PartialDiff, Seed) ->
 	#job{
 		output = Output, global_step_number = StepNumber,
 		partition_upper_bound = PartitionUpperBound } = Job,
-	ar_mining_server:add_pool_job(
+	big_mining_server:add_pool_job(
 		SessionKey, StepNumber, Output, PartitionUpperBound, Seed, PartialDiff),
 	emit_pool_jobs(Jobs, SessionKey, PartialDiff, Seed).
