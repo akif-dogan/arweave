@@ -29,7 +29,7 @@ lookup_bigfile_txt_record(Domain) ->
 derive_tx_label(TXID, BH) ->
 	Data = <<TXID/binary, BH/binary>>,
 	Digest = crypto:hash(sha256, Data),
-	binary:part(ar_base32:encode(Digest), {0, 12}).
+	binary:part(big_base32:encode(Digest), {0, 12}).
 
 %%%===================================================================
 %%% Private functions.

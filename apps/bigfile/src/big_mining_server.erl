@@ -1178,7 +1178,7 @@ validate_solution(Solution, DiffPair) ->
 			PartitionNumber, PartitionUpperBound),
 	%% Assert recall_byte1 is computed correctly.
 	RecallByte1 = big_block:get_recall_byte(RecallRange1Start, Nonce, PackingDifficulty),
-	{BlockStart1, BlockEnd1, TXRoot1} = ar_block_index:get_block_bounds(RecallByte1),
+	{BlockStart1, BlockEnd1, TXRoot1} = big_block_index:get_block_bounds(RecallByte1),
 	BlockSize1 = BlockEnd1 - BlockStart1,
 	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
 	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
@@ -1212,7 +1212,7 @@ validate_solution(Solution, DiffPair) ->
 									RecallByte2 = big_block:get_recall_byte(RecallRange2Start,
 											Nonce, PackingDifficulty),
 									{BlockStart2, BlockEnd2, TXRoot2} =
-											ar_block_index:get_block_bounds(RecallByte2),
+											big_block_index:get_block_bounds(RecallByte2),
 									BlockSize2 = BlockEnd2 - BlockStart2,
 									case big_poa:validate({BlockStart2, RecallByte2, TXRoot2,
 											BlockSize2, PoA2,

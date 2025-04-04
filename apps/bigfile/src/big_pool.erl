@@ -506,7 +506,7 @@ process_partial_solution_poa(Solution, Ref, H0, H1) ->
 			PartitionNumber, PartitionUpperBound),
 	ComputedRecallByte1 = big_block:get_recall_byte(RecallRange1Start, Nonce,
 			PackingDifficulty),
-	{BlockStart1, BlockEnd1, TXRoot1} = ar_block_index:get_block_bounds(ComputedRecallByte1),
+	{BlockStart1, BlockEnd1, TXRoot1} = big_block_index:get_block_bounds(ComputedRecallByte1),
 	BlockSize1 = BlockEnd1 - BlockStart1,
 	Packing = big_block:get_packing(PackingDifficulty, MiningAddress, ReplicaFormat),
 	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
@@ -525,7 +525,7 @@ process_partial_solution_poa(Solution, Ref, H0, H1) ->
 		{true, ChunkID} ->
 			ComputedRecallByte2 = big_block:get_recall_byte(RecallRange2Start, Nonce,
 					PackingDifficulty),
-			{BlockStart2, BlockEnd2, TXRoot2} = ar_block_index:get_block_bounds(
+			{BlockStart2, BlockEnd2, TXRoot2} = big_block_index:get_block_bounds(
 					ComputedRecallByte2),
 			BlockSize2 = BlockEnd2 - BlockStart2,
 			case RecallByte2 == ComputedRecallByte2 andalso
@@ -702,7 +702,7 @@ process_partial_solution_test_() ->
 		{big_block, compute_h0,
 			fun(O, P, S, M, PD) ->
 					crypto:hash(sha256, << O/binary, P:256, S/binary, M/binary, PD:8 >>) end},
-		{ar_block_index, get_block_bounds,
+		{big_block_index, get_block_bounds,
 			fun(_Byte) ->
 				{10, 110, << 1:256 >>}
 			end},
@@ -935,7 +935,7 @@ process_solution_test_() ->
 		{big_block, compute_h0,
 			fun(O, P, S, M, PD) ->
 				crypto:hash(sha256, << O/binary, P:256, S/binary, M/binary, PD:8 >>) end},
-		{ar_block_index, get_block_bounds,
+		{big_block_index, get_block_bounds,
 			fun(_Byte) ->
 				{10, 110, << 1:256 >>}
 			end},

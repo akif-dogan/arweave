@@ -53,7 +53,7 @@ test_recent_blocks(Type) ->
 	lists:foreach(
 		fun({H, _WeaveSize, _TXRoot}) ->
 			timer:sleep(1000),
-			B = ar_test_node:remote_call(peer1, ar_block_cache, get, [block_cache, H]),
+			B = ar_test_node:remote_call(peer1, big_block_cache, get, [block_cache, H]),
 			case Type of
 				post ->
 					ar_test_node:send_new_block(ar_test_node:peer_ip(peer1), B);
@@ -88,7 +88,7 @@ expected_blocks(Node, BI, ForcePending) ->
 	%%    (latest block first)
 	Blocks = lists:foldl(
 		fun({H, _WeaveSize, _TXRoot}, Acc) ->
-			B = ar_test_node:remote_call(Node, ar_block_cache, get, [block_cache, H]),
+			B = ar_test_node:remote_call(Node, big_block_cache, get, [block_cache, H]),
 			Timestamp = case ForcePending of
 				true -> <<"pending">>;
 				false ->

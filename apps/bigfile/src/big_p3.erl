@@ -316,8 +316,8 @@ scan_block_for_deposits(_, _) ->
 	ok.
 
 get_block_txs(Height) ->
-	BlockHash = ar_block_index:get_element_by_height(Height),
-	case ar_block_cache:get(block_cache, BlockHash) of
+	BlockHash = big_block_index:get_element_by_height(Height),
+	case big_block_cache:get(block_cache, BlockHash) of
 		not_found ->
 			case big_storage:read_block(BlockHash) of
 				unavailable ->

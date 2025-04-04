@@ -28,8 +28,8 @@ reset_node() ->
 	ar_test_node:disconnect_from(peer1),
 	ar_test_node:mine(peer1),
 	[{H, _, _} | _] = ar_test_node:assert_wait_until_height(peer1, Height + 1),
-	B = ar_test_node:remote_call(peer1, ar_block_cache, get, [block_cache, H]),
-	PrevB = ar_test_node:remote_call(peer1, ar_block_cache, get, [block_cache, PrevH]),
+	B = ar_test_node:remote_call(peer1, big_block_cache, get, [block_cache, H]),
+	PrevB = ar_test_node:remote_call(peer1, big_block_cache, get, [block_cache, PrevH]),
 	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
 	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
 	{Key, B, PrevB}.

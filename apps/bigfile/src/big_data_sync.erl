@@ -802,7 +802,7 @@ handle_cast(process_store_chunk_queue, State) ->
 handle_cast({join, RecentBI}, State) ->
 	#sync_data_state{ block_index = CurrentBI, store_id = StoreID } = State,
 	[{_, WeaveSize, _} | _] = RecentBI,
-	case {CurrentBI, ar_block_index:get_intersection(CurrentBI)} of
+	case {CurrentBI, big_block_index:get_intersection(CurrentBI)} of
 		{[], _} ->
 			ok;
 		{_, no_intersection} ->
@@ -823,7 +823,7 @@ handle_cast({join, RecentBI}, State) ->
 			ar_events:send(sync_record, {global_cut, Offset}),
 			reset_orphaned_data_roots_disk_pool_timestamps(OrphanedDataRoots)
 	end,
-	BI = ar_block_index:get_list_by_hash(element(1, lists:last(RecentBI))),
+	BI = big_block_index:get_list_by_hash(element(1, lists:last(RecentBI))),
 	repair_data_root_offset_index(BI, State),
 	DiskPoolThreshold = get_disk_pool_threshold(RecentBI),
 	ets:insert(ar_data_sync_state, {disk_pool_threshold, DiskPoolThreshold}),
@@ -1112,7 +1112,7 @@ handle_cast({store_fetched_chunk, Peer, Byte, Proof} = Cast, State) ->
 	{store_fetched_chunk, Peer, Byte, Proof} = Cast,	
 	#{ data_path := DataPath, tx_path := TXPath, chunk := Chunk, packing := Packing } = Proof,
 	SeekByte = get_chunk_seek_offset(Byte + 1) - 1,
-	{BlockStartOffset, BlockEndOffset, TXRoot} = ar_block_index:get_block_bounds(SeekByte),
+	{BlockStartOffset, BlockEndOffset, TXRoot} = big_block_index:get_block_bounds(SeekByte),
 	BlockSize = BlockEndOffset - BlockStartOffset,
 	Offset = SeekByte - BlockStartOffset,
 	ValidateDataPathRuleset = big_poa:get_data_path_validation_ruleset(BlockStartOffset,
@@ -1937,7 +1937,7 @@ validate_fetched_chunk(Args) ->
 				[{disk_pool_threshold, T}, {end_offset, Offset}]),
 			{true, none};
 		false ->
-			case ar_block_index:get_block_bounds(Offset - 1) of
+			case big_block_index:get_block_bounds(Offset - 1) of
 				{BlockStart, BlockEnd, TXRoot} ->
 					ValidateDataPathRuleset = big_poa:get_data_path_validation_ruleset(
 							BlockStart, get_merkle_rebase_threshold()),
@@ -2450,7 +2450,7 @@ shift_block_index(_TXRoot, _BlockStart, _WeaveSize, Height, ResyncBlocks, _BI) -
 
 add_block(B, SizeTaggedTXs, StoreID) ->
 	#block{ indep_hash = H, weave_size = WeaveSize, tx_root = TXRoot } = B,
-	case ar_block_index:get_element_by_height(B#block.height) of
+	case big_block_index:get_element_by_height(B#block.height) of
 		{H, WeaveSize, TXRoot} ->
 			BlockStart = B#block.weave_size - B#block.block_size,
 			case ar_kv:get({data_root_offset_index, StoreID},

@@ -1002,7 +1002,7 @@ parse_recent_hash_list_diff(<<>>) ->
 	{ok, in_sync};
 parse_recent_hash_list_diff(<< H:48/binary, Len:16, TXIDs:(32 * Len)/binary, Rest/binary >>)
 		when Len =< ?BLOCK_TX_COUNT_LIMIT ->
-	case ar_block_cache:get(block_cache, H) of
+	case big_block_cache:get(block_cache, H) of
 		not_found ->
 			case count_blocks_on_top(Rest) of
 				{ok, N} ->

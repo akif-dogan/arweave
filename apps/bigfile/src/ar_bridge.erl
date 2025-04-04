@@ -117,7 +117,7 @@ handle_info({event, block, {new, _B, #{ gossip := false }}}, State) ->
 	{noreply, State};
 handle_info({event, block, {new, B, _}}, State) ->
 	#state{ block_propagation_queue = Q, workers = Workers } = State,
-	case ar_block_cache:get(block_cache, B#block.previous_block) of
+	case big_block_cache:get(block_cache, B#block.previous_block) of
 		not_found ->
 			%% The cache should have been just pruned and this block is old.
 			{noreply, State};

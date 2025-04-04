@@ -327,7 +327,7 @@ handle_cast({found_solution, miner, _Solution, _PoACache, _PoA2Cache},
 	{noreply, State};
 handle_cast({found_solution, Source, Solution, PoACache, PoA2Cache}, State) ->
 	[{_, PrevH}] = ets:lookup(node_state, current),
-	PrevB = ar_block_cache:get(block_cache, PrevH),
+	PrevB = big_block_cache:get(block_cache, PrevH),
 	handle_found_solution({Source, Solution, PoACache, PoA2Cache}, PrevB, State);
 
 
@@ -383,7 +383,7 @@ handle_info({event, node_state, {account_tree_initialized, Height}}, State) ->
 	%% Take the latest block the account tree is stored for.
 	Blocks2 = lists:nthtail(Height2 - Height, Blocks),
 	BI2 = lists:nthtail(Height2 - Height, BI),
-	ar_block_index:init(BI2),
+	big_block_index:init(BI2),
 	Blocks3 = lists:sublist(Blocks2, ?SEARCH_SPACE_UPPER_BOUND_DEPTH),
 	Blocks4 = may_be_initialize_nonce_limiter(Blocks3, BI2),
 	Blocks5 = Blocks4 ++ lists:nthtail(length(Blocks3), Blocks2),
@@ -401,7 +401,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 	Current = element(1, hd(RecentBI)),
 	RecentBlocks = lists:sublist(Blocks, ?STORE_BLOCKS_BEHIND_CURRENT),
 	RecentBlocks2 = set_poa_caches(RecentBlocks),
-	ar_block_cache:initialize_from_list(block_cache, RecentBlocks2),
+	big_block_cache:initialize_from_list(block_cache, RecentBlocks2),
 	B = hd(RecentBlocks2),
 	RewardHistory = [{H, {Addr, HashRate, Reward, Denomination}}
 			|| {{Addr, HashRate, Reward, Denomination}, {H, _, _}}
@@ -453,7 +453,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 	ar_events:send(node_state, {search_space_upper_bound, SearchSpaceUpperBound}),
 	ar_events:send(node_state, {initialized, B}),
 	ar_events:send(node_state, {checkpoint_block, 
-		ar_block_cache:get_checkpoint_block(RecentBI)}),
+		big_block_cache:get_checkpoint_block(RecentBI)}),
 	big:console("Joined the BigFile network successfully at the block ~s, height ~B.~n",
 			[ar_util:encode(Current), Height]),
 	?LOG_INFO([{event, joined_the_network}, {block, ar_util:encode(Current)},
@@ -464,20 +464,20 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 handle_info({event, nonce_limiter, {invalid, H, Code}}, State) ->
 	?LOG_WARNING([{event, received_block_with_invalid_nonce_limiter_chain},
 			{block, ar_util:encode(H)}, {code, Code}]),
-	ar_block_cache:remove(block_cache, H),
+	big_block_cache:remove(block_cache, H),
 	ar_ignore_registry:add(H),
 	gen_server:cast(?MODULE, apply_block),
 	{noreply, maps:remove({nonce_limiter_validation_scheduled, H}, State)};
 
 handle_info({event, nonce_limiter, {valid, H}}, State) ->
 	?LOG_INFO([{event, vdf_validation_successful}, {block, ar_util:encode(H)}]),
-	ar_block_cache:mark_nonce_limiter_validated(block_cache, H),
+	big_block_cache:mark_nonce_limiter_validated(block_cache, H),
 	gen_server:cast(?MODULE, apply_block),
 	{noreply, maps:remove({nonce_limiter_validation_scheduled, H}, State)};
 
 handle_info({event, nonce_limiter, {validation_error, H}}, State) ->
 	?LOG_WARNING([{event, vdf_validation_error}, {block, ar_util:encode(H)}]),
-	ar_block_cache:remove(block_cache, H),
+	big_block_cache:remove(block_cache, H),
 	gen_server:cast(?MODULE, apply_block),
 	{noreply, maps:remove({nonce_limiter_validation_scheduled, H}, State)};
 
@@ -515,9 +515,9 @@ handle_info({event, block, {new, B, _Source}}, State) ->
 	H = B#block.indep_hash,
 	%% Record the block in the block cache. Schedule an application of the
 	%% earliest not validated block from the longest chain, if any.
-	case ar_block_cache:get(block_cache, H) of
+	case big_block_cache:get(block_cache, H) of
 		not_found ->
-			case ar_block_cache:get(block_cache, B#block.previous_block) of
+			case big_block_cache:get(block_cache, B#block.previous_block) of
 				not_found ->
 					%% The cache should have been just pruned and this block is old.
 					?LOG_WARNING([{event, block_cache_missing_block},
@@ -526,7 +526,7 @@ handle_info({event, block, {new, B, _Source}}, State) ->
 							{block, ar_util:encode(H)}]),
 					{noreply, State};
 				_PrevB ->
-					ar_block_cache:add(block_cache, B),
+					big_block_cache:add(block_cache, B),
 					gen_server:cast(?MODULE, apply_block),
 					{noreply, State}
 			end;
@@ -537,7 +537,7 @@ handle_info({event, block, {new, B, _Source}}, State) ->
 	end;
 
 handle_info({event, block, {mined_block_received, H, ReceiveTimestamp}}, State) ->
-	ar_block_cache:update_timestamp(block_cache, H, ReceiveTimestamp),
+	big_block_cache:update_timestamp(block_cache, H, ReceiveTimestamp),
 	{noreply, State};
 
 handle_info({event, block, _}, State) ->
@@ -647,16 +647,16 @@ handle_task(apply_block, State) ->
 	apply_block(State);
 
 handle_task({cache_missing_txs, BH, TXs}, State) ->
-	case ar_block_cache:get_block_and_status(block_cache, BH) of
+	case big_block_cache:get_block_and_status(block_cache, BH) of
 		not_found ->
 			%% The block should have been pruned while we were fetching the missing txs.
 			{noreply, State};
 		{B, {{not_validated, _}, _}} ->
-			case ar_block_cache:get(block_cache, B#block.previous_block) of
+			case big_block_cache:get(block_cache, B#block.previous_block) of
 				not_found ->
 					ok;
 				_ ->
-					ar_block_cache:add(block_cache, B#block{ txs = TXs })
+					big_block_cache:add(block_cache, B#block{ txs = TXs })
 			end,
 			gen_server:cast(?MODULE, apply_block),
 			{noreply, State};
@@ -771,7 +771,7 @@ get_max_block_size([{_BH, PrevWeaveSize, _TXRoot} | BI], WeaveSize, Max) ->
 	get_max_block_size(BI, PrevWeaveSize, Max2).
 
 apply_block(State) ->
-	case ar_block_cache:get_earliest_not_validated_from_longest_chain(block_cache) of
+	case big_block_cache:get_earliest_not_validated_from_longest_chain(block_cache) of
 		not_found ->
 			maybe_rebase(State);
 		Args ->
@@ -797,7 +797,7 @@ apply_block({B, PrevBlocks, {{not_validated, nonce_limiter_validated}, Timestamp
 	apply_block(B, PrevBlocks, Timestamp, State).
 
 maybe_rebase(#{ pending_rebase := {PrevH, H} } = State) ->
-	case ar_block_cache:get_block_and_status(block_cache, PrevH) of
+	case big_block_cache:get_block_and_status(block_cache, PrevH) of
 		not_found ->
 			{noreply, State};
 		{PrevB, {validated, _}} ->
@@ -817,19 +817,19 @@ maybe_rebase(#{ pending_rebase := {PrevH, H} } = State) ->
 					handle_found_solution(Args, PrevB, State)
 				end;
 		{B, {Status, Timestamp}} ->
-			PrevBlocks = ar_block_cache:get_fork_blocks(block_cache, B),
+			PrevBlocks = big_block_cache:get_fork_blocks(block_cache, B),
 			Args = {B, PrevBlocks, {Status, Timestamp}},
 			apply_block(Args, State)
 	end;
 maybe_rebase(State) ->
 	[{_, H}] = ets:lookup(node_state, current),
-	B = ar_block_cache:get(block_cache, H),
+	B = big_block_cache:get(block_cache, H),
 	{ok, Config} = application:get_env(bigfile, config),
 	case B#block.reward_addr == Config#config.mining_addr of
 		false ->
 			{noreply, State};
 		true ->
-			case ar_block_cache:get_siblings(block_cache, B) of
+			case big_block_cache:get_siblings(block_cache, B) of
 				[] ->
 					{noreply, State};
 				Siblings ->
@@ -862,8 +862,8 @@ rebase(B, PrevB, State) ->
 	H = B#block.indep_hash,
 	PrevH = PrevB#block.indep_hash,
 	gen_server:cast(?MODULE, apply_block),
-	PrevBlocks = ar_block_cache:get_fork_blocks(block_cache, PrevB),
-	{_, {Status, Timestamp}} = ar_block_cache:get_block_and_status(block_cache, PrevH),
+	PrevBlocks = big_block_cache:get_fork_blocks(block_cache, PrevB),
+	{_, {Status, Timestamp}} = big_block_cache:get_block_and_status(block_cache, PrevH),
 	State2 = State#{ pending_rebase => {PrevH, H} },
 	case Status of
 		validated ->
@@ -937,7 +937,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 					{h, ar_util:encode(B#block.indep_hash)}]),
 			ar_events:send(block, {rejected, Reason, B#block.indep_hash, no_peer}),
 			BH = B#block.indep_hash,
-			ar_block_cache:remove(block_cache, BH),
+			big_block_cache:remove(block_cache, BH),
 			ar_ignore_registry:add(BH),
 			gen_server:cast(?MODULE, apply_block),
 			{noreply, State};
@@ -947,7 +947,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 					BH = B#block.indep_hash,
 					?LOG_WARNING([{event, failed_to_validate_wallet_list},
 							{h, ar_util:encode(BH)}]),
-					ar_block_cache:remove(block_cache, BH),
+					big_block_cache:remove(block_cache, BH),
 					ar_ignore_registry:add(BH),
 					gen_server:cast(?MODULE, apply_block),
 					{noreply, State};
@@ -1113,7 +1113,7 @@ pack_block_with_transactions(B, PrevB) ->
 		end,
 	Accounts = big_wallets:get(PrevB#block.wallet_list, Addresses3),
 	[{block_txs_pairs, BlockTXPairs}] = ets:lookup(node_state, block_txs_pairs),
-	PrevBlocks = ar_block_cache:get_fork_blocks(block_cache, B),
+	PrevBlocks = big_block_cache:get_fork_blocks(block_cache, B),
 	BlockTXPairs2 = update_block_txs_pairs(B, PrevBlocks, BlockTXPairs),
 	BlockTXPairs3 = tl(BlockTXPairs2),
 	{BlockAnchors, RecentTXMap} = get_block_anchors_and_recent_txs_map(BlockTXPairs3),
@@ -1338,7 +1338,7 @@ apply_validated_block(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	case B#block.cumulative_diff =< CDiff of
 		true ->
 			%% The block is from the longest fork, but not the latest known block from there.
-			ar_block_cache:add_validated(block_cache, B),
+			big_block_cache:add_validated(block_cache, B),
 			gen_server:cast(?MODULE, apply_block),
 			log_applied_block(B),
 			State;
@@ -1352,9 +1352,9 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	%% Overwrite the block to store computed size tagged txs - they
 	%% may be needed for reconstructing block_txs_pairs if there is a reorg
 	%% off and then back on this fork.
-	ar_block_cache:add(block_cache, B),
-	ar_block_cache:mark_tip(block_cache, BH),
-	ar_block_cache:prune(block_cache, ?STORE_BLOCKS_BEHIND_CURRENT),
+	big_block_cache:add(block_cache, B),
+	big_block_cache:mark_tip(block_cache, BH),
+	big_block_cache:prune(block_cache, ?STORE_BLOCKS_BEHIND_CURRENT),
 	%% We could have missed a few blocks due to networking issues, which would then
 	%% be picked by ar_poller and end up waiting for missing transactions to be fetched.
 	%% Thefore, it is possible (although not likely) that there are blocks above the new tip,
@@ -1401,7 +1401,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	AddedBlocks = tl(lists:reverse([B | [PrevB2 || PrevB2 <- PrevBlocks]])),
 	AddedBIElements = [block_index_entry(Blck) || Blck <- AddedBlocks],
 	OrphanCount = length(Orphans),
-	ar_block_index:update(AddedBIElements, OrphanCount),
+	big_block_index:update(AddedBIElements, OrphanCount),
 	RecentBI2 = lists:sublist(RecentBI, ?BLOCK_INDEX_HEAD_LEN),
 	big_data_sync:add_tip_block(BlockTXPairs, RecentBI2),
 	big_header_sync:add_tip_block(B, RecentBI2),
@@ -1446,7 +1446,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	ar_events:send(node_state, {search_space_upper_bound, SearchSpaceUpperBound}),
 	ar_events:send(node_state, {new_tip, B, PrevB}),
 	ar_events:send(node_state, {checkpoint_block, 
-		ar_block_cache:get_checkpoint_block(RecentBI)}),
+		big_block_cache:get_checkpoint_block(RecentBI)}),
 	maybe_reset_miner(State).
 
 log_applied_block(B) ->
@@ -1587,7 +1587,7 @@ record_vdf_metrics(#block{ height = Height } = B, PrevB) ->
 return_orphaned_txs_to_mempool(H, H) ->
 	ok;
 return_orphaned_txs_to_mempool(H, BaseH) ->
-	#block{ txs = TXs, previous_block = PrevH } = ar_block_cache:get(block_cache, H),
+	#block{ txs = TXs, previous_block = PrevH } = big_block_cache:get(block_cache, H),
 	lists:foreach(fun(TX) ->
 		ar_events:send(tx, {orphaned, TX}),
 		ar_events:send(tx, {ready_for_mining, TX}),
@@ -1840,7 +1840,7 @@ set_poa_cache(B) ->
 compute_poa_cache(B, PoA, RecallByte, Nonce, Packing) ->
 	PackingDifficulty = B#block.packing_difficulty,
 	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
-	{BlockStart, BlockEnd, TXRoot} = ar_block_index:get_block_bounds(RecallByte),
+	{BlockStart, BlockEnd, TXRoot} = big_block_index:get_block_bounds(RecallByte),
 	BlockSize = BlockEnd - BlockStart,
 	ChunkID = ar_tx:generate_chunk_id(PoA#poa.chunk),
 	{{BlockStart, RecallByte, TXRoot, BlockSize, Packing, SubChunkIndex}, ChunkID}.
@@ -2181,7 +2181,7 @@ handle_found_solution(Args, PrevB, State) ->
 							undefined -> 1;
 							_ -> 2
 						end}]),
-			ar_block_cache:add(block_cache, B),
+			big_block_cache:add(block_cache, B),
 			ar_events:send(solution, {accepted, #{ indep_hash => H, source => Source }}),
 			apply_block(update_solution_cache(H, Args, State));
 		_Steps ->

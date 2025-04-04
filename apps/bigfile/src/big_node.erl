@@ -64,7 +64,7 @@ get_block_index() ->
 %% initialized the state.
 get_current_block() ->
 	[{_, Current}] = ets:lookup(node_state, current),
-	ar_block_cache:get(block_cache, Current).
+	big_block_cache:get(block_cache, Current).
 
 %% @doc Return the current network difficulty. Assume the node has joined the network and
 %% initialized the state.
@@ -84,7 +84,7 @@ get_block_index_and_height() ->
 	CurrentHeight = proplists:get_value(height, Props),
 	RecentBI = proplists:get_value(recent_block_index, Props),
 	{CurrentHeight, merge(RecentBI,
-			ar_block_index:get_list(CurrentHeight - length(RecentBI)))}.
+			big_block_index:get_list(CurrentHeight - length(RecentBI)))}.
 
 merge([Elem | BI], BI2) ->
 	[Elem | merge(BI, BI2)];
@@ -107,7 +107,7 @@ get_ready_for_mining_txs() ->
 
 %% @doc Return true if the given block hash is found in the block index.
 is_in_block_index(H) ->
-	ar_block_index:member(H).
+	big_block_index:member(H).
 
 %% @doc Get the current block hash.
 get_current_block_hash() ->
@@ -126,7 +126,7 @@ get_block_index_entry(Height) ->
 		[{_, false}] ->
 			not_joined;
 		[{_, true}] ->
-			ar_block_index:get_element_by_height(Height)
+			big_block_index:get_element_by_height(Height)
 	end.
 
 %% @doc Get the 2.0 hash for a 1.0 block.
@@ -202,7 +202,7 @@ get_mempool_size() ->
 
 %% @doc Get the block shadow from the block cache.
 get_block_shadow_from_cache(H) ->
-	ar_block_cache:get(block_cache, H).
+	big_block_cache:get(block_cache, H).
 
 %% @doc Get the current balance of a given wallet address.
 %% The balance returned is in relation to the nodes current wallet list.
@@ -244,7 +244,7 @@ get_partition_upper_bound(BI) ->
 	element(2, get_nth_or_last(?SEARCH_SPACE_UPPER_BOUND_DEPTH, BI)).
 
 get_recent_partition_upper_bound_by_prev_h(H, Diff) ->
-	case ar_block_cache:get_block_and_status(block_cache, H) of
+	case big_block_cache:get_block_and_status(block_cache, H) of
 		{_B, {on_chain, _}} ->
 			[{_, BI}] = ets:lookup(node_state, recent_block_index),
 			Genesis = length(BI) =< ?SEARCH_SPACE_UPPER_BOUND_DEPTH,
@@ -315,7 +315,7 @@ get_recent_max_block_size() ->
 %%%===================================================================
 
 get_recent_partition_upper_bound_by_prev_h_short_cache_test() ->
-	ar_block_cache:new(block_cache, B0 = test_block(1, 1, <<>>)),
+	big_block_cache:new(block_cache, B0 = test_block(1, 1, <<>>)),
 	H0 = B0#block.indep_hash,
 	BI = lists:reverse([{H0, 20, <<>>}
 			| [{crypto:strong_rand_bytes(48), 20, <<>>} || _ <- lists:seq(1, 99)]]),
@@ -335,7 +335,7 @@ get_recent_partition_upper_bound_by_prev_h_short_cache_test() ->
 	?assertEqual({H1, 20}, get_recent_partition_upper_bound_by_prev_h(HNext)).
 
 get_recent_partition_upper_bound_by_prev_h_genesis_test() ->
-	ar_block_cache:new(block_cache, B0 = test_block(0, 1, <<>>)),
+	big_block_cache:new(block_cache, B0 = test_block(0, 1, <<>>)),
 	H0 = B0#block.indep_hash,
 	ets:insert(node_state, {recent_block_index, [{H0, 20, <<>>}]}),
 	?assertEqual({H0, 20}, get_recent_partition_upper_bound_by_prev_h(H0)).
@@ -347,8 +347,8 @@ test_block(H, Height, CDiff, PrevH) ->
 	#block{ indep_hash = H, height = Height, cumulative_diff = CDiff, previous_block = PrevH }.
 
 add_blocks([{H, _, _} | BI], Height, CDiff, PrevH) ->
-	ar_block_cache:add_validated(block_cache, test_block(H, Height, CDiff, PrevH)),
-	ar_block_cache:mark_tip(block_cache, H),
+	big_block_cache:add_validated(block_cache, test_block(H, Height, CDiff, PrevH)),
+	big_block_cache:mark_tip(block_cache, H),
 	add_blocks(BI, Height + 1, CDiff + 1, H);
 add_blocks([], _Height, _CDiff, _PrevH) ->
 	ok.

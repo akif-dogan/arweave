@@ -435,7 +435,7 @@ get_blocks() ->
 get_blocks(_H, N) when N >= ?STORE_BLOCKS_BEHIND_CURRENT ->
 	[];
 get_blocks(H, N) ->
-	#block{} = B = ar_block_cache:get(block_cache, H),
+	#block{} = B = big_block_cache:get(block_cache, H),
 	[B | get_blocks(B#block.previous_block, N + 1)].
 
 handle_call(get_current_step_number, _From,

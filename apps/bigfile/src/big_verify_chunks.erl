@@ -80,7 +80,7 @@ terminate(_Reason, _State) ->
 	ok.
 
 is_ready(EndOffset) ->
-	case ar_block_index:get_last() of
+	case big_block_index:get_last() of
 		'$end_of_table' ->
 			false;
 		{WeaveSize, _Height, _H, _TXRoot}  ->

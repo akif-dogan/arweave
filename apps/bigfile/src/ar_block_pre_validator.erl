@@ -374,7 +374,7 @@ pre_validate_existing_solution_hash(B, PrevB, Peer) ->
 	CDiff = B#block.cumulative_diff,
 	PrevCDiff = PrevB#block.cumulative_diff,
 	GetCachedSolution =
-		case ar_block_cache:get_by_solution_hash(block_cache, SolutionH, H,
+		case big_block_cache:get_by_solution_hash(block_cache, SolutionH, H,
 				CDiff, PrevCDiff) of
 			not_found ->
 				not_found;
@@ -695,7 +695,7 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 			B#block.partition_number, PartitionUpperBound),
 	RecallByte1 = big_block:get_recall_byte(RecallRange1Start, B#block.nonce,
 			B#block.packing_difficulty),
-	{BlockStart1, BlockEnd1, TXRoot1} = ar_block_index:get_block_bounds(RecallByte1),
+	{BlockStart1, BlockEnd1, TXRoot1} = big_block_index:get_block_bounds(RecallByte1),
 	BlockSize1 = BlockEnd1 - BlockStart1,
 	PackingDifficulty = B#block.packing_difficulty,
 	Nonce = B#block.nonce,
@@ -729,7 +729,7 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 				false ->
 					RecallByte2 = big_block:get_recall_byte(RecallRange2Start, B#block.nonce,
 							B#block.packing_difficulty),
-					{BlockStart2, BlockEnd2, TXRoot2} = ar_block_index:get_block_bounds(
+					{BlockStart2, BlockEnd2, TXRoot2} = big_block_index:get_block_bounds(
 							RecallByte2),
 					BlockSize2 = BlockEnd2 - BlockStart2,
 					ArgCache2 = {BlockStart2, RecallByte2, TXRoot2, BlockSize2, Packing,

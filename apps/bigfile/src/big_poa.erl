@@ -103,7 +103,7 @@ validate(Args) ->
 %% validate that the ChunkID is correct.
 validate_paths(TXRoot, TXPath, DataPath, AbsoluteOffset) ->
 	{BlockStartOffset, BlockEndOffset, TXRoot} =
-		ar_block_index:get_block_bounds(AbsoluteOffset),
+		big_block_index:get_block_bounds(AbsoluteOffset),
 
 	Proof = #chunk_proof{
 		absolute_offset = AbsoluteOffset,

@@ -136,7 +136,7 @@ assert_block_index(Peer, Height, ExpectedBI) ->
 
 assert_reward_history(ExpectedPeer, Peer, H) ->
     RewardHistory = get_reward_history(Peer, H),
-    {B, _} = ar_test_node:remote_call(ExpectedPeer, ar_block_cache, get_block_and_status, [block_cache, H]),
+    {B, _} = ar_test_node:remote_call(ExpectedPeer, big_block_cache, get_block_and_status, [block_cache, H]),
     ExpectedRewardHistory = B#block.reward_history,
 
     ?assertEqual(ExpectedRewardHistory, RewardHistory).

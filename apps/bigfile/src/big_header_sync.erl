@@ -99,7 +99,7 @@ handle_cast({join, Height, RecentBI, Blocks}, State) ->
 		 },
 	StartHeight = PrevHeight - length(CurrentBI) + 1,
 	State3 =
-		case {CurrentBI, ar_block_index:get_intersection(StartHeight, CurrentBI)} of
+		case {CurrentBI, big_block_index:get_intersection(StartHeight, CurrentBI)} of
 			{[], _} ->
 				State2;
 			{_, no_intersection} ->

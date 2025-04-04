@@ -1,6 +1,6 @@
 %%% @doc The module maintains a DAG of blocks that have passed the PoW validation, in ETS.
 %%% NOTE It is not safe to call functions which modify the state from different processes.
--module(ar_block_cache).
+-module(big_block_cache).
 
 -export([new/2, initialize_from_list/2, add/2, mark_nonce_limiter_validated/2,
 		add_validated/2,
@@ -589,28 +589,28 @@ get_checkpoint_height(TipHeight) ->
 
 get_checkpoint_block2([{H, _, _}], _N, _CheckpointDepth) ->
 	%% The genesis block.
-	ar_block_cache:get(block_cache, H);
+	big_block_cache:get(block_cache, H);
 get_checkpoint_block2([{H, _, _} | BI], N, CheckpointDepth) ->
-	 B = ar_block_cache:get(block_cache, H),
+	 B = big_block_cache:get(block_cache, H),
 	 get_checkpoint_block2(BI, N + 1, B, CheckpointDepth).
 
 get_checkpoint_block2([{H, _, _}], _N, B, _CheckpointDepth) ->
 	%% The genesis block.
-	case ar_block_cache:get(block_cache, H) of
+	case big_block_cache:get(block_cache, H) of
 		not_found ->
 			B;
 		B2 ->
 			B2
 	end;
 get_checkpoint_block2([{H, _, _} | _], N, B, CheckpointDepth) when N == CheckpointDepth ->
-	case ar_block_cache:get(block_cache, H) of
+	case big_block_cache:get(block_cache, H) of
 		not_found ->
 			B;
 		B2 ->
 			B2
 	end;
 get_checkpoint_block2([{H, _, _} | BI], N, B, CheckpointDepth) ->
-	case ar_block_cache:get(block_cache, H) of
+	case big_block_cache:get(block_cache, H) of
 		not_found ->
 			B;
 		B2 ->

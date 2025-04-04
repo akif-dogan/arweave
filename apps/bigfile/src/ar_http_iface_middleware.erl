@@ -851,7 +851,7 @@ handle(<<"GET">>, [<<"reward_history">>, EncodedBH], Req, _Pid) ->
 			case ar_util:safe_decode(EncodedBH) of
 				{ok, BH} ->
 					Fork_2_6 = ar_fork:height_2_6(),
-					case ar_block_cache:get_block_and_status(block_cache, BH) of
+					case big_block_cache:get_block_and_status(block_cache, BH) of
 						{#block{ height = Height, reward_history = RewardHistory }, {Status, _}}
 								when (Status == on_chain orelse Status == validated),
 									Height >= Fork_2_6 ->
@@ -875,7 +875,7 @@ handle(<<"GET">>, [<<"block_time_history">>, EncodedBH], Req, _Pid) ->
 			case ar_util:safe_decode(EncodedBH) of
 				{ok, BH} ->
 					Fork_2_7 = ar_fork:height_2_7(),
-					case ar_block_cache:get_block_and_status(block_cache, BH) of
+					case big_block_cache:get_block_and_status(block_cache, BH) of
 						{#block{ height = Height,
 									block_time_history = BlockTimeHistory }, {Status, _}}
 								when (Status == on_chain orelse Status == validated),
@@ -993,7 +993,7 @@ handle(<<"GET">>, [<<"recent_hash_list_diff">>], Req, Pid) ->
 					case decode_recent_hash_list(Body) of
 						{ok, ReverseHL} ->
 							{BlockTXPairs, _}
-									= ar_block_cache:get_longest_chain_cache(block_cache),
+									= big_block_cache:get_longest_chain_cache(block_cache),
 							case get_recent_hash_list_diff(ReverseHL,
 									lists:reverse(BlockTXPairs)) of
 								no_intersection ->
@@ -1535,7 +1535,7 @@ handle_get_block_index_range(Start, End, CurrentHeight, RecentBI, Req, Encoding)
 	Range =
 		case Start < CheckpointHeight of
 			true ->
-				RecentRange ++ ar_block_index:get_range(Start, min(End, CheckpointHeight - 1));
+				RecentRange ++ big_block_index:get_range(Start, min(End, CheckpointHeight - 1));
 			false ->
 				RecentRange
 		end,
@@ -1571,7 +1571,7 @@ handle_get_tx_status(EncodedTXID, Req) ->
 								{<<"block_height">>, Height},
 								{<<"block_indep_hash">>, ar_util:encode(BH)}
 							],
-							case ar_block_index:get_element_by_height(Height) of
+							case big_block_index:get_element_by_height(Height) of
 								not_found ->
 									{404, #{}, <<"Not Found.">>, Req};
 								{BH, _, _} ->
@@ -1805,7 +1805,7 @@ handle_get_block(Type, ID, Req, Pid, Encoding) ->
 						Height when Height > CurrentHeight ->
 							{404, #{}, <<"Block not found.">>, Req};
 						Height ->
-							case ar_block_index:get_element_by_height(Height) of
+							case big_block_index:get_element_by_height(Height) of
 								not_found ->
 									{404, #{}, <<"Block not found.">>, Req};
 								{H, _, _} ->
@@ -1819,7 +1819,7 @@ handle_get_block(Type, ID, Req, Pid, Encoding) ->
 	end.
 
 handle_get_block(H, Req, Pid, Encoding) ->
-	case ar_block_cache:get(block_cache, H) of
+	case big_block_cache:get(block_cache, H) of
 		not_found ->
 			handle_get_block2(H, Req, Encoding);
 		B ->
@@ -2480,7 +2480,7 @@ post_block(enqueue_block, {B, Peer}, Req, ReceiveTimestamp) ->
 	{200, #{}, <<"OK">>, Req}.
 
 check_block_receive_timestamp(H) ->
-	case ar_block_cache:get(block_cache, H) of
+	case big_block_cache:get(block_cache, H) of
 		not_found ->
 			not_found;
 		B ->
@@ -2814,12 +2814,12 @@ handle_get_block_wallet_balance(EncodedHeight, EncodedAddr, Req) ->
 				Height when Height > CurrentHeight ->
 					{404, #{}, jiffy:encode(#{ error => block_not_found }), Req};
 				Height ->
-					case ar_block_index:get_element_by_height(Height) of
+					case big_block_index:get_element_by_height(Height) of
 						not_found ->
 							{404, #{}, jiffy:encode(#{ error => block_not_found }), Req};
 						{H, _, _} ->
 							B =
-								case ar_block_cache:get(block_cache, H) of
+								case big_block_cache:get(block_cache, H) of
 									not_found ->
 										big_storage:read_block(H);
 									B2 ->
@@ -2917,7 +2917,7 @@ find_block(<<"height">>, RawHeight) ->
 		{'EXIT', _} ->
 			{error, height_not_integer};
 		Height ->
-			case ar_block_index:get_element_by_height(Height) of
+			case big_block_index:get_element_by_height(Height) of
 				not_found ->
 					unavailable;
 				{H, _, _} ->

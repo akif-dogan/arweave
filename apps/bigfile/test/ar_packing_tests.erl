@@ -476,7 +476,7 @@ test_packs_chunks_depending_on_packing_threshold() ->
 					_ ->
 						RecallRange1Start + (B#block.nonce div 32) * ?DATA_CHUNK_SIZE
 				end,
-			{BlockStart, BlockEnd, TXRoot} = ar_block_index:get_block_bounds(RecallByte),
+			{BlockStart, BlockEnd, TXRoot} = big_block_index:get_block_bounds(RecallByte),
 			?debugFmt("Mined a block. "
 					"Computed recall byte: ~B, block's recall byte: ~p. "
 					"Height: ~B. Previous block: ~s. "

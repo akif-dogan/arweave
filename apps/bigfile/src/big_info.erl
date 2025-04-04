@@ -67,7 +67,7 @@ get_recent_blocks() ->
     Anchors = lists:sublist(big_node:get_block_anchors(), ?CHECKPOINT_DEPTH),
     Blocks = lists:foldl(
         fun(H, Acc) ->
-            B = ar_block_cache:get(block_cache, H),
+            B = big_block_cache:get(block_cache, H),
             [#{
                 <<"id">> => ar_util:encode(H),
                 <<"received">> => get_block_timestamp(B, length(Acc)),
