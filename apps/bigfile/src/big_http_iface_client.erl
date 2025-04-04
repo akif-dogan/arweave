@@ -1127,7 +1127,7 @@ get_tx_from_remote_peer(Peer, TXID, RatePeer) ->
 		})
 	) of
 		{ok, #tx{} = TX, Time, Size} ->
-			case ar_tx:verify_tx_id(TXID, TX) of
+			case big_tx:verify_tx_id(TXID, TX) of
 				false ->
 					?LOG_WARNING([
 						{event, peer_served_invalid_tx},

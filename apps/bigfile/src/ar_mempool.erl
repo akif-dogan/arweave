@@ -281,7 +281,7 @@ del_from_propagation_queue(Priority, TXID) ->
 		del_from_propagation_queue(ar_mempool:get_propagation_queue(), Priority, TXID)
 	}).
 del_from_propagation_queue(PropagationQueue, TX = #tx{}, Timestamp) ->
-	Priority = {ar_tx:utility(TX), Timestamp},
+	Priority = {big_tx:utility(TX), Timestamp},
 	del_from_propagation_queue(PropagationQueue, Priority, TX#tx.id);
 del_from_propagation_queue(PropagationQueue, Priority, TXID)
 	when is_bitstring(TXID) ->
@@ -304,11 +304,11 @@ init_tx_metadata(TX, Status) ->
 	{TX, Status, -os:system_time(microsecond)}.
 
 add_to_priority_set(PrioritySet, TX, Status, Timestamp) ->
-	Priority = {ar_tx:utility(TX), Timestamp},
+	Priority = {big_tx:utility(TX), Timestamp},
 	gb_sets:add_element({Priority, TX#tx.id, Status}, PrioritySet).
 
 add_to_priority_set(PrioritySet, TX, PrevStatus, Status, Timestamp) ->
-	Priority = {ar_tx:utility(TX), Timestamp},
+	Priority = {big_tx:utility(TX), Timestamp},
 	gb_sets:add_element({Priority, TX#tx.id, Status},
 		gb_sets:del_element({Priority, TX#tx.id, PrevStatus},
 			PrioritySet
@@ -316,11 +316,11 @@ add_to_priority_set(PrioritySet, TX, PrevStatus, Status, Timestamp) ->
 	).
 
 del_from_priority_set(PrioritySet, TX, Status, Timestamp) ->
-	Priority = {ar_tx:utility(TX), Timestamp},
+	Priority = {big_tx:utility(TX), Timestamp},
 	gb_sets:del_element({Priority, TX#tx.id, Status}, PrioritySet).
 
 add_to_propagation_queue(PropagationQueue, TX, Timestamp) ->
-	Priority = {ar_tx:utility(TX), Timestamp},
+	Priority = {big_tx:utility(TX), Timestamp},
 	gb_sets:add_element({Priority, TX#tx.id}, PropagationQueue).
 
 %% @doc Store a map of last_tx TXIDs to a priority set of TXs that use
@@ -372,7 +372,7 @@ del_from_origin_tx_map(OriginTXMap, TX) ->
 	end.
 
 unconfirmed_tx(TX = #tx{}) ->
-	{ar_tx:utility(TX), TX#tx.id}.
+	{big_tx:utility(TX), TX#tx.id}.
 	
 
 increase_mempool_size(
@@ -439,11 +439,11 @@ should_drop_low_priority_tx(_TX, {_MempoolHeaderSize, _MempoolDataSize}) ->
 find_clashing_txs(#tx{ last_tx = <<>> }) ->
 	[];
 find_clashing_txs(TX = #tx{}) ->
-	Wallets = big_wallets:get(ar_tx:get_addresses([TX])),
+	Wallets = big_wallets:get(big_tx:get_addresses([TX])),
 	find_clashing_txs(TX, Wallets).
 
 find_clashing_txs(TX = #tx{}, Wallets) when is_map(Wallets) ->
-	case ar_tx:check_last_tx(Wallets, TX) of
+	case big_tx:check_last_tx(Wallets, TX) of
 		true ->
 			ClashingTXIDs = maps:get(TX#tx.last_tx, get_last_tx_map(), gb_sets:new()),
 			filter_clashing_txs(ClashingTXIDs);
@@ -455,7 +455,7 @@ find_clashing_txs(_TX, _Wallets) ->
 
 %% @doc Only the highest priority TX will be kept, others will be dropped.
 %% Priority is defined as:
-%% 1. ar_tx:utility
+%% 1. big_tx:utility
 %% 2. alphanumeric order of TXID (z is higher priority than a)
 %%
 %% Adding the TXID term to the priority calculation (rather than local

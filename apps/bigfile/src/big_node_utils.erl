@@ -569,7 +569,7 @@ validate_block(txs, {NewB = #block{ timestamp = Timestamp, height = Height, txs 
 	RedenominationHeight = OldB#block.redenomination_height,
 	Args = {TXs, Rate, PricePerGiBMinute, KryderPlusRateMultiplier, Denomination, Height - 1,
 			RedenominationHeight, Timestamp, Wallets, BlockAnchors, RecentTXMap},
-	case ar_tx_replay_pool:verify_block_txs(Args) of
+	case big_tx_replay_pool:verify_block_txs(Args) of
 		invalid ->
 			{invalid, invalid_txs};
 		valid ->

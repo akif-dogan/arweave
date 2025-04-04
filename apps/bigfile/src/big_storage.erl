@@ -289,7 +289,7 @@ write_full_block(BShadow, TXs) ->
 is_blacklisted(#tx{ format = 2 }) ->
 	false;
 is_blacklisted(#tx{ id = TXID }) ->
-	ar_tx_blacklist:is_tx_blacklisted(TXID).
+	big_tx_blacklist:is_tx_blacklisted(TXID).
 
 update_confirmation_index(B) ->
 	put_tx_confirmation_data(B).
@@ -638,7 +638,7 @@ write_tx(#tx{ format = Format, id = TXID } = TX) ->
 									ok
 							end;
 						{true, 2} ->
-							case ar_tx_blacklist:is_tx_blacklisted(TX#tx.id) of
+							case big_tx_blacklist:is_tx_blacklisted(TX#tx.id) of
 								true ->
 									ok;
 								false ->
@@ -674,9 +674,9 @@ write_tx_header(TX) ->
 	ar_kv:put(tx_db, TX#tx.id, big_serialize:tx_to_binary(TX2)).
 
 write_tx_data(ExpectedDataRoot, Data, TXID) ->
-	Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, Data),
-	SizeTaggedChunks = ar_tx:chunks_to_size_tagged_chunks(Chunks),
-	SizeTaggedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
+	Chunks = big_tx:chunk_binary(?DATA_CHUNK_SIZE, Data),
+	SizeTaggedChunks = big_tx:chunks_to_size_tagged_chunks(Chunks),
+	SizeTaggedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
 	case {ExpectedDataRoot, big_merkle:generate_tree(SizeTaggedChunkIDs)} of
 		{no_expected_data_root, {DataRoot, DataTree}} ->
 			write_tx_data(DataRoot, DataTree, Data, SizeTaggedChunks, TXID);
@@ -690,7 +690,7 @@ write_tx_data(DataRoot, DataTree, Data, SizeTaggedChunks, TXID) ->
 	Errors = lists:foldl(
 		fun
 			({<<>>, _}, Acc) ->
-				%% Empty chunks are produced by ar_tx:chunk_binary/2, when
+				%% Empty chunks are produced by big_tx:chunk_binary/2, when
 				%% the data is evenly split by the given chunk size. They are
 				%% the last chunks of the corresponding transactions and have
 				%% the same end offsets as their preceding chunks. They are never

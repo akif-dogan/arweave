@@ -696,30 +696,30 @@ get_optimistic_tx_price(Node, DataSize, Target) ->
 %% @doc Return a signed format=2 transaction with the minimum required fee fetched from
 %% GET /price/0 on the peer1 node.
 sign_tx(Wallet) ->
-	sign_tx(peer1, Wallet, #{ format => 2 }, fun ar_tx:sign/2).
+	sign_tx(peer1, Wallet, #{ format => 2 }, fun big_tx:sign/2).
 
 %% @doc Return a signed format=2 transaction with properties from the given Args map.
 %% If the fee is not in Args, fetch it from GET /price/{data_size}
 %% or GET /price/{data_size}/{target} (if the target is specified) on the peer1 node.
 sign_tx(Wallet, Args) ->
-	sign_tx(peer1, Wallet, insert_root(Args#{ format => 2 }), fun ar_tx:sign/2).
+	sign_tx(peer1, Wallet, insert_root(Args#{ format => 2 }), fun big_tx:sign/2).
 
 %% @doc Like sign_tx/2, but use the given Node to fetch the fee estimation and
 %% block anchor from.
 sign_tx(Node, Wallet, Args) ->
-	sign_tx(Node, Wallet, insert_root(Args#{ format => 2 }), fun ar_tx:sign/2).
+	sign_tx(Node, Wallet, insert_root(Args#{ format => 2 }), fun big_tx:sign/2).
 
 %% @doc Like sign_tx/1 but return a format=1 transaction.
 sign_v1_tx(Wallet) ->
-	sign_tx(peer1, Wallet, #{}, fun ar_tx:sign_v1/2).
+	sign_tx(peer1, Wallet, #{}, fun big_tx:sign_v1/2).
 
 %% @doc Like sign_tx/2 but return a format=1 transaction.
 sign_v1_tx(Wallet, TXParams) ->
-	sign_tx(peer1, Wallet, TXParams, fun ar_tx:sign_v1/2).
+	sign_tx(peer1, Wallet, TXParams, fun big_tx:sign_v1/2).
 
 %% @doc Like sign_tx/3 but return a format=1 transaction.
 sign_v1_tx(Node, Wallet, Args) ->
-	sign_tx(Node, Wallet, Args, fun ar_tx:sign_v1/2).
+	sign_tx(Node, Wallet, Args, fun big_tx:sign_v1/2).
 
 %%%===================================================================
 %%% Legacy private functions.
@@ -730,7 +730,7 @@ insert_root(Params) ->
 		{<<>>, _} ->
 			Params;
 		{Data, <<>>} ->
-			TX = ar_tx:generate_chunk_tree(#tx{ data = Data }),
+				TX = big_tx:generate_chunk_tree(#tx{ data = Data }),
 			Params#{ data_root => TX#tx.data_root };
 		_ ->
 			Params
@@ -757,7 +757,7 @@ sign_tx(Node, Wallet, Args, SignFun) ->
 				AssignedFee
 		end,
 	SignFun(
-		(ar_tx:new())#tx{
+		(big_tx:new())#tx{
 			owner = Pub,
 			reward = Fee2,
 			data = Data,
@@ -1073,7 +1073,7 @@ post_tx_to_peer(Node, TX, Wait) ->
 			Addr =
 				case TX#tx.owner of
 					<<>> ->
-						DataSegment = ar_tx:generate_signature_data_segment(TX),
+						DataSegment = big_tx:generate_signature_data_segment(TX),
 						big_wallet:to_address(
 							big_wallet:recover_key(DataSegment, TX#tx.signature, TX#tx.signature_type),
 							TX#tx.signature_type);
@@ -1088,7 +1088,7 @@ post_tx_to_peer(Node, TX, Wait) ->
 					TX#tx.data_size, ar_util:encode(TX#tx.last_tx),
 					ar_util:encode(TX#tx.owner),
 					ar_util:encode(Addr),
-					remote_call(Node, ar_tx_db, get_error_codes, [TX#tx.id]),
+					remote_call(Node, big_tx_db, get_error_codes, [TX#tx.id]),
 					ErrorInfo]),
 			noop
 	end,

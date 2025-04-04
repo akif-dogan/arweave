@@ -484,7 +484,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:assert_post_tx_to_peer(main, TX3),
 	TX4 = ar_test_node:sign_tx(main, Key3, #{ denomination => 2 }),
 	?assertMatch({ok, {{<<"400">>, _}, _, _, _, _}}, ar_test_node:post_tx_to_peer(main, TX4)),
-	?assertEqual({ok, ["invalid_denomination"]}, ar_tx_db:get_error_codes(TX4#tx.id)),
+	?assertEqual({ok, ["invalid_denomination"]}, big_tx_db:get_error_codes(TX4#tx.id)),
 	TX5 = ar_test_node:sign_tx(main, Key3, #{ denomination => 0, target => big_wallet:to_address(Pub2),
 			quantity => 10 }),
 	ar_test_node:assert_post_tx_to_peer(main, TX5),
@@ -510,11 +510,11 @@ test_auto_redenomination_and_endowment_debt() ->
 	%% Transactions without explicit denomination are not accepted now until
 	%% the redenomination height.
 	?assertMatch({ok, {{<<"400">>, _}, _, _, _, _}}, ar_test_node:post_tx_to_peer(main, TX6)),
-	?assertEqual({ok, ["invalid_denomination"]}, ar_tx_db:get_error_codes(TX6#tx.id)),
+	?assertEqual({ok, ["invalid_denomination"]}, big_tx_db:get_error_codes(TX6#tx.id)),
 	%% The redenomination did not start yet.
 	TX7 = ar_test_node:sign_tx(main, Key3, #{ denomination => 2 }),
 	?assertMatch({ok, {{<<"400">>, _}, _, _, _, _}}, ar_test_node:post_tx_to_peer(main, TX7)),
-	?assertEqual({ok, ["invalid_denomination"]}, ar_tx_db:get_error_codes(TX7#tx.id)),
+	?assertEqual({ok, ["invalid_denomination"]}, big_tx_db:get_error_codes(TX7#tx.id)),
 	{_, Pub4} = big_wallet:new(),
 	TX8 = ar_test_node:sign_tx(main, Key3, #{ denomination => 1, target => big_wallet:to_address(Pub4),
 			quantity => 3 }),
@@ -531,11 +531,11 @@ test_auto_redenomination_and_endowment_debt() ->
 	TX9 = ar_test_node:sign_v1_tx(main, Key3, #{ denomination => 0, target => big_wallet:to_address(Pub5),
 			quantity => 100 }),
 	?assertMatch({ok, {{<<"400">>, _}, _, _, _, _}}, ar_test_node:post_tx_to_peer(main, TX9)),
-	?assertEqual({ok, ["invalid_denomination"]}, ar_tx_db:get_error_codes(TX9#tx.id)),
+	?assertEqual({ok, ["invalid_denomination"]}, big_tx_db:get_error_codes(TX9#tx.id)),
 	%% The redenomination did not start just yet.
 	TX10 = ar_test_node:sign_v1_tx(main, Key3, #{ denomination => 2 }),
 	?assertMatch({ok, {{<<"400">>, _}, _, _, _, _}}, ar_test_node:post_tx_to_peer(main, TX10)),
-	?assertEqual({ok, ["invalid_denomination"]}, ar_tx_db:get_error_codes(TX10#tx.id)),
+	?assertEqual({ok, ["invalid_denomination"]}, big_tx_db:get_error_codes(TX10#tx.id)),
 	{Reward11, _} = ar_test_node:get_tx_price(main, 0, big_wallet:to_address(Pub5)),
 	?assert(ar_difficulty:get_hash_rate_fixed_ratio(B11) > 1),
 	?assertEqual(lists:sublist([{MinerAddr, ar_difficulty:get_hash_rate_fixed_ratio(B11), B11#block.reward, 1}
@@ -580,10 +580,10 @@ test_auto_redenomination_and_endowment_debt() ->
 	TX15 = ar_test_node:sign_v1_tx(main, Key3, #{ denomination => 2,
 			reward => erlang:ceil(Reward14 / 1000) }),
 	?assertMatch({ok, {{<<"400">>, _}, _, _, _, _}}, ar_test_node:post_tx_to_peer(main, TX15)),
-	?assertEqual({ok, ["tx_too_cheap"]}, ar_tx_db:get_error_codes(TX15#tx.id)),
+	?assertEqual({ok, ["tx_too_cheap"]}, big_tx_db:get_error_codes(TX15#tx.id)),
 	TX16 = ar_test_node:sign_v1_tx(main, Key3, #{ denomination => 3 }),
 	?assertMatch({ok, {{<<"400">>, _}, _, _, _, _}}, ar_test_node:post_tx_to_peer(main, TX16)),
-	?assertEqual({ok, ["invalid_denomination"]}, ar_tx_db:get_error_codes(TX16#tx.id)),
+	?assertEqual({ok, ["invalid_denomination"]}, big_tx_db:get_error_codes(TX16#tx.id)),
 	{_, Pub6} = big_wallet:new(),
 	%% Divide the reward by 1000 and specify the previous denomination.
 	Reward17 = ar_test_node:get_optimistic_tx_price(main, 0, big_wallet:to_address(Pub6)),

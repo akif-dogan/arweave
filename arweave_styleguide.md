@@ -91,12 +91,12 @@ The name of the module can sometimes be used to help increase clarity without in
 
 ```erlang
 %% Bad function names
-ar_tx:generate_data_segment_for_signing(TX).
+big_tx:generate_data_segment_for_signing(TX).
 ar_util:pretty_print_internal_ip_representation(IPAddr).
 ar_retarget:is_current_block_retarget_block(Block).
 
 %% Good function names
-ar_tx:to_binary(TX).
+big_tx:to_binary(TX).
 big_block:generate_block_from_shadow(BShadow).
 big_serialize:block_to_json_struct(Block).
 ```

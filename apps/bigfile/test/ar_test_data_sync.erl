@@ -126,8 +126,8 @@ generate_random_split(ChunkCount) ->
 		end,
 		[],
 		lists:seq(1, case ChunkCount of random -> rand:uniform(5); _ -> ChunkCount end)),
-	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
-			ar_tx:chunks_to_size_tagged_chunks(Chunks)),
+	SizedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(
+			big_tx:chunks_to_size_tagged_chunks(Chunks)),
 	{DataRoot, _} = big_merkle:generate_tree(SizedChunkIDs),
 	{DataRoot, Chunks}.
 
@@ -151,9 +151,9 @@ generate_random_original_split(ChunkCount) ->
 
 %% @doc Split the way v1 transactions are split.
 original_split(Data) ->
-	Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, Data),
-	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
-		ar_tx:chunks_to_size_tagged_chunks(Chunks)
+	Chunks = big_tx:chunk_binary(?DATA_CHUNK_SIZE, Data),
+	SizedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(
+		big_tx:chunks_to_size_tagged_chunks(Chunks)
 	),
 	{DataRoot, _} = big_merkle:generate_tree(SizedChunkIDs),
 	{DataRoot, Chunks}.
@@ -162,8 +162,8 @@ original_split(Data) ->
 %% this way as of the time this was written).
 v2_standard_split(Data) ->
 	Chunks = v2_standard_split_get_chunks(Data),
-	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
-		ar_tx:chunks_to_size_tagged_chunks(Chunks)
+	SizedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(
+		big_tx:chunks_to_size_tagged_chunks(Chunks)
 	),
 	{DataRoot, _} = big_merkle:generate_tree(SizedChunkIDs),
 	{DataRoot, Chunks}.
@@ -212,9 +212,9 @@ build_proofs(TX, Chunks, TXs, BlockStartOffset, Height) ->
 		lists:search(fun({{TXID, _}, _}) -> TXID == TX#tx.id end, SizeTaggedTXs),
 	{TXRoot, TXTree} = big_merkle:generate_tree(SizeTaggedDataRoots),
 	TXPath = big_merkle:generate_path(TXRoot, TXOffset - 1, TXTree),
-	SizeTaggedChunks = ar_tx:chunks_to_size_tagged_chunks(Chunks),
+	SizeTaggedChunks = big_tx:chunks_to_size_tagged_chunks(Chunks),
 	{DataRoot, DataTree} = big_merkle:generate_tree(
-		ar_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks)
+		big_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks)
 	),
 	DataSize = byte_size(binary:list_to_bin(Chunks)),
 	lists:foldl(
@@ -279,8 +279,8 @@ post_random_blocks(Wallet) ->
 
 post_blocks(Wallet, BlockMap) ->
 	FixedChunks = [crypto:strong_rand_bytes(256 * 1024) || _ <- lists:seq(1, 4)],
-	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
-			ar_tx:chunks_to_size_tagged_chunks(FixedChunks)),
+	SizedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(
+			big_tx:chunks_to_size_tagged_chunks(FixedChunks)),
 	{DataRoot, _} = big_merkle:generate_tree(SizedChunkIDs),
 	lists:foldl(
 		fun

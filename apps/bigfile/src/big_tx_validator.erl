@@ -1,4 +1,4 @@
--module(ar_tx_validator).
+-module(big_tx_validator).
 
 -export([validate/1]).
 
@@ -33,17 +33,17 @@ validate(TX) ->
 	KryderPlusRateMultiplier = proplists:get_value(kryder_plus_rate_multiplier, Props),
 	Denomination = proplists:get_value(denomination, Props),
 	RedenominationHeight = proplists:get_value(redenomination_height, Props),
-	Wallets = big_wallets:get(WL, ar_tx:get_addresses([TX])),
+	Wallets = big_wallets:get(WL, big_tx:get_addresses([TX])),
 	Mempool = ar_mempool:get_map(),
-	Result = ar_tx_replay_pool:verify_tx({TX, USDToBIGRate, PricePerGiBMinute,
+	Result = big_tx_replay_pool:verify_tx({TX, USDToBIGRate, PricePerGiBMinute,
 			KryderPlusRateMultiplier, Denomination, Height, RedenominationHeight, BlockAnchors,
 			RecentTXMap, Mempool, Wallets}),
 	Result2 =
 		case {Result, TX#tx.format == 2 andalso byte_size(TX#tx.data) /= 0} of
 			{valid, true} ->
-				Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, TX#tx.data),
-				SizeTaggedChunks = ar_tx:chunks_to_size_tagged_chunks(Chunks),
-				SizeTaggedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
+				Chunks = big_tx:chunk_binary(?DATA_CHUNK_SIZE, TX#tx.data),
+				SizeTaggedChunks = big_tx:chunks_to_size_tagged_chunks(Chunks),
+				SizeTaggedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
 				{Root, _} = big_merkle:generate_tree(SizeTaggedChunkIDs),
 				Size = byte_size(TX#tx.data),
 				case {Root, Size} == {TX#tx.data_root, TX#tx.data_size} of
@@ -73,9 +73,9 @@ validate(TX) ->
 							%% (see big_data_sync:add_tip_block called in big_node_worker) which
 							%% does not always complete before big_header_sync attempts the
 							%% insertion.
-							V1Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, TX#tx.data),
-							SizeTaggedV1Chunks = ar_tx:chunks_to_size_tagged_chunks(V1Chunks),
-							SizeTaggedV1ChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
+							V1Chunks = big_tx:chunk_binary(?DATA_CHUNK_SIZE, TX#tx.data),
+							SizeTaggedV1Chunks = big_tx:chunks_to_size_tagged_chunks(V1Chunks),
+							SizeTaggedV1ChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(
 									SizeTaggedV1Chunks),
 							{DataRoot, _} = big_merkle:generate_tree(SizeTaggedV1ChunkIDs),
 							{valid, TX#tx{ data_root = DataRoot }};

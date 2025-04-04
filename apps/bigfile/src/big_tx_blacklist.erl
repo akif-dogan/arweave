@@ -4,7 +4,7 @@
 %%% queries about the currently blacklisted transactions and the corresponding global
 %%% byte offsets.
 %%% @end
--module(ar_tx_blacklist).
+-module(big_tx_blacklist).
 
 -behaviour(gen_server).
 

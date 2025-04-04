@@ -417,7 +417,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 	ar_disk_cache:write_block(B),
 	big_data_sync:join(RecentBI),
 	big_header_sync:join(Height, RecentBI, Blocks),
-	ar_tx_blacklist:start_taking_down(),
+	big_tx_blacklist:start_taking_down(),
 	BlockTXPairs = [block_txs_pair(Block) || Block <- Blocks],
 	{BlockAnchors, RecentTXMap} = get_block_anchors_and_recent_txs_map(BlockTXPairs),
 	{Rate, ScheduledRate} = {B#block.usd_to_big_rate, B#block.scheduled_usd_to_big_rate},
@@ -689,11 +689,11 @@ handle_task({filter_mempool, Mempool}, State) ->
 					redenomination_height),
 			[{block_anchors, BlockAnchors}] = ets:lookup(node_state, block_anchors),
 			[{recent_txs_map, RecentTXMap}] = ets:lookup(node_state, recent_txs_map),
-			Wallets = big_wallets:get(WalletList, ar_tx:get_addresses(List)),
+			Wallets = big_wallets:get(WalletList, big_tx:get_addresses(List)),
 			InvalidTXs =
 				lists:foldl(
 					fun(TX, Acc) ->
-						case ar_tx_replay_pool:verify_tx({TX, Rate, Price,
+						case big_tx_replay_pool:verify_tx({TX, Rate, Price,
 								KryderPlusRateMultiplier, Denomination, Height,
 								RedenominationHeight, BlockAnchors, RecentTXMap, #{}, Wallets},
 								do_not_verify_signature) of
@@ -917,7 +917,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 	[{recent_block_index, RecentBI}] = ets:lookup(node_state, recent_block_index),
 	RootHash = PrevB#block.wallet_list,
 	TXs = B#block.txs,
-	Accounts = big_wallets:get(RootHash, [B#block.reward_addr | ar_tx:get_addresses(TXs)]),
+	Accounts = big_wallets:get(RootHash, [B#block.reward_addr | big_tx:get_addresses(TXs)]),
 	{Orphans, RecentBI2} = update_block_index(B, PrevBlocks, RecentBI),
 	BlockTXPairs2 = update_block_txs_pairs(B, PrevBlocks, BlockTXPairs),
 	BlockTXPairs3 = tl(BlockTXPairs2),
@@ -1102,7 +1102,7 @@ pack_block_with_transactions(B, PrevB) ->
 	Denomination = B#block.denomination,
 	KryderPlusRateMultiplier = PrevB#block.kryder_plus_rate_multiplier,
 	RedenominationHeight = PrevB#block.redenomination_height,
-	Addresses = [B#block.reward_addr | ar_tx:get_addresses(TXs)],
+	Addresses = [B#block.reward_addr | big_tx:get_addresses(TXs)],
 	Addresses2 = [big_rewards:get_oldest_locked_address(PrevB) | Addresses],
 	Addresses3 =
 		case B#block.double_signing_proof of
@@ -1117,13 +1117,13 @@ pack_block_with_transactions(B, PrevB) ->
 	BlockTXPairs2 = update_block_txs_pairs(B, PrevBlocks, BlockTXPairs),
 	BlockTXPairs3 = tl(BlockTXPairs2),
 	{BlockAnchors, RecentTXMap} = get_block_anchors_and_recent_txs_map(BlockTXPairs3),
-	ValidTXs = ar_tx_replay_pool:pick_txs_to_mine({BlockAnchors, RecentTXMap, Height - 1,
+	ValidTXs = big_tx_replay_pool:pick_txs_to_mine({BlockAnchors, RecentTXMap, Height - 1,
 			RedenominationHeight, Rate, PricePerGiBMinute, KryderPlusRateMultiplier,
 			PrevDenomination, B#block.timestamp, Accounts, TXs}),
 	BlockSize =
 		lists:foldl(
 			fun(TX, Acc) ->
-				Acc + ar_tx:get_weave_size_increase(TX, Height)
+				Acc + big_tx:get_weave_size_increase(TX, Height)
 			end,
 			0,
 			ValidTXs
@@ -1842,7 +1842,7 @@ compute_poa_cache(B, PoA, RecallByte, Nonce, Packing) ->
 	SubChunkIndex = big_block:get_sub_chunk_index(PackingDifficulty, Nonce),
 	{BlockStart, BlockEnd, TXRoot} = big_block_index:get_block_bounds(RecallByte),
 	BlockSize = BlockEnd - BlockStart,
-	ChunkID = ar_tx:generate_chunk_id(PoA#poa.chunk),
+	ChunkID = big_tx:generate_chunk_id(PoA#poa.chunk),
 	{{BlockStart, RecallByte, TXRoot, BlockSize, Packing, SubChunkIndex}, ChunkID}.
 
 dump_mempool(TXs, MempoolSize) ->

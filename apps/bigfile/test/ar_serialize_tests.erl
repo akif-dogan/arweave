@@ -200,7 +200,7 @@ test_block_roundtrip() ->
 
 %% @doc Convert a new TX into JSON and back, ensure the result is the same.
 tx_roundtrip_test() ->
-	TXBase = ar_tx:new(<<"test">>),
+	TXBase = big_tx:new(<<"test">>),
 	TX =
 		TXBase#tx{
 			format = 2,

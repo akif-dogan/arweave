@@ -57,7 +57,7 @@ fetch(Start, End, StoreID, AllPeersIntervals) ->
 %% intervals.
 get_unsynced_intervals(Start, End, StoreID) ->
 	UnsyncedIntervals = get_unsynced_intervals(Start, End, ar_intervals:new(), StoreID),
-	BlacklistedIntervals = ar_tx_blacklist:get_blacklisted_intervals(Start, End),
+	BlacklistedIntervals = big_tx_blacklist:get_blacklisted_intervals(Start, End),
 	ar_intervals:outerjoin(BlacklistedIntervals, UnsyncedIntervals).
 
 get_unsynced_intervals(Start, End, Intervals, _StoreID) when Start >= End ->

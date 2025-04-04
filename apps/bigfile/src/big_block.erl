@@ -129,7 +129,7 @@ verify_last_retarget(NewB, OldB) ->
 verify_weave_size(NewB, OldB, TXs) ->
 	BlockSize = lists:foldl(
 		fun(TX, Acc) ->
-			Acc + ar_tx:get_weave_size_increase(TX, NewB#block.height)
+			Acc + big_tx:get_weave_size_increase(TX, NewB#block.height)
 		end,
 		0,
 		TXs
@@ -713,7 +713,7 @@ generate_size_tagged_list_from_txs(TXs, Height) ->
 					End = Pos + DataSize,
 					case Height >= ar_fork:height_2_5() of
 						true ->
-							Padding = ar_tx:get_weave_size_increase(DataSize, Height)
+							Padding = big_tx:get_weave_size_increase(DataSize, Height)
 									- DataSize,
 							%% Encode the padding information in the Merkle tree.
 							case Padding > 0 of
@@ -752,7 +752,7 @@ encode_tags(B) ->
 		true ->
 			B#block.tags;
 		false ->
-			ar_tx:tags_to_list(B#block.tags)
+			big_tx:tags_to_list(B#block.tags)
 	end.
 
 poa_to_list(POA) ->
@@ -808,7 +808,7 @@ generate_tx_root_for_block(TXs = [TX | _], Height) when is_record(TX, tx) ->
 get_tx_data_root(#tx{ format = 2, data_root = DataRoot }) ->
 	DataRoot;
 get_tx_data_root(TX) ->
-	(ar_tx:generate_chunk_tree(TX))#tx.data_root.
+	(big_tx:generate_chunk_tree(TX))#tx.data_root.
 
 %%%===================================================================
 %%% Tests.
@@ -834,7 +834,7 @@ generate_size_tagged_list_from_txs_test() ->
 	Fork_2_5 = ar_fork:height_2_5(),
 	?assertEqual([], generate_size_tagged_list_from_txs([], Fork_2_5)),
 	?assertEqual([], generate_size_tagged_list_from_txs([], Fork_2_5 - 1)),
-	EmptyV1Root = (ar_tx:generate_chunk_tree(#tx{}))#tx.data_root,
+	EmptyV1Root = (big_tx:generate_chunk_tree(#tx{}))#tx.data_root,
 	?assertEqual([{{<<>>, EmptyV1Root}, 0}],
 			generate_size_tagged_list_from_txs([#tx{}], Fork_2_5)),
 	?assertEqual([{{<<>>, <<>>}, 0}],

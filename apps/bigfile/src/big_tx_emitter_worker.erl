@@ -1,4 +1,4 @@
--module(ar_tx_emitter_worker).
+-module(big_tx_emitter_worker).
 
 -behaviour(gen_server).
 

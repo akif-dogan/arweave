@@ -368,7 +368,7 @@ returns_error_when_txs_exceed_balance(BuildTXSetFun) ->
 	SortedTXs = lists:sort(
 		fun (TX1, TX2) ->
 			% Sort in reverse order - "biggest" first.
-			{ar_tx:utility(TX1), TX1#tx.id} > {ar_tx:utility(TX2), TX2#tx.id}
+			{big_tx:utility(TX1), TX1#tx.id} > {big_tx:utility(TX2), TX2#tx.id}
 		end,
 		TXs
 	),
@@ -405,7 +405,7 @@ returns_error_when_txs_exceed_balance(BuildTXSetFun) ->
 			path => "/tx",
 			body => big_serialize:jsonify(big_serialize:tx_to_json_struct(ExceedBalanceTX))
 		}),
-	?assertEqual({ok, ["overspend"]}, ar_test_node:remote_call(peer1, ar_tx_db, get_error_codes,
+	?assertEqual({ok, ["overspend"]}, ar_test_node:remote_call(peer1, big_tx_db, get_error_codes,
 			[ExceedBalanceTX#tx.id])).
 
 
@@ -431,7 +431,7 @@ test_rejects_transactions_above_the_size_limit() ->
 	),
 	?assertMatch(
 		{ok, ["tx_fields_too_large"]},
-		ar_test_node:remote_call(peer1, ar_tx_db, get_error_codes, [BadTX#tx.id])
+		ar_test_node:remote_call(peer1, big_tx_db, get_error_codes, [BadTX#tx.id])
 	).
 
 test_accepts_at_most_one_wallet_list_anchored_tx_per_block() ->
@@ -497,7 +497,7 @@ test_does_not_allow_to_spend_mempool_tokens() ->
 		}
 	),
 	{ok, {{<<"400">>, _}, _, _, _, _}} = ar_test_node:post_tx_to_peer(peer1, TX2),
-	?assertEqual({ok, ["overspend"]}, ar_test_node:remote_call(peer1, ar_tx_db, get_error_codes, [TX2#tx.id])),
+	?assertEqual({ok, ["overspend"]}, ar_test_node:remote_call(peer1, big_tx_db, get_error_codes, [TX2#tx.id])),
 	ar_test_node:mine(peer1),
 	PeerBI = assert_wait_until_height(peer1, 1),
 	B1 = ar_test_node:remote_call(peer1, ar_test_node, read_block_when_stored, [hd(PeerBI)]),

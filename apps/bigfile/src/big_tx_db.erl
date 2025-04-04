@@ -1,7 +1,7 @@
 %%% @doc Database for storing error codes for failed transactions, so that a user
 %%% can get the error reason when polling the status of a transaction. The entries
 %%% have a TTL. The DB is a singleton.
--module(ar_tx_db).
+-module(big_tx_db).
 
 -export([get_error_codes/1, put_error_codes/2, ensure_error/1, clear_error_codes/1]).
 
@@ -65,15 +65,15 @@ test_tx_db() ->
 		{big_wallet:to_address(Pub2), ?BIG(10000), <<>>}
 	],
 	WL = maps:from_list([{A, {B, LTX}} || {A, B, LTX} <- Wallets]),
-	OrphanedTX1 = ar_tx:new(Pub1, ?BIG(1), ?BIG(5000), <<>>),
+	OrphanedTX1 = big_tx:new(Pub1, ?BIG(1), ?BIG(5000), <<>>),
 	BadTX = OrphanedTX1#tx{ owner = Owner1, signature = <<"BAD">> },
 	Timestamp = os:system_time(seconds),
-	?assert(not ar_tx:verify(BadTX, {{1, 4}, 1, 1, 1, 0, 1, WL, Timestamp})),
+	?assert(not big_tx:verify(BadTX, {{1, 4}, 1, 1, 1, 0, 1, WL, Timestamp})),
 	Expected = {ok, ["same_owner_as_target", "tx_id_not_valid", "tx_signature_not_valid"]},
 	?assertEqual(Expected, get_error_codes(BadTX#tx.id)),
-	OrphanedTX2 = ar_tx:new(Pub1, ?BIG(1), ?BIG(5000), <<>>),
-	SignedTX = ar_tx:sign_v1(OrphanedTX2, Priv2, Pub2),
-	?assert(ar_tx:verify(SignedTX, {{1, 4}, 1, 1, 1, 0, 1, WL, Timestamp})),
+	OrphanedTX2 = big_tx:new(Pub1, ?BIG(1), ?BIG(5000), <<>>),
+	SignedTX = big_tx:sign_v1(OrphanedTX2, Priv2, Pub2),
+	?assert(big_tx:verify(SignedTX, {{1, 4}, 1, 1, 1, 0, 1, WL, Timestamp})),
 	clear_error_codes(BadTX#tx.id),
 	clear_error_codes(SignedTX#tx.id),
 	ok.

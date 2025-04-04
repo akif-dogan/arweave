@@ -124,7 +124,7 @@ test_mines_off_only_last_chunks() ->
 		fun(Height) ->
 			RandomID = crypto:strong_rand_bytes(32),
 			Chunk = crypto:strong_rand_bytes(1023),
-			ChunkID = ar_tx:generate_chunk_id(Chunk),
+			ChunkID = big_tx:generate_chunk_id(Chunk),
 			DataSize = ?DATA_CHUNK_SIZE + 1023,
 			{DataRoot, DataTree} = big_merkle:generate_tree([{RandomID, ?DATA_CHUNK_SIZE},
 					{ChunkID, DataSize}]),
@@ -187,7 +187,7 @@ test_mines_off_only_second_last_chunks() ->
 		fun(Height) ->
 			RandomID = crypto:strong_rand_bytes(32),
 			Chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE div 2),
-			ChunkID = ar_tx:generate_chunk_id(Chunk),
+			ChunkID = big_tx:generate_chunk_id(Chunk),
 			DataSize = (?DATA_CHUNK_SIZE) div 2 + (?DATA_CHUNK_SIZE) div 2 + 3,
 			{DataRoot, DataTree} = big_merkle:generate_tree([{ChunkID, ?DATA_CHUNK_SIZE div 2},
 					{RandomID, DataSize}]),
@@ -238,8 +238,8 @@ test_disk_pool_rotation() ->
 			#{ addr => Addr, storage_modules => StorageModules }),
 	Chunks = [crypto:strong_rand_bytes(?DATA_CHUNK_SIZE)],
 	{DataRoot, DataTree} = big_merkle:generate_tree(
-		ar_tx:sized_chunks_to_sized_chunk_ids(
-			ar_tx:chunks_to_size_tagged_chunks(Chunks)
+		big_tx:sized_chunks_to_sized_chunk_ids(
+			big_tx:chunks_to_size_tagged_chunks(Chunks)
 		)
 	),
 	{TX, Chunks} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot, Chunks}),

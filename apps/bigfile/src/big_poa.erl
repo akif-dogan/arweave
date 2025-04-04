@@ -195,7 +195,7 @@ validate2({spora_2_6, _} = Packing, Args) ->
 				{exception, Exception}]),
 			error;
 		{ok, Unpacked} ->
-			case ChunkID == ar_tx:generate_chunk_id(Unpacked) of
+			case ChunkID == big_tx:generate_chunk_id(Unpacked) of
 				false ->
 					false;
 				true ->
@@ -242,7 +242,7 @@ validate3(Packing, Args) ->
 		{ok, UnpackedSubChunk} ->
 			ChunkSize = ChunkEndOffset - ChunkStartOffset,
 			UnpackedChunkNoPadding = binary:part(UnpackedChunk, 0, ChunkSize),
-			case ChunkID == ar_tx:generate_chunk_id(UnpackedChunkNoPadding) of
+			case ChunkID == big_tx:generate_chunk_id(UnpackedChunkNoPadding) of
 				false ->
 					false;
 				true ->
@@ -298,4 +298,4 @@ validate_data_path(DataRoot, TXOffset, EndOffset, POA) ->
 	end.
 
 validate_chunk(ChunkID, POA) ->
-	ChunkID == ar_tx:generate_chunk_id(POA#poa.chunk).
+	ChunkID == big_tx:generate_chunk_id(POA#poa.chunk).

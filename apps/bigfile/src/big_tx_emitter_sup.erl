@@ -1,4 +1,4 @@
--module(ar_tx_emitter_sup).
+-module(big_tx_emitter_sup).
 
 -behaviour(supervisor).
 
@@ -25,7 +25,7 @@ init([]) ->
 	MaxEmitters = Config#config.max_emitters,
 	Workers = lists:map(fun tx_workers/1, lists:seq(1, MaxEmitters)),
 	WorkerNames = [ Name || #{ id := Name } <- Workers],
-	Emitter = tx_emitter([ar_tx_emitter, WorkerNames]),
+	Emitter = tx_emitter([big_tx_emitter, WorkerNames]),
 	ChildrenSpec = [Emitter|Workers],
 	{ok, {supervisor_spec(), ChildrenSpec}}.
 
@@ -35,25 +35,25 @@ supervisor_spec() ->
 	 , period => 10
 	 }.
 
-% helper to create ar_tx_emitter process, in charge
-% of sending chunk to propagate to ar_tx_emitter_worker.
+% helper to create big_tx_emitter process, in charge
+% of sending chunk to propagate to big_tx_emitter_worker.
 tx_emitter(Args) ->
-	#{ id => ar_tx_emitter
+	#{ id => big_tx_emitter
 	 , type => worker
-	 , start => {ar_tx_emitter, start_link, Args}
+	 , start => {big_tx_emitter, start_link, Args}
 	 , shutdown => ?SHUTDOWN_TIMEOUT
-	 , modules => [ar_tx_emitter]
+	 , modules => [big_tx_emitter]
 	 , restart => permanent
 	 }.
 
 % helper function to create ar_tx_workers processes.
 tx_workers(Num) ->
-	Name = "ar_tx_emitter_worker_" ++ integer_to_list(Num),
+	Name = "big_tx_emitter_worker_" ++ integer_to_list(Num),
 	Atom = list_to_atom(Name),
 	#{ id => Atom
-	 , start => {ar_tx_emitter_worker, start_link, [Atom]}
+	 , start => {big_tx_emitter_worker, start_link, [Atom]}
 	 , restart => permanent
 	 , type => worker
 	 , timeout => ?SHUTDOWN_TIMEOUT
-	 , modules => [ar_tx_emitter_worker]
+	 , modules => [big_tx_emitter_worker]
 	 }.

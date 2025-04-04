@@ -35,7 +35,7 @@ setup_all_batch() ->
 	{Setup, Cleanup} = ar_test_node:mock_functions([
 		{ar_retarget, is_retarget_height, fun(_Height) -> false end},
 		{ar_retarget, is_retarget_block, fun(_Block) -> false end},
-		{ar_tx, get_tx_fee, fun(_Args) -> ?BIG(1) end}
+		{big_tx, get_tx_fee, fun(_Args) -> ?BIG(1) end}
 		]),
 	Functions = Setup(),
 	GenesisData = start_node(),
@@ -257,7 +257,7 @@ test_get_info(_) ->
 %% @doc Ensure that transactions are only accepted once.
 test_single_regossip(_) ->
 	ar_test_node:disconnect_from(peer1),
-	TX = ar_tx:new(),
+	TX = big_tx:new(),
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
 		big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TX#tx.id,
@@ -305,7 +305,7 @@ get_fun_msg_pair(get_info) ->
 	, info_unavailable};
 get_fun_msg_pair(send_tx_binary) ->
 	{ fun(_) ->
-			InvalidTX = (ar_tx:new())#tx{ owner = <<"key">>, signature = <<"invalid">> },
+			InvalidTX = (big_tx:new())#tx{ owner = <<"key">>, signature = <<"invalid">> },
 			case big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main),
 					InvalidTX#tx.id, big_serialize:tx_to_binary(InvalidTX)) of
 				{ok,
@@ -511,12 +511,12 @@ test_get_non_existent_block(_) ->
 %% @doc A test for retrieving format=2 transactions from HTTP API.
 test_get_format_2_tx(_) ->
 	LocalHeight = big_node:get_height(),
-	DataRoot = (ar_tx:generate_chunk_tree(#tx{ data = <<"DATA">> }))#tx.data_root,
-	ValidTX = #tx{ id = TXID } = (ar_tx:new(<<"DATA">>))#tx{
+	DataRoot = (big_tx:generate_chunk_tree(#tx{ data = <<"DATA">> }))#tx.data_root,
+	ValidTX = #tx{ id = TXID } = (big_tx:new(<<"DATA">>))#tx{
 			format = 2,
 			data_root = DataRoot },
-	InvalidDataRootTX = #tx{ id = InvalidTXID } = (ar_tx:new(<<"DATA">>))#tx{ format = 2 },
-	EmptyTX = #tx{ id = EmptyTXID } = (ar_tx:new())#tx{ format = 2 },
+	InvalidDataRootTX = #tx{ id = InvalidTXID } = (big_tx:new(<<"DATA">>))#tx{ format = 2 },
+	EmptyTX = #tx{ id = EmptyTXID } = (big_tx:new())#tx{ format = 2 },
 	EncodedTXID = binary_to_list(ar_util:encode(TXID)),
 	EncodedInvalidTXID = binary_to_list(ar_util:encode(InvalidTXID)),
 	EncodedEmptyTXID = binary_to_list(ar_util:encode(EmptyTXID)),
@@ -580,7 +580,7 @@ test_get_format_2_tx(_) ->
 
 test_get_format_1_tx(_) ->
 	LocalHeight = big_node:get_height(),
-	TX = #tx{ id = TXID } = ar_tx:new(<<"DATA">>),
+	TX = #tx{ id = TXID } = big_tx:new(<<"DATA">>),
 	EncodedTXID = binary_to_list(ar_util:encode(TXID)),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			big_serialize:tx_to_binary(TX)),
@@ -609,7 +609,7 @@ test_get_format_1_tx(_) ->
 %% @doc Test adding transactions to a block.
 test_add_external_tx_with_tags(_) ->
 	LocalHeight = big_node:get_height(),
-	TX = ar_tx:new(<<"DATA">>),
+	TX = big_tx:new(<<"DATA">>),
 	TaggedTX =
 		TX#tx {
 			tags =
@@ -632,7 +632,7 @@ test_add_external_tx_with_tags(_) ->
 %% @doc Test getting transactions
 test_find_external_tx(_) ->
 	LocalHeight = big_node:get_height(),
-	TX = ar_tx:new(<<"DATA">>),
+		TX = big_tx:new(<<"DATA">>),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			big_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
@@ -682,7 +682,7 @@ test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
 %% @doc Post a tx to the network and ensure that its subfields can be gathered
 test_get_subfields_of_tx(_) ->
 	LocalHeight = big_node:get_height(),
-	TX = ar_tx:new(<<"DATA">>),
+	TX = big_tx:new(<<"DATA">>),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			big_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
@@ -694,7 +694,7 @@ test_get_subfields_of_tx(_) ->
 
 %% @doc Correctly check the status of pending is returned for a pending transaction
 test_get_pending_tx(_) ->
-	TX = ar_tx:new(<<"DATA1">>),
+	TX = big_tx:new(<<"DATA1">>),
 	big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TX#tx.id,
 			big_serialize:jsonify(big_serialize:tx_to_json_struct(TX))),
 	wait_until_receives_txs([TX]),
@@ -710,7 +710,7 @@ test_get_pending_tx(_) ->
 test_get_tx_body(_) ->
 	ar_test_node:disconnect_from(peer1),
 	LocalHeight = big_node:get_height(),
-	TX = ar_tx:new(<<"TEST DATA">>),
+	TX = big_tx:new(<<"TEST DATA">>),
 	ar_test_node:assert_post_tx_to_peer(main, TX),
 	ar_test_node:mine(),
 	wait_until_height(main, LocalHeight + 1),
@@ -722,7 +722,7 @@ test_get_tx_status(_) ->
 	Height = big_node:get_height(),
 	assert_wait_until_height(peer1, Height),
 	ar_test_node:disconnect_from(peer1),
-	TX = (ar_tx:new())#tx{ tags = [{<<"TestName">>, <<"TestVal">>}] },
+	TX = (big_tx:new())#tx{ tags = [{<<"TestName">>, <<"TestVal">>}] },
 	ar_test_node:assert_post_tx_to_peer(main, TX),
 	FetchStatus = fun() ->
 		big_http:req(#{
@@ -820,7 +820,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 		ar_test_node:mine(),
 		wait_until_height(main, LocalHeight + 1),
 		%% Send an unsigned transaction to be signed with the generated key.
-		TX = (ar_tx:new())#tx{reward = ?BIG(1), last_tx = TopUpTX#tx.id},
+		TX = (big_tx:new())#tx{reward = ?BIG(1), last_tx = TopUpTX#tx.id},
 		UnsignedTXProps = [
 			{<<"last_tx">>, <<>>},
 			{<<"target">>, TX#tx.target},
@@ -884,7 +884,7 @@ test_post_unsigned_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 test_get_error_of_data_limit(_) ->
 	LocalHeight = big_node:get_height(),
 	Limit = 1460,
-	TX = ar_tx:new(<< <<0>> || _ <- lists:seq(1, Limit * 2) >>),
+	TX = big_tx:new(<< <<0>> || _ <- lists:seq(1, Limit * 2) >>),
 	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			big_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),

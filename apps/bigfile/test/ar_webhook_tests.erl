@@ -197,9 +197,9 @@ test_webhooks() ->
 
 create_v2_tx(Wallet) ->
 	DataSize = 3 * ?DATA_CHUNK_SIZE + 11,
-	Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, crypto:strong_rand_bytes(DataSize)),
-	SizeTaggedChunks = ar_tx:chunks_to_size_tagged_chunks(Chunks),
-	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
+	Chunks = big_tx:chunk_binary(?DATA_CHUNK_SIZE, crypto:strong_rand_bytes(DataSize)),
+	SizeTaggedChunks = big_tx:chunks_to_size_tagged_chunks(Chunks),
+	SizedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
 	{DataRoot, DataTree} = big_merkle:generate_tree(SizedChunkIDs),
 	TX = ar_test_node:sign_tx(main, Wallet,
 			#{ format => 2, data_root => DataRoot, data_size => DataSize, reward => ?BIG(1) }),

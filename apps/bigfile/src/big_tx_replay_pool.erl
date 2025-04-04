@@ -1,9 +1,9 @@
 %%% @doc This module contains functions for transaction verification. It relies on
-%%% some verification helpers from the ar_tx and big_node_utils modules.
+%%% some verification helpers from the big_tx and big_node_utils modules.
 %%% The module should be used to verify transactions on-edge, validate
 %%% new blocks' transactions, pick transactions to include into a block, and
 %%% remove no longer valid transactions from the mempool after accepting a new block.
--module(ar_tx_replay_pool).
+-module(big_tx_replay_pool).
 
 -export([verify_tx/1, verify_tx/2, verify_block_txs/1, pick_txs_to_mine/1]).
 
@@ -110,7 +110,7 @@ verify_tx2(Args) ->
 			RedenominationHeight, Timestamp, FloatingWallets, BlockAnchors, RecentTXMap,
 			Mempool, VerifySignature} = Args,
 	
-	case ar_tx:verify(TX, {Rate, PricePerGiBMinute, KryderPlusRateMultiplier, Denomination,
+	case big_tx:verify(TX, {Rate, PricePerGiBMinute, KryderPlusRateMultiplier, Denomination,
 			RedenominationHeight, Height, FloatingWallets, Timestamp}, VerifySignature) of
 		true ->
 			verify_anchor(TX, Height, FloatingWallets, BlockAnchors, RecentTXMap, Mempool);
@@ -147,7 +147,7 @@ verify_anchor(TX, Height, FloatingWallets, BlockAnchors, RecentTXMap, Mempool) w
 	end.
 
 verify_last_tx(TX, FloatingWallets, BlockAnchors, RecentTXMap, Mempool) ->
-	case ar_tx:check_last_tx(FloatingWallets, TX) of
+	case big_tx:check_last_tx(FloatingWallets, TX) of
 		true ->
 			valid;
 		false ->
@@ -238,8 +238,8 @@ compare_txs(TX1, TX2, BHL) ->
 	end.
 
 compare_txs_by_utility(TX1, TX2, BHL) ->
-	U1 = ar_tx:utility(TX1),
-	U2 = ar_tx:utility(TX2),
+	U1 = big_tx:utility(TX1),
+	U2 = big_tx:utility(TX2),
 	case U1 == U2 of
 		true ->
 			compare_anchors(TX1#tx.last_tx, TX2#tx.last_tx, BHL);

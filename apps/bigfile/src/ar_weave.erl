@@ -122,7 +122,7 @@ get_initial_block_time_history() ->
 create_genesis_tx(Key, Size) ->
 	{_, {_, Pk}} = Key,
 	UnsignedTX =
-		(ar_tx:new())#tx{
+		(big_tx:new())#tx{
 			owner = Pk,
 			reward = 0,
 			data = generate_genesis_data(Size),
@@ -133,7 +133,7 @@ create_genesis_tx(Key, Size) ->
 			last_tx = <<>>,
 			format = 1
 		},
-	ar_tx:sign_v1(UnsignedTX, Key).
+	big_tx:sign_v1(UnsignedTX, Key).
 
 %% @doc: generate binary data to be used as genesis data in tests. That data is incrementing
 %% integer data in 4 byte chunks. e.g.
@@ -187,9 +187,9 @@ create_mainnet_genesis_txs() ->
 			{Priv, Pub} = big_wallet:new(),
 			LastTx = <<>>,
 			Data = unicode:characters_to_binary(M),
-			TX = ar_tx:new(Data, 0, LastTx),
+			TX = big_tx:new(Data, 0, LastTx),
 			Reward = 0,
-			SignedTX = ar_tx:sign_v1(TX#tx{reward = Reward}, Priv, Pub),
+			SignedTX = big_tx:sign_v1(TX#tx{reward = Reward}, Priv, Pub),
 			big_storage:write_tx(SignedTX),
 			SignedTX
 		end,

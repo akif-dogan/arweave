@@ -179,16 +179,16 @@ test_verify_block_txs() ->
 			?debugFmt("~s:~n", [Title]),
 			?assertEqual(
 				ExpectedResult,
-				ar_tx_replay_pool:verify_block_txs({TXs, Rate, PricePerGiBMinute,
+				big_tx_replay_pool:verify_block_txs({TXs, Rate, PricePerGiBMinute,
 						KryderPlusRateMultiplier, Denomination, Height, RedenominationHeight,
 						Timestamp, Wallets, BlockAnchors, RecentTXMap}),
 				Title),
-			PickedTXs = ar_tx_replay_pool:pick_txs_to_mine({BlockAnchors, RecentTXMap, Height,
+			PickedTXs = big_tx_replay_pool:pick_txs_to_mine({BlockAnchors, RecentTXMap, Height,
 					RedenominationHeight, Rate, PricePerGiBMinute, KryderPlusRateMultiplier,
 					Denomination, Timestamp, Wallets, TXs}),
 			?assertEqual(
 				valid,
-				ar_tx_replay_pool:verify_block_txs({PickedTXs, Rate, PricePerGiBMinute,
+				big_tx_replay_pool:verify_block_txs({PickedTXs, Rate, PricePerGiBMinute,
 						KryderPlusRateMultiplier, Denomination, Height, RedenominationHeight,
 						Timestamp, Wallets, BlockAnchors, RecentTXMap}),
 				lists:flatten(
@@ -205,7 +205,7 @@ make_tx_chain(Key, Height) ->
 	[TX1, TX2].
 
 tx(Key = {_, {_, Owner}}, Reward, Anchor) ->
-	ar_tx:sign(
+	big_tx:sign(
 		#tx{
 			format = 2,
 			owner = Owner,
@@ -219,4 +219,4 @@ wallet({_, Pub}, Balance) ->
 	{big_wallet:to_address(Pub), Balance, <<>>}.
 
 fee(Height) ->
-	ar_tx:get_tx_fee({0, 2000, 1, <<>>, #{}, Height + 1}).
+	big_tx:get_tx_fee({0, 2000, 1, <<>>, #{}, Height + 1}).

@@ -312,7 +312,7 @@ apply_block2(B, PrevB, DAG) ->
 	Tree = ar_diff_dag:reconstruct(DAG, RootHash, fun apply_diff/2),
 	TXs = B#block.txs,
 	RewardAddr = B#block.reward_addr,
-	Addresses = [RewardAddr | ar_tx:get_addresses(TXs)],
+	Addresses = [RewardAddr | big_tx:get_addresses(TXs)],
 	Addresses2 = [big_rewards:get_oldest_locked_address(PrevB) | Addresses],
 	Addresses3 =
 		case B#block.double_signing_proof of

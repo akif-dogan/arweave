@@ -116,8 +116,8 @@ test_wallet_transaction() ->
 		fun() ->
 			{Priv1, Pub1} = big_wallet:new_keyfile(KeyType),
 			{_Priv2, Pub2} = big_wallet:new(),
-			TX = ar_tx:new(big_wallet:to_address(Pub2), ?BIG(1), ?BIG(9000), <<>>),
-			SignedTX = ar_tx:sign(TX#tx{ format = 2 }, Priv1, Pub1),
+			TX = big_tx:new(big_wallet:to_address(Pub2), ?BIG(1), ?BIG(9000), <<>>),
+			SignedTX = big_tx:sign(TX#tx{ format = 2 }, Priv1, Pub1),
 			[B0] = ar_weave:init([{big_wallet:to_address(Pub1), ?BIG(10000), <<>>}]),
 			ar_test_node:start(B0, big_wallet:to_address(big_wallet:new_keyfile({eddsa, ed25519}))),
 			ar_test_node:start_peer(peer1, B0),

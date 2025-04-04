@@ -1,5 +1,5 @@
 %%% @doc The module with utilities for transaction creation, signing and verification.
--module(ar_tx).
+-module(big_tx).
 
 -export([new/0, new/1, new/2, new/3, new/4, sign/2, sign/3, sign_v1/2, sign_v1/3, verify/2,
 		verify/3, verify_tx_id/2, generate_signature_data_segment/1,
@@ -417,7 +417,7 @@ collect_validation_results(TXID, Checks) ->
 		[] ->
 			true;
 		ErrorCodes ->
-			ar_tx_db:put_error_codes(TXID, ErrorCodes),
+			big_tx_db:put_error_codes(TXID, ErrorCodes),
 			false
 	end.
 

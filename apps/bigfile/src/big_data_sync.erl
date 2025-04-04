@@ -90,7 +90,7 @@ invalidate_bad_data_record(AbsoluteEndOffset, ChunkSize, StoreID, Case) ->
 %% @doc The condition which is true if the chunk is too small compared to the proof.
 %% Small chunks make syncing slower and increase space amplification. A small chunk
 %% is accepted if it is the last chunk of the corresponding transaction - such chunks
-%% may be produced by ar_tx:chunk_binary/1, the legacy splitting method used to split
+%% may be produced by big_tx:chunk_binary/1, the legacy splitting method used to split
 %% v1 data or determine the data root of a v2 tx when data is uploaded via the data field.
 %% Due to the block limit we can only get up to 1k such chunks per block.
 is_chunk_proof_ratio_attractive(ChunkSize, TXSize, DataPath) ->
@@ -1714,7 +1714,7 @@ get_chunk(Offset, SeekOffset, Pack, Packing, StoredPacking, StoreID, RequestOrig
 						none ->
 							{ok, Proof};
 						_ ->
-							ComputedChunkID = ar_tx:generate_chunk_id(MaybeUnpackedChunk),
+							ComputedChunkID = big_tx:generate_chunk_id(MaybeUnpackedChunk),
 							case ComputedChunkID == ChunkID of
 								true ->
 									{ok, Proof#{ unpacked_chunk => MaybeUnpackedChunk }};
@@ -2318,7 +2318,7 @@ remove_tx_index_range(Start, End, State) ->
 						Error;
 					(_, TXID, ok) ->
 						ar_kv:delete(TXIndex, TXID),
-						ar_tx_blacklist:norify_about_orphaned_tx(TXID)
+						big_tx_blacklist:norify_about_orphaned_tx(TXID)
 				end,
 				ok,
 				Map
@@ -2486,7 +2486,7 @@ update_tx_index(SizeTaggedTXs, BlockStartOffset, StoreID) ->
 							ok ->
 								ar_events:send(tx, {registered_offset, TXID, AbsoluteEndOffset,
 										TXSize}),
-								ar_tx_blacklist:notify_about_added_tx(TXID, AbsoluteEndOffset,
+								big_tx_blacklist:notify_about_added_tx(TXID, AbsoluteEndOffset,
 										AbsoluteStartOffset),
 								TXEndOffset;
 							{error, Reason} ->
@@ -2736,7 +2736,7 @@ validate_proof(TXRoot, BlockStartOffset, Offset, BlockSize, Proof, ValidateDataP
 			AbsoluteEndOffset = BlockStartOffset + TXStartOffset + ChunkEndOffset,
 			case Packing of
 				unpacked ->
-					case ar_tx:generate_chunk_id(Chunk) == ChunkID of
+					case big_tx:generate_chunk_id(Chunk) == ChunkID of
 						false ->
 							false;
 						true ->
@@ -2822,7 +2822,7 @@ validate_data_path(DataRoot, Offset, TXSize, DataPath, Chunk) ->
 		false ->
 			false;
 		{ChunkID, StartOffset, EndOffset} ->
-			case ar_tx:generate_chunk_id(Chunk) == ChunkID of
+			case big_tx:generate_chunk_id(Chunk) == ChunkID of
 				false ->
 					false;
 				true ->
@@ -2873,7 +2873,7 @@ get_chunk_data_key(DataPathHash) ->
 	<< Timestamp:256, DataPathHash/binary >>.
 
 write_chunk(Offset, ChunkDataKey, Chunk, ChunkSize, DataPath, Packing, State) ->
-	case ar_tx_blacklist:is_byte_blacklisted(Offset) of
+	case big_tx_blacklist:is_byte_blacklisted(Offset) of
 		true ->
 			{ok, Packing};
 		false ->
@@ -2915,7 +2915,7 @@ write_not_blacklisted_chunk(Offset, ChunkDataKey, Chunk, ChunkSize, DataPath, Pa
 
 update_chunks_index(Args, State) ->
 	AbsoluteChunkOffset = element(1, Args),
-	case ar_tx_blacklist:is_byte_blacklisted(AbsoluteChunkOffset) of
+	case big_tx_blacklist:is_byte_blacklisted(AbsoluteChunkOffset) of
 		true ->
 			ok;
 		false ->
@@ -3456,7 +3456,7 @@ process_disk_pool_matured_chunk_offset(Iterator, TXRoot, TXPath, AbsoluteOffset,
 			{noreply, State2} ->
 				{noreply, State2};
 			StoreID2 ->
-				case ar_tx_blacklist:is_byte_blacklisted(AbsoluteOffset) of
+				case big_tx_blacklist:is_byte_blacklisted(AbsoluteOffset) of
 					true ->
 						gen_server:cast(self(), {process_disk_pool_chunk_offsets, Iterator,
 								MayConclude, Args}),
@@ -3628,7 +3628,7 @@ process_unpacked_chunk(ChunkArgs, Args, State) ->
 	end.
 
 validate_chunk_id_size(Chunk, ChunkID, ChunkSize) ->
-	case ar_tx:generate_chunk_id(Chunk) == ChunkID of
+	case big_tx:generate_chunk_id(Chunk) == ChunkID of
 		false ->
 			false;
 		true ->

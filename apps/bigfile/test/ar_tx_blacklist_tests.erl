@@ -227,12 +227,12 @@ create_txs(Wallet) ->
 			(_, {TXs, DataTrees}) ->
 				Chunks =
 					lists:sublist(
-						ar_tx:chunk_binary(?DATA_CHUNK_SIZE,
+						big_tx:chunk_binary(?DATA_CHUNK_SIZE,
 								crypto:strong_rand_bytes(10 * ?DATA_CHUNK_SIZE)),
 						10
 					), % Exclude empty chunk created by chunk_to_binary.
-				SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
-					ar_tx:chunks_to_size_tagged_chunks(Chunks)
+				SizedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(
+					big_tx:chunks_to_size_tagged_chunks(Chunks)
 				),
 				{DataRoot, DataTree} = big_merkle:generate_tree(SizedChunkIDs),
 				TX = ar_test_node:sign_tx(Wallet, #{ format => 2, data_root => DataRoot,

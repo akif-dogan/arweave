@@ -253,7 +253,7 @@ sync_range({Start, End, Peer, TargetStoreID, RetryCount} = Args, State) ->
 		false ->
 			recast;
 		true ->
-			Start2 = ar_tx_blacklist:get_next_not_blacklisted_byte(Start + 1),
+			Start2 = big_tx_blacklist:get_next_not_blacklisted_byte(Start + 1),
 			case Start2 - 1 >= End of
 				true ->
 					ok;

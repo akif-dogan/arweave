@@ -1,4 +1,4 @@
--module(ar_tx_poller).
+-module(big_tx_poller).
 -behaviour(gen_server).
 
 -export([
@@ -142,7 +142,7 @@ download_and_verify_tx(TXID) ->
 					{txid, ar_util:encode(TXID)}
 			]);
 		{TX, Peer, Time, Size} ->
-			case ar_tx_validator:validate(TX) of
+			case big_tx_validator:validate(TX) of
 				{invalid, Code} ->
 					log_invalid_tx(Code, TXID, TX, Peer);
 				{valid, TX2} ->
@@ -169,7 +169,7 @@ log_invalid_tx(tx_verification_failed, TXID, TX, Peer) ->
 	LastTX = ar_util:encode(TX#tx.last_tx),
 	CurrentHeight = big_node:get_height(),
 	CurrentBlockHash = ar_util:encode(big_node:get_current_block_hash()),
-	ErrorCodes = ar_tx_db:get_error_codes(TXID),
+	ErrorCodes = big_tx_db:get_error_codes(TXID),
 	?LOG_INFO(format_invalid_tx_message(tx_verification_failed, TXID, Peer, [
 		{last_tx, LastTX},
 		{current_height, CurrentHeight},

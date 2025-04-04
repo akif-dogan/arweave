@@ -196,7 +196,7 @@ handle(<<"GET">>, [<<"is_tx_blacklisted">>, EncodedTXID], Req, _Pid) ->
 		{error, invalid} ->
 			{400, #{}, jiffy:encode(#{ error => invalid_tx_id }), Req};
 		{ok, TXID} ->
-			{200, #{}, jiffy:encode(ar_tx_blacklist:is_tx_blacklisted(TXID)), Req}
+			{200, #{}, jiffy:encode(big_tx_blacklist:is_tx_blacklisted(TXID)), Req}
 	end;
 
 %% Some load balancers use 'HEAD's rather than 'GET's to tell if a node
@@ -601,7 +601,7 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 						proplists:get_value(<<"wallet_access_code">>, UnsignedTXProps),
 					%% big_serialize:json_struct_to_tx/1 requires all properties to be there,
 					%% so we're adding id, owner and signature with bogus values. These
-					%% will later be overwritten in ar_tx:sign/2
+					%% will later be overwritten in big_tx:sign/2
 					FullTxProps = lists:append(
 						proplists:delete(<<"wallet_access_code">>, UnsignedTXProps),
 						[
@@ -617,7 +617,7 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 					DataSize = byte_size(Data),
 					DataRoot = case DataSize > 0 of
 						true ->
-							TreeTX = ar_tx:generate_chunk_tree(#tx{ data = Data }),
+							TreeTX = big_tx:generate_chunk_tree(#tx{ data = Data }),
 							TreeTX#tx.data_root;
 						false ->
 							<<>>
@@ -627,7 +627,7 @@ handle(<<"POST">>, [<<"unsigned_tx">>], Req, Pid) ->
 						data_size = DataSize,
 						data_root = DataRoot
 					},
-					SignedTX = ar_tx:sign(Format2TX, KeyPair),
+					SignedTX = big_tx:sign(Format2TX, KeyPair),
 					Peer = big_http_util:bigfile_peer(Req),
 					Reply = big_serialize:jsonify({[{<<"id">>,
 							ar_util:encode(SignedTX#tx.id)}]}),
@@ -1640,7 +1640,7 @@ maybe_tx_is_pending_response(ID, Req) ->
 		true ->
 			{202, #{}, <<"Pending">>, Req};
 		false ->
-			case ar_tx_db:get_error_codes(ID) of
+			case big_tx_db:get_error_codes(ID) of
 				{ok, ErrorCodes} ->
 					ErrorBody = list_to_binary(lists:join(" ", ErrorCodes)),
 					{410, #{}, ErrorBody, Req};
@@ -1744,7 +1744,7 @@ estimate_tx_fee(Size, Addr, Type) ->
 			_ ->
 				big_wallets:get(RootHash, Addr)
 		end,
-	Size2 = ar_tx:get_weave_size_increase(Size, Height + 1),
+	Size2 = big_tx:get_weave_size_increase(Size, Height + 1),
 	Args = {Size2, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height + 1},
 	Denomination2 =
 		case Height >= ar_fork:height_2_6() of
@@ -1753,7 +1753,7 @@ estimate_tx_fee(Size, Addr, Type) ->
 			false ->
 				0
 		end,
-	{ar_tx:get_tx_fee(Args), Denomination2}.
+	{big_tx:get_tx_fee(Args), Denomination2}.
 
 estimate_tx_fee_v2(Size, Addr) ->
 	Props =
@@ -1780,9 +1780,9 @@ estimate_tx_fee_v2(Size, Addr) ->
 			_ ->
 				big_wallets:get(RootHash, Addr)
 		end,
-	Size2 = ar_tx:get_weave_size_increase(Size, Height + 1),
+	Size2 = big_tx:get_weave_size_increase(Size, Height + 1),
 	Args = {Size2, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height + 1},
-	ar_tx:get_tx_fee2(Args).
+	big_tx:get_tx_fee2(Args).
 
 handle_get_block(Type, ID, Req, Pid, Encoding) ->
 	case Type of
@@ -1915,7 +1915,7 @@ handle_post_tx({Req, Pid, Encoding}) ->
 	end.
 
 handle_post_tx(Req, Peer, TX) ->
-	case ar_tx_validator:validate(TX) of
+	case big_tx_validator:validate(TX) of
 		{invalid, tx_verification_failed} ->
 			handle_post_tx_verification_response();
 		{invalid, last_tx_in_mempool} ->
@@ -2985,7 +2985,7 @@ post_tx_parse_id(parse_json, {TXID, Req, Body}) ->
                     noop;
                 _ ->
                     ar_ignore_registry:remove_temporary(TXID),
-					ar_tx_db:put_error_codes(TXID, [<<"invalid_signature_type">>])
+					big_tx_db:put_error_codes(TXID, [<<"invalid_signature_type">>])
             end,
             {error, invalid_signature_type, Req};
 		{error, _} ->
