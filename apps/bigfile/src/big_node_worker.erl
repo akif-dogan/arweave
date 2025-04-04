@@ -99,7 +99,7 @@ init([]) ->
 			Config#config.start_from_block /= undefined,
 	case {StartFromLocalState, Config#config.init, Config#config.auto_join} of
 		{false, false, true} ->
-			ar_join:start(big_peers:get_trusted_peers());
+			big_join:start(big_peers:get_trusted_peers());
 		{true, _, _} ->
 			case big_storage:read_block_index() of
 				not_found ->

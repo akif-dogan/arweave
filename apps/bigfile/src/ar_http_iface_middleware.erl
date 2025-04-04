@@ -3219,7 +3219,7 @@ handle_mining_h2(Req, Pid) ->
 									{200, #{}, <<>>, Req2};
 								_ ->
 									ar_mining_server:prepare_and_post_solution(Candidate),
-									ar_mining_stats:h2_received_from_peer(Peer),
+									big_mining_stats:h2_received_from_peer(Peer),
 									{200, #{}, <<>>, Req}
 							end
 					end;

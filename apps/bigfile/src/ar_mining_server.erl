@@ -163,7 +163,7 @@ init([]) ->
 	Workers = lists:foldl(
 		fun({Partition, _Addr, Difficulty}, Acc) ->
 			maps:put({Partition, Difficulty},
-					ar_mining_worker:name(Partition, Difficulty), Acc)
+					big_mining_worker:name(Partition, Difficulty), Acc)
 		end,
 		#{},
 		Partitions
@@ -189,7 +189,7 @@ handle_call(Request, _From, State) ->
 handle_cast(pause, State) ->
 	big:console("Pausing mining.~n"),
 	?LOG_INFO([{event, pause_mining}]),
-	ar_mining_stats:mining_paused(),
+	big_mining_stats:mining_paused(),
 	%% Setting paused to true allows all pending tasks to complete, but prevents new output to be 
 	%% distributed. Setting diff to infinity ensures that no solutions are found.
 	State2 = set_difficulty({infinity, infinity}, State),
@@ -200,11 +200,11 @@ handle_cast({start_mining, Args}, State) ->
 	big:console("Starting mining.~n"),
 	?LOG_INFO([{event, start_mining}, {difficulty, DiffPair},
 			{rebase_threshold, RebaseThreshold}, {height, Height}]),
-	ar_mining_stats:start_performance_reports(),
+	big_mining_stats:start_performance_reports(),
 
 	maps:foreach(
 		fun(_Partition, Worker) ->
-			ar_mining_worker:reset(Worker, DiffPair)
+			big_mining_worker:reset(Worker, DiffPair)
 		end,
 		State#state.workers
 	),
@@ -241,7 +241,7 @@ handle_cast({compute_h2_for_peer, Candidate}, State) ->
 		not_found ->
 			ok;
 		Worker ->
-			ar_mining_worker:add_task(Worker, compute_h2_for_peer, Candidate)
+			big_mining_worker:add_task(Worker, compute_h2_for_peer, Candidate)
 	end,
 	{noreply, State};
 
@@ -267,7 +267,7 @@ handle_cast({manual_garbage_collect, Ref}, #state{ gc_process_ref = Ref } = Stat
 	erlang:garbage_collect(self(), [{async, erlang:monotonic_time()}]),
 	maps:foreach(
 		fun(_Partition, Worker) ->
-			ar_mining_worker:garbage_collect(Worker)
+			big_mining_worker:garbage_collect(Worker)
 		end,
 		State#state.workers
 	),
@@ -343,7 +343,7 @@ get_worker(Key, State) ->
 set_difficulty(DiffPair, State) ->
 	maps:foreach(
 		fun(_Partition, Worker) ->
-			ar_mining_worker:set_difficulty(Worker, DiffPair)
+			big_mining_worker:set_difficulty(Worker, DiffPair)
 		end,
 		State#state.workers
 	),
@@ -385,7 +385,7 @@ update_sessions(NewActiveSessions, CurrentActiveSessions, State) ->
 
 	maps:foreach(
 		fun(_Partition, Worker) ->
-			ar_mining_worker:set_sessions(Worker, NewActiveSessions)
+			big_mining_worker:set_sessions(Worker, NewActiveSessions)
 		end,
 		State#state.workers
 	),
@@ -495,7 +495,7 @@ maybe_update_cache_limits(Limits, State) ->
 		GarbageCollectionFrequency} = Limits,
 	maps:foreach(
 		fun(_Partition, Worker) ->
-			ar_mining_worker:set_cache_limits(
+			big_mining_worker:set_cache_limits(
 				Worker, PartitionCacheLimit, VDFQueueLimit)
 		end,
 		State#state.workers
@@ -544,7 +544,7 @@ distribute_output([{Partition, MiningAddress, PackingDifficulty} | Partitions],
 			?LOG_ERROR([{event, worker_not_found}, {partition, Partition}]),
 			ok;
 		Worker ->
-			ar_mining_worker:add_task(
+			big_mining_worker:add_task(
 				Worker, compute_h0,
 				Candidate#mining_candidate{
 					partition_number = Partition,
@@ -1019,7 +1019,7 @@ fetch_poa_from_peer(Peer, RecallByte) ->
 handle_computed_output(SessionKey, StepNumber, Output, PartitionUpperBound,
 		PartialDiff, State) ->
 	true = is_integer(StepNumber),
-	ar_mining_stats:vdf_computed(),
+	big_mining_stats:vdf_computed(),
 
 	State2 = case ar_mining_io:set_largest_seen_upper_bound(PartitionUpperBound) of
 		true ->

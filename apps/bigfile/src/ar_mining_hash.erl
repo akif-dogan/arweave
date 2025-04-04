@@ -142,17 +142,17 @@ hashing_thread(PackingState) ->
 				packing_difficulty = PackingDifficulty } = Candidate,
 			H0 = big_block:compute_h0(Output, PartitionNumber, Seed, MiningAddress,
 					PackingDifficulty, PackingState),
-			ar_mining_worker:computed_hash(Worker, computed_h0, H0, undefined, Candidate),
+			big_mining_worker:computed_hash(Worker, computed_h0, H0, undefined, Candidate),
 			hashing_thread(PackingState);
 		{compute, h1, Worker, Candidate} ->
 			#mining_candidate{ h0 = H0, nonce = Nonce, chunk1 = Chunk1 } = Candidate,
 			{H1, Preimage} = big_block:compute_h1(H0, Nonce, Chunk1),
-			ar_mining_worker:computed_hash(Worker, computed_h1, H1, Preimage, Candidate),
+			big_mining_worker:computed_hash(Worker, computed_h1, H1, Preimage, Candidate),
 			hashing_thread(PackingState);
 		{compute, h2, Worker, Candidate} ->
 			#mining_candidate{ h0 = H0, h1 = H1, chunk2 = Chunk2 } = Candidate,
 			{H2, Preimage} = big_block:compute_h2(H1, Chunk2, H0),
-			ar_mining_worker:computed_hash(Worker, computed_h2, H2, Preimage, Candidate),
+			big_mining_worker:computed_hash(Worker, computed_h2, H2, Preimage, Candidate),
 			hashing_thread(PackingState)
 	end.
 

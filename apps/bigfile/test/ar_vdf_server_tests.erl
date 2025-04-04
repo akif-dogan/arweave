@@ -977,7 +977,7 @@ get_current_session_key() ->
 
 mock_add_task() ->
 	{
-		ar_mining_worker, add_task,
+		big_mining_worker, add_task,
 		fun(Worker, TaskType, Candidate) ->
 			ets:insert(add_task, {Worker, TaskType, Candidate#mining_candidate.step_number})
 		end

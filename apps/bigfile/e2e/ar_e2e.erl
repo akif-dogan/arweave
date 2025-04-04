@@ -360,7 +360,7 @@ assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 		[Node, PartitionNumber, ar_serialize:encode_packing(Packing, true), Size]),
 	ar_util:do_until(
 		fun() -> 
-			ar_test_node:remote_call(Node, ar_mining_stats, get_partition_data_size, 
+			ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
 				[PartitionNumber, Packing]) >= Size
 		end,
 		100,
@@ -368,7 +368,7 @@ assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 	),
 	?assertEqual(
 		Size,
-		ar_test_node:remote_call(Node, ar_mining_stats, get_partition_data_size, 
+		ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
 			[PartitionNumber, Packing]),
 		iolist_to_binary(io_lib:format(
 			"~s partition ~p,~p was not the expected size.", 
@@ -377,7 +377,7 @@ assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 assert_empty_partition(Node, PartitionNumber, Packing) ->
 	ar_util:do_until(
 		fun() -> 
-			ar_test_node:remote_call(Node, ar_mining_stats, get_partition_data_size, 
+			ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
 				[PartitionNumber, Packing]) > 0
 		end,
 		100,
@@ -385,7 +385,7 @@ assert_empty_partition(Node, PartitionNumber, Packing) ->
 	),
 	?assertEqual(
 		0,
-		ar_test_node:remote_call(Node, ar_mining_stats, get_partition_data_size, 
+		ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
 			[PartitionNumber, Packing]),
 		iolist_to_binary(io_lib:format(
 			"~s partition ~p,~p is not empty", [Node, PartitionNumber, 

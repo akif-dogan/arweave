@@ -1,4 +1,4 @@
--module(ar_mining_stats).
+-module(big_mining_stats).
 -behaviour(gen_server).
 
 -export([start_link/0, start_performance_reports/0, pause_performance_reports/1, mining_paused/0,
@@ -835,7 +835,7 @@ test_h2_stats() ->
 	test_local_stats(fun h2_computed/2, h2).
 
 test_local_stats(Fun, Stat) ->
-	ar_mining_stats:pause_performance_reports(120000),
+	big_mining_stats:pause_performance_reports(120000),
 	reset_all_stats(),
 	Fun(1, 1),
 	TotalStart1 = get_start({partition, 1, Stat, total}),
@@ -924,12 +924,12 @@ test_local_stats(Fun, Stat) ->
 	?assertEqual(0.0, get_average_by_samples({partition, 3, Stat, current})).
 
 test_vdf_stats() ->
-	ar_mining_stats:pause_performance_reports(120000),
+	big_mining_stats:pause_performance_reports(120000),
 	reset_all_stats(),
-	ar_mining_stats:vdf_computed(),
+	big_mining_stats:vdf_computed(),
 	Start = get_start(vdf),
-	ar_mining_stats:vdf_computed(),
-	ar_mining_stats:vdf_computed(),
+	big_mining_stats:vdf_computed(),
+	big_mining_stats:vdf_computed(),
 
 	?assertEqual(0.0, get_average_count_by_time(vdf, Start)),
 	?assertEqual(6.0, get_average_count_by_time(vdf, Start + 500)),
@@ -946,11 +946,11 @@ test_vdf_stats() ->
 	?assertEqual(0.0, get_average_by_samples(vdf)),
 	?assertEqual(undefined, vdf_speed(Now + 500)),
 
-	ar_mining_stats:vdf_computed(),
+	big_mining_stats:vdf_computed(),
 	Start2 = get_start(vdf),
 	?assertEqual(0.5, vdf_speed(Start2 + 500)),
 
-	ar_mining_stats:vdf_computed(),
+	big_mining_stats:vdf_computed(),
 	reset_all_stats(),
 	?assertEqual(undefined, get_start(vdf)),
 	?assertEqual(0.0, get_average_count_by_time(vdf, 1000)),
@@ -967,7 +967,7 @@ test_data_size_stats() ->
 		WeaveSize = floor(2 * ?PARTITION_SIZE),
 		ets:insert(node_state, [{weave_size, WeaveSize}]),
 
-		ar_mining_stats:pause_performance_reports(120000),
+		big_mining_stats:pause_performance_reports(120000),
 		do_test_data_size_stats({spora_2_6, <<"MINING">>}, {spora_2_6, <<"PACKING">>}),
 		do_test_data_size_stats({composite, <<"MINING">>, 1}, {composite, <<"PACKING">>, 1}),
 		do_test_data_size_stats({composite, <<"MINING">>, 2}, {composite, <<"PACKING">>, 2})
@@ -981,33 +981,33 @@ do_test_data_size_stats(Mining, Packing) ->
 	?assertEqual(0, get_partition_data_size(1, Mining)),
 	?assertEqual(0, get_partition_data_size(2, Mining)),
 
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.1 * ?PARTITION_SIZE), 10, unpacked}),
 		unpacked, 1, floor(0.1 * ?PARTITION_SIZE), 10, 101),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.1 * ?PARTITION_SIZE), 10, Mining}),
 		Mining, 1, floor(0.1 * ?PARTITION_SIZE), 10, 102),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.1 * ?PARTITION_SIZE), 10, Packing}),
 		Packing, 1, floor(0.1 * ?PARTITION_SIZE), 10, 103),
 
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.3 * ?PARTITION_SIZE), 4, unpacked}),
 		unpacked, 1, floor(0.3 * ?PARTITION_SIZE), 4, 111),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.3 * ?PARTITION_SIZE), 4, Mining}),
 		Mining, 1, floor(0.3 * ?PARTITION_SIZE), 4, 112),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.3 * ?PARTITION_SIZE), 4, Packing}),
 		Packing, 1, floor(0.3 * ?PARTITION_SIZE), 4, 113),
 
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({?PARTITION_SIZE, 2, unpacked}),
 		unpacked, 2, ?PARTITION_SIZE, 2, 201),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({?PARTITION_SIZE, 2, Mining}),
 		Mining, 2, ?PARTITION_SIZE, 2, 202),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({?PARTITION_SIZE, 2, Packing}),
 		Packing, 2, ?PARTITION_SIZE, 2, 203),
 
@@ -1015,23 +1015,23 @@ do_test_data_size_stats(Mining, Packing) ->
 	?assertEqual(202, get_partition_data_size(2, Mining)),
 	?assertEqual(214, get_total_minable_data_size(Mining)),
 
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.2 * ?PARTITION_SIZE), 8, unpacked}),
 		unpacked, 1, floor(0.2 * ?PARTITION_SIZE), 8, 121),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.2 * ?PARTITION_SIZE), 8, Mining}),
 		Mining, 1, floor(0.2 * ?PARTITION_SIZE), 8, 122),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({floor(0.2 * ?PARTITION_SIZE), 8, Packing}),
 		Packing, 1, floor(0.2 * ?PARTITION_SIZE), 8, 123),
 
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({?PARTITION_SIZE, 2, unpacked}),
 		unpacked, 2, ?PARTITION_SIZE, 2, 51),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({?PARTITION_SIZE, 2, Mining}),
 		Mining, 2, ?PARTITION_SIZE, 2, 52),
-	ar_mining_stats:set_storage_module_data_size(
+	big_mining_stats:set_storage_module_data_size(
 		big_storage_module:id({?PARTITION_SIZE, 2, Packing}),
 		Packing, 2, ?PARTITION_SIZE, 2, 53),
 	
@@ -1051,7 +1051,7 @@ test_h1_received_from_peer_stats() ->
 	test_peer_stats(fun h1_received_from_peer/2, h1_from_peer).
 
 test_peer_stats(Fun, Stat) ->
-	ar_mining_stats:pause_performance_reports(120000),
+	big_mining_stats:pause_performance_reports(120000),
 	reset_all_stats(),
 
 	Peer1 = ar_test_node:peer_ip(peer1),
@@ -1148,18 +1148,18 @@ test_peer_stats(Fun, Stat) ->
 	?assertEqual(0.0, get_average_by_samples({peer, Peer3, Stat, current})).
 
 test_h2_peer_stats() ->
-	ar_mining_stats:pause_performance_reports(120000),
+	big_mining_stats:pause_performance_reports(120000),
 	reset_all_stats(),
 
 	Peer1 = ar_test_node:peer_ip(peer1),
 	Peer2 = ar_test_node:peer_ip(peer2),
 	Peer3 = ar_test_node:peer_ip(peer3),
 
-	ar_mining_stats:h2_sent_to_peer(Peer1),
-	ar_mining_stats:h2_sent_to_peer(Peer1),
-	ar_mining_stats:h2_sent_to_peer(Peer1),
-	ar_mining_stats:h2_sent_to_peer(Peer2),
-	ar_mining_stats:h2_sent_to_peer(Peer2),
+	big_mining_stats:h2_sent_to_peer(Peer1),
+	big_mining_stats:h2_sent_to_peer(Peer1),
+	big_mining_stats:h2_sent_to_peer(Peer1),
+	big_mining_stats:h2_sent_to_peer(Peer2),
+	big_mining_stats:h2_sent_to_peer(Peer2),
 
 	?assertEqual(3, get_count({peer, Peer1, h2_to_peer, total})),
 	?assertEqual(2, get_count({peer, Peer2, h2_to_peer, total})),
@@ -1167,11 +1167,11 @@ test_h2_peer_stats() ->
 
 	?assertEqual(5, get_overall_total(peer, h2_to_peer, total)),
 
-	ar_mining_stats:h2_received_from_peer(Peer1),
-	ar_mining_stats:h2_received_from_peer(Peer1),
-	ar_mining_stats:h2_received_from_peer(Peer1),
-	ar_mining_stats:h2_received_from_peer(Peer2),
-	ar_mining_stats:h2_received_from_peer(Peer2),
+	big_mining_stats:h2_received_from_peer(Peer1),
+	big_mining_stats:h2_received_from_peer(Peer1),
+	big_mining_stats:h2_received_from_peer(Peer1),
+	big_mining_stats:h2_received_from_peer(Peer2),
+	big_mining_stats:h2_received_from_peer(Peer2),
 
 	?assertEqual(3, get_count({peer, Peer1, h2_from_peer, total})),
 	?assertEqual(2, get_count({peer, Peer2, h2_from_peer, total})),
@@ -1329,7 +1329,7 @@ test_report(Mining, Packing, PoA1Multiplier) ->
 				storage_modules = StorageModules,
 				mining_addr = MiningAddress
 			}),
-		ar_mining_stats:pause_performance_reports(120000),
+		big_mining_stats:pause_performance_reports(120000),
 		reset_all_stats(),
 		Partitions = [
 			{1, MiningAddress, 0},
@@ -1344,20 +1344,20 @@ test_report(Mining, Packing, PoA1Multiplier) ->
 		Now = erlang:monotonic_time(millisecond),
 		WeaveSize = floor(10 * ?PARTITION_SIZE),
 		ets:insert(node_state, [{weave_size, WeaveSize}]),
-		ar_mining_stats:set_total_data_size(floor(0.6 * ?PARTITION_SIZE)),
-		ar_mining_stats:set_storage_module_data_size(
+		big_mining_stats:set_total_data_size(floor(0.6 * ?PARTITION_SIZE)),
+		big_mining_stats:set_storage_module_data_size(
 			big_storage_module:id({floor(0.1 * ?PARTITION_SIZE), 10, Mining}),
 			Mining, 1, floor(0.1 * ?PARTITION_SIZE), 10,
 			floor(0.1 * ?PARTITION_SIZE)),
-		ar_mining_stats:set_storage_module_data_size(
+		big_mining_stats:set_storage_module_data_size(
 			big_storage_module:id({floor(0.3 * ?PARTITION_SIZE), 4, Mining}),
 			Mining, 1, floor(0.3 * ?PARTITION_SIZE), 4,
 			floor(0.2 * ?PARTITION_SIZE)),
-		ar_mining_stats:set_storage_module_data_size(
+		big_mining_stats:set_storage_module_data_size(
 			big_storage_module:id({floor(0.2 * ?PARTITION_SIZE), 8, Mining}),
 			Mining, 1, floor(0.2 * ?PARTITION_SIZE), 8,
 			floor(0.05 * ?PARTITION_SIZE)),	
-		ar_mining_stats:set_storage_module_data_size(
+		big_mining_stats:set_storage_module_data_size(
 			big_storage_module:id({?PARTITION_SIZE, 2, Mining}),
 			Mining, 2, ?PARTITION_SIZE, 2, floor(0.25 * ?PARTITION_SIZE)),
 		vdf_computed(Now),

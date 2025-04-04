@@ -712,7 +712,7 @@ store_state(State) ->
 		ok ->
 			maps:map(
 				fun	({big_data_sync, Packing}, TypeRecord) ->
-						ar_mining_stats:set_storage_module_data_size(
+						big_mining_stats:set_storage_module_data_size(
 							StoreID, Packing, PartitionNumber, StorageModuleSize,
 							StorageModuleIndex,
 							ar_intervals:sum(TypeRecord));

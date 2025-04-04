@@ -1,4 +1,4 @@
--module(ar_metrics_collector).
+-module(big_metrics_collector).
 
 -behaviour(prometheus_collector).
 

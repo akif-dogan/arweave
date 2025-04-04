@@ -302,7 +302,7 @@ io_thread(Mode, Cache, LastClearTime) ->
 	end.
 
 chunks_read(miner, Worker, WhichChunk, Candidate, RecallRangeStart, ChunkOffsets) ->
-	ar_mining_worker:chunks_read(
+	big_mining_worker:chunks_read(
 		Worker, WhichChunk, Candidate, RecallRangeStart, ChunkOffsets);
 chunks_read(standalone, Worker, WhichChunk, Candidate, RecallRangeStart, ChunkOffsets) ->
 	Worker ! {chunks_read, WhichChunk, Candidate, RecallRangeStart, ChunkOffsets}.
@@ -426,7 +426,7 @@ log_read_range(_Mode, Candidate, WhichChunk, FoundChunks, StartTime) ->
 		chunk2 -> Candidate#mining_candidate.partition_number2
 	end,
 
-	ar_mining_stats:raw_read_rate(PartitionNumber, ReadRate),
+	big_mining_stats:raw_read_rate(PartitionNumber, ReadRate),
 
 	% ?LOG_DEBUG([{event, mining_debug_read_recall_range},
 	% 		{thread, self()},

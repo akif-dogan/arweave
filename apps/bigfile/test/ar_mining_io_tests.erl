@@ -19,7 +19,7 @@ setup_all() ->
 		[[{?PARTITION_SIZE, N, {spora_2_6, RewardAddr}}] || N <- lists:seq(0, 8)]),
 	ar_test_node:start(B0, RewardAddr, Config, StorageModules),
 	{Setup, Cleanup} = ar_test_node:mock_functions([
-		{ar_mining_worker, chunks_read, fun chunks_read/5}
+		{big_mining_worker, chunks_read, fun chunks_read/5}
 	]),
 	Functions = Setup(),
 	{Cleanup, Functions}.

@@ -714,7 +714,7 @@ start(normal, _Args) ->
 	ar_logger:init(Config),
 	%% Start the Prometheus metrics subsystem.
 	prometheus_registry:register_collector(prometheus_process_collector),
-	prometheus_registry:register_collector(ar_metrics_collector),
+	prometheus_registry:register_collector(big_metrics_collector),
 	%% Register custom metrics.
 	big_metrics:register(),
 	%% Start other apps which we depend on.

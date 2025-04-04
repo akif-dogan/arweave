@@ -409,9 +409,9 @@ send_h1(Candidate, State) ->
 			end),
 			case Peer of
 				{pool, _} ->
-					ar_mining_stats:h1_sent_to_peer(pool, length(H1List));
+					big_mining_stats:h1_sent_to_peer(pool, length(H1List));
 				_ ->
-					ar_mining_stats:h1_sent_to_peer(Peer, length(H1List))
+					big_mining_stats:h1_sent_to_peer(Peer, length(H1List))
 			end
 	end.
 
@@ -421,9 +421,9 @@ send_h2(Peer, Candidate) ->
 	end),
 	case Peer of
 		{pool, _} ->
-			ar_mining_stats:h2_sent_to_peer(pool);
+			big_mining_stats:h2_sent_to_peer(pool);
 		_ ->
-			ar_mining_stats:h2_sent_to_peer(Peer)
+			big_mining_stats:h2_sent_to_peer(Peer)
 	end.
 
 add_mining_peer({Peer, StorageModules}, State) ->

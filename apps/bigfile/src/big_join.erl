@@ -1,4 +1,4 @@
--module(ar_join).
+-module(big_join).
 
 -export([start/1]).
 

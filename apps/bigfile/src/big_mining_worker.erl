@@ -1,4 +1,4 @@
--module(ar_mining_worker).
+-module(big_mining_worker).
 
 -behaviour(gen_server).
 
@@ -268,7 +268,7 @@ process_chunks(WhichChunk, Candidate, _RangeStart, Nonce, _NoncesPerChunk, Nonce
 		chunk2 ->
 			Candidate#mining_candidate.partition_number2
 	end,
-	ar_mining_stats:chunks_read(Partition, Count),
+	big_mining_stats:chunks_read(Partition, Count),
 	State;
 process_chunks(WhichChunk, Candidate, RangeStart, Nonce, NoncesPerChunk, NonceMax,
 		[], SubChunkSize, Count, State) ->
@@ -463,7 +463,7 @@ handle_task({computed_h1, Candidate, _ExtraArgs}, State) ->
 				{h1, ar_util:encode(H1)}, 
 				{p1, Candidate#mining_candidate.partition_number},
 				{difficulty, get_difficulty(State2, Candidate)}]),
-			ar_mining_stats:h1_solution(),
+			big_mining_stats:h1_solution(),
 			%% Decrement 1 for chunk1:
 			%% Since we found a solution we won't need chunk2 (and it will be evicted if
 			%% necessary below)
@@ -529,7 +529,7 @@ handle_task({computed_h2, Candidate, _ExtraArgs}, State) ->
 					{p2, Candidate#mining_candidate.partition_number2},
 					{difficulty, get_difficulty(State2, Candidate)},
 					{partial_difficulty, get_partial_difficulty(State2, Candidate)}]),
-			ar_mining_stats:h2_solution();
+			big_mining_stats:h2_solution();
 		partial ->
 			?LOG_INFO([{event, found_h2_partial_solution},
 					{worker, State2#state.name},
@@ -577,7 +577,7 @@ handle_task({compute_h2_for_peer, Candidate, _ExtraArgs}, State) ->
 	Range2Exists = ar_mining_io:read_recall_range(chunk2, self(), Candidate3, RecallRange2Start),
 	case Range2Exists of
 		true ->
-			ar_mining_stats:h1_received_from_peer(Peer, length(H1List)),
+			big_mining_stats:h1_received_from_peer(Peer, length(H1List)),
 			%% Note: when processing CM requests we always reserve the cache space and proceed
 			%% *even if* this puts us over the chunk cache limit. This may have to be
 			%% revisited later if we find that this causes unacceptable memory bloat.
@@ -895,13 +895,13 @@ hash_computed(WhichHash, Candidate, State) ->
 report_hashes(State) ->
 	maps:foreach(
         fun(Key, Value) ->
-            ar_mining_stats:h1_computed(Key, Value)
+            big_mining_stats:h1_computed(Key, Value)
         end,
         State#state.h1_hashes
     ),
 	maps:foreach(
         fun(Key, Value) ->
-            ar_mining_stats:h2_computed(Key, Value)
+            big_mining_stats:h2_computed(Key, Value)
         end,
         State#state.h2_hashes
     ),

@@ -117,7 +117,7 @@ handle_cast(update_serialized_sync_buckets, State) ->
 
 handle_cast(record_v2_index_data_size_metric, State) ->
 	#state{ sync_record = SyncRecord } = State,
-	ar_mining_stats:set_total_data_size(ar_intervals:sum(SyncRecord)),
+	big_mining_stats:set_total_data_size(ar_intervals:sum(SyncRecord)),
 	ar_util:cast_after(?UPDATE_SIZE_METRIC_FREQUENCY_MS, ?MODULE,
 			record_v2_index_data_size_metric),
 	{noreply, State};

@@ -1,4 +1,4 @@
--module(ar_mining_sup).
+-module(big_mining_sup).
 
 -behaviour(supervisor).
 
@@ -27,7 +27,7 @@ init([]) ->
 	MiningWorkers = lists:map(
 		fun({Partition, _MiningAddr, PackingDifficulty}) ->
 			?CHILD_WITH_ARGS(
-				ar_mining_worker, worker, ar_mining_worker:name(Partition, PackingDifficulty),
+				big_mining_worker, worker, big_mining_worker:name(Partition, PackingDifficulty),
 					[Partition, PackingDifficulty])
 		end,
 		ar_mining_io:get_partitions(infinity)
@@ -36,6 +36,6 @@ init([]) ->
 		?CHILD(ar_mining_server, worker),
 		?CHILD(ar_mining_hash, worker),
 		?CHILD(ar_mining_io, worker),
-		?CHILD(ar_mining_stats, worker)
+		?CHILD(big_mining_stats, worker)
 	],
 	{ok, {{one_for_one, 5, 10}, Children}}.
