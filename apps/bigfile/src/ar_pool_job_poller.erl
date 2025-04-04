@@ -52,7 +52,7 @@ handle_cast(fetch_jobs, State) ->
 				%% We are a standalone pool client (a non-CM miner and a pool client).
 				big_pool:pool_peer()
 		end,
-	case ar_http_iface_client:get_jobs(Peer, PrevOutput) of
+	case big_http_iface_client:get_jobs(Peer, PrevOutput) of
 		{ok, Jobs} ->
 			emit_pool_jobs(Jobs),
 			big_pool:cache_jobs(Jobs),

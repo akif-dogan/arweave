@@ -405,7 +405,7 @@ send_h1(Candidate, State) ->
 		Peer ->
 			Candidate2 = Candidate#mining_candidate{ label = <<"cm">> },
 			spawn(fun() ->
-				ar_http_iface_client:cm_h1_send(Peer, Candidate2)
+				big_http_iface_client:cm_h1_send(Peer, Candidate2)
 			end),
 			case Peer of
 				{pool, _} ->
@@ -417,7 +417,7 @@ send_h1(Candidate, State) ->
 
 send_h2(Peer, Candidate) ->
 	spawn(fun() ->
-		ar_http_iface_client:cm_h2_send(Peer, Candidate)
+		big_http_iface_client:cm_h2_send(Peer, Candidate)
 	end),
 	case Peer of
 		{pool, _} ->
@@ -463,7 +463,7 @@ refetch_peer_partitions(Peers) ->
 		
 		ar_util:pmap(
 			fun(Peer) ->
-				case ar_http_iface_client:get_cm_partition_table(Peer) of
+				case big_http_iface_client:get_cm_partition_table(Peer) of
 					{ok, PartitionList} ->
 						ar_coordination:update_peer(Peer, PartitionList);
 					_ ->
@@ -513,7 +513,7 @@ refetch_pool_peer_partitions(UniquePeerPartitions) ->
 	spawn(fun() ->
 		JSON = ar_serialize:jsonify(lists:sort(sets:to_list(UniquePeerPartitions))),
 		PoolPeer = big_pool:pool_peer(),
-		case ar_http_iface_client:post_cm_partition_table_to_pool(PoolPeer, JSON) of
+		case big_http_iface_client:post_cm_partition_table_to_pool(PoolPeer, JSON) of
 			{ok, PartitionList} ->
 				ar_coordination:update_peer(PoolPeer, PartitionList);
 			_ ->

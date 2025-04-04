@@ -3180,7 +3180,7 @@ handle_mining_h1(Req, Pid) ->
 									Payload = ar_serialize:jsonify(
 											ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),
 									spawn(fun() ->
-										ar_http_iface_client:post_pool_cm_jobs(PoolPeer,
+										big_http_iface_client:post_pool_cm_jobs(PoolPeer,
 												Payload) end),
 									{200, #{}, <<>>, Req2};
 								_ ->
@@ -3214,7 +3214,7 @@ handle_mining_h2(Req, Pid) ->
 									Payload = ar_serialize:jsonify(
 											ar_serialize:pool_cm_jobs_to_json_struct(Jobs)),
 									spawn(fun() ->
-										ar_http_iface_client:post_pool_cm_jobs(PoolPeer,
+										big_http_iface_client:post_pool_cm_jobs(PoolPeer,
 												Payload) end),
 									{200, #{}, <<>>, Req2};
 								_ ->

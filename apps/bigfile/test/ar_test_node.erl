@@ -1226,7 +1226,7 @@ post_block(B, ExpectedResults, Peer) ->
 	await_post_block(B, ExpectedResults, Peer).
 
 send_new_block(Peer, B) ->
-	ar_http_iface_client:send_block_binary(Peer, B#block.indep_hash,
+	big_http_iface_client:send_block_binary(Peer, B#block.indep_hash,
 			ar_serialize:block_to_binary(B)).
 
 await_post_block(B, ExpectedResults) ->

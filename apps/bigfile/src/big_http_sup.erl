@@ -3,7 +3,7 @@
 %% with this file, You can obtain one at
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
--module(ar_http_sup).
+-module(big_http_sup).
 
 -behaviour(supervisor).
 

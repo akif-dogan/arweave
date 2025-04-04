@@ -44,7 +44,7 @@ handle_cast(fetch_cm_jobs, State) ->
 	Peer = big_pool:pool_peer(),
 	Partitions = ar_coordination:get_cluster_partitions_list(),
 	PartitionJobs = #pool_cm_jobs{ partitions = Partitions },
-	case ar_http_iface_client:get_pool_cm_jobs(Peer, PartitionJobs) of
+	case big_http_iface_client:get_pool_cm_jobs(Peer, PartitionJobs) of
 		{ok, Jobs} ->
 			push_cm_jobs_to_cm_peers(Jobs),
 			big_pool:process_cm_jobs(Jobs, Peer),
@@ -80,5 +80,5 @@ push_cm_jobs_to_cm_peers(Jobs) ->
 push_cm_jobs_to_cm_peers(_Payload, []) ->
 	ok;
 push_cm_jobs_to_cm_peers(Payload, [Peer | Peers]) ->
-	spawn(fun() -> ar_http_iface_client:post_pool_cm_jobs(Peer, Payload) end),
+	spawn(fun() -> big_http_iface_client:post_pool_cm_jobs(Peer, Payload) end),
 	push_cm_jobs_to_cm_peers(Payload, Peers).

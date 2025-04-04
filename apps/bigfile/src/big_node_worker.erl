@@ -230,7 +230,7 @@ validate_trusted_peers(Config) ->
 filter_valid_peers(Peers) ->
 	lists:filter(
 		fun(Peer) ->
-			case ar_http_iface_client:get_info(Peer, network) of
+			case big_http_iface_client:get_info(Peer, network) of
 				info_unavailable ->
 					io:format("~n\tPeer ~s is not available.~n~n",
 							[ar_util:format_peer(Peer)]),
@@ -251,7 +251,7 @@ filter_valid_peers(Peers) ->
 %% @doc Validate our clocks are in sync with the trusted peers' clocks.
 validate_clock_sync(Peers) ->
 	ValidatePeerClock = fun(Peer) ->
-		case ar_http_iface_client:get_time(Peer, 5 * 1000) of
+		case big_http_iface_client:get_time(Peer, 5 * 1000) of
 			{ok, {RemoteTMin, RemoteTMax}} ->
 				LocalT = os:system_time(second),
 				Tolerance = ?JOIN_CLOCK_TOLERANCE,
@@ -1313,7 +1313,7 @@ get_missing_txs_and_retry(H, TXIDs, Worker, Peers, TXs, TotalSize) ->
 			{TXs, TotalSize},
 			ar_util:pmap(
 				fun(TXID) ->
-					ar_http_iface_client:get_tx(Peers, TXID)
+					big_http_iface_client:get_tx(Peers, TXID)
 				end,
 				Bulk
 			)

@@ -94,7 +94,7 @@ process_partial_solution(Solution) ->
 post_partial_solution(Solution) ->
 	gen_server:cast(?MODULE, {post_partial_solution, Solution}).
 
-%% @doc Return the pool server as a "peer" recognized by ar_http_iface_client.
+%% @doc Return the pool server as a "peer" recognized by big_http_iface_client.
 pool_peer() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	{pool, Config#config.pool_server_address}.
@@ -188,7 +188,7 @@ handle_cast({cache_jobs, Jobs}, State) ->
 			jobs_by_session_key = JobsBySessionKey2 }};
 
 handle_cast({post_partial_solution, Solution}, State) ->
-	case ar_http_iface_client:post_partial_solution(pool_peer(), Solution) of
+	case big_http_iface_client:post_partial_solution(pool_peer(), Solution) of
 		{ok, _Response} ->
 			ok;
 		{error, Error} ->

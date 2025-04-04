@@ -69,7 +69,7 @@ node_blacklisting_post_spammer_test_() ->
 %% @doc Check that we can qickly get the local time from the peer.
 get_time_test() ->
 	Now = os:system_time(second),
-	{ok, {Min, Max}} = ar_http_iface_client:get_time(ar_test_node:peer_ip(main), 10 * 1000),
+	{ok, {Min, Max}} = big_http_iface_client:get_time(ar_test_node:peer_ip(main), 10 * 1000),
 	?assert(Min < Now),
 	?assert(Now < Max).
 
@@ -236,23 +236,23 @@ get_tx(ID) ->
 %% @doc Ensure that server info can be retreived via the HTTP interface.
 test_get_info(_) ->
 	?assertEqual(info_unavailable,
-		ar_http_iface_client:get_info(ar_test_node:peer_ip(main), bad_key)),
+		big_http_iface_client:get_info(ar_test_node:peer_ip(main), bad_key)),
 	?assertEqual(<<?NETWORK_NAME>>,
-			ar_http_iface_client:get_info(ar_test_node:peer_ip(main), network)),
+			big_http_iface_client:get_info(ar_test_node:peer_ip(main), network)),
 	?assertEqual(?RELEASE_NUMBER,
-			ar_http_iface_client:get_info(ar_test_node:peer_ip(main), release)),
+			big_http_iface_client:get_info(ar_test_node:peer_ip(main), release)),
 	?assertEqual(
 		?CLIENT_VERSION,
-		ar_http_iface_client:get_info(ar_test_node:peer_ip(main), version)),
-	?assertEqual(1, ar_http_iface_client:get_info(ar_test_node:peer_ip(main), peers)),
+		big_http_iface_client:get_info(ar_test_node:peer_ip(main), version)),
+	?assertEqual(1, big_http_iface_client:get_info(ar_test_node:peer_ip(main), peers)),
 	ar_util:do_until(
 		fun() ->
-			1 == ar_http_iface_client:get_info(ar_test_node:peer_ip(main), blocks)
+			1 == big_http_iface_client:get_info(ar_test_node:peer_ip(main), blocks)
 		end,
 		100,
 		2000
 	),
-	?assertEqual(1, ar_http_iface_client:get_info(ar_test_node:peer_ip(main), height)).
+	?assertEqual(1, big_http_iface_client:get_info(ar_test_node:peer_ip(main), height)).
 
 %% @doc Ensure that transactions are only accepted once.
 test_single_regossip(_) ->
@@ -260,22 +260,22 @@ test_single_regossip(_) ->
 	TX = ar_tx:new(),
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
-		ar_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TX#tx.id,
+		big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TX#tx.id,
 				ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX)))
 	),
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
-		ar_test_node:remote_call(peer1, ar_http_iface_client, send_tx_binary, [ar_test_node:peer_ip(peer1), TX#tx.id,
+		ar_test_node:remote_call(peer1, big_http_iface_client, send_tx_binary, [ar_test_node:peer_ip(peer1), TX#tx.id,
 				ar_serialize:tx_to_binary(TX)])
 	),
 	?assertMatch(
 		{ok, {{<<"208">>, _}, _, _, _, _}},
-		ar_test_node:remote_call(peer1, ar_http_iface_client, send_tx_binary, [ar_test_node:peer_ip(peer1), TX#tx.id,
+		ar_test_node:remote_call(peer1, big_http_iface_client, send_tx_binary, [ar_test_node:peer_ip(peer1), TX#tx.id,
 				ar_serialize:tx_to_binary(TX)])
 	),
 	?assertMatch(
 		{ok, {{<<"208">>, _}, _, _, _, _}},
-		ar_test_node:remote_call(peer1, ar_http_iface_client, send_tx_json, [ar_test_node:peer_ip(peer1), TX#tx.id,
+		ar_test_node:remote_call(peer1, big_http_iface_client, send_tx_json, [ar_test_node:peer_ip(peer1), TX#tx.id,
 				ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX))])
 	).
 
@@ -300,13 +300,13 @@ test_node_blacklisting_post_spammer() ->
 -spec get_fun_msg_pair(atom()) -> {fun(), any()}.
 get_fun_msg_pair(get_info) ->
 	{ fun(_) ->
-			ar_http_iface_client:get_info(ar_test_node:peer_ip(main))
+			big_http_iface_client:get_info(ar_test_node:peer_ip(main))
 		end
 	, info_unavailable};
 get_fun_msg_pair(send_tx_binary) ->
 	{ fun(_) ->
 			InvalidTX = (ar_tx:new())#tx{ owner = <<"key">>, signature = <<"invalid">> },
-			case ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main),
+			case big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main),
 					InvalidTX#tx.id, ar_serialize:tx_to_binary(InvalidTX)) of
 				{ok,
 					{{<<"429">>, <<"Too Many Requests">>}, _,
@@ -439,10 +439,10 @@ test_get_wallet_list_in_chunks({B0, {_, Pub1}, {_, Pub2}, {_, StaticPub}}) ->
 
 %% @doc Test that heights are returned correctly.
 test_get_height(_) ->
-	0 = ar_http_iface_client:get_height(ar_test_node:peer_ip(main)),
+	0 = big_http_iface_client:get_height(ar_test_node:peer_ip(main)),
 	ar_test_node:mine(),
 	wait_until_height(main, 1),
-	1 = ar_http_iface_client:get_height(ar_test_node:peer_ip(main)).
+	1 = big_http_iface_client:get_height(ar_test_node:peer_ip(main)).
 
 %% @doc Test that last tx associated with a wallet can be fetched.
 test_get_last_tx_single({_, _, _, {_, StaticPub}}) ->
@@ -457,7 +457,7 @@ test_get_last_tx_single({_, _, _, {_, StaticPub}}) ->
 
 %% @doc Ensure that blocks can be received via a hash.
 test_get_block_by_hash({B0, _, _, _}) ->
-	{_Peer, B1, _Time, _Size} = ar_http_iface_client:get_block_shadow(B0#block.indep_hash,
+	{_Peer, B1, _Time, _Size} = big_http_iface_client:get_block_shadow(B0#block.indep_hash,
 			ar_test_node:peer_ip(main), binary, #{}),
 	TXIDs = [TX#tx.id || TX <- B0#block.txs],
 	?assertEqual(B0#block{ size_tagged_txs = unset, account_tree = undefined, txs = TXIDs,
@@ -465,16 +465,16 @@ test_get_block_by_hash({B0, _, _, _}) ->
 
 %% @doc Ensure that blocks can be received via a height.
 test_get_block_by_height({B0, _, _, _}) ->
-	{_Peer, B1, _Time, _Size} = ar_http_iface_client:get_block_shadow(0, ar_test_node:peer_ip(main), binary, #{}),
+	{_Peer, B1, _Time, _Size} = big_http_iface_client:get_block_shadow(0, ar_test_node:peer_ip(main), binary, #{}),
 	TXIDs = [TX#tx.id || TX <- B0#block.txs],
 	?assertEqual(B0#block{ size_tagged_txs = unset, account_tree = undefined, txs = TXIDs,
 			reward_history = [], block_time_history = [] }, B1).
 
 test_get_current_block({B0, _, _, _}) ->
 	Peer = ar_test_node:peer_ip(main),
-	{ok, BI} = ar_http_iface_client:get_block_index(Peer, 0, 100),
+	{ok, BI} = big_http_iface_client:get_block_index(Peer, 0, 100),
 	{_Peer, B1, _Time, _Size} =
-	ar_http_iface_client:get_block_shadow(hd(BI), Peer, binary, #{}),
+	big_http_iface_client:get_block_shadow(hd(BI), Peer, binary, #{}),
 	TXIDs = [TX#tx.id || TX <- B0#block.txs],
 	?assertEqual(B0#block{ size_tagged_txs = unset, txs = TXIDs, reward_history = [],
 			block_time_history = [], account_tree = undefined }, B1),
@@ -520,7 +520,7 @@ test_get_format_2_tx(_) ->
 	EncodedTXID = binary_to_list(ar_util:encode(TXID)),
 	EncodedInvalidTXID = binary_to_list(ar_util:encode(InvalidTXID)),
 	EncodedEmptyTXID = binary_to_list(ar_util:encode(EmptyTXID)),
-	ar_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), ValidTX#tx.id,
+	big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), ValidTX#tx.id,
 			ar_serialize:jsonify(ar_serialize:tx_to_json_struct(ValidTX))),
 	{ok, {{<<"400">>, _}, _, <<"The attached data is split in an unknown way.">>, _, _}} =
 		big_http:req(#{
@@ -529,10 +529,10 @@ test_get_format_2_tx(_) ->
 			path => "/tx",
 			body => ar_serialize:jsonify(ar_serialize:tx_to_json_struct(InvalidDataRootTX))
 		}),
-	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main),
+	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main),
 			InvalidDataRootTX#tx.id,
 			ar_serialize:tx_to_binary(InvalidDataRootTX#tx{ data = <<>> })),
-	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), EmptyTX#tx.id,
+	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), EmptyTX#tx.id,
 			ar_serialize:tx_to_binary(EmptyTX)),
 	wait_until_receives_txs([ValidTX, EmptyTX, InvalidDataRootTX]),
 	ar_test_node:mine(),
@@ -582,7 +582,7 @@ test_get_format_1_tx(_) ->
 	LocalHeight = big_node:get_height(),
 	TX = #tx{ id = TXID } = ar_tx:new(<<"DATA">>),
 	EncodedTXID = binary_to_list(ar_util:encode(TXID)),
-	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
+	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			ar_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
 	ar_test_node:mine(),
@@ -618,7 +618,7 @@ test_add_external_tx_with_tags(_) ->
 					{<<"TEST_TAG2">>, <<"TEST_VAL2">>}
 				]
 		},
-	ar_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TaggedTX#tx.id,
+	big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TaggedTX#tx.id,
 			ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TaggedTX))),
 	wait_until_receives_txs([TaggedTX]),
 	ar_test_node:mine(),
@@ -633,7 +633,7 @@ test_add_external_tx_with_tags(_) ->
 test_find_external_tx(_) ->
 	LocalHeight = big_node:get_height(),
 	TX = ar_tx:new(<<"DATA">>),
-	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
+	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			ar_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
 	ar_test_node:mine(),
@@ -641,7 +641,7 @@ test_find_external_tx(_) ->
 	{ok, FoundTXID} =
 		ar_util:do_until(
 			fun() ->
-				case ar_http_iface_client:get_tx([ar_test_node:peer_ip(main)], TX#tx.id) of
+				case big_http_iface_client:get_tx([ar_test_node:peer_ip(main)], TX#tx.id) of
 					not_found ->
 						false;
 					TX ->
@@ -664,7 +664,7 @@ test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
 		quantity => ?BIG(2),
 		reward => ?BIG(1)}),
 	ID = SignedTX#tx.id,
-	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), SignedTX#tx.id,
+	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), SignedTX#tx.id,
 			ar_serialize:tx_to_binary(SignedTX)),
 	wait_until_receives_txs([SignedTX]),
 	ar_test_node:mine(),
@@ -683,7 +683,7 @@ test_add_tx_and_get_last({_B0, Wallet1, Wallet2, _StaticWallet}) ->
 test_get_subfields_of_tx(_) ->
 	LocalHeight = big_node:get_height(),
 	TX = ar_tx:new(<<"DATA">>),
-	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
+	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			ar_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
 	ar_test_node:mine(),
@@ -695,7 +695,7 @@ test_get_subfields_of_tx(_) ->
 %% @doc Correctly check the status of pending is returned for a pending transaction
 test_get_pending_tx(_) ->
 	TX = ar_tx:new(<<"DATA1">>),
-	ar_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TX#tx.id,
+	big_http_iface_client:send_tx_json(ar_test_node:peer_ip(main), TX#tx.id,
 			ar_serialize:jsonify(ar_serialize:tx_to_json_struct(TX))),
 	wait_until_receives_txs([TX]),
 	{ok, {{<<"202">>, _}, _, Body, _, _}} =
@@ -885,7 +885,7 @@ test_get_error_of_data_limit(_) ->
 	LocalHeight = big_node:get_height(),
 	Limit = 1460,
 	TX = ar_tx:new(<< <<0>> || _ <- lists:seq(1, Limit * 2) >>),
-	ar_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
+	big_http_iface_client:send_tx_binary(ar_test_node:peer_ip(main), TX#tx.id,
 			ar_serialize:tx_to_binary(TX)),
 	wait_until_receives_txs([TX]),
 	ar_test_node:mine(),

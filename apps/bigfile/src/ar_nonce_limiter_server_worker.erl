@@ -114,7 +114,7 @@ push_update(SessionKey, StepNumber, Output, Peer, Format, State) ->
 	case Update of
 		not_found -> State;
 		_ ->
-			case ar_http_iface_client:push_nonce_limiter_update(Peer, Update, Format) of
+			case big_http_iface_client:push_nonce_limiter_update(Peer, Update, Format) of
 				ok ->
 					State;
 				{ok, Response} ->
@@ -173,7 +173,7 @@ push_session(SessionKey, Session, Peer, Format) ->
 	case Update of
 		not_found -> ok;
 		_ ->
-			case ar_http_iface_client:push_nonce_limiter_update(Peer, Update, Format) of
+			case big_http_iface_client:push_nonce_limiter_update(Peer, Update, Format) of
 				ok ->
 					ok;
 				{ok, #nonce_limiter_update_response{ step_number = ClientStepNumber,

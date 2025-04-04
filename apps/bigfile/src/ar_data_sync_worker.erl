@@ -52,7 +52,7 @@ handle_cast({read_range, Args}, State) ->
 		recast ->
 			ok;
 		ReadResult ->
-			gen_server:cast(ar_chunk_copy,
+			gen_server:cast(big_chunk_copy,
 				{task_completed, {read_range, {State#state.name, ReadResult, Args}}})
 	end,
 	{noreply, State};
@@ -260,7 +260,7 @@ sync_range({Start, End, Peer, TargetStoreID, RetryCount} = Args, State) ->
 				false ->
 					Packing = get_target_packing(TargetStoreID,
 							State#state.request_packed_chunks),
-					case ar_http_iface_client:get_chunk_binary(Peer, Start2, Packing) of
+					case big_http_iface_client:get_chunk_binary(Peer, Start2, Packing) of
 						{ok, #{ chunk := Chunk } = Proof, _Time, _TransferSize} ->
 							%% In case we fetched a packed small chunk,
 							%% we may potentially skip some chunks by

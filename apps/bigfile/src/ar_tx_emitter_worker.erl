@@ -111,14 +111,14 @@ emit2(#{ release := Release, peer := Peer, propagated_tx := PropagatedTX,
 	 tx_id := TXID, opts := Opts } = Data)
 	when Release >= 42 ->
 		Bin = ar_serialize:tx_to_binary(PropagatedTX),
-		Reply = ar_http_iface_client:send_tx_binary(Peer, TXID, Bin, Opts),
+		Reply = big_http_iface_client:send_tx_binary(Peer, TXID, Bin, Opts),
 		NewData = Data#{ reply => Reply },
 		emit3(NewData);
 emit2(#{ peer := Peer, propagated_tx := PropagatedTX, tx_id := TXID,
 	 opts := Opts } = Data) ->
 	Serialize = ar_serialize:tx_to_json_struct(PropagatedTX),
 	JSON = ar_serialize:jsonify(Serialize),
-	Reply = ar_http_iface_client:send_tx_json(Peer, TXID, JSON, Opts),
+	Reply = big_http_iface_client:send_tx_json(Peer, TXID, JSON, Opts),
 	NewData = Data#{ reply => Reply },
 	emit3(NewData).
 

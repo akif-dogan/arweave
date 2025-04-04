@@ -33,7 +33,7 @@ filter_peers(Peers) ->
 	filter_peers(Peers, []).
 
 filter_peers([Peer | Peers], Peers2) ->
-	case ar_http_iface_client:get_info(Peer, height) of
+	case big_http_iface_client:get_info(Peer, height) of
 		info_unavailable ->
 			?LOG_WARNING([{event, trusted_peer_unavailable},
 					{peer, ar_util:format_peer(Peer)}]),
@@ -117,12 +117,12 @@ get_block_index([Peer | Peers]) ->
 	end.
 
 get_block_index2(Peer) ->
-	Height = ar_http_iface_client:get_info(Peer, height),
+	Height = big_http_iface_client:get_info(Peer, height),
 	get_block_index2(Peer, 0, Height, []).
 
 get_block_index2(Peer, Start, Height, BI) ->
 	N = ?REQUEST_BLOCK_INDEX_RANGE_SIZE,
-	case ar_http_iface_client:get_block_index(Peer, min(Start, Height),
+	case big_http_iface_client:get_block_index(Peer, min(Start, Height),
 			min(Height, Start + N - 1)) of
 		{ok, Range} when length(Range) < N ->
 			case Start of
@@ -163,7 +163,7 @@ get_block(Peers, H) ->
 
 get_block(Peers, H, Retries) ->
 	big:console("Downloading joining block ~s.~n", [ar_util:encode(H)]),
-	case ar_http_iface_client:get_block_shadow(Peers, H) of
+	case big_http_iface_client:get_block_shadow(Peers, H) of
 		{_Peer, #block{} = BShadow, _Time, _Size} ->
 			get_block(Peers, BShadow, BShadow#block.txs, [], Retries);
 		_ ->
@@ -196,7 +196,7 @@ get_block(Peers, H, Retries) ->
 get_block(_Peers, BShadow, [], TXs, _Retries) ->
 	BShadow#block{ txs = lists:reverse(TXs) };
 get_block(Peers, BShadow, [TXID | TXIDs], TXs, Retries) ->
-	case ar_http_iface_client:get_tx(Peers, TXID) of
+	case big_http_iface_client:get_tx(Peers, TXID) of
 		#tx{} = TX ->
 			get_block(Peers, BShadow, TXIDs, [TX | TXs], Retries);
 		_ ->
@@ -443,7 +443,7 @@ maybe_set_reward_history(Blocks, Peers) ->
 	ExpectedHashesLen = big_rewards:expected_hashes_length(HeadB#block.height),
 	ExpectedHashes = [B#block.reward_history_hash
 			|| B <- lists:sublist(Blocks, ExpectedHashesLen)],
-	case ar_http_iface_client:get_reward_history(Peers, HeadB, ExpectedHashes) of
+	case big_http_iface_client:get_reward_history(Peers, HeadB, ExpectedHashes) of
 		{ok, RewardHistory} ->
 			big_rewards:set_reward_history(Blocks, RewardHistory);
 		_ ->
@@ -458,7 +458,7 @@ maybe_set_reward_history(Blocks, Peers) ->
 maybe_set_block_time_history([#block{ height = Height } | _] = Blocks, Peers) ->
 	case Height >= ar_fork:height_2_7() of
 		true ->
-			case ar_http_iface_client:get_block_time_history(
+			case big_http_iface_client:get_block_time_history(
 					Peers, hd(Blocks), ar_block_time_history:get_hashes(Blocks)) of
 				{ok, BlockTimeHistory} ->
 					ar_block_time_history:set_history(Blocks, BlockTimeHistory);
@@ -476,7 +476,7 @@ maybe_set_block_time_history([#block{ height = Height } | _] = Blocks, Peers) ->
 join_peers(Peers) ->
 	lists:foreach(
 		fun(Peer) ->
-			ar_http_iface_client:add_peer(Peer)
+			big_http_iface_client:add_peer(Peer)
 		end,
 		Peers
 	).
@@ -484,10 +484,10 @@ join_peers(Peers) ->
 worker() ->
 	receive
 		{get_block_shadow, H, Peer, From} ->
-			From ! {block_response, H, Peer, ar_http_iface_client:get_block_shadow([Peer], H)},
+			From ! {block_response, H, Peer, big_http_iface_client:get_block_shadow([Peer], H)},
 			worker();
 		{get_tx, H, TXID, Peer, From} ->
-			From ! {tx_response, H, TXID, Peer, ar_http_iface_client:get_tx(Peer, TXID)},
+			From ! {tx_response, H, TXID, Peer, big_http_iface_client:get_tx(Peer, TXID)},
 			worker()
 	end.
 

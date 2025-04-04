@@ -105,7 +105,7 @@ handle_cast(update_network_data_map, #state{ peers_pending = N } = State)
 		{{value, Peer}, Queue} ->
 			monitor(process, spawn_link(
 				fun() ->
-					case ar_http_iface_client:get_sync_buckets(Peer) of
+					case big_http_iface_client:get_sync_buckets(Peer) of
 						{ok, SyncBuckets} ->
 							gen_server:cast(?MODULE, {add_peer_sync_buckets, Peer,
 									SyncBuckets});
@@ -214,7 +214,7 @@ collect_peers([]) ->
 	ok.
 
 get_sync_buckets(Peer) ->
-	case ar_http_iface_client:get_sync_record(Peer) of
+	case big_http_iface_client:get_sync_record(Peer) of
 		{ok, SyncRecord} ->
 			SyncBuckets = big_sync_buckets:from_intervals(SyncRecord),
 			{SyncBuckets2, _} = big_sync_buckets:serialize(SyncBuckets, ?MAX_SYNC_BUCKETS_SIZE),

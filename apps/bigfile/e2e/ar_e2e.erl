@@ -333,7 +333,7 @@ assert_syncs_range(Node, StartOffset, EndOffset) ->
 		true ->
 			ok;
 		_ ->
-			SyncRecord = ar_http_iface_client:get_sync_record(
+			SyncRecord = big_http_iface_client:get_sync_record(
 				ar_test_node:peer_ip(Node)),
 			?assert(false, 
 				iolist_to_binary(io_lib:format(
@@ -410,7 +410,7 @@ assert_mine_and_validate(MinerNode, ValidatorNode, MinerPacking) ->
 
 has_range(Node, StartOffset, EndOffset) ->
 	NodeIP = ar_test_node:peer_ip(Node),
-	case ar_http_iface_client:get_sync_record(NodeIP) of
+	case big_http_iface_client:get_sync_record(NodeIP) of
 		{ok, SyncRecord} ->
 			interval_contains(SyncRecord, StartOffset, EndOffset);
 		Error ->

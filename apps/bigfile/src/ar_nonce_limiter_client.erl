@@ -80,7 +80,7 @@ handle_cast(pull, State) ->
 					%% Push the peer to the back of the queue.
 					{noreply, State#state{ remote_servers = RotatedServers }};
 				{ok, Peer} ->
-					case ar_http_iface_client:get_vdf_update(Peer) of
+					case big_http_iface_client:get_vdf_update(Peer) of
 						{ok, Update} ->
 							#nonce_limiter_update{ session_key = SessionKey,
 									session = #vdf_session{
@@ -205,10 +205,10 @@ terminate(_Reason, _State) ->
 %%%===================================================================
 
 fetch_and_apply_session_and_previous_session(Peer) ->
-	case ar_http_iface_client:get_vdf_session(Peer) of
+	case big_http_iface_client:get_vdf_session(Peer) of
 		{ok, #nonce_limiter_update{ session = #vdf_session{
 				prev_session_key = PrevSessionKey } } = Update} ->
-			case ar_http_iface_client:get_previous_vdf_session(Peer) of
+			case big_http_iface_client:get_previous_vdf_session(Peer) of
 				{ok, #nonce_limiter_update{ session_key = PrevSessionKey } = Update2} ->
 					ar_nonce_limiter:apply_external_update(Update2, Peer),
 					ar_nonce_limiter:apply_external_update(Update, Peer);
@@ -229,7 +229,7 @@ fetch_and_apply_session_and_previous_session(Peer) ->
 	end.
 
 fetch_and_apply_session(Peer) ->
-	case ar_http_iface_client:get_vdf_session(Peer) of
+	case big_http_iface_client:get_vdf_session(Peer) of
 		{ok, Update} ->
 			ar_nonce_limiter:apply_external_update(Update, Peer);
 		{error, Reason} = Error ->

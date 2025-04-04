@@ -493,7 +493,7 @@ download_block(H, H2, TXRoot) ->
 download_block(Peers, H, H2, TXRoot) ->
 	Fork_2_0 = ar_fork:height_2_0(),
 	Opts = #{ rand_min => length(Peers) },
-	case ar_http_iface_client:get_block_shadow(Peers, H, Opts) of
+	case big_http_iface_client:get_block_shadow(Peers, H, Opts) of
 		unavailable ->
 			?LOG_WARNING([
 				{event, ar_header_sync_failed_to_download_block_header},
@@ -528,7 +528,7 @@ download_block(Peers, H, H2, TXRoot) ->
 	end.
 
 download_txs(Peers, B, TXRoot) ->
-	case ar_http_iface_client:get_txs(Peers, B) of
+	case big_http_iface_client:get_txs(Peers, B) of
 		{ok, TXs} ->
 			SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs, B#block.height),
 			SizeTaggedDataRoots = [{Root, Offset} || {{_, Root}, Offset} <- SizeTaggedTXs],

@@ -141,7 +141,7 @@ get_peer_intervals(Peer, Left, SoughtIntervals, AllPeersIntervals) ->
 			{ok, ar_intervals:intersection(PeerIntervals, SoughtIntervals), PeerIntervals,
 					Left2};
 		_ ->
-			case ar_http_iface_client:get_sync_record(Peer, Left + 1, Limit) of
+			case big_http_iface_client:get_sync_record(Peer, Left + 1, Limit) of
 				{ok, PeerIntervals2} ->
 					{ok, ar_intervals:intersection(PeerIntervals2, SoughtIntervals),
 							PeerIntervals2, Left};

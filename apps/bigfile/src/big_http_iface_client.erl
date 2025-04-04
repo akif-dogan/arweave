@@ -2,7 +2,7 @@
 %%% @doc Exposes access to an internal Bigfile client to external nodes on the network.
 %%%
 
--module(ar_http_iface_client).
+-module(big_http_iface_client).
 
 -export([send_tx_json/3, send_tx_json/4, send_tx_binary/3, send_tx_binary/4]).
 -export([send_block_json/3, send_block_binary/3, send_block_binary/4,

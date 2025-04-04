@@ -64,7 +64,7 @@ test_recent_blocks(Type) ->
 						recall_byte2 = B#block.recall_byte2,
 						solution_hash = B#block.hash,
 						tx_prefixes = [] },
-					ar_http_iface_client:send_block_announcement(
+					big_http_iface_client:send_block_announcement(
 						ar_test_node:peer_ip(peer1), Announcement)
 			end
 		end,

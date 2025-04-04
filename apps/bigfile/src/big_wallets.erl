@@ -259,7 +259,7 @@ initialize_state(Blocks, Tree) ->
 get_tree_from_peers(B, Peers) ->
 	ID = B#block.wallet_list,
 	big:console("Downloading the wallet tree, chunk 1.~n", []),
-	case ar_http_iface_client:get_wallet_list_chunk(Peers, ID) of
+	case big_http_iface_client:get_wallet_list_chunk(Peers, ID) of
 		{ok, {Cursor, Chunk}} ->
 			{ok, Tree} = load_wallet_tree_from_peers(
 				ID,
@@ -281,7 +281,7 @@ load_wallet_tree_from_peers(_ID, _Peers, Acc, last, _) ->
 load_wallet_tree_from_peers(ID, Peers, Acc, Cursor, N) ->
 	ar_util:terminal_clear(),
 	big:console("Downloading the wallet tree, chunk ~B.~n", [N]),
-	case ar_http_iface_client:get_wallet_list_chunk(Peers, ID, Cursor) of
+	case big_http_iface_client:get_wallet_list_chunk(Peers, ID, Cursor) of
 		{ok, {NextCursor, Chunk}} ->
 			Acc3 =
 				lists:foldl(

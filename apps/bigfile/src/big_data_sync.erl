@@ -1617,7 +1617,7 @@ do_sync_data2(#sync_data_state{
 			[{OtherStoreID, {Start, End}} | Intervals]
 		} = State) ->
 	State2 =
-		case ar_chunk_copy:read_range(Start, End, OtherStoreID, StoreID) of
+		case big_chunk_copy:read_range(Start, End, OtherStoreID, StoreID) of
 			true ->
 				State#sync_data_state{
 					unsynced_intervals_from_other_storage_modules = Intervals };

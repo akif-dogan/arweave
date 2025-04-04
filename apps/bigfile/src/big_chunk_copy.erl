@@ -1,6 +1,6 @@
 %%% @doc The module maintains a queue of processes fetching data from the network
 %%% and from the local storage modules.
--module(ar_chunk_copy).
+-module(big_chunk_copy).
 
 -behaviour(gen_server).
 
@@ -37,7 +37,7 @@ start_link(WorkerMap) ->
 
 register_workers() ->
 	{Workers, WorkerMap} = register_read_workers(),
-	ChunkCopy = ?CHILD_WITH_ARGS(ar_chunk_copy, worker, ar_chunk_copy, [WorkerMap]),
+	ChunkCopy = ?CHILD_WITH_ARGS(big_chunk_copy, worker, big_chunk_copy, [WorkerMap]),
 	Workers ++ [ChunkCopy].
 
 register_read_workers() ->

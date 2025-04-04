@@ -67,7 +67,7 @@ handle_cast({poll, Ref}, #state{ ref = Ref, peer = Peer,
 		false ->
 			ok
 	end,
-	case ar_http_iface_client:get_recent_hash_list_diff(Peer, HL) of
+	case big_http_iface_client:get_recent_hash_list_diff(Peer, HL) of
 		{ok, in_sync} ->
 			ar_util:cast_after(FrequencyMs, self(), {poll, Ref}),
 			{noreply, State};
@@ -84,7 +84,7 @@ handle_cast({poll, Ref}, #state{ ref = Ref, peer = Peer,
 					end,
 					ar_ignore_registry:add_temporary(H, 1000),
 					Indices = get_missing_tx_indices(TXIDs),
-					case ar_http_iface_client:get_block(Peer, H, Indices) of
+					case big_http_iface_client:get_block(Peer, H, Indices) of
 						{#block{ height = Height } = B, TimeMicroseconds, _Size} ->
 							case Height =< CurrentHeight - 5 of
 								true ->

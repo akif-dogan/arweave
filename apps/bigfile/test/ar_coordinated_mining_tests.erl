@@ -123,19 +123,19 @@ test_no_secret() ->
 	?assertMatch(
 		{error, {ok, {{<<"421">>, _}, _, 
 			<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
-		ar_http_iface_client:get_cm_partition_table(Peer)),
+		big_http_iface_client:get_cm_partition_table(Peer)),
 	?assertMatch(
 		{error, {ok, {{<<"421">>, _}, _, 
 			<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
-		ar_http_iface_client:cm_h1_send(Peer, dummy_candidate())),
+		big_http_iface_client:cm_h1_send(Peer, dummy_candidate())),
 	?assertMatch(
 		{error, {ok, {{<<"421">>, _}, _, 
 			<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
-		ar_http_iface_client:cm_h2_send(Peer, dummy_candidate())),
+		big_http_iface_client:cm_h2_send(Peer, dummy_candidate())),
 	?assertMatch(
 		{error, {ok, {{<<"421">>, _}, _, 
 			<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
-		ar_http_iface_client:cm_publish_send(Peer, dummy_solution())).
+		big_http_iface_client:cm_publish_send(Peer, dummy_solution())).
 
 test_bad_secret() ->
 	[Node, _ExitNode, _ValidatorNode] = ar_test_node:start_coordinated(1),
@@ -147,19 +147,19 @@ test_bad_secret() ->
 		?assertMatch(
 			{error, {ok, {{<<"421">>, _}, _, 
 				<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
-			ar_http_iface_client:get_cm_partition_table(Peer)),
+			big_http_iface_client:get_cm_partition_table(Peer)),
 		?assertMatch(
 			{error, {ok, {{<<"421">>, _}, _, 
 				<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
-			ar_http_iface_client:cm_h1_send(Peer, dummy_candidate())),
+			big_http_iface_client:cm_h1_send(Peer, dummy_candidate())),
 		?assertMatch(
 			{error, {ok, {{<<"421">>, _}, _, 
 				<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
-			ar_http_iface_client:cm_h2_send(Peer, dummy_candidate())),
+			big_http_iface_client:cm_h2_send(Peer, dummy_candidate())),
 		?assertMatch(
 			{error, {ok, {{<<"421">>, _}, _, 
 				<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
-			ar_http_iface_client:cm_publish_send(Peer, dummy_solution()))
+			big_http_iface_client:cm_publish_send(Peer, dummy_solution()))
 	after
 		ok = application:set_env(bigfile, config, Config)
 	end.
@@ -177,7 +177,7 @@ test_partition_table() ->
 
 	?assertEqual(
 		{ok, []},
-		ar_http_iface_client:get_cm_partition_table(Peer)
+		big_http_iface_client:get_cm_partition_table(Peer)
 	),
 
 	%% Partition jumble with 2 addresses
@@ -208,7 +208,7 @@ test_partition_table() ->
 	%% node is not mining.
 	?assertEqual(
 		{ok, []},
-		ar_http_iface_client:get_cm_partition_table(Peer)
+		big_http_iface_client:get_cm_partition_table(Peer)
 	),
 
 	%% Simulate mining start
@@ -225,7 +225,7 @@ test_partition_table() ->
 			{30, ?PARTITION_SIZE, MiningAddr, 0},
 			{31, ?PARTITION_SIZE, MiningAddr, 0}
 		]},
-		ar_http_iface_client:get_cm_partition_table(Peer)
+		big_http_iface_client:get_cm_partition_table(Peer)
 	).
 
 test_peers_by_partition() ->

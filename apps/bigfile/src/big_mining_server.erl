@@ -951,7 +951,7 @@ post_solution(not_set, Solution, State) ->
 			big_node_worker:found_solution(miner, Solution, PoACache, PoA2Cache)
 	end;
 post_solution(ExitPeer, Solution, #state{ is_pool_client = true }) ->
-	case ar_http_iface_client:post_partial_solution(ExitPeer, Solution) of
+	case big_http_iface_client:post_partial_solution(ExitPeer, Solution) of
 		{ok, _} ->
 			ok;
 		{error, Reason} ->
@@ -961,7 +961,7 @@ post_solution(ExitPeer, Solution, #state{ is_pool_client = true }) ->
 					"error: ~p.", [io_lib:format("~p", [Reason])])
 	end;
 post_solution(ExitPeer, Solution, _State) ->
-	case ar_http_iface_client:cm_publish_send(ExitPeer, Solution) of
+	case big_http_iface_client:cm_publish_send(ExitPeer, Solution) of
 		{ok, _} ->
 			ok;
 		{error, Reason} ->
@@ -1009,7 +1009,7 @@ fetch_poa_from_peers(RecallByte, _PackingDifficulty) ->
 	end.
 
 fetch_poa_from_peer(Peer, RecallByte) ->
-	case ar_http_iface_client:get_chunk_binary(Peer, RecallByte + 1, any) of
+	case big_http_iface_client:get_chunk_binary(Peer, RecallByte + 1, any) of
 		{ok, #{ data_path := DataPath, tx_path := TXPath }, _, _} ->
 			#poa{ data_path = DataPath, tx_path = TXPath };
 		_ ->

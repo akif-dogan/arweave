@@ -210,7 +210,7 @@ send_to_worker(Peer, {JSON, B}, W) ->
 							solution_hash = SolutionH2,
 							tx_prefixes = [big_node_worker:tx_id_prefix(ID)
 									|| #tx{ id = ID } <- TXs] },
-					ar_http_iface_client:send_block_announcement(Peer, Announcement)
+					big_http_iface_client:send_block_announcement(Peer, Announcement)
 				end,
 			SendFun =
 				fun(MissingChunk, MissingChunk2, MissingTXs) ->
@@ -256,9 +256,9 @@ send_and_log(Peer, H, Height, Format, Bin, RecallByte) ->
 	Reply =
 		case Format of
 			json ->
-				ar_http_iface_client:send_block_json(Peer, H, Bin);
+				big_http_iface_client:send_block_json(Peer, H, Bin);
 			binary ->
-				ar_http_iface_client:send_block_binary(Peer, H, Bin, RecallByte)
+				big_http_iface_client:send_block_binary(Peer, H, Bin, RecallByte)
 		end,
 	case lists:member(Peer, Config#config.block_gossip_peers) of
 		true ->

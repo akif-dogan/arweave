@@ -469,7 +469,7 @@ terminate(_Reason, _State) ->
 %%%===================================================================
 
 get_peer_peers(Peer) ->
-	case ar_http_iface_client:get_peers(Peer) of
+	case big_http_iface_client:get_peers(Peer) of
 		unavailable -> [];
 		Peers -> Peers
 	end.
@@ -525,7 +525,7 @@ discover_peers([Peer | Peers]) ->
 		false ->
 			case check_peer(Peer, is_public_peer(Peer)) of
 				ok ->
-					case ar_http_iface_client:get_info(Peer) of
+					case big_http_iface_client:get_info(Peer) of
 						info_unavailable ->
 							ok;
 						Info ->
@@ -592,7 +592,7 @@ load_peers(Peers) ->
 	load_peers(Peers3).
 
 load_peer({Peer, Performance}) ->
-	case ar_http_iface_client:get_info(Peer, network) of
+	case big_http_iface_client:get_info(Peer, network) of
 		info_unavailable ->
 			?LOG_DEBUG([{event, peer_unavailable}, {peer, ar_util:format_peer(Peer)}]),
 			ok;
@@ -692,10 +692,10 @@ shift_port_map_left(PortMap, Max, N) ->
 	shift_port_map_left(PortMap2, Max, N + 1).
 
 ping_peers(Peers) when length(Peers) < 100 ->
-	ar_util:pmap(fun ar_http_iface_client:add_peer/1, Peers);
+	ar_util:pmap(fun big_http_iface_client:add_peer/1, Peers);
 ping_peers(Peers) ->
 	{Send, Rest} = lists:split(100, Peers),
-	ar_util:pmap(fun ar_http_iface_client:add_peer/1, Send),
+	ar_util:pmap(fun big_http_iface_client:add_peer/1, Send),
 	ping_peers(Rest).
 
 -ifdef(AR_TEST).
