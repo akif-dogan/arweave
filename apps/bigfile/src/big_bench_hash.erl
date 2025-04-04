@@ -1,4 +1,4 @@
--module(ar_bench_hash).
+-module(big_bench_hash).
 
 -export([run_benchmark_from_cli/1, run_benchmark/1]).
 

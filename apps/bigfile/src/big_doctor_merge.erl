@@ -1,4 +1,4 @@
--module(ar_doctor_merge).
+-module(big_doctor_merge).
 
 -export([main/1, help/0]).
 

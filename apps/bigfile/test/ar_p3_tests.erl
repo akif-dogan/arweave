@@ -47,12 +47,12 @@ test_valid_request() ->
 	Wallet = {PrivKey, PubKey} = big_wallet:new(),
 	Address = big_wallet:to_address(Wallet),
 	EncodedAddress = ar_util:encode(Address),
-	{ok, _Account} = ar_p3_db:get_or_create_account(
+	{ok, _Account} = big_p3_db:get_or_create_account(
 		Address,
 		PubKey,
 		?BIGFILE_BIG
 	),
-	{ok, _} = ar_p3_db:post_deposit(
+	{ok, _} = big_p3_db:post_deposit(
 		Address,
 		10000,
 		crypto:strong_rand_bytes(32)
@@ -87,7 +87,7 @@ test_zero_rate() ->
 	Wallet = {PrivKey, PubKey} = big_wallet:new(),
 	Address = big_wallet:to_address(Wallet),
 	EncodedAddress = ar_util:encode(Address),
-	{ok, _Account} = ar_p3_db:get_or_create_account(
+	{ok, _Account} = big_p3_db:get_or_create_account(
 		Address,
 		PubKey,
 		?BIGFILE_BIG
@@ -120,7 +120,7 @@ test_checksum_request() ->
 	EncodedChecksum = ar_util:encode(Checksum),
 	ValidAddress = << EncodedAddress/binary, ":", EncodedChecksum/binary>>,
 	InvalidAddress = << EncodedAddress/binary, ":BAD_CHECKSUM">>,
-	{ok, _Account} = ar_p3_db:get_or_create_account(
+	{ok, _Account} = big_p3_db:get_or_create_account(
 		Address,
 		PubKey,
 		?BIGFILE_BIG
@@ -149,7 +149,7 @@ test_bad_headers() ->
 	Wallet = {PrivKey, PubKey} = big_wallet:new(),
 	Address = big_wallet:to_address(Wallet),
 	EncodedAddress = ar_util:encode(Address),
-	{ok, _Account} = ar_p3_db:get_or_create_account(
+	{ok, _Account} = big_p3_db:get_or_create_account(
 		Address,
 		PubKey,
 		?BIGFILE_BIG
@@ -157,7 +157,7 @@ test_bad_headers() ->
 	Wallet2 = {PrivKey2, PubKey2} = big_wallet:new(),
 	Address2 = big_wallet:to_address(Wallet2),
 	EncodedAddress2 = ar_util:encode(Address2),
-	{ok, _Account2} = ar_p3_db:get_or_create_account(
+	{ok, _Account2} = big_p3_db:get_or_create_account(
 		Address2,
 		PubKey2,
 		?BIGFILE_BIG
@@ -314,7 +314,7 @@ test_bad_config() ->
 	Wallet = {PrivKey, PubKey} = big_wallet:new(),
 	Address = big_wallet:to_address(Wallet),
 	EncodedAddress = ar_util:encode(Address),
-	{ok, _Account} = ar_p3_db:get_or_create_account(
+	{ok, _Account} = big_p3_db:get_or_create_account(
 		Address,
 		PubKey,
 		?BIGFILE_BIG
@@ -388,7 +388,7 @@ test_balance_endpoint() ->
 	Address = big_wallet:to_address(Wallet),
 	Checksum = << (erlang:crc32(Address)):32 >>,
 	EncodedAddress = ar_util:encode(Address),
-	{ok, _Account} = ar_p3_db:get_or_create_account(
+	{ok, _Account} = big_p3_db:get_or_create_account(
 		Address,
 		PubKey,
 		?BIGFILE_BIG
@@ -405,7 +405,7 @@ test_balance_endpoint() ->
 		get_balance(crypto:strong_rand_bytes(32), <<"bigfile">>, <<"BIG">>)),
 
 	TXID = crypto:strong_rand_bytes(32),
-	{ok, _} = ar_p3_db:post_deposit(Address, 10, TXID),
+	{ok, _} = big_p3_db:post_deposit(Address, 10, TXID),
 	?assertEqual(
 		{<<"200">>, <<"10">>},
 		get_balance(Address, <<"bigfile">>, <<"BIG">>)),
@@ -423,33 +423,33 @@ test_reverse_charge() ->
 	Wallet2 = {_, PubKey2} = big_wallet:new(),
 	Address1 = big_wallet:to_address(Wallet1),
 	Address2 = big_wallet:to_address(Wallet2),
-	{ok, _} = ar_p3_db:get_or_create_account(
+	{ok, _} = big_p3_db:get_or_create_account(
 			Address1,
 			PubKey1,
 			?BIGFILE_BIG),
-	{ok, _} = ar_p3_db:get_or_create_account(
+	{ok, _} = big_p3_db:get_or_create_account(
 			Address2,
 			PubKey2,
 			?BIGFILE_BIG),
 
 	Request = raw_request(<<"GET">>, <<"/price/1000">>),
-	{ok, Charge1} = ar_p3_db:post_charge(
+	{ok, Charge1} = big_p3_db:post_charge(
 		Address1,
 		20,
 		-20,
 		Request),
-	?assertEqual({ok, -20}, ar_p3_db:get_balance(Address1)),
+	?assertEqual({ok, -20}, big_p3_db:get_balance(Address1)),
 	big_p3:reverse_charge(Charge1),
-	?assertEqual({ok, 0}, ar_p3_db:get_balance(Address1)),
+	?assertEqual({ok, 0}, big_p3_db:get_balance(Address1)),
 
-	{ok, Charge2} = ar_p3_db:post_charge(
+	{ok, Charge2} = big_p3_db:post_charge(
 		Address1,
 		0,
 		0,
 		Request),
-	?assertEqual({ok, 0}, ar_p3_db:get_balance(Address1)),
+	?assertEqual({ok, 0}, big_p3_db:get_balance(Address1)),
 	big_p3:reverse_charge(Charge2),
-	?assertEqual({ok, 0}, ar_p3_db:get_balance(Address1)).
+	?assertEqual({ok, 0}, big_p3_db:get_balance(Address1)).
 
 mocked_test_timeout() ->
 	ar_test_node:test_with_mocked_functions([{big_p3_config, get_service_config, fun(_, _) -> timer:sleep(10000) end}],
@@ -821,14 +821,14 @@ e2e_restart_p3_service() ->
 		assert_wait_until_height(peer1, 4),
 
 		ar_test_node:rejoin_on(#{ node => main, join_on => peer1 }),
-		?assertEqual(0, ar_p3_db:get_scan_height(),
+		?assertEqual(0, big_p3_db:get_scan_height(),
 			"Node hasn't seen any blocks yet: scan height 0"),
 
 		%% Nodes only scan for P3 depostics when a new block is received, so the balance will be 0
 		%% until the next block comes in.
 		wait_until_height(main, 4),
 		?assertEqual({<<"200">>, <<"0">>}, get_balance(Sender1Address)),
-		?assertEqual(0, ar_p3_db:get_scan_height(),
+		?assertEqual(0, big_p3_db:get_scan_height(),
 			"Node has seen blocks, but hasn't received a new_tip event yet: scan height 0"),
 
 		ar_test_node:mine(peer1),
@@ -836,7 +836,7 @@ e2e_restart_p3_service() ->
 		wait_until_height(main, 5),
 		%% allow time for the new_tip event to be processed
 		timer:sleep(1000),
-		?assertEqual(5, ar_p3_db:get_scan_height(),
+		?assertEqual(5, big_p3_db:get_scan_height(),
 			"Node has received a new_tip event: scan height 5"),
 
 		%% We should have scanned the second deposit, and omitted the first deposit since it
@@ -846,7 +846,7 @@ e2e_restart_p3_service() ->
 		ar_test_node:disconnect_from(peer1),
 		stop(),
 		ar_test_node:rejoin_on(#{ node => main, join_on => peer1 }),
-		?assertEqual(5, ar_p3_db:get_scan_height(),
+		?assertEqual(5, big_p3_db:get_scan_height(),
 			"Restarting node should not have reset scan height db: scan height 5")
 	after
 		ok = application:set_env(bigfile, config, BaseConfig)
@@ -903,7 +903,7 @@ e2e_concurrent_requests() ->
 
 		?assertEqual({<<"200">>, <<"100">>}, get_balance(Address1)),
 
-		{ok, AccountClientError} = ar_p3_db:get_account(Address1),
+		{ok, AccountClientError} = big_p3_db:get_account(Address1),
 		%% Due to variation in when requests are processed, some requests will be blocked before
 		%% being processed, others will be blocked after being processed. We do know that an
 		%% even nmber of transactions should have been added - for each request that is processed
@@ -932,7 +932,7 @@ e2e_concurrent_requests() ->
 
 		?assertEqual({<<"200">>, <<"0">>}, get_balance(Address1)),
 
-		{ok, AccountValid} = ar_p3_db:get_account(Address1),
+		{ok, AccountValid} = big_p3_db:get_account(Address1),
 		?assertEqual(Count+1, AccountValid#p3_account.count)
 	after
 		ok = application:set_env(bigfile, config, BaseConfig)

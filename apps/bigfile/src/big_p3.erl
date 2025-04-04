@@ -69,14 +69,14 @@ handle_call({allow_request, Req}, _From, State) ->
 handle_call({reverse_charge, Transaction}, _From, State) ->
 	{
 		reply,
-	 	ar_p3_db:reverse_transaction(
+	 	big_p3_db:reverse_transaction(
 			Transaction#p3_transaction.address,
 			Transaction#p3_transaction.id),
 		State
 	};
 
 handle_call({get_balance, Address, Asset}, _From, State) ->
-	{reply, ar_p3_db:get_balance(Address, Asset), State};
+	{reply, big_p3_db:get_balance(Address, Asset), State};
 
 handle_call({get_rates_json}, _From, State) ->
 	{reply, big_p3_config:get_json(State), State}.
@@ -135,7 +135,7 @@ apply_charge(Account, Req, P3Config, ServiceConfig) when
 		is_record(Account, p3_account) ->
 	case validate_asset(Account, P3Config, ServiceConfig) of
 		{ok, {MinimumBalance, Amount}} ->
-			ar_p3_db:post_charge(Account#p3_account.address, Amount, MinimumBalance, Req);
+			big_p3_db:post_charge(Account#p3_account.address, Amount, MinimumBalance, Req);
 		Error ->
 			Error
 	end.
@@ -228,7 +228,7 @@ validate_signature(DecodedAddress, DecodedSignature, Req) ->
 	end.
 
 get_or_try_to_create_account(DecodedAddress) ->
-	case ar_p3_db:get_account(DecodedAddress) of
+	case big_p3_db:get_account(DecodedAddress) of
 		{ok, Account} ->
 			{ok, Account};
 		{error, not_found} ->
@@ -243,7 +243,7 @@ try_to_create_account(DecodedAddress) ->
 			{error, not_found};
 		TX ->
 			PublicKey = {TX#tx.signature_type, TX#tx.owner},
-			ar_p3_db:get_or_create_account(DecodedAddress, PublicKey, ?BIGFILE_BIG)
+			big_p3_db:get_or_create_account(DecodedAddress, PublicKey, ?BIGFILE_BIG)
 	end.
 
 validate_price(Account, Req) ->
@@ -283,7 +283,7 @@ concat(Elements) ->
 %% Scan the block chain for new deposits and apply them.
 %%--------------------------------------------------------------------
 scan_blocks_for_deposits(LastConfirmedBlockHeight, DepositAddress) ->
-	LastScannedBlockHeight = ar_p3_db:get_scan_height(),
+	LastScannedBlockHeight = big_p3_db:get_scan_height(),
 	case LastConfirmedBlockHeight > LastScannedBlockHeight of
 		true ->
 			%% Scan all blocks since the last one we scanned. Unless it's been a while
@@ -298,7 +298,7 @@ scan_blocks_for_deposits(LastConfirmedBlockHeight, DepositAddress) ->
 					%% If we can't get the block, we'll try again later.
 					ok;
 				_ ->
-					{ok, _} = ar_p3_db:set_scan_height(ScanBlockHeight),
+					{ok, _} = big_p3_db:set_scan_height(ScanBlockHeight),
 					scan_blocks_for_deposits(LastConfirmedBlockHeight, DepositAddress)
 			end;
 		false ->
@@ -343,8 +343,8 @@ apply_deposits([TX|TXs], DepositAddress) ->
 apply_deposit(TX) ->
 	Sender = big_wallet:to_address(TX#tx.owner, TX#tx.signature_type),
 	PublicKey = {TX#tx.signature_type, TX#tx.owner},
-	{ok, _} = ar_p3_db:get_or_create_account(Sender, PublicKey, ?BIGFILE_BIG),
-	{ok, _} = ar_p3_db:post_deposit(Sender, TX#tx.quantity, TX#tx.id),
+	{ok, _} = big_p3_db:get_or_create_account(Sender, PublicKey, ?BIGFILE_BIG),
+	{ok, _} = big_p3_db:post_deposit(Sender, TX#tx.quantity, TX#tx.id),
 	?LOG_INFO([{event, big_p3}, {op, deposit}, {sender, Sender},
 		{target, TX#tx.target}, {quantity, TX#tx.quantity}]),
 	ok.

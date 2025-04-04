@@ -12,7 +12,7 @@
 
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
-%% Only used by ar_bench_packing.erl
+%% Only used by big_bench_packing.erl
 -export([chunk_key/3]).
 
 -include_lib("bigfile/include/big.hrl").
@@ -271,7 +271,7 @@ init([]) ->
 	{RandomXState512, _RandomXState4096, _RandomXStateSharedEntropy}
 			= PackingState = init_packing_state(),
 	big:console("RandomX dataset initialisation complete.~n", []),
-	{H0, H1} = ar_bench_hash:run_benchmark(RandomXState512),
+	{H0, H1} = big_bench_hash:run_benchmark(RandomXState512),
 	H0String = io_lib:format("~.3f", [H0 / 1000]),
 	H1String = io_lib:format("~.3f", [H1 / 1000]),
 	big:console("Hashing benchmark~nH0: ~s ms~nH1/H2: ~s ms~n", [H0String, H1String]),

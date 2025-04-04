@@ -4,7 +4,7 @@
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
 %%% @doc The module gossips blocks to peers.
--module(ar_bridge).
+-module(big_bridge).
 
 -behaviour(gen_server).
 

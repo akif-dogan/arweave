@@ -17,7 +17,7 @@ main(Args) ->
 	Command = hd(Args),
 	Success = case Command of
 		"merge" ->
-			ar_doctor_merge:main(tl(Args));
+			big_doctor_merge:main(tl(Args));
 		"bench" ->
 			big_doctor_bench:main(tl(Args));
 		"dump" ->
@@ -35,7 +35,7 @@ main(Args) ->
 
 help() ->
 	big:console("~n"),
-	ar_doctor_merge:help(),
+	big_doctor_merge:help(),
 	big:console("~n"),
 	big_doctor_bench:help(),
 	big:console("~n"),

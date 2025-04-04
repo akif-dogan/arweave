@@ -1,4 +1,4 @@
--module(ar_bench_vdf).
+-module(big_bench_vdf).
 
 -export([run_benchmark/0]).
 

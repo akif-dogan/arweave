@@ -1,4 +1,4 @@
--module(ar_p3_db).
+-module(big_p3_db).
 
 -behaviour(gen_server).
 

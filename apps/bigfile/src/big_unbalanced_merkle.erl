@@ -1,4 +1,4 @@
--module(ar_unbalanced_merkle).
+-module(big_unbalanced_merkle).
 
 -export([
 	root/2, root/3,

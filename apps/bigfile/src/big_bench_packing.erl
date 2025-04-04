@@ -1,4 +1,4 @@
--module(ar_bench_packing).
+-module(big_bench_packing).
 
 -export([run_benchmark_from_cli/1]).
 
@@ -110,8 +110,8 @@ run_benchmark(Test, JIT, LargePages, HardwareAES, PackingDifficulty, Rounds) ->
 			show_help()
 	end,
 
-	Init = ar_bench_timer:get_total({init}) / 1000000,
-	Total = ar_bench_timer:get_total({wall}) / 1000000,
+	Init = big_bench_timer:get_total({init}) / 1000000,
+	Total = big_bench_timer:get_total({wall}) / 1000000,
 
 	File = open_file("benchmark.results.csv", [append]),
 
@@ -269,12 +269,12 @@ init_randomx_state(Config) ->
 	} = Config,
 	case lists:member(Test, [pack_composite, nif_repack_composite]) of
 		true ->
-			ar_bench_timer:record({init},
+			big_bench_timer:record({init},
 				fun ar_rx4096_nif:rx4096_init_nif/5,
 					[?RANDOMX_PACKING_KEY, ?RANDOMX_HASHING_MODE_FAST, 
 						JIT, LargePages, NumWorkers]);
 		false ->
-			ar_bench_timer:record({init},
+			big_bench_timer:record({init},
 				fun ar_rx512_nif:rx512_init_nif/5,
 					[?RANDOMX_PACKING_KEY, ?RANDOMX_HASHING_MODE_FAST,
 						JIT, LargePages, NumWorkers])
@@ -287,7 +287,7 @@ run_test(Config) ->
 	} = Config,
 
 	io:format("packing..."),
-	ar_bench_timer:record({wall}, fun test/1, [Config]),
+	big_bench_timer:record({wall}, fun test/1, [Config]),
 
 	file:close(InputFileHandle),
 	file:close(OutputFileHandle).
@@ -322,7 +322,7 @@ test(Config) ->
 	io:format("~n").
 
 worker(WorkerID, Config, WorkerFun, Offset, Size) ->
-	ar_bench_timer:record({total, WorkerID}, WorkerFun, [
+	big_bench_timer:record({total, WorkerID}, WorkerFun, [
 			WorkerID,
 			Config,
 			Offset,

@@ -149,16 +149,16 @@ verify_cumulative_diff(NewB, OldB) ->
 %% @doc Verify the root of the new block tree is computed correctly.
 verify_block_hash_list_merkle(NewB, CurrentB) ->
 	true = NewB#block.height > ar_fork:height_2_0(),
-	NewB#block.hash_list_merkle == ar_unbalanced_merkle:root(CurrentB#block.hash_list_merkle,
+	NewB#block.hash_list_merkle == big_unbalanced_merkle:root(CurrentB#block.hash_list_merkle,
 			{CurrentB#block.indep_hash, CurrentB#block.weave_size, CurrentB#block.tx_root},
-			fun ar_unbalanced_merkle:hash_block_index_entry/1).
+			fun big_unbalanced_merkle:hash_block_index_entry/1).
 
 %% @doc Compute the root of the new block tree given the previous block.
 compute_hash_list_merkle(B) ->
-	ar_unbalanced_merkle:root(
+	big_unbalanced_merkle:root(
 		B#block.hash_list_merkle,
 		{B#block.indep_hash, B#block.weave_size, B#block.tx_root},
-		fun ar_unbalanced_merkle:hash_block_index_entry/1
+		fun big_unbalanced_merkle:hash_block_index_entry/1
 	).
 
 %% @doc Compute "h0" - a cryptographic hash used as a source of entropy when choosing

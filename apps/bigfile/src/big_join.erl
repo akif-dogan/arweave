@@ -66,7 +66,7 @@ start2(Peers) ->
 	[{H, _, _} | _] = BI = get_block_index(Peers, ?REJOIN_RETRIES),
 	big:console("Downloaded the block index successfully.~n", []),
 	B = get_block(Peers, H),
-	ExpectedBIMerkleH = ar_unbalanced_merkle:block_index_to_merkle_root(tl(BI)),
+	ExpectedBIMerkleH = big_unbalanced_merkle:block_index_to_merkle_root(tl(BI)),
 	case B#block.hash_list_merkle of
 		ExpectedBIMerkleH ->
 			do_join(Peers, B, BI);

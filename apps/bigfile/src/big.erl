@@ -700,7 +700,7 @@ start(Config) ->
 	warn_if_single_scheduler(),
 	case Config2#config.nonce_limiter_server_trusted_peers of
 		[] ->
-			VDFSpeed = ar_bench_vdf:run_benchmark(),
+			VDFSpeed = big_bench_vdf:run_benchmark(),
 			?LOG_INFO([{event, vdf_benchmark}, {vdf_s, VDFSpeed / 1000000}]);
 		_ ->
 			ok
@@ -804,18 +804,18 @@ create_wallet_fail(?ECDSA_KEY_TYPE) ->
 benchmark_packing() ->
 	benchmark_packing([]).
 benchmark_packing(Args) ->
-	ar_bench_timer:initialize(),
-	ar_bench_packing:run_benchmark_from_cli(Args),
+	big_bench_timer:initialize(),
+	big_bench_packing:run_benchmark_from_cli(Args),
 	erlang:halt().
 
 benchmark_vdf() ->
-	ar_bench_vdf:run_benchmark(),
+	big_bench_vdf:run_benchmark(),
 	erlang:halt().
 
 benchmark_hash() ->
 	benchmark_hash([]).
 benchmark_hash(Args) ->
-	ar_bench_hash:run_benchmark_from_cli(Args),
+	big_bench_hash:run_benchmark_from_cli(Args),
 	erlang:halt().
 
 benchmark_2_9() ->

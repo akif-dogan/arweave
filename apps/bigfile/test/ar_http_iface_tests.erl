@@ -914,7 +914,7 @@ test_send_missing_tx_with_the_block({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 	B = big_storage:read_block(hd(BI)),
 	B2 = B#block{ txs = big_storage:read_tx(B#block.txs) },
 	ar_test_node:connect_to_peer(peer1),
-	ar_bridge ! {event, block, {new, B2, #{ recall_byte => undefined }}},
+	big_bridge ! {event, block, {new, B2, #{ recall_byte => undefined }}},
 	assert_wait_until_height(peer1, RemoteHeight + 1).
 
 test_fallback_to_block_endpoint_if_cannot_send_tx({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
@@ -930,7 +930,7 @@ test_fallback_to_block_endpoint_if_cannot_send_tx({_B0, Wallet1, _Wallet2, _Stat
 	BI = wait_until_height(main, LocalHeight + 1),
 	B = big_storage:read_block(hd(BI)),
 	ar_test_node:connect_to_peer(peer1),
-	ar_bridge ! {event, block, {new, B, #{ recall_byte => undefined }}},
+	big_bridge ! {event, block, {new, B, #{ recall_byte => undefined }}},
 	assert_wait_until_height(peer1, RemoteHeight + 1).
 
 test_get_recent_hash_list_diff({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
