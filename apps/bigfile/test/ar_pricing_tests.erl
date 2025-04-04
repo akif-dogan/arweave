@@ -386,7 +386,7 @@ test_auto_redenomination_and_endowment_debt() ->
 			{MinerAddr, 1, 10, 1}, {MinerAddr, 1, 10, 1}, {B0#block.reward_addr, 1, 10, 1}],
 			B4#block.reward_history),
 	?assertEqual(
-		ar_rewards:reward_history_hash(B4#block.height, B3#block.reward_history_hash,
+		big_rewards:reward_history_hash(B4#block.height, B3#block.reward_history_hash,
 			[{MinerAddr, 1, ExpectedReward4, 1}, {MinerAddr, 1, 10, 1}, {MinerAddr, 1, 10, 1}]),
 		B4#block.reward_history_hash),
 	ar_test_node:mine(),
@@ -405,7 +405,7 @@ test_auto_redenomination_and_endowment_debt() ->
 			{MinerAddr, 1, 10, 1}, {MinerAddr, 1, 10, 1}, {MinerAddr, 1, 10, 1},
 			{B0#block.reward_addr, 1, 10, 1}], B5#block.reward_history),
 	?assertEqual(
-		ar_rewards:reward_history_hash(B5#block.height, B4#block.reward_history_hash,
+		big_rewards:reward_history_hash(B5#block.height, B4#block.reward_history_hash,
 			[{MinerAddr, 1, ExpectedReward5, 1}, {MinerAddr, 1, ExpectedReward4, 1},
 				{MinerAddr, 1, 10, 1}]),
 		B5#block.reward_history_hash),

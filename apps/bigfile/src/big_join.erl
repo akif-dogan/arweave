@@ -440,12 +440,12 @@ request_block(H, WorkerQ, PeerQ) ->
 
 maybe_set_reward_history(Blocks, Peers) ->
 	HeadB = hd(Blocks),
-	ExpectedHashesLen = ar_rewards:expected_hashes_length(HeadB#block.height),
+	ExpectedHashesLen = big_rewards:expected_hashes_length(HeadB#block.height),
 	ExpectedHashes = [B#block.reward_history_hash
 			|| B <- lists:sublist(Blocks, ExpectedHashesLen)],
 	case ar_http_iface_client:get_reward_history(Peers, HeadB, ExpectedHashes) of
 		{ok, RewardHistory} ->
-			ar_rewards:set_reward_history(Blocks, RewardHistory);
+			big_rewards:set_reward_history(Blocks, RewardHistory);
 		_ ->
 			big:console("Failed to fetch the reward history for the block ~s from "
 					"any of the peers. Consider changing the peers.~n",

@@ -227,7 +227,7 @@ update_accounts2(B, PrevB, Accounts, Args) ->
 update_accounts3(B, PrevB, Accounts, Args) ->
 	case may_be_apply_double_signing_proof(B, PrevB, Accounts) of
 		{ok, Accounts2} ->
-			Accounts3 = ar_rewards:apply_rewards(PrevB, Accounts2),
+			Accounts3 = big_rewards:apply_rewards(PrevB, Accounts2),
 			update_accounts4(B, PrevB, Accounts3, Args);
 		Error ->
 			Error
@@ -274,8 +274,8 @@ may_be_apply_double_signing_proof2(B, PrevB, Accounts) ->
 				true ->
 					{error, invalid_double_signing_proof_already_banned};
 				false ->
-					LockedRewards = ar_rewards:get_locked_rewards(PrevB),
-					case ar_rewards:has_locked_reward(Addr, LockedRewards) of
+					LockedRewards = big_rewards:get_locked_rewards(PrevB),
+					case big_rewards:has_locked_reward(Addr, LockedRewards) of
 						false ->
 							{error, invalid_double_signing_proof_not_in_reward_history};
 						true ->
@@ -331,9 +331,9 @@ update_accounts4(B, PrevB, Accounts, Args) ->
 		Proof ->
 			Denomination = PrevB#block.denomination,
 			BannedAddr = big_wallet:hash_pub_key(element(1, Proof)),
-			Sum = ar_rewards:get_total_reward_for_address(BannedAddr, PrevB) - 1,
+			Sum = big_rewards:get_total_reward_for_address(BannedAddr, PrevB) - 1,
 			{Dividend, Divisor} = ?DOUBLE_SIGNING_PROVER_REWARD_SHARE,
-			LockedRewards = ar_rewards:get_locked_rewards(PrevB),
+			LockedRewards = big_rewards:get_locked_rewards(PrevB),
 			Sample = lists:sublist(LockedRewards, ?DOUBLE_SIGNING_REWARD_SAMPLE_SIZE),
 			{Min, MinDenomination} = get_minimal_reward(Sample),
 			Min2 = big_pricing:redenominate(Min, MinDenomination, Denomination),
@@ -341,7 +341,7 @@ update_accounts4(B, PrevB, Accounts, Args) ->
 			{MinerReward, EndowmentPool, DebtSupply, KryderPlusRateMultiplierLatch,
 					KryderPlusRateMultiplier} = Args,
 			EndowmentPool2 = EndowmentPool + Sum - ProverReward,
-			Accounts2 = ar_rewards:apply_reward(Accounts, B#block.reward_addr, ProverReward,
+			Accounts2 = big_rewards:apply_reward(Accounts, B#block.reward_addr, ProverReward,
 					Denomination),
 			Args2 = {MinerReward, EndowmentPool2, DebtSupply, KryderPlusRateMultiplierLatch,
 					KryderPlusRateMultiplier},
@@ -501,9 +501,9 @@ validate_block(reward_history_hash, {NewB, OldB, Wallets, BlockAnchors, RecentTX
 	%% Pre-2.8: slice the reward history to compute the hash
 	%% Post-2.8: use the previous reward history hash and the head of the history to compute
 	%% the new hash.
-	LockedRewards = ar_rewards:trim_locked_rewards(Height,
+	LockedRewards = big_rewards:trim_locked_rewards(Height,
 		[{RewardAddr, HashRate, Reward, Denomination} | RewardHistory]),
-	case ar_rewards:reward_history_hash(Height, PreviousRewardHistoryHash, LockedRewards) of
+	case big_rewards:reward_history_hash(Height, PreviousRewardHistoryHash, LockedRewards) of
 		RewardHistoryHash ->
 			validate_block(block_time_history_hash, {NewB, OldB, Wallets, BlockAnchors,
 					RecentTXMap});

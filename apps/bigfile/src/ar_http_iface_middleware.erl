@@ -855,7 +855,7 @@ handle(<<"GET">>, [<<"reward_history">>, EncodedBH], Req, _Pid) ->
 						{#block{ height = Height, reward_history = RewardHistory }, {Status, _}}
 								when (Status == on_chain orelse Status == validated),
 									Height >= Fork_2_6 ->
-							RewardHistory2 = ar_rewards:trim_buffered_reward_history(Height,
+							RewardHistory2 = big_rewards:trim_buffered_reward_history(Height,
 									RewardHistory),
 							{200, #{}, ar_serialize:reward_history_to_binary(RewardHistory2),
 									Req};
@@ -1116,7 +1116,7 @@ handle(<<"GET">>, [<<"wallet">>, Addr, <<"reserved_rewards_total">>], Req, _Pid)
 			case big_wallet:base64_address_with_optional_checksum_to_decoded_address_safe(Addr) of
 				{ok, AddrOK} when byte_size(AddrOK) == 32 ->
 					B = big_node:get_current_block(),
-					Sum = ar_rewards:get_total_reward_for_address(AddrOK, B),
+					Sum = big_rewards:get_total_reward_for_address(AddrOK, B),
 					{200, #{}, integer_to_binary(Sum), Req};
 				_ ->
 					{400, #{}, <<"Invalid address.">>, Req}

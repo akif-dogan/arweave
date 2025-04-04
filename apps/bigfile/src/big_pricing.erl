@@ -57,7 +57,7 @@ get_v2_price_per_gib_minute(Height, B) ->
 	end.
 
 get_v2_price_per_gib_minute_two_difficulty(Height, B) ->
-	{HashRateTotal, RewardTotal, History} = ar_rewards:get_reward_history_totals(B),
+	{HashRateTotal, RewardTotal, History} = big_rewards:get_reward_history_totals(B),
 	{IntervalTotal, VDFIntervalTotal, OneChunkCount, TwoChunkCount} =
 		ar_block_time_history:sum_history(B),
 	%% The intent of the SolutionsPerPartitionPerVDFStep is to estimate network replica
@@ -153,7 +153,7 @@ get_v2_price_per_gib_minute_two_difficulty(Height, B) ->
 	PricePerGiBPerMinute.
 
 get_v2_price_per_gib_minute_one_difficulty(Height, B) ->
-	{HashRateTotal, RewardTotal, History} = ar_rewards:get_reward_history_totals(B),
+	{HashRateTotal, RewardTotal, History} = big_rewards:get_reward_history_totals(B),
 	{IntervalTotal, VDFIntervalTotal, OneChunkCount, TwoChunkCount} =
 		ar_block_time_history:sum_history(B),
 	%% The intent of the SolutionsPerPartitionPerVDFStep is to estimate network replica
@@ -220,7 +220,7 @@ get_v2_price_per_gib_minute_one_difficulty(Height, B) ->
 	PricePerGiBPerMinute.
 
 get_v2_price_per_gib_minute_simple(B) ->
-	{HashRateTotal, RewardTotal, _History} = ar_rewards:get_reward_history_totals(B),
+	{HashRateTotal, RewardTotal, _History} = big_rewards:get_reward_history_totals(B),
 	%% 2 recall ranges per partition per second.
 	SolutionsPerPartitionPerSecond = 2 * (?LEGACY_RECALL_RANGE_SIZE) div (?DATA_CHUNK_SIZE),
 	SolutionsPerPartitionPerMinute = SolutionsPerPartitionPerSecond * 60,

@@ -35,7 +35,7 @@ test_mining_reward() ->
 	{_, TotalLocked} = lists:foldl(
 		fun(Height, {PrevB, TotalLocked}) ->
 			?assertEqual(0, big_node:get_balance(Pub1)),
-			?assertEqual(TotalLocked, ar_rewards:get_total_reward_for_address(MiningAddr, PrevB)),
+			?assertEqual(TotalLocked, big_rewards:get_total_reward_for_address(MiningAddr, PrevB)),
 			ar_test_node:mine(),
 			ar_test_node:wait_until_height(main, Height + 1),
 			B = big_node:get_current_block(),
@@ -53,7 +53,7 @@ test_mining_reward() ->
 	?assertEqual(Reward + 10, big_node:get_balance(Pub1)),
 	?assertEqual(
 		TotalLocked - Reward - 10 + FinalB#block.reward,
-		ar_rewards:get_total_reward_for_address(MiningAddr, FinalB)).
+		big_rewards:get_total_reward_for_address(MiningAddr, FinalB)).
 
 % @doc Check that other nodes accept a new block and associated mining reward.
 multi_node_mining_reward_test_() ->

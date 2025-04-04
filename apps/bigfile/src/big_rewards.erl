@@ -1,4 +1,4 @@
--module(ar_rewards).
+-module(big_rewards).
 
 -export([reward_history_length/1, expected_hashes_length/1, buffered_reward_history_length/1, 
 		set_reward_history/2, get_locked_rewards/1,
