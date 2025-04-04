@@ -52,7 +52,7 @@ get_rates_json() ->
 init([]) ->
 	ok = ar_events:subscribe(node_state),
 	{ok, Config} = application:get_env(bigfile, config),
-	ar_p3_config:validate_config(Config).
+	big_p3_config:validate_config(Config).
 
 handle_call({allow_request, Req}, _From, State) ->
 	case handle_request(Req, State) of
@@ -79,15 +79,15 @@ handle_call({get_balance, Address, Asset}, _From, State) ->
 	{reply, ar_p3_db:get_balance(Address, Asset), State};
 
 handle_call({get_rates_json}, _From, State) ->
-	{reply, ar_p3_config:get_json(State), State}.
+	{reply, big_p3_config:get_json(State), State}.
 
 handle_cast(stop, State) ->
 	{stop, normal, State}.
 
 handle_info({event, node_state, {new_tip, B, _PrevB}}, State) ->
-	NumConfirmations = ar_p3_config:get_payments_value(
+	NumConfirmations = big_p3_config:get_payments_value(
 							State, ?BIGFILE_BIG, #p3_payment.confirmations),
-	DepositAddress = ar_p3_config:get_payments_value(
+	DepositAddress = big_p3_config:get_payments_value(
 							State, ?BIGFILE_BIG, #p3_payment.address),
 	case {NumConfirmations, DepositAddress} of
 		{undefined, _} -> ok;
@@ -115,7 +115,7 @@ terminate(Reason, State) ->
 %%--------------------------------------------------------------------
 handle_request(Req, P3Config) when
 		is_record(P3Config, p3_config) ->
-	case ar_p3_config:get_service_config(P3Config, Req) of
+	case big_p3_config:get_service_config(P3Config, Req) of
 		undefined ->
 			{ok, not_p3_service};
 		ServiceConfig ->
@@ -142,9 +142,9 @@ apply_charge(Account, Req, P3Config, ServiceConfig) when
 
 validate_asset(Account, P3Config, ServiceConfig) ->
 	Asset = Account#p3_account.asset,
-	MinimumBalance = ar_p3_config:get_payments_value(
+	MinimumBalance = big_p3_config:get_payments_value(
 							P3Config, Asset, #p3_payment.minimum_balance),
-	Amount = ar_p3_config:get_rate(ServiceConfig, Asset),
+	Amount = big_p3_config:get_rate(ServiceConfig, Asset),
 	case {MinimumBalance, Amount} of
 		{undefined, _} ->
 			{error, invalid_config};

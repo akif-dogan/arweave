@@ -594,7 +594,7 @@ parse_options([{<<"defragment_modules">>, Bin} | _], _) ->
 
 parse_options([{<<"p3">>, {P3Config}} | Rest], Config) ->
 	try
-		P3 = ar_p3_config:parse_p3(P3Config, #p3_config{}),
+		P3 = big_p3_config:parse_p3(P3Config, #p3_config{}),
 		parse_options(Rest, Config#config{ p3 = P3 })
 	catch error:Reason ->
 		{error,

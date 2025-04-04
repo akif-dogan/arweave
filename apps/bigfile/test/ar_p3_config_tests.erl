@@ -265,19 +265,19 @@ no_p3_validate_test() ->
 	P3Config = #p3_config{},
 	?assertEqual(
 		{ok, P3Config},
-		ar_p3_config:validate_config(#config{})).
+		big_p3_config:validate_config(#config{})).
 
 empty_p3_validate_test() ->
 	P3Config = #p3_config{},
 	?assertEqual(
 		{ok, P3Config},
-		ar_p3_config:validate_config(config_fixture(P3Config))).
+		big_p3_config:validate_config(config_fixture(P3Config))).
 
 empty_payments_and_services_validate_test() ->
 	P3Config = #p3_config{ payments = #{}, services = #{}},
 	?assertEqual(
 		{ok, P3Config},
-		ar_p3_config:validate_config(config_fixture(P3Config))).
+		big_p3_config:validate_config(config_fixture(P3Config))).
 
 basic_validate_test() ->
 	P3Config = #p3_config{
@@ -309,7 +309,7 @@ basic_validate_test() ->
 	},
 	?assertEqual(
 		{ok, P3Config},
-		ar_p3_config:validate_config(config_fixture(P3Config))).
+		big_p3_config:validate_config(config_fixture(P3Config))).
 
 empty_payments_validate_test() ->
 	P3Config = #p3_config{
@@ -335,7 +335,7 @@ empty_payments_validate_test() ->
 	},
 	?assertEqual(
 		{ok, P3Config},
-		ar_p3_config:validate_config(config_fixture(P3Config))).
+		big_p3_config:validate_config(config_fixture(P3Config))).
 
 empty_services_validate_test() ->
 	P3Config = #p3_config{
@@ -350,7 +350,7 @@ empty_services_validate_test() ->
 	},
 	?assertEqual(
 		{ok, P3Config},
-		ar_p3_config:validate_config(config_fixture(P3Config))).
+		big_p3_config:validate_config(config_fixture(P3Config))).
 
 bad_payments_asset_validate_test() ->
 	P3Config = #p3_config{
@@ -365,7 +365,7 @@ bad_payments_asset_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 no_address_validate_test() ->
 	P3Config = #p3_config{
@@ -379,7 +379,7 @@ no_address_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 bad_minimum_balance_validate_test() ->
 	P3Config = #p3_config{
@@ -394,7 +394,7 @@ bad_minimum_balance_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 float_minimum_balance_validate_test() ->
 	P3Config = #p3_config{
@@ -409,7 +409,7 @@ float_minimum_balance_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 bad_confirmations_validate_test() ->
 	P3Config = #p3_config{
@@ -424,7 +424,7 @@ bad_confirmations_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 float_confirmations_validate_test() ->
 	P3Config = #p3_config{
@@ -439,7 +439,7 @@ float_confirmations_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 all_endpoints_validate_test() ->
 	Endpoints = [
@@ -486,7 +486,7 @@ all_endpoints_validate_test() ->
 			},
 			?assertEqual(
 				{ok, P3Config},
-				ar_p3_config:validate_config(config_fixture(P3Config)))
+				big_p3_config:validate_config(config_fixture(P3Config)))
 		end,
 		Endpoints).
 
@@ -505,7 +505,7 @@ no_endpoint_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 bad_endpoint_validate_test() ->
 	P3Config = #p3_config{
@@ -523,7 +523,7 @@ bad_endpoint_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 no_mod_seq_validate_test() ->
 	P3Config = #p3_config{
@@ -540,7 +540,7 @@ no_mod_seq_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 bad_mod_seq_validate_test() ->
 	P3Config = #p3_config{
@@ -558,7 +558,7 @@ bad_mod_seq_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 no_rates_validate_test() ->
 	P3Config = #p3_config{
@@ -573,7 +573,7 @@ no_rates_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 bad_rates_validate_test() ->
 	P3Config = #p3_config{
@@ -589,7 +589,7 @@ bad_rates_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 invalid_rates_asset_validate_test() ->
 	P3Config = #p3_config{
@@ -607,7 +607,7 @@ invalid_rates_asset_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 bad_rates_price_validate_test() ->
 	P3Config = #p3_config{
@@ -625,7 +625,7 @@ bad_rates_price_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 string_rates_price_validate_test() ->
 	P3Config = #p3_config{
@@ -643,7 +643,7 @@ string_rates_price_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 no_rate_type_validate_test() ->
 	P3Config = #p3_config{
@@ -660,7 +660,7 @@ no_rate_type_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 string_rate_type_validate_test() ->
 	P3Config = #p3_config{
@@ -678,7 +678,7 @@ string_rate_type_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 bad_rate_type_validate_test() ->
 	P3Config = #p3_config{
@@ -696,7 +696,7 @@ bad_rate_type_validate_test() ->
 	},
 	?assertMatch(
 		{stop, _},
-	 	ar_p3_config:validate_config(config_fixture(P3Config))).
+	 	big_p3_config:validate_config(config_fixture(P3Config))).
 
 %% ------------------------------------------------------------------
 %% @doc the rates_endpoint_test_ tests the /rates endpoint response.

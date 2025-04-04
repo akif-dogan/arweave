@@ -34,4 +34,4 @@ get_tx_content_type_test() ->
 	).
 
 content_type_from_tags(Tags) ->
-	ar_http_util:get_tx_content_type(#tx { tags = Tags }).
+	big_http_util:get_tx_content_type(#tx { tags = Tags }).

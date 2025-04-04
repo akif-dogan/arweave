@@ -1,4 +1,4 @@
--module(ar_http_util).
+-module(big_http_util).
 
 -export([get_tx_content_type/1, bigfile_peer/1]).
 

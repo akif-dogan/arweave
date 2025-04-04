@@ -279,7 +279,7 @@ jobs:
             big_node_utils,
             ar_nonce_limiter,
             # big_p3,
-            # ar_p3_config,
+            # big_p3_config,
             # ar_p3_db,
             ar_packing_server,
             ar_patricia_tree,

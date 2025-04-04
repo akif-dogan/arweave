@@ -1,4 +1,4 @@
--module(ar_p3_config).
+-module(big_p3_config).
 
 -export([
 	parse_p3/2, validate_config/1, get_payments_value/3, get_service_config/2, get_rate/2,

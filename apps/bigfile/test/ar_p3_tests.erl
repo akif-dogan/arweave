@@ -452,7 +452,7 @@ test_reverse_charge() ->
 	?assertEqual({ok, 0}, ar_p3_db:get_balance(Address1)).
 
 mocked_test_timeout() ->
-	ar_test_node:test_with_mocked_functions([{ar_p3_config, get_service_config, fun(_, _) -> timer:sleep(10000) end}],
+	ar_test_node:test_with_mocked_functions([{big_p3_config, get_service_config, fun(_, _) -> timer:sleep(10000) end}],
 		fun test_timeout/0).
 
 test_timeout() ->
