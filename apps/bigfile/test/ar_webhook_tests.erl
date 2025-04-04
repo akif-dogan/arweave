@@ -200,11 +200,11 @@ create_v2_tx(Wallet) ->
 	Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, crypto:strong_rand_bytes(DataSize)),
 	SizeTaggedChunks = ar_tx:chunks_to_size_tagged_chunks(Chunks),
 	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
-	{DataRoot, DataTree} = ar_merkle:generate_tree(SizedChunkIDs),
+	{DataRoot, DataTree} = big_merkle:generate_tree(SizedChunkIDs),
 	TX = ar_test_node:sign_tx(main, Wallet,
 			#{ format => 2, data_root => DataRoot, data_size => DataSize, reward => ?BIG(1) }),
 	Proofs = [encode_proof(#{ data_root => DataRoot, chunk => Chunk,
-				data_path => ar_merkle:generate_path(DataRoot, Offset - 1, DataTree),
+				data_path => big_merkle:generate_path(DataRoot, Offset - 1, DataTree),
 				offset => Offset - 1, data_size => DataSize })
 			|| {Chunk, Offset} <- SizeTaggedChunks],
 	{TX, Proofs}.

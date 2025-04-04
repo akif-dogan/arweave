@@ -532,7 +532,7 @@ download_txs(Peers, B, TXRoot) ->
 		{ok, TXs} ->
 			SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs, B#block.height),
 			SizeTaggedDataRoots = [{Root, Offset} || {{_, Root}, Offset} <- SizeTaggedTXs],
-			{Root, _Tree} = ar_merkle:generate_tree(SizeTaggedDataRoots),
+			{Root, _Tree} = big_merkle:generate_tree(SizeTaggedDataRoots),
 			case Root of
 				TXRoot ->
 					{ok, B#block{ txs = TXs, size_tagged_txs = SizeTaggedTXs }};

@@ -128,7 +128,7 @@ generate_random_split(ChunkCount) ->
 		lists:seq(1, case ChunkCount of random -> rand:uniform(5); _ -> ChunkCount end)),
 	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
 			ar_tx:chunks_to_size_tagged_chunks(Chunks)),
-	{DataRoot, _} = ar_merkle:generate_tree(SizedChunkIDs),
+	{DataRoot, _} = big_merkle:generate_tree(SizedChunkIDs),
 	{DataRoot, Chunks}.
 
 generate_random_original_v1_split() ->
@@ -155,7 +155,7 @@ original_split(Data) ->
 	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
 		ar_tx:chunks_to_size_tagged_chunks(Chunks)
 	),
-	{DataRoot, _} = ar_merkle:generate_tree(SizedChunkIDs),
+	{DataRoot, _} = big_merkle:generate_tree(SizedChunkIDs),
 	{DataRoot, Chunks}.
 
 %% @doc Split the way v2 transactions are usually split (bigfile-js does it
@@ -165,7 +165,7 @@ v2_standard_split(Data) ->
 	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
 		ar_tx:chunks_to_size_tagged_chunks(Chunks)
 	),
-	{DataRoot, _} = ar_merkle:generate_tree(SizedChunkIDs),
+	{DataRoot, _} = big_merkle:generate_tree(SizedChunkIDs),
 	{DataRoot, Chunks}.
 
 v2_standard_split_get_chunks(Data) ->
@@ -210,10 +210,10 @@ build_proofs(TX, Chunks, TXs, BlockStartOffset, Height) ->
 	SizeTaggedDataRoots = [{Root, Offset} || {{_, Root}, Offset} <- SizeTaggedTXs],
 	{value, {_, TXOffset}} =
 		lists:search(fun({{TXID, _}, _}) -> TXID == TX#tx.id end, SizeTaggedTXs),
-	{TXRoot, TXTree} = ar_merkle:generate_tree(SizeTaggedDataRoots),
-	TXPath = ar_merkle:generate_path(TXRoot, TXOffset - 1, TXTree),
+	{TXRoot, TXTree} = big_merkle:generate_tree(SizeTaggedDataRoots),
+	TXPath = big_merkle:generate_path(TXRoot, TXOffset - 1, TXTree),
 	SizeTaggedChunks = ar_tx:chunks_to_size_tagged_chunks(Chunks),
-	{DataRoot, DataTree} = ar_merkle:generate_tree(
+	{DataRoot, DataTree} = big_merkle:generate_tree(
 		ar_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks)
 	),
 	DataSize = byte_size(binary:list_to_bin(Chunks)),
@@ -229,7 +229,7 @@ build_proofs(TX, Chunks, TXs, BlockStartOffset, Height) ->
 					data_root => ar_util:encode(DataRoot),
 					data_path =>
 						ar_util:encode(
-							ar_merkle:generate_path(DataRoot, ChunkOffset - 1, DataTree)
+							big_merkle:generate_path(DataRoot, ChunkOffset - 1, DataTree)
 						),
 					chunk => ar_util:encode(Chunk),
 					offset => integer_to_binary(ChunkOffset - 1),
@@ -281,7 +281,7 @@ post_blocks(Wallet, BlockMap) ->
 	FixedChunks = [crypto:strong_rand_bytes(256 * 1024) || _ <- lists:seq(1, 4)],
 	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
 			ar_tx:chunks_to_size_tagged_chunks(FixedChunks)),
-	{DataRoot, _} = ar_merkle:generate_tree(SizedChunkIDs),
+	{DataRoot, _} = big_merkle:generate_tree(SizedChunkIDs),
 	lists:foldl(
 		fun
 			({empty, Height}, Acc) ->

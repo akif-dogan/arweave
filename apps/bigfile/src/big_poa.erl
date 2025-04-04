@@ -20,7 +20,7 @@
 %% changed in some other ways on top of that). The threshold where the specific
 %% requirements were imposed on data splits to make each chunk belong to its own
 %% 256 KiB bucket is set to ?STRICT_DATA_SPLIT_THRESHOLD. The code is then passed to
-%% ar_merkle:validate_path/5.
+%% big_merkle:validate_path/5.
 get_data_path_validation_ruleset(BlockStartOffset, MerkleRebaseSupportThreshold) ->
 	get_data_path_validation_ruleset(BlockStartOffset, MerkleRebaseSupportThreshold,
 			?STRICT_DATA_SPLIT_THRESHOLD).
@@ -29,7 +29,7 @@ get_data_path_validation_ruleset(BlockStartOffset, MerkleRebaseSupportThreshold)
 %% offset, the threshold where the offset rebases were allowed (and the validation
 %% changed in some other ways on top of that), and the threshold where the specific
 %% requirements were imposed on data splits to make each chunk belong to its own
-%% 256 KiB bucket. The code is then passed to ar_merkle:validate_path/5.
+%% 256 KiB bucket. The code is then passed to big_merkle:validate_path/5.
 get_data_path_validation_ruleset(BlockStartOffset, MerkleRebaseSupportThreshold,
 		StrictDataSplitThreshold) ->
 	case BlockStartOffset >= MerkleRebaseSupportThreshold of
@@ -144,7 +144,7 @@ validate_paths(Proof) ->
 	BlockRelativeOffset = AbsoluteOffset - BlockStartOffset,
 	BlockSize = BlockEndOffset - BlockStartOffset,
 
-	case ar_merkle:validate_path(TXRoot, BlockRelativeOffset, BlockSize, TXPath) of
+	case big_merkle:validate_path(TXRoot, BlockRelativeOffset, BlockSize, TXPath) of
 		false ->
 			{false, Proof#chunk_proof{ tx_path_is_valid = invalid }};
 		{DataRoot, TXStartOffset, TXEndOffset} ->
@@ -156,7 +156,7 @@ validate_paths(Proof) ->
 			},
 			TXSize = TXEndOffset - TXStartOffset,
 			TXRelativeOffset = BlockRelativeOffset - TXStartOffset,
-			case ar_merkle:validate_path(
+			case big_merkle:validate_path(
 					DataRoot, TXRelativeOffset, TXSize, DataPath, ValidateDataPathRuleset) of
 				false ->
 					{false, Proof2#chunk_proof{ data_path_is_valid = invalid }};
@@ -266,7 +266,7 @@ get_padded_offset(Offset, StrictDataSplitThreshold) ->
 %% @doc Validate a proof of access.
 validate_pre_fork_2_5(BlockOffset, TXRoot, BlockEndOffset, POA) ->
 	Validation =
-		ar_merkle:validate_path(
+		big_merkle:validate_path(
 			TXRoot,
 			BlockOffset,
 			BlockEndOffset,
@@ -285,7 +285,7 @@ validate_pre_fork_2_5(BlockOffset, TXRoot, BlockEndOffset, POA) ->
 
 validate_data_path(DataRoot, TXOffset, EndOffset, POA) ->
 	Validation =
-		ar_merkle:validate_path(
+		big_merkle:validate_path(
 			DataRoot,
 			TXOffset,
 			EndOffset,

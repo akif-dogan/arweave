@@ -44,7 +44,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 	SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs, 0),
 	BlockSize = case SizeTaggedTXs of [] -> 0; _ -> element(2, lists:last(SizeTaggedTXs)) end,
 	SizeTaggedDataRoots = [{Root, Offset} || {{_, Root}, Offset} <- SizeTaggedTXs],
-	{TXRoot, _Tree} = ar_merkle:generate_tree(SizeTaggedDataRoots),
+	{TXRoot, _Tree} = big_merkle:generate_tree(SizeTaggedDataRoots),
 	Timestamp = os:system_time(second),
 	B0 =
 		#block{

@@ -701,7 +701,7 @@ generate_tx_tree(B) ->
 	generate_tx_tree(B, SizeTaggedDataRoots).
 
 generate_tx_tree(B, SizeTaggedDataRoots) ->
-	{Root, Tree} = ar_merkle:generate_tree(SizeTaggedDataRoots),
+	{Root, Tree} = big_merkle:generate_tree(SizeTaggedDataRoots),
 	B#block{ tx_tree = Tree, tx_root = Root }.
 
 generate_size_tagged_list_from_txs(TXs, Height) ->
@@ -802,7 +802,7 @@ generate_tx_root_for_block([], _Height) ->
 generate_tx_root_for_block(TXs = [TX | _], Height) when is_record(TX, tx) ->
 	SizeTaggedTXs = generate_size_tagged_list_from_txs(TXs, Height),
 	SizeTaggedDataRoots = [{Root, Offset} || {{_, Root}, Offset} <- SizeTaggedTXs],
-	{Root, _Tree} = ar_merkle:generate_tree(SizeTaggedDataRoots),
+	{Root, _Tree} = big_merkle:generate_tree(SizeTaggedDataRoots),
 	Root.
 
 get_tx_data_root(#tx{ format = 2, data_root = DataRoot }) ->

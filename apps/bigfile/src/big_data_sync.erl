@@ -99,7 +99,7 @@ is_chunk_proof_ratio_attractive(ChunkSize, TXSize, DataPath) ->
 		0 ->
 			false;
 		_ ->
-			case catch ar_merkle:extract_note(DataPath) of
+			case catch big_merkle:extract_note(DataPath) of
 				{'EXIT', _} ->
 					false;
 				Offset ->
@@ -2511,7 +2511,7 @@ add_block_data_roots([], _CurrentWeaveSize, _StoreID) ->
 	{ok, sets:new()};
 add_block_data_roots(SizeTaggedTXs, CurrentWeaveSize, StoreID) ->
 	SizeTaggedDataRoots = [{Root, Offset} || {{_, Root}, Offset} <- SizeTaggedTXs],
-	{TXRoot, TXTree} = ar_merkle:generate_tree(SizeTaggedDataRoots),
+	{TXRoot, TXTree} = big_merkle:generate_tree(SizeTaggedDataRoots),
 	{BlockSize, DataRootIndexKeySet, Args} = lists:foldl(
 		fun ({_, Offset}, {Offset, _, _} = Acc) ->
 				Acc;
@@ -2520,7 +2520,7 @@ add_block_data_roots(SizeTaggedTXs, CurrentWeaveSize, StoreID) ->
 			({{_, DataRoot}, Offset}, {_, Acc1, Acc2}) when byte_size(DataRoot) < 32 ->
 				{Offset, Acc1, Acc2};
 			({{_, DataRoot}, TXEndOffset}, {PrevOffset, CurrentDataRootSet, CurrentArgs}) ->
-				TXPath = ar_merkle:generate_path(TXRoot, TXEndOffset - 1, TXTree),
+				TXPath = big_merkle:generate_path(TXRoot, TXEndOffset - 1, TXTree),
 				TXOffset = CurrentWeaveSize + PrevOffset,
 				TXSize = TXEndOffset - PrevOffset,
 				DataRootKey = << DataRoot:32/binary, TXSize:?OFFSET_KEY_BITSIZE >>,
@@ -2802,10 +2802,10 @@ validate_proof2(
 	end.
 
 validate_data_path(DataRoot, Offset, TXSize, DataPath, Chunk) ->
-	Base = ar_merkle:validate_path(DataRoot, Offset, TXSize, DataPath, strict_borders_ruleset),
-	Strict = ar_merkle:validate_path(DataRoot, Offset, TXSize, DataPath,
+	Base = big_merkle:validate_path(DataRoot, Offset, TXSize, DataPath, strict_borders_ruleset),
+	Strict = big_merkle:validate_path(DataRoot, Offset, TXSize, DataPath,
 			strict_data_split_ruleset),
-	Rebase = ar_merkle:validate_path(DataRoot, Offset, TXSize, DataPath,
+	Rebase = big_merkle:validate_path(DataRoot, Offset, TXSize, DataPath,
 			offset_rebase_support_ruleset),
 	Result =
 		case {Base, Strict, Rebase} of
@@ -3662,7 +3662,7 @@ data_root_index_next_v2(Args, _Limit) ->
 			none;
 		{ok, << DataRoot:32/binary, TXSizeSize:8, TXSize:(TXSizeSize * 8),
 				TXStartOffset2Size:8, TXStartOffset2:(TXStartOffset2Size * 8) >>, TXPath} ->
-			{ok, TXRoot} = ar_merkle:extract_root(TXPath),
+			{ok, TXRoot} = big_merkle:extract_root(TXPath),
 			{{TXStartOffset2, TXRoot, TXPath},
 					{DataRootKey, TXStartOffset2, LatestTXStartOffset, DataRootIndex,
 							Count + 1}};

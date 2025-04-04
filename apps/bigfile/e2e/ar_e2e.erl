@@ -238,7 +238,7 @@ mine_block(Node, Wallet, DataSize, IsTemporary) ->
 
 generate_tx(Node, Wallet, WeaveSize, DataSize) ->
 	Chunks = generate_chunks(Node, WeaveSize, DataSize, []),
-	{DataRoot, _DataTree} = ar_merkle:generate_tree(
+	{DataRoot, _DataTree} = big_merkle:generate_tree(
 		[{ar_tx:generate_chunk_id(Chunk), Offset} || {Chunk, Offset} <- Chunks]
 	),
 	TX = ar_test_node:sign_tx(Node, Wallet, #{

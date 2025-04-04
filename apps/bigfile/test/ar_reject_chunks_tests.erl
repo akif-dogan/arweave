@@ -65,8 +65,8 @@ test_rejects_invalid_chunks() ->
 	SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
 		ar_tx:chunks_to_size_tagged_chunks([Chunk])
 	),
-	{DataRoot, DataTree} = ar_merkle:generate_tree(SizedChunkIDs),
-	DataPath = ar_merkle:generate_path(DataRoot, 0, DataTree),
+	{DataRoot, DataTree} = big_merkle:generate_tree(SizedChunkIDs),
+	DataPath = big_merkle:generate_path(DataRoot, 0, DataTree),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"data_root_not_found\"}">>, _, _}},
 		ar_test_node:post_chunk(main, ar_serialize:jsonify(#{
@@ -141,14 +141,14 @@ test_does_not_store_small_chunks_after_2_5() ->
 					crypto:strong_rand_bytes(SecondSize), crypto:strong_rand_bytes(ThirdSize)},
 			{FirstChunkID, SecondChunkID, ThirdChunkID} = {ar_tx:generate_chunk_id(FirstChunk),
 					ar_tx:generate_chunk_id(SecondChunk), ar_tx:generate_chunk_id(ThirdChunk)},
-			{DataRoot, DataTree} = ar_merkle:generate_tree([{FirstChunkID, FirstMerkleOffset},
+			{DataRoot, DataTree} = big_merkle:generate_tree([{FirstChunkID, FirstMerkleOffset},
 					{SecondChunkID, SecondMerkleOffset}, {ThirdChunkID, ThirdMerkleOffset}]),
 			TX = ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(main), data_size => DataSize,
 					data_root => DataRoot }),
 			ar_test_node:post_and_mine(#{ miner => main, await_on => main }, [TX]),
 			lists:foreach(
 				fun({Chunk, Offset}) ->
-					DataPath = ar_merkle:generate_path(DataRoot, Offset, DataTree),
+					DataPath = big_merkle:generate_path(DataRoot, Offset, DataTree),
 					Proof = #{ data_root => ar_util:encode(DataRoot),
 							data_path => ar_util:encode(DataPath),
 							chunk => ar_util:encode(Chunk),
@@ -201,11 +201,11 @@ test_rejects_chunks_with_merkle_tree_borders_exceeding_max_chunk_size() ->
 	Wallet = ar_test_data_sync:setup_nodes(),
 	BigOutOfBoundsOffsetChunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	BigChunkID = ar_tx:generate_chunk_id(BigOutOfBoundsOffsetChunk),
-	{BigDataRoot, BigDataTree} = ar_merkle:generate_tree([{BigChunkID, ?DATA_CHUNK_SIZE + 1}]),
+	{BigDataRoot, BigDataTree} = big_merkle:generate_tree([{BigChunkID, ?DATA_CHUNK_SIZE + 1}]),
 	BigTX = ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(main), data_size => ?DATA_CHUNK_SIZE,
 			data_root => BigDataRoot }),
 	ar_test_node:post_and_mine(#{ miner => main, await_on => main }, [BigTX]),
-	BigDataPath = ar_merkle:generate_path(BigDataRoot, 0, BigDataTree),
+	BigDataPath = big_merkle:generate_path(BigDataRoot, 0, BigDataTree),
 	BigProof = #{ data_root => ar_util:encode(BigDataRoot),
 			data_path => ar_util:encode(BigDataPath),
 			chunk => ar_util:encode(BigOutOfBoundsOffsetChunk), offset => <<"0">>,
@@ -222,7 +222,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 		(?DEFAULT_MAX_DISK_POOL_DATA_ROOT_BUFFER_MB * 1024 * 1024) + 1
 	),
 	Chunks1 = ar_test_data_sync:imperfect_split(Data1),
-	{DataRoot1, _} = ar_merkle:generate_tree(
+	{DataRoot1, _} = big_merkle:generate_tree(
 		ar_tx:sized_chunks_to_sized_chunk_ids(
 			ar_tx:chunks_to_size_tagged_chunks(Chunks1)
 		)
@@ -250,7 +250,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 		) * 1024 * 1024
 	),
 	Chunks2 = ar_test_data_sync:imperfect_split(Data2),
-	{DataRoot2, _} = ar_merkle:generate_tree(
+	{DataRoot2, _} = big_merkle:generate_tree(
 		ar_tx:sized_chunks_to_sized_chunk_ids(
 			ar_tx:chunks_to_size_tagged_chunks(Chunks2)
 		)
@@ -276,7 +276,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 	?assert(Left < ?DEFAULT_MAX_DISK_POOL_DATA_ROOT_BUFFER_MB * 1024 * 1024),
 	Data3 = crypto:strong_rand_bytes(Left + 1),
 	Chunks3 = ar_test_data_sync:imperfect_split(Data3),
-	{DataRoot3, _} = ar_merkle:generate_tree(
+	{DataRoot3, _} = big_merkle:generate_tree(
 		ar_tx:sized_chunks_to_sized_chunk_ids(
 			ar_tx:chunks_to_size_tagged_chunks(Chunks3)
 		)

@@ -174,7 +174,7 @@ generate_chunk_tree(TX) ->
 	).
 
 generate_chunk_tree(TX, ChunkIDSizes) ->
-	{Root, Tree} = ar_merkle:generate_tree(ChunkIDSizes),
+	{Root, Tree} = big_merkle:generate_tree(ChunkIDSizes),
 	TX#tx{ data_tree = Tree, data_root = Root }.
 
 %% @doc Generate a chunk ID used to construct the Merkle tree from the tx data chunks.
@@ -909,19 +909,19 @@ test_generate_chunk_tree_and_validate_path(Data, ChallengeLocation) ->
 			}
 		),
 	DataPath =
-		ar_merkle:generate_path(
+		big_merkle:generate_path(
 			DataRoot,
 			ChallengeLocation,
 			DataTree
 		),
 	RealChunkID = ar_tx:generate_chunk_id(Chunk),
 	{PathChunkID, StartOffset, EndOffset} =
-		ar_merkle:validate_path(DataRoot, ChallengeLocation, byte_size(Data), DataPath),
+		big_merkle:validate_path(DataRoot, ChallengeLocation, byte_size(Data), DataPath),
 	{PathChunkID, StartOffset, EndOffset} =
-		ar_merkle:validate_path(DataRoot, ChallengeLocation, byte_size(Data),
+		big_merkle:validate_path(DataRoot, ChallengeLocation, byte_size(Data),
 				DataPath, strict_data_split_ruleset),
 	{PathChunkID, StartOffset, EndOffset} =
-		ar_merkle:validate_path(DataRoot, ChallengeLocation, byte_size(Data),
+		big_merkle:validate_path(DataRoot, ChallengeLocation, byte_size(Data),
 				DataPath, strict_borders_ruleset),
 	?assertEqual(RealChunkID, PathChunkID),
 	?assert(ChallengeLocation >= StartOffset),

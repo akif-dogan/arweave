@@ -44,7 +44,7 @@ validate(TX) ->
 				Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, TX#tx.data),
 				SizeTaggedChunks = ar_tx:chunks_to_size_tagged_chunks(Chunks),
 				SizeTaggedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
-				{Root, _} = ar_merkle:generate_tree(SizeTaggedChunkIDs),
+				{Root, _} = big_merkle:generate_tree(SizeTaggedChunkIDs),
 				Size = byte_size(TX#tx.data),
 				case {Root, Size} == {TX#tx.data_root, TX#tx.data_size} of
 					true ->
@@ -77,7 +77,7 @@ validate(TX) ->
 							SizeTaggedV1Chunks = ar_tx:chunks_to_size_tagged_chunks(V1Chunks),
 							SizeTaggedV1ChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
 									SizeTaggedV1Chunks),
-							{DataRoot, _} = ar_merkle:generate_tree(SizeTaggedV1ChunkIDs),
+							{DataRoot, _} = big_merkle:generate_tree(SizeTaggedV1ChunkIDs),
 							{valid, TX#tx{ data_root = DataRoot }};
 						false ->
 							{valid, TX}

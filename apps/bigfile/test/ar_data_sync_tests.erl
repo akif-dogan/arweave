@@ -46,7 +46,7 @@ test_syncs_data() ->
 	lists:foreach(
 		fun({B, #tx{ id = TXID }, Chunks, {_, Proof}}) ->
 			TXSize = byte_size(binary:list_to_bin(Chunks)),
-			TXOffset = ar_merkle:extract_note(ar_util:decode(maps:get(tx_path, Proof))),
+			TXOffset = big_merkle:extract_note(ar_util:decode(maps:get(tx_path, Proof))),
 			AbsoluteTXOffset = B#block.weave_size - B#block.block_size + TXOffset,
 			ExpectedOffsetInfo = ar_serialize:jsonify(#{
 					offset => integer_to_binary(AbsoluteTXOffset),
@@ -126,13 +126,13 @@ test_mines_off_only_last_chunks() ->
 			Chunk = crypto:strong_rand_bytes(1023),
 			ChunkID = ar_tx:generate_chunk_id(Chunk),
 			DataSize = ?DATA_CHUNK_SIZE + 1023,
-			{DataRoot, DataTree} = ar_merkle:generate_tree([{RandomID, ?DATA_CHUNK_SIZE},
+			{DataRoot, DataTree} = big_merkle:generate_tree([{RandomID, ?DATA_CHUNK_SIZE},
 					{ChunkID, DataSize}]),
 			TX = ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(main), data_size => DataSize,
 					data_root => DataRoot }),
 			ar_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX]),
 			Offset = ?DATA_CHUNK_SIZE + 1,
-			DataPath = ar_merkle:generate_path(DataRoot, Offset, DataTree),
+				DataPath = big_merkle:generate_path(DataRoot, Offset, DataTree),
 			Proof = #{ data_root => ar_util:encode(DataRoot),
 					data_path => ar_util:encode(DataPath), chunk => ar_util:encode(Chunk),
 					offset => integer_to_binary(Offset),
@@ -189,13 +189,13 @@ test_mines_off_only_second_last_chunks() ->
 			Chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE div 2),
 			ChunkID = ar_tx:generate_chunk_id(Chunk),
 			DataSize = (?DATA_CHUNK_SIZE) div 2 + (?DATA_CHUNK_SIZE) div 2 + 3,
-			{DataRoot, DataTree} = ar_merkle:generate_tree([{ChunkID, ?DATA_CHUNK_SIZE div 2},
+			{DataRoot, DataTree} = big_merkle:generate_tree([{ChunkID, ?DATA_CHUNK_SIZE div 2},
 					{RandomID, DataSize}]),
 			TX = ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(main), data_size => DataSize,
 					data_root => DataRoot }),
 			ar_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX]),
 			Offset = 0,
-			DataPath = ar_merkle:generate_path(DataRoot, Offset, DataTree),
+			DataPath = big_merkle:generate_path(DataRoot, Offset, DataTree),
 			Proof = #{ data_root => ar_util:encode(DataRoot),
 					data_path => ar_util:encode(DataPath), chunk => ar_util:encode(Chunk),
 					offset => integer_to_binary(Offset),
@@ -237,7 +237,7 @@ test_disk_pool_rotation() ->
 	Wallet = ar_test_data_sync:setup_nodes(
 			#{ addr => Addr, storage_modules => StorageModules }),
 	Chunks = [crypto:strong_rand_bytes(?DATA_CHUNK_SIZE)],
-	{DataRoot, DataTree} = ar_merkle:generate_tree(
+	{DataRoot, DataTree} = big_merkle:generate_tree(
 		ar_tx:sized_chunks_to_sized_chunk_ids(
 			ar_tx:chunks_to_size_tagged_chunks(Chunks)
 		)
@@ -246,7 +246,7 @@ test_disk_pool_rotation() ->
 	ar_test_node:assert_post_tx_to_peer(main, TX),
 	Offset = ?DATA_CHUNK_SIZE,
 	DataSize = ?DATA_CHUNK_SIZE,
-	DataPath = ar_merkle:generate_path(DataRoot, Offset, DataTree),
+	DataPath = big_merkle:generate_path(DataRoot, Offset, DataTree),
 	Proof = #{ data_root => ar_util:encode(DataRoot),
 			data_path => ar_util:encode(DataPath),
 			chunk => ar_util:encode(hd(Chunks)),

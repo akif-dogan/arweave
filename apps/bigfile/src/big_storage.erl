@@ -677,7 +677,7 @@ write_tx_data(ExpectedDataRoot, Data, TXID) ->
 	Chunks = ar_tx:chunk_binary(?DATA_CHUNK_SIZE, Data),
 	SizeTaggedChunks = ar_tx:chunks_to_size_tagged_chunks(Chunks),
 	SizeTaggedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
-	case {ExpectedDataRoot, ar_merkle:generate_tree(SizeTaggedChunkIDs)} of
+	case {ExpectedDataRoot, big_merkle:generate_tree(SizeTaggedChunkIDs)} of
 		{no_expected_data_root, {DataRoot, DataTree}} ->
 			write_tx_data(DataRoot, DataTree, Data, SizeTaggedChunks, TXID);
 		{_, {ExpectedDataRoot, DataTree}} ->
@@ -699,7 +699,7 @@ write_tx_data(DataRoot, DataTree, Data, SizeTaggedChunks, TXID) ->
 				%% chunking implementation. There is no value in storing them.
 				Acc;
 			({Chunk, Offset}, Acc) ->
-				DataPath = ar_merkle:generate_path(DataRoot, Offset - 1, DataTree),
+				DataPath = big_merkle:generate_path(DataRoot, Offset - 1, DataTree),
 				TXSize = byte_size(Data),
 				case big_data_sync:add_chunk(DataRoot, DataPath, Chunk, Offset - 1, TXSize) of
 					ok ->

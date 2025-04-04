@@ -234,7 +234,7 @@ create_txs(Wallet) ->
 				SizedChunkIDs = ar_tx:sized_chunks_to_sized_chunk_ids(
 					ar_tx:chunks_to_size_tagged_chunks(Chunks)
 				),
-				{DataRoot, DataTree} = ar_merkle:generate_tree(SizedChunkIDs),
+				{DataRoot, DataTree} = big_merkle:generate_tree(SizedChunkIDs),
 				TX = ar_test_node:sign_tx(Wallet, #{ format => 2, data_root => DataRoot,
 						data_size => 10 * ?DATA_CHUNK_SIZE, last_tx => ar_test_node:get_tx_anchor(peer1),
 						reward => ?BIG(10000), denomination => 1 }),
@@ -298,7 +298,7 @@ upload_data(TXs, DataTrees) ->
 			UploadChunks = ChunkOffsets,
 			lists:foreach(
 				fun({Chunk, Offset}) ->
-					DataPath = ar_merkle:generate_path(DataRoot, Offset - 1, DataTree),
+					DataPath = big_merkle:generate_path(DataRoot, Offset - 1, DataTree),
 					{ok, {{<<"200">>, _}, _, _, _, _}} =
 						ar_test_node:post_chunk(peer1, encode_chunk(#{
 							data_root => DataRoot,
@@ -414,8 +414,8 @@ assert_does_not_accept_offsets(BadOffsets) ->
 								ar_test_node:get_chunk(peer1, Offset),
 							Proof = decode_chunk(EncodedProof),
 							DataPath = maps:get(data_path, Proof),
-							{ok, DataRoot} = ar_merkle:extract_root(DataPath),
-							RelativeOffset = ar_merkle:extract_note(DataPath),
+							{ok, DataRoot} = big_merkle:extract_root(DataPath),
+							RelativeOffset = big_merkle:extract_note(DataPath),
 							Proof2 = Proof#{
 								offset => RelativeOffset - 1,
 								data_root => DataRoot,
