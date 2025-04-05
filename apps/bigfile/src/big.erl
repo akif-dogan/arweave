@@ -918,7 +918,7 @@ tests(TestType, Args) ->
 	tests(TestType, Mods, #config{ debug = true }).
 
 e2e() ->
-	tests(e2e, [ar_sync_pack_mine_tests, ar_repack_mine_tests, ar_repack_in_place_mine_tests]).
+	tests(e2e, [big_sync_pack_mine_tests, big_repack_mine_tests, big_repack_in_place_mine_tests]).
 e2e(Mod) ->
 	tests(e2e, Mod).
 

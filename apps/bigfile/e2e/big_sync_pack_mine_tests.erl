@@ -1,4 +1,4 @@
--module(ar_sync_pack_mine_tests).
+-module(big_sync_pack_mine_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
