@@ -305,7 +305,7 @@ bigfile_doctor_help() {
 bigfile_developer_mode() {
 	(
 	    cd ${PARENT_DIR} \
-		&& ./ar-rebar3 ${BIGFILE_BUILD_TARGET:-default} release
+		&& ./big-rebar3 ${BIGFILE_BUILD_TARGET:-default} release
 	)
 }
 
@@ -376,7 +376,7 @@ bigfile_test_run() {
 	cd ${PARENT_DIR}
 
 	echo -e "\033[0;32m===> Compile ${TEST_PROFILE} profile\033[0m"
-	./ar-rebar3 "${TEST_PROFILE}" compile
+	./big-rebar3 "${TEST_PROFILE}" compile
 
 	# if a specific test is specified
 	if test "${1}"

@@ -60,7 +60,7 @@ jobs:
 
       - name: Get dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: ./ar-rebar3 test get-deps
+        run: ./big-rebar3 test get-deps
 
       - uses: actions/cache@v4
         if: steps.cache.outputs.cache-hit != 'true'
@@ -98,10 +98,10 @@ jobs:
           key: deps-cache-${{ hashFiles('rebar.lock') }}
 
       - name: Compile arweave release
-        run: ./ar-rebar3 default release
+        run: ./big-rebar3 default release
 
       - name: Build arweave test sources
-        run: ./ar-rebar3 test compile
+        run: ./big-rebar3 test compile
 
       # some artifacts are compiled and only available
       # in arweave directy (libraries)
