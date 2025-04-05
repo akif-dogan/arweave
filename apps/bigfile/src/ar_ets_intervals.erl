@@ -1,7 +1,7 @@
 %%% @doc The utilities for managing sets of non-overlapping intervals stored in an ETS table.
-%%% The API is similar to the one of the ar_intervals module. Keeping the intervals in ETS
+%%% The API is similar to the one of the big_intervals module. Keeping the intervals in ETS
 %%% is a convenient way to share them between processes, e.g. the mining module can quickly
-%%% check whether the given recall byte is synced. ar_intervals, in turn, is helpful
+%%% check whether the given recall byte is synced. big_intervals, in turn, is helpful
 %%% for manipulating multiple sets of intervals, e.g. the syncing process uses it to look for
 %%% the intersections between our data and peers' data.
 %%% @end

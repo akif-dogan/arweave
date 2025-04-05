@@ -820,22 +820,22 @@ handle_get_jobs_response(Reply) ->
 	{error, Reply}.
 
 handle_sync_record_response({ok, {{<<"200">>, _}, _, Body, _, _}}) ->
-	ar_intervals:safe_from_etf(Body);
+	big_intervals:safe_from_etf(Body);
 handle_sync_record_response(Reply) ->
 	{error, Reply}.
 
 handle_sync_record_response({ok, {{<<"200">>, _}, _, Body, _, _}}, Start, Limit) ->
-	case ar_intervals:safe_from_etf(Body) of
+	case big_intervals:safe_from_etf(Body) of
 		{ok, Intervals} ->
-			case ar_intervals:count(Intervals) > Limit of
+			case big_intervals:count(Intervals) > Limit of
 				true ->
 					{error, too_many_intervals};
 				false ->
-					case ar_intervals:is_empty(Intervals) of
+					case big_intervals:is_empty(Intervals) of
 						true ->
 							{ok, Intervals};
 						false ->
-							case element(1, ar_intervals:smallest(Intervals)) < Start of
+							case element(1, big_intervals:smallest(Intervals)) < Start of
 								true ->
 									{error, intervals_do_not_match_cursor};
 								false ->

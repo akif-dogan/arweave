@@ -298,11 +298,11 @@ init(StoreID) ->
 
 handle_call({get, ID}, _From, State) ->
 	#state{ sync_record_by_id = SyncRecordByID } = State,
-	{reply, maps:get(ID, SyncRecordByID, ar_intervals:new()), State};
+	{reply, maps:get(ID, SyncRecordByID, big_intervals:new()), State};
 
 handle_call({get, Packing, ID}, _From, State) ->
 	#state{ sync_record_by_id_type = SyncRecordByIDType } = State,
-	{reply, maps:get({ID, Packing}, SyncRecordByIDType, ar_intervals:new()), State};
+	{reply, maps:get({ID, Packing}, SyncRecordByIDType, big_intervals:new()), State};
 
 handle_call({add, End, Start, ID}, _From, State) ->
 	{Reply, State2} = add2(End, Start, ID, State),
@@ -319,8 +319,8 @@ handle_call({delete, End, Start, ID}, _From, State) ->
 handle_call({cut, Offset, ID}, _From, State) ->
 	#state{ sync_record_by_id = SyncRecordByID, sync_record_by_id_type = SyncRecordByIDType,
 			state_db = StateDB, store_id = StoreID } = State,
-	SyncRecord = maps:get(ID, SyncRecordByID, ar_intervals:new()),
-	SyncRecord2 = ar_intervals:cut(SyncRecord, Offset),
+	SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
+	SyncRecord2 = big_intervals:cut(SyncRecord, Offset),
 	SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 	TID = get_or_create_type_tid({ID, StoreID}),
 	ar_ets_intervals:cut(TID, Offset),
@@ -328,7 +328,7 @@ handle_call({cut, Offset, ID}, _From, State) ->
 		maps:map(
 			fun
 				({ID2, _}, ByType) when ID2 == ID ->
-					ar_intervals:cut(ByType, Offset);
+					big_intervals:cut(ByType, Offset);
 				(_, ByType) ->
 					ByType
 			end,
@@ -434,8 +434,8 @@ name(StoreID) ->
 add2(End, Start, ID, State) ->
 	#state{ sync_record_by_id = SyncRecordByID, state_db = StateDB,
 			store_id = StoreID } = State,
-	SyncRecord = maps:get(ID, SyncRecordByID, ar_intervals:new()),
-	SyncRecord2 = ar_intervals:add(SyncRecord, End, Start),
+	SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
+	SyncRecord2 = big_intervals:add(SyncRecord, End, Start),
 	SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 	TID = get_or_create_type_tid({ID, StoreID}),
 	ar_ets_intervals:add(TID, End, Start),
@@ -452,13 +452,13 @@ add2(End, Start, ID, State) ->
 add2(End, Start, Packing, ID, State) ->
 	#state{ sync_record_by_id = SyncRecordByID, sync_record_by_id_type = SyncRecordByIDType,
 			state_db = StateDB, store_id = StoreID } = State,
-	ByType = maps:get({ID, Packing}, SyncRecordByIDType, ar_intervals:new()),
-	ByType2 = ar_intervals:add(ByType, End, Start),
+	ByType = maps:get({ID, Packing}, SyncRecordByIDType, big_intervals:new()),
+	ByType2 = big_intervals:add(ByType, End, Start),
 	SyncRecordByIDType2 = maps:put({ID, Packing}, ByType2, SyncRecordByIDType),
 	TypeTID = get_or_create_type_tid({ID, Packing, StoreID}),
 	ar_ets_intervals:add(TypeTID, End, Start),
-	SyncRecord = maps:get(ID, SyncRecordByID, ar_intervals:new()),
-	SyncRecord2 = ar_intervals:add(SyncRecord, End, Start),
+	SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
+	SyncRecord2 = big_intervals:add(SyncRecord, End, Start),
 	SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 	TID = get_or_create_type_tid({ID, StoreID}),
 	ar_ets_intervals:add(TID, End, Start),
@@ -476,8 +476,8 @@ add2(End, Start, Packing, ID, State) ->
 delete2(End, Start, ID, State) ->
 	#state{ sync_record_by_id = SyncRecordByID, sync_record_by_id_type = SyncRecordByIDType,
 			state_db = StateDB, store_id = StoreID } = State,
-	SyncRecord = maps:get(ID, SyncRecordByID, ar_intervals:new()),
-	SyncRecord2 = ar_intervals:delete(SyncRecord, End, Start),
+	SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
+	SyncRecord2 = big_intervals:delete(SyncRecord, End, Start),
 	SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 	TID = get_or_create_type_tid({ID, StoreID}),
 	ar_ets_intervals:delete(TID, End, Start),
@@ -485,7 +485,7 @@ delete2(End, Start, ID, State) ->
 		maps:map(
 			fun
 				({ID2, _}, ByType) when ID2 == ID ->
-					ar_intervals:delete(ByType, End, Start);
+					big_intervals:delete(ByType, End, Start);
 				(_, ByType) ->
 					ByType
 			end,
@@ -592,34 +592,34 @@ replay_write_ahead_log(SyncRecordByID, SyncRecordByIDType, N, WAL, StateDB, Stor
 			case Op of
 				add ->
 					{End, Start, ID} = Params,
-					SyncRecord = maps:get(ID, SyncRecordByID, ar_intervals:new()),
-					SyncRecord2 = ar_intervals:add(SyncRecord, End, Start),
+					SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
+					SyncRecord2 = big_intervals:add(SyncRecord, End, Start),
 					emit_add_range(Start, End, ID, StoreID),
 					SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 					replay_write_ahead_log(
 						SyncRecordByID2, SyncRecordByIDType, N + 1, WAL, StateDB, StoreID);
 				{add, Packing} ->
 					{End, Start, ID} = Params,
-					SyncRecord = maps:get(ID, SyncRecordByID, ar_intervals:new()),
-					SyncRecord2 = ar_intervals:add(SyncRecord, End, Start),
+					SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
+					SyncRecord2 = big_intervals:add(SyncRecord, End, Start),
 					SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
-					ByType = maps:get({ID, Packing}, SyncRecordByIDType, ar_intervals:new()),
-					ByType2 = ar_intervals:add(ByType, End, Start),
+					ByType = maps:get({ID, Packing}, SyncRecordByIDType, big_intervals:new()),
+					ByType2 = big_intervals:add(ByType, End, Start),
 					emit_add_range(Start, End, ID, StoreID),
 					SyncRecordByIDType2 = maps:put({ID, Packing}, ByType2, SyncRecordByIDType),
 					replay_write_ahead_log(
 						SyncRecordByID2, SyncRecordByIDType2, N + 1, WAL, StateDB, StoreID);
 				delete ->
 					{End, Start, ID} = Params,
-					SyncRecord = maps:get(ID, SyncRecordByID, ar_intervals:new()),
-					SyncRecord2 = ar_intervals:delete(SyncRecord, End, Start),
+					SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
+					SyncRecord2 = big_intervals:delete(SyncRecord, End, Start),
 					emit_remove_range(Start, End, StoreID),
 					SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 					SyncRecordByIDType2 =
 						maps:map(
 							fun
 								({ID2, _}, ByType) when ID2 == ID ->
-									ar_intervals:delete(ByType, End, Start);
+									big_intervals:delete(ByType, End, Start);
 								(_, ByType) ->
 									ByType
 							end,
@@ -629,15 +629,15 @@ replay_write_ahead_log(SyncRecordByID, SyncRecordByIDType, N, WAL, StateDB, Stor
 						SyncRecordByID2, SyncRecordByIDType2, N + 1, WAL, StateDB, StoreID);
 				cut ->
 					{Offset, ID} = Params,
-					SyncRecord = maps:get(ID, SyncRecordByID, ar_intervals:new()),
-					SyncRecord2 = ar_intervals:cut(SyncRecord, Offset),
+					SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
+					SyncRecord2 = big_intervals:cut(SyncRecord, Offset),
 					emit_cut(Offset, StoreID),
 					SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 					SyncRecordByIDType2 =
 						maps:map(
 							fun
 								({ID2, _}, ByType) when ID2 == ID ->
-									ar_intervals:cut(ByType, Offset);
+										big_intervals:cut(ByType, Offset);
 								(_, ByType) ->
 									ByType
 							end,
@@ -715,7 +715,7 @@ store_state(State) ->
 						big_mining_stats:set_storage_module_data_size(
 							StoreID, Packing, PartitionNumber, StorageModuleSize,
 							StorageModuleIndex,
-							ar_intervals:sum(TypeRecord));
+							big_intervals:sum(TypeRecord));
 					(_, _) ->
 						ok
 				end,

@@ -14,15 +14,15 @@
 new() ->
 	{?DEFAULT_SYNC_BUCKET_SIZE, #{}}.
 
-%% @doc Initialize buckets from a set of intervals (see ar_intervals).
+%% @doc Initialize buckets from a set of intervals (see big_intervals).
 %% The bucket size is ?DEFAULT_SYNC_BUCKET_SIZE.
 from_intervals(Intervals) ->
 	from_intervals(Intervals, new()).
 
-%% @doc Add the data from a set of intervals (see ar_intervals) to the given buckets.
+%% @doc Add the data from a set of intervals (see big_intervals) to the given buckets.
 from_intervals(Intervals, SyncBuckets) ->
 	{Size, Map} = SyncBuckets,
-	{Size, ar_intervals:fold(
+	{Size, big_intervals:fold(
 		fun({End, Start}, Acc) ->
 			add(Start, End, Size, Acc)
 		end,

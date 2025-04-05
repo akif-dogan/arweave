@@ -384,14 +384,14 @@ has_any(Offset, [{BucketSize, Bucket, Packing} | StorageModules]) ->
 	end.
 
 get_unique_sorted_intervals(StorageModules) ->
-	get_unique_sorted_intervals(StorageModules, ar_intervals:new()).
+	get_unique_sorted_intervals(StorageModules, big_intervals:new()).
 
 get_unique_sorted_intervals([], Intervals) ->
-	[{Start, End} || {End, Start} <- ar_intervals:to_list(Intervals)];
+	[{Start, End} || {End, Start} <- big_intervals:to_list(Intervals)];
 get_unique_sorted_intervals([{BucketSize, Bucket, _Packing} | StorageModules], Intervals) ->
 	End = (Bucket + 1) * BucketSize,
 	Start = Bucket * BucketSize,
-	get_unique_sorted_intervals(StorageModules, ar_intervals:add(Intervals, End, Start)).
+	get_unique_sorted_intervals(StorageModules, big_intervals:add(Intervals, End, Start)).
 
 has_range(PartitionStart, PartitionEnd, _Intervals)
 		when PartitionStart >= PartitionEnd ->

@@ -67,7 +67,7 @@ init([]) ->
 	{SyncRecord, Height, CurrentBI} =
 		case big_storage:read_term(header_sync_state) of
 			not_found ->
-				{ar_intervals:new(), -1, []};
+				{big_intervals:new(), -1, []};
 			{ok, StoredState} ->
 				StoredState
 		end,
@@ -78,14 +78,14 @@ init([]) ->
 		lists:seq(1, Config#config.header_sync_jobs)
 	),
 	gen_server:cast(?MODULE, store_sync_state),
-	ets:insert(?MODULE, {synced_blocks, ar_intervals:sum(SyncRecord)}),
+	ets:insert(?MODULE, {synced_blocks, big_intervals:sum(SyncRecord)}),
 	{ok,
 		#state{
 			sync_record = SyncRecord,
 			height = Height,
 			block_index = CurrentBI,
 			retry_queue = queue:new(),
-			retry_record = ar_intervals:new(),
+			retry_record = big_intervals:new(),
 			is_disk_space_sufficient = true
 		}}.
 
@@ -111,8 +111,8 @@ handle_cast({join, Height, RecentBI, Blocks}, State) ->
 					erlang:halt();
 			{_, {IntersectionHeight, _}} ->
 				S = State2#state{
-						sync_record = ar_intervals:cut(SyncRecord, IntersectionHeight),
-						retry_record = ar_intervals:cut(RetryRecord, IntersectionHeight) },
+						sync_record = big_intervals:cut(SyncRecord, IntersectionHeight),
+						retry_record = big_intervals:cut(RetryRecord, IntersectionHeight) },
 				ok = store_sync_state(S),
 				%% Delete from the kv store only after the sync record is saved - no matter
 				%% what happens to the process, if a height is in the record, it must be
@@ -137,8 +137,8 @@ handle_cast({add_tip_block, #block{ height = Height } = B, RecentBI}, State) ->
 			block_index = CurrentBI, height = PrevHeight } = State,
 	BaseHeight = get_base_height(CurrentBI, PrevHeight, RecentBI),
 	State2 = State#state{
-		sync_record = ar_intervals:cut(SyncRecord, BaseHeight),
-		retry_record = ar_intervals:cut(RetryRecord, BaseHeight),
+		sync_record = big_intervals:cut(SyncRecord, BaseHeight),
+		retry_record = big_intervals:cut(RetryRecord, BaseHeight),
 		block_index = RecentBI,
 		height = Height
 	},
@@ -206,7 +206,7 @@ handle_cast(process_item, #state{ retry_queue = Queue, retry_record = RetryRecor
 						end,
 					{noreply, State2#state{
 							retry_queue = enqueue({block, {H, H2, TXRoot, Height}}, Queue2),
-							retry_record = ar_intervals:add(RetryRecord, Height, Height - 1) }}
+							retry_record = big_intervals:add(RetryRecord, Height, Height - 1) }}
 			end
 	end;
 
@@ -226,7 +226,7 @@ handle_cast({remove_block, Height}, State) ->
 	?LOG_INFO([{event, removing_block_record}, {height, Height}]),
 	#state{ sync_record = Record } = State,
 	ok = big_kv:delete(?MODULE, << Height:256 >>),
-	{noreply, State#state{ sync_record = ar_intervals:delete(Record, Height, Height - 1) }};
+	{noreply, State#state{ sync_record = big_intervals:delete(Record, Height, Height - 1) }};
 
 handle_cast(store_sync_state, State) ->
 	ar_util:cast_after(?STORE_HEADER_STATE_FREQUENCY_MS, ?MODULE, store_sync_state),
@@ -252,8 +252,8 @@ handle_info({event, tx, {preparing_unblacklisting, TXID}}, State) ->
 		{ok, {Height, _BH}} ->
 			?LOG_DEBUG([{event, mark_block_with_blacklisted_tx_for_resyncing},
 					{tx, ar_util:encode(TXID)}, {height, Height}]),
-			State2 = State#state{ sync_record = ar_intervals:delete(SyncRecord, Height,
-					Height - 1), retry_record = ar_intervals:delete(RetryRecord, Height,
+			State2 = State#state{ sync_record = big_intervals:delete(SyncRecord, Height,
+					Height - 1), retry_record = big_intervals:delete(RetryRecord, Height,
 					Height - 1) },
 			ok = store_sync_state(State2),
 			ok = big_kv:delete(?MODULE, << Height:256 >>),
@@ -344,7 +344,7 @@ terminate(Reason, _State) ->
 
 store_sync_state(State) ->
 	#state{ sync_record = SyncRecord, height = LastHeight, block_index = BI } = State,
-	SyncedCount = ar_intervals:sum(SyncRecord),
+	SyncedCount = big_intervals:sum(SyncRecord),
 	prometheus_gauge:set(synced_blocks, SyncedCount),
 	ets:insert(?MODULE, {synced_blocks, SyncedCount}),
 	big_storage:write_term(header_sync_state, {SyncRecord, LastHeight, BI}).
@@ -384,13 +384,13 @@ add_block2(B, #state{ sync_record = SyncRecord, retry_record = RetryRecord } = S
 	#block{ indep_hash = H, previous_block = PrevH, height = Height } = B,
 	case big_storage:write_full_block(B, B#block.txs) of
 		ok ->
-			case ar_intervals:is_inside(SyncRecord, Height) of
+			case big_intervals:is_inside(SyncRecord, Height) of
 				true ->
 					{ok, State};
 				false ->
 					ok = big_kv:put(?MODULE, << Height:256 >>, term_to_binary({H, PrevH})),
-					SyncRecord2 = ar_intervals:add(SyncRecord, Height, Height - 1),
-					RetryRecord2 = ar_intervals:delete(RetryRecord, Height, Height - 1),
+					SyncRecord2 = big_intervals:add(SyncRecord, Height, Height - 1),
+					RetryRecord2 = big_intervals:delete(RetryRecord, Height, Height - 1),
 					{ok, State#state{ sync_record = SyncRecord2, retry_record = RetryRecord2 }}
 			end;
 		{error, Reason} ->
@@ -403,12 +403,12 @@ add_block2(B, #state{ sync_record = SyncRecord, retry_record = RetryRecord } = S
 %% Return 'nothing_to_sync' if everything is either synced or in the retry queue.
 pick_unsynced_block(#state{ height = Height, sync_record = SyncRecord,
 		retry_record = RetryRecord }) ->
-	Union = ar_intervals:union(SyncRecord, RetryRecord),
-	case ar_intervals:is_empty(Union) of
+	Union = big_intervals:union(SyncRecord, RetryRecord),
+	case big_intervals:is_empty(Union) of
 		true ->
 			Height;
 		false ->
-			case ar_intervals:take_largest(Union) of
+			case big_intervals:take_largest(Union) of
 				{{End, _Start}, _Union2} when Height > End ->
 					Height;
 				{{_End, -1}, _Union2} ->

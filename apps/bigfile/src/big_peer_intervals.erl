@@ -33,7 +33,7 @@ fetch(Start, End, StoreID, AllPeersIntervals) ->
 
 			%% The updated AllPeersIntervals cache is returned so it can be added to the State
 			Parent = big_data_sync:name(StoreID),
-			case ar_intervals:is_empty(UnsyncedIntervals) of
+			case big_intervals:is_empty(UnsyncedIntervals) of
 				true ->
 					ok;
 				false ->
@@ -56,22 +56,22 @@ fetch(Start, End, StoreID, AllPeersIntervals) ->
 %% @doc Collect the unsynced intervals between Start and End excluding the blocklisted
 %% intervals.
 get_unsynced_intervals(Start, End, StoreID) ->
-	UnsyncedIntervals = get_unsynced_intervals(Start, End, ar_intervals:new(), StoreID),
+	UnsyncedIntervals = get_unsynced_intervals(Start, End, big_intervals:new(), StoreID),
 	BlacklistedIntervals = big_tx_blacklist:get_blacklisted_intervals(Start, End),
-	ar_intervals:outerjoin(BlacklistedIntervals, UnsyncedIntervals).
+	big_intervals:outerjoin(BlacklistedIntervals, UnsyncedIntervals).
 
 get_unsynced_intervals(Start, End, Intervals, _StoreID) when Start >= End ->
 	Intervals;
 get_unsynced_intervals(Start, End, Intervals, StoreID) ->
 	case big_sync_record:get_next_synced_interval(Start, End, big_data_sync, StoreID) of
 		not_found ->
-			ar_intervals:add(Intervals, End, Start);
+			big_intervals:add(Intervals, End, Start);
 		{End2, Start2} ->
 			case Start2 > Start of
 				true ->
 					End3 = min(Start2, End),
 					get_unsynced_intervals(End2, End,
-							ar_intervals:add(Intervals, End3, Start), StoreID);
+							big_intervals:add(Intervals, End3, Start), StoreID);
 				_ ->
 					get_unsynced_intervals(End2, End, Intervals, StoreID)
 			end
@@ -96,7 +96,7 @@ fetch_peer_intervals(Parent, Start, Peers, UnsyncedIntervals, AllPeersIntervals)
 	EnqueueIntervals =
 		lists:foldl(
 			fun	({Peer, SoughtIntervals, _, _}, Acc) ->
-					case ar_intervals:is_empty(SoughtIntervals) of
+					case big_intervals:is_empty(SoughtIntervals) of
 						true ->
 							Acc;
 						false ->
@@ -112,11 +112,11 @@ fetch_peer_intervals(Parent, Start, Peers, UnsyncedIntervals, AllPeersIntervals)
 
 	AllPeersIntervals2 = lists:foldl(
 		fun	({Peer, _, PeerIntervals, Left}, Acc) ->
-				case ar_intervals:is_empty(PeerIntervals) of
+				case big_intervals:is_empty(PeerIntervals) of
 					true ->
 						Acc;
 					false ->
-						Right = element(1, ar_intervals:largest(PeerIntervals)),
+						Right = element(1, big_intervals:largest(PeerIntervals)),
 						maps:put(Peer, {Right, Left, PeerIntervals}, Acc)
 				end;
 			(_, Acc) ->
@@ -135,15 +135,15 @@ fetch_peer_intervals(Parent, Start, Peers, UnsyncedIntervals, AllPeersIntervals)
 %%                intervals) that the peer advertises starting at offset Left.
 get_peer_intervals(Peer, Left, SoughtIntervals, AllPeersIntervals) ->
 	Limit = ?MAX_SHARED_SYNCED_INTERVALS_COUNT,
-	Right = element(1, ar_intervals:largest(SoughtIntervals)),
+	Right = element(1, big_intervals:largest(SoughtIntervals)),
 	case maps:get(Peer, AllPeersIntervals, not_found) of
 		{Right2, Left2, PeerIntervals} when Right2 >= Right, Left2 =< Left ->
-			{ok, ar_intervals:intersection(PeerIntervals, SoughtIntervals), PeerIntervals,
+			{ok, big_intervals:intersection(PeerIntervals, SoughtIntervals), PeerIntervals,
 					Left2};
 		_ ->
 			case big_http_iface_client:get_sync_record(Peer, Left + 1, Limit) of
 				{ok, PeerIntervals2} ->
-					{ok, ar_intervals:intersection(PeerIntervals2, SoughtIntervals),
+					{ok, big_intervals:intersection(PeerIntervals2, SoughtIntervals),
 							PeerIntervals2, Left};
 				Error ->
 					Error

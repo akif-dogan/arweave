@@ -230,7 +230,7 @@ do_prepare_entropy(State) ->
     SliceIndex = ar_replica_2_9:get_slice_index(BucketEndOffset),
 
     %% Make sure all prior entropy writes are complete.
-    ar_entropy_storage:is_ready(StoreID),
+    big_entropy_storage:is_ready(StoreID),
 
     CheckRangeEnd =
         case BucketEndOffset > PaddedRangeEnd of
@@ -279,7 +279,7 @@ do_prepare_entropy(State) ->
             waiting_for_repack ->
                 waiting_for_repack;
             false ->
-                ar_entropy_storage:is_entropy_recorded(BucketEndOffset, StoreID)
+                big_entropy_storage:is_entropy_recorded(BucketEndOffset, StoreID)
         end,
 
     %% get_entropy_partition will use bucket *start* offset to determine the partition.
@@ -320,7 +320,7 @@ do_prepare_entropy(State) ->
                         %% Wait for the previous store_entropy to complete. Should only
                         %% return 'false' if the entropy storage process is down (e.g. during
                         %% shutdown)
-                        ar_entropy_storage:store_entropy(
+                        big_entropy_storage:store_entropy(
                             StoreID, Entropies, BucketEndOffset, RangeStart,
                             IterationEnd, EntropyKeys, RewardAddr)
                 end

@@ -36,7 +36,7 @@
 	repack_cursor = 0,
 	target_packing,
 	repack_status = undefined,
-	entropy_context = none, %% some data we need pass to ar_entropy_storage
+	entropy_context = none, %% some data we need pass to big_entropy_storage
 	range_start,
 	range_end
 }).
@@ -512,7 +512,7 @@ handle_call({delete, PaddedEndOffset}, _From, State) ->
 	StartOffset = PaddedEndOffset - ?DATA_CHUNK_SIZE,
 	case big_sync_record:delete(PaddedEndOffset, StartOffset, big_chunk_storage, StoreID) of
 		ok ->
-			case ar_entropy_storage:delete_record(PaddedEndOffset, StoreID) of
+			case big_entropy_storage:delete_record(PaddedEndOffset, StoreID) of
 				ok ->
 					case delete_chunk(PaddedEndOffset, StoreID) of
 						ok ->
@@ -639,7 +639,7 @@ store_chunk(
 		PackingLabel, FileIndex, EntropyContext) ->
 	case ar_entropy_gen:is_entropy_packing(Packing) of
 		true ->
-			ar_entropy_storage:record_chunk(
+			big_entropy_storage:record_chunk(
 				PaddedEndOffset, Chunk, StoreID,
 				StoreIDLabel, PackingLabel, FileIndex, EntropyContext);
 		false ->
@@ -774,9 +774,9 @@ delete_chunk(PaddedOffset, StoreID) ->
 					Chunk ->
 						Chunk
 				end,
-			ar_entropy_storage:acquire_semaphore(Filepath),
+			big_entropy_storage:acquire_semaphore(Filepath),
 			Result = file:pwrite(F, Position, ZeroChunk),
-			ar_entropy_storage:release_semaphore(Filepath),
+			big_entropy_storage:release_semaphore(Filepath),
 			Result;
 		{error, enoent} ->
 			ok;

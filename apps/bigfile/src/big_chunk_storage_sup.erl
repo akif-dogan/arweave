@@ -25,5 +25,5 @@ init([]) ->
 
 	Workers = big_chunk_storage:register_workers() ++
 		ar_entropy_gen:register_workers(ar_entropy_gen) ++
-		ar_entropy_gen:register_workers(ar_entropy_storage),
+		ar_entropy_gen:register_workers(big_entropy_storage),
 	{ok, {{one_for_one, 5, 10}, Workers}}.

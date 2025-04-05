@@ -259,14 +259,14 @@ test_disk_pool_rotation() ->
 	timer:sleep(2000),
 	Options = #{ format => etf, random_subset => false },
 	{ok, Binary1} = big_global_sync_record:get_serialized_sync_record(Options),
-	{ok, Global1} = ar_intervals:safe_from_etf(Binary1),
+	{ok, Global1} = big_intervals:safe_from_etf(Binary1),
 	%% 3 genesis chunks plus the two we upload here.
-	?assertEqual([{1048576, 0}], ar_intervals:to_list(Global1)),
+	?assertEqual([{1048576, 0}], big_intervals:to_list(Global1)),
 	ar_test_node:mine(main),
 	assert_wait_until_height(main, 2),
 	{ok, Binary2} = big_global_sync_record:get_serialized_sync_record(Options),
-	{ok, Global2} = ar_intervals:safe_from_etf(Binary2),
-	?assertEqual([{1048576, 0}], ar_intervals:to_list(Global2)),
+	{ok, Global2} = big_intervals:safe_from_etf(Binary2),
+	?assertEqual([{1048576, 0}], big_intervals:to_list(Global2)),
 	ar_test_node:mine(main),
 	assert_wait_until_height(main, 3),
 	ar_test_node:mine(main),
@@ -276,8 +276,8 @@ test_disk_pool_rotation() ->
 	true = ar_util:do_until(
 		fun() ->
 			{ok, Binary3} = big_global_sync_record:get_serialized_sync_record(Options),
-			{ok, Global3} = ar_intervals:safe_from_etf(Binary3),
-			[{786432, 0}] == ar_intervals:to_list(Global3)
+			{ok, Global3} = big_intervals:safe_from_etf(Binary3),
+			[{786432, 0}] == big_intervals:to_list(Global3)
 		end,
 		200,
 		5000
@@ -291,7 +291,7 @@ enqueue_intervals_test() ->
 
 	test_enqueue_intervals(
 		[
-			{Peer1, ar_intervals:from_list([
+			{Peer1, big_intervals:from_list([
 					{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 					{9*?DATA_CHUNK_SIZE, 6*?DATA_CHUNK_SIZE}
 				])}
@@ -313,7 +313,7 @@ enqueue_intervals_test() ->
 
 	test_enqueue_intervals(
 		[
-			{Peer1, ar_intervals:from_list([
+			{Peer1, big_intervals:from_list([
 					{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 					{9*?DATA_CHUNK_SIZE, 6*?DATA_CHUNK_SIZE}
 				])}
@@ -331,15 +331,15 @@ enqueue_intervals_test() ->
 
 	test_enqueue_intervals(
 		[
-			{Peer1, ar_intervals:from_list([
+			{Peer1, big_intervals:from_list([
 				{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 				{9*?DATA_CHUNK_SIZE, 6*?DATA_CHUNK_SIZE}
 			])},
-			{Peer2, ar_intervals:from_list([
+			{Peer2, big_intervals:from_list([
 				{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 				{7*?DATA_CHUNK_SIZE, 5*?DATA_CHUNK_SIZE}
 			])},
-			{Peer3, ar_intervals:from_list([
+			{Peer3, big_intervals:from_list([
 				{8*?DATA_CHUNK_SIZE, 7*?DATA_CHUNK_SIZE}
 			])}
 		],
@@ -360,15 +360,15 @@ enqueue_intervals_test() ->
 
 	test_enqueue_intervals(
 		[
-			{Peer1, ar_intervals:from_list([
+			{Peer1, big_intervals:from_list([
 				{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 				{9*?DATA_CHUNK_SIZE, 6*?DATA_CHUNK_SIZE}
 			])},
-			{Peer2, ar_intervals:from_list([
+			{Peer2, big_intervals:from_list([
 				{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 				{7*?DATA_CHUNK_SIZE, 5*?DATA_CHUNK_SIZE}
 			])},
-			{Peer3, ar_intervals:from_list([
+			{Peer3, big_intervals:from_list([
 				{8*?DATA_CHUNK_SIZE, 7*?DATA_CHUNK_SIZE}
 			])}
 		],
@@ -389,7 +389,7 @@ enqueue_intervals_test() ->
 
 	test_enqueue_intervals(
 		[
-			{Peer1, ar_intervals:from_list([
+			{Peer1, big_intervals:from_list([
 					{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 					{9*?DATA_CHUNK_SIZE, 6*?DATA_CHUNK_SIZE}
 			])}
@@ -409,15 +409,15 @@ enqueue_intervals_test() ->
 
 	test_enqueue_intervals(
 		[
-			{Peer1, ar_intervals:from_list([
+			{Peer1, big_intervals:from_list([
 				{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 				{9*?DATA_CHUNK_SIZE, 6*?DATA_CHUNK_SIZE}
 			])},
-			{Peer2, ar_intervals:from_list([
+			{Peer2, big_intervals:from_list([
 				{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 				{7*?DATA_CHUNK_SIZE, 5*?DATA_CHUNK_SIZE}
 			])},
-			{Peer3, ar_intervals:from_list([
+			{Peer3, big_intervals:from_list([
 				{8*?DATA_CHUNK_SIZE, 7*?DATA_CHUNK_SIZE}
 			])}
 		],
@@ -437,7 +437,7 @@ enqueue_intervals_test() ->
 
 	test_enqueue_intervals(
 		[
-			{Peer1, ar_intervals:from_list([
+			{Peer1, big_intervals:from_list([
 				{trunc(3.25*?DATA_CHUNK_SIZE), 2*?DATA_CHUNK_SIZE},
 				{9*?DATA_CHUNK_SIZE, trunc(5.75*?DATA_CHUNK_SIZE)}
 			])}
@@ -458,15 +458,15 @@ enqueue_intervals_test() ->
 
 	test_enqueue_intervals(
 		[
-			{Peer1, ar_intervals:from_list([
+			{Peer1, big_intervals:from_list([
 				{trunc(3.25*?DATA_CHUNK_SIZE), 2*?DATA_CHUNK_SIZE},
 				{9*?DATA_CHUNK_SIZE, trunc(5.75*?DATA_CHUNK_SIZE)}
 			])},
-			{Peer2, ar_intervals:from_list([
+			{Peer2, big_intervals:from_list([
 				{4*?DATA_CHUNK_SIZE, 2*?DATA_CHUNK_SIZE},
 				{7*?DATA_CHUNK_SIZE, 6*?DATA_CHUNK_SIZE}
 			])},
-			{Peer3, ar_intervals:from_list([
+			{Peer3, big_intervals:from_list([
 				{8*?DATA_CHUNK_SIZE, 7*?DATA_CHUNK_SIZE}
 			])}
 		],
@@ -488,12 +488,12 @@ enqueue_intervals_test() ->
 		"Multiple peers, overlapping, full intervals, 2 chunks. Overlapping QIntervals.").
 
 test_enqueue_intervals(Intervals, ChunksPerPeer, QIntervalsRanges, ExpectedQIntervalRanges, ExpectedChunks, Label) ->
-	QIntervals = ar_intervals:from_list(QIntervalsRanges),
+	QIntervals = big_intervals:from_list(QIntervalsRanges),
 	Q = gb_sets:new(),
 	{QResult, QIntervalsResult} = big_data_sync:enqueue_intervals(Intervals, ChunksPerPeer, {Q, QIntervals}),
 	ExpectedQIntervals = lists:foldl(fun({End, Start}, Acc) ->
-			ar_intervals:add(Acc, End, Start)
+			big_intervals:add(Acc, End, Start)
 		end, QIntervals, ExpectedQIntervalRanges),
-	?assertEqual(ar_intervals:to_list(ExpectedQIntervals), ar_intervals:to_list(QIntervalsResult), Label),
+	?assertEqual(big_intervals:to_list(ExpectedQIntervals), big_intervals:to_list(QIntervalsResult), Label),
 	?assertEqual(ExpectedChunks, gb_sets:to_list(QResult), Label).
 

@@ -1,4 +1,4 @@
--module(ar_entropy_storage).
+-module(big_entropy_storage).
 
 -behaviour(gen_server).
 
@@ -471,7 +471,7 @@ shift_entropy_offset(Offset, SectorCount) ->
     big_chunk_storage:get_chunk_bucket_end(Offset + SectorSize * SectorCount).
 
 acquire_semaphore(Filepath) ->
-    case ets:insert_new(ar_entropy_storage, {{semaphore, Filepath}}) of
+    case ets:insert_new(big_entropy_storage, {{semaphore, Filepath}}) of
         false ->
             ?LOG_DEBUG([{event, details_store_chunk},
                         {section, waiting_on_semaphore},
@@ -483,7 +483,7 @@ acquire_semaphore(Filepath) ->
     end.
 
 release_semaphore(Filepath) ->
-    ets:delete(ar_entropy_storage, {semaphore, Filepath}).
+    ets:delete(big_entropy_storage, {semaphore, Filepath}).
 
 %%%===================================================================
 %%% Tests.

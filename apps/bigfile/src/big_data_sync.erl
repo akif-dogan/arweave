@@ -1549,7 +1549,7 @@ do_sync_intervals(State) ->
 		false ->
 			gen_server:cast(self(), sync_intervals),
 			{{Start, End, Peer}, Q2} = gb_sets:take_smallest(Q),
-			I2 = ar_intervals:delete(QIntervals, End, Start),
+			I2 = big_intervals:delete(QIntervals, End, Start),
 			gen_server:cast(big_data_sync_worker_master,
 					{sync_range, {Start, End, Peer, StoreID}}),
 			State#sync_data_state{ sync_intervals_queue = Q2,
@@ -2662,8 +2662,8 @@ enqueue_peer_intervals(Peer, Intervals, ChunksToEnqueue, {Q, QIntervals}) ->
 	%%    to pick because it is probabilistic.
 	%% 2) We ask many peers simultaneously about the same interval
 	%%    to make finding of the relatively rare intervals quicker.
-	OuterJoin = ar_intervals:outerjoin(QIntervals, Intervals),
-	{_, {Q2, QIntervals2}}  = ar_intervals:fold(
+	OuterJoin = big_intervals:outerjoin(QIntervals, Intervals),
+	{_, {Q2, QIntervals2}}  = big_intervals:fold(
 		fun	(_, {0, {QAcc, QIAcc}}) ->
 				{0, {QAcc, QIAcc}};
 			({End, Start}, {ChunksToEnqueue2, {QAcc, QIAcc}}) ->
@@ -2688,7 +2688,7 @@ enqueue_peer_range(Peer, RangeStart, RangeEnd, ChunkOffsets, {Q, QIntervals}) ->
 		Q,
 		ChunkOffsets
 	),
-	QIntervals2 = ar_intervals:add(QIntervals, RangeEnd, RangeStart),
+	QIntervals2 = big_intervals:add(QIntervals, RangeEnd, RangeStart),
 	{Q2, QIntervals2}.
 
 unpack_fetched_chunk(Cast, AbsoluteOffset, ChunkArgs, Args, State) ->

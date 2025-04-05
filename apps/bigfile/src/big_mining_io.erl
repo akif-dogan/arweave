@@ -315,7 +315,7 @@ get_packed_intervals(Start, End, MiningAddress, PackingDifficulty, "default", In
 			Intervals;
 		{Right, Left} ->
 			get_packed_intervals(Right, End, MiningAddress, PackingDifficulty, "default",
-					ar_intervals:add(Intervals, Right, Left))
+					big_intervals:add(Intervals, Right, Left))
 	end;
 get_packed_intervals(_Start, _End, _MiningAddr, _PackingDifficulty, _StoreID, _Intervals) ->
 	no_interval_check_implemented_for_non_default_store.
@@ -393,7 +393,7 @@ read_range(Mode, WhichChunk, Candidate, RangeStart, StoreID) ->
 			packing_difficulty = PackingDifficulty } = Candidate,
 	RecallRangeSize = big_block:get_recall_range_size(PackingDifficulty),
 	Intervals = get_packed_intervals(RangeStart, RangeStart + RecallRangeSize,
-			MiningAddress, PackingDifficulty, StoreID, ar_intervals:new()),
+			MiningAddress, PackingDifficulty, StoreID, big_intervals:new()),
 	ChunkOffsets = big_chunk_storage:get_range(RangeStart, RecallRangeSize, StoreID),
 	ChunkOffsets2 = filter_by_packing(ChunkOffsets, Intervals, StoreID),
 	log_read_range(Mode, Candidate, WhichChunk, length(ChunkOffsets), StartTime),
@@ -402,7 +402,7 @@ read_range(Mode, WhichChunk, Candidate, RangeStart, StoreID) ->
 filter_by_packing([], _Intervals, _StoreID) ->
 	[];
 filter_by_packing([{EndOffset, Chunk} | ChunkOffsets], Intervals, "default" = StoreID) ->
-	case ar_intervals:is_inside(Intervals, EndOffset) of
+	case big_intervals:is_inside(Intervals, EndOffset) of
 		false ->
 			filter_by_packing(ChunkOffsets, Intervals, StoreID);
 		true ->

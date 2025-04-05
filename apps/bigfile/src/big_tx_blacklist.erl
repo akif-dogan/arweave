@@ -104,7 +104,7 @@ get_next_not_blacklisted_byte(Offset) ->
 
 %% @doc Return the blacklisted intervals intersecting the given range.
 get_blacklisted_intervals(Start, End) ->
-	get_blacklisted_intervals(Start, End, ar_intervals:new()).
+	get_blacklisted_intervals(Start, End, big_intervals:new()).
 
 get_blacklisted_intervals(Start, End, Intervals) ->
 	case ets:next(big_tx_blacklist_offsets, Start) of
@@ -115,10 +115,10 @@ get_blacklisted_intervals(Start, End, Intervals) ->
 				[{Offset, Start2}] when Start2 >= End ->
 					Intervals;
 				[{Offset, Start2}] when Offset >= End ->
-					ar_intervals:add(Intervals, End, max(Start2, Start));
+					big_intervals:add(Intervals, End, max(Start2, Start));
 				[{Offset, Start2}] ->
 					get_blacklisted_intervals(Offset, End,
-							ar_intervals:add(Intervals, Offset, max(Start2, Start)));
+							big_intervals:add(Intervals, Offset, max(Start2, Start)));
 				[] ->
 					%% The key should have been just removed, unlucky timing.
 					get_blacklisted_intervals(Start, End, Intervals)

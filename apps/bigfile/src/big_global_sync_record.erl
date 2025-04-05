@@ -81,10 +81,10 @@ init([]) ->
 					Acc;
 				_ ->
 					StoreID = big_storage_module:id(Module),
-					ar_intervals:union(big_sync_record:get(big_data_sync, StoreID), Acc)
+					big_intervals:union(big_sync_record:get(big_data_sync, StoreID), Acc)
 			end
 		end,
-		ar_intervals:new(),
+		big_intervals:new(),
 		["default" | Config#config.storage_modules]
 	),
 	SyncBuckets = big_sync_buckets:from_intervals(SyncRecord),
@@ -100,7 +100,7 @@ handle_call({get_serialized_sync_record, Args}, _From, State) ->
 	#state{ sync_record = SyncRecord } = State,
 	Limit = min(maps:get(limit, Args, ?MAX_SHARED_SYNCED_INTERVALS_COUNT),
 			?MAX_SHARED_SYNCED_INTERVALS_COUNT),
-	{reply, {ok, ar_intervals:serialize(Args#{ limit => Limit }, SyncRecord)}, State};
+	{reply, {ok, big_intervals:serialize(Args#{ limit => Limit }, SyncRecord)}, State};
 
 handle_call(Request, _From, State) ->
 	?LOG_WARNING([{event, unhandled_call}, {module, ?MODULE}, {request, Request}]),
@@ -117,7 +117,7 @@ handle_cast(update_serialized_sync_buckets, State) ->
 
 handle_cast(record_v2_index_data_size_metric, State) ->
 	#state{ sync_record = SyncRecord } = State,
-	big_mining_stats:set_total_data_size(ar_intervals:sum(SyncRecord)),
+	big_mining_stats:set_total_data_size(big_intervals:sum(SyncRecord)),
 	ar_util:cast_after(?UPDATE_SIZE_METRIC_FREQUENCY_MS, ?MODULE,
 			record_v2_index_data_size_metric),
 	{noreply, State};
@@ -135,20 +135,20 @@ handle_info({event, sync_record, {add_range, Start, End, big_data_sync, StoreID}
 			{noreply, State};
 		_ ->
 			#state{ sync_record = SyncRecord, sync_buckets = SyncBuckets } = State,
-			SyncRecord2 = ar_intervals:add(SyncRecord, End, Start),
+			SyncRecord2 = big_intervals:add(SyncRecord, End, Start),
 			SyncBuckets2 = big_sync_buckets:add(End, Start, SyncBuckets),
 			{noreply, State#state{ sync_record = SyncRecord2, sync_buckets = SyncBuckets2 }}
 	end;
 
 handle_info({event, sync_record, {global_cut, Offset}}, State) ->
 	#state{ sync_record = SyncRecord, sync_buckets = SyncBuckets } = State,
-	SyncRecord2 = ar_intervals:cut(SyncRecord, Offset),
+	SyncRecord2 = big_intervals:cut(SyncRecord, Offset),
 	SyncBuckets2 = big_sync_buckets:cut(Offset, SyncBuckets),
 	{noreply, State#state{ sync_record = SyncRecord2, sync_buckets = SyncBuckets2 }};
 
 handle_info({event, sync_record, {global_remove_range, Start, End}}, State) ->
 	#state{ sync_record = SyncRecord, sync_buckets = SyncBuckets } = State,
-	SyncRecord2 = ar_intervals:delete(SyncRecord, End, Start),
+	SyncRecord2 = big_intervals:delete(SyncRecord, End, Start),
 	SyncBuckets2 = big_sync_buckets:delete(End, Start, SyncBuckets),
 	{noreply, State#state{ sync_record = SyncRecord2, sync_buckets = SyncBuckets2 }};
 
