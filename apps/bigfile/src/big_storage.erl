@@ -873,16 +873,16 @@ write_wallet_list(Height, Tree) ->
 
 %% @doc Read a given wallet list (by hash) from the disk.
 read_wallet_list(<<>>) ->
-	{ok, ar_patricia_tree:new()};
+	{ok, big_patricia_tree:new()};
 read_wallet_list(WalletListHash) when is_binary(WalletListHash) ->
 	Key = WalletListHash,
-	read_wallet_list(get_account_tree_value(Key, <<>>), ar_patricia_tree:new(), [],
+	read_wallet_list(get_account_tree_value(Key, <<>>), big_patricia_tree:new(), [],
 			WalletListHash, WalletListHash).
 
 read_wallet_list({ok, << K:48/binary, _/binary >>, Bin}, Tree, Keys, RootHash, K) ->
 	case binary_to_term(Bin) of
 		{Key, Value} ->
-			Tree2 = ar_patricia_tree:insert(Key, Value, Tree),
+			Tree2 = big_patricia_tree:insert(Key, Value, Tree),
 			case Keys of
 				[] ->
 					{ok, Tree2};
@@ -919,7 +919,7 @@ read_wallet_list_from_chunk_files(WalletListHash) when is_binary(WalletListHash)
 			Error
 	end;
 read_wallet_list_from_chunk_files(WL) when is_list(WL) ->
-	{ok, ar_patricia_tree:from_proplist([{get_wallet_key(T), get_wallet_value(T)}
+	{ok, big_patricia_tree:from_proplist([{get_wallet_key(T), get_wallet_value(T)}
 			|| T <- WL])}.
 
 get_wallet_key(T) ->
@@ -931,7 +931,7 @@ get_wallet_value({_, Balance, LastTX, Denomination, MiningPermission}) ->
 	{Balance, LastTX, Denomination, MiningPermission}.
 
 read_wallet_list_chunk(RootHash) ->
-	read_wallet_list_chunk(RootHash, 0, ar_patricia_tree:new()).
+	read_wallet_list_chunk(RootHash, 0, big_patricia_tree:new()).
 
 read_wallet_list_chunk(RootHash, Position, Tree) ->
 	{ok, Config} = application:get_env(bigfile, config),
@@ -958,7 +958,7 @@ read_wallet_list_chunk(RootHash, Position, Tree) ->
 				end,
 			Tree2 =
 				lists:foldl(
-					fun({K, V}, Acc) -> ar_patricia_tree:insert(K, V, Acc) end,
+					fun({K, V}, Acc) -> big_patricia_tree:insert(K, V, Acc) end,
 					Tree,
 					Wallets
 				),
@@ -1364,13 +1364,13 @@ test_store_and_retrieve_wallet_list() ->
 	Addr = big_wallet:to_address(TX#tx.owner, {?RSA_SIGN_ALG, 65537}),
 	write_block(B0),
 	TXID = TX#tx.id,
-	ExpectedWL = ar_patricia_tree:from_proplist([{Addr, {0, TXID}}]),
+	ExpectedWL = big_patricia_tree:from_proplist([{Addr, {0, TXID}}]),
 	WalletListHash = write_wallet_list(0, ExpectedWL),
 	{ok, ActualWL} = read_wallet_list(WalletListHash),
 	assert_wallet_trees_equal(ExpectedWL, ActualWL),
 	Addr2 = binary:part(Addr, 0, 16),
 	TXID2 = crypto:strong_rand_bytes(32),
-	ExpectedWL2 = ar_patricia_tree:from_proplist([{Addr, {0, TXID}}, {Addr2, {0, TXID2}}]),
+	ExpectedWL2 = big_patricia_tree:from_proplist([{Addr, {0, TXID}}, {Addr2, {0, TXID2}}]),
 	WalletListHash2 = write_wallet_list(0, ExpectedWL2),
 	{ok, ActualWL2} = read_wallet_list(WalletListHash2),
 	?assertEqual({0, TXID}, read_account(Addr, WalletListHash2)),
@@ -1380,8 +1380,8 @@ test_store_and_retrieve_wallet_list() ->
 	Addr3 = << (binary:part(Addr, 0, 3))/binary, (crypto:strong_rand_bytes(29))/binary >>,
 	TXID3 = crypto:strong_rand_bytes(32),
 	TXID4 = crypto:strong_rand_bytes(32),
-	ActualWL4 = ar_patricia_tree:insert(Addr3, {100, TXID3},
-			ar_patricia_tree:insert(Addr2, {0, TXID4}, ActualWL3)),
+	ActualWL4 = big_patricia_tree:insert(Addr3, {100, TXID3},
+			big_patricia_tree:insert(Addr2, {0, TXID4}, ActualWL3)),
 	{WalletListHash3, ActualWL5, UpdateMap2} = big_block:hash_wallet_list(ActualWL4),
 	store_account_tree_update(1, WalletListHash3, UpdateMap2),
 	?assertEqual({100, TXID3}, read_account(Addr3, WalletListHash3)),
@@ -1439,14 +1439,14 @@ store_and_retrieve_wallet_list(Keys) ->
 	MinBinary = <<>>,
 	MaxBinary = << <<1:1>> || _ <- lists:seq(1, 512) >>,
 	big_kv:delete_range(account_tree_db, MinBinary, MaxBinary),
-	store_and_retrieve_wallet_list(Keys, ar_patricia_tree:new(), maps:new(), false).
+	store_and_retrieve_wallet_list(Keys, big_patricia_tree:new(), maps:new(), false).
 
 store_and_retrieve_wallet_list([], Tree, InsertedKeys, IsUpdate) ->
 	store_and_retrieve_wallet_list2(Tree, InsertedKeys, IsUpdate);
 store_and_retrieve_wallet_list([Key | Keys], Tree, InsertedKeys, IsUpdate) ->
 	TXID = crypto:strong_rand_bytes(32),
 	Balance = rand:uniform(1000000000),
-	Tree2 = ar_patricia_tree:insert(Key, {Balance, TXID}, Tree),
+	Tree2 = big_patricia_tree:insert(Key, {Balance, TXID}, Tree),
 	InsertedKeys2 = maps:put(Key, {Balance, TXID}, InsertedKeys),
 	case rand:uniform(2) of
 		1 ->
@@ -1483,8 +1483,8 @@ permutations(L)  -> [[H|T] || H <- L, T <- permutations(L--[H])].
 
 assert_wallet_trees_equal(Expected, Actual) ->
 	?assertEqual(
-		ar_patricia_tree:foldr(fun(K, V, Acc) -> [{K, V} | Acc] end, [], Expected),
-		ar_patricia_tree:foldr(fun(K, V, Acc) -> [{K, V} | Acc] end, [], Actual)
+		big_patricia_tree:foldr(fun(K, V, Acc) -> [{K, V} | Acc] end, [], Expected),
+		big_patricia_tree:foldr(fun(K, V, Acc) -> [{K, V} | Acc] end, [], Actual)
 	).
 
 read_wallet_list_chunks_test() ->
@@ -1497,7 +1497,7 @@ read_wallet_list_chunks_test() ->
 	],
 	lists:foreach(
 		fun(TestCase) ->
-			Tree = ar_patricia_tree:from_proplist(TestCase),
+			Tree = big_patricia_tree:from_proplist(TestCase),
 			RootHash = write_wallet_list(0, Tree),
 			{ok, ReadTree} = read_wallet_list(RootHash),
 			assert_wallet_trees_equal(Tree, ReadTree)

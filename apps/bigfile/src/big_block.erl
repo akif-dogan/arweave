@@ -673,7 +673,7 @@ encode_bin(N, S) -> big_serialize:encode_bin(N, S).
 encode_bin_list(L, LS, ES) -> big_serialize:encode_bin_list(L, LS, ES).
 
 hash_wallet_list(WalletList) ->
-	ar_patricia_tree:compute_hash(WalletList,
+	big_patricia_tree:compute_hash(WalletList,
 		fun	(Addr, {Balance, LastTX}) ->
 				EncodedBalance = binary:encode_unsigned(Balance),
 				big_deep_hash:hash([Addr, EncodedBalance, LastTX]);
@@ -895,21 +895,21 @@ test_wallet_list_performance2(Length, Algo, Denominations) ->
 					fun({A, B, LastTX}, Acc) ->
 						case Denominations of
 							old ->
-								ar_patricia_tree:insert(A, {B, LastTX}, Acc);
+								big_patricia_tree:insert(A, {B, LastTX}, Acc);
 							new ->
-								ar_patricia_tree:insert(A, {B, LastTX,
+								big_patricia_tree:insert(A, {B, LastTX,
 										1 + rand:uniform(10), true}, Acc);
 							mixed ->
 								case rand:uniform(2) == 1 of
 									true ->
-										ar_patricia_tree:insert(A, {B, LastTX}, Acc);
+										big_patricia_tree:insert(A, {B, LastTX}, Acc);
 									false ->
-										ar_patricia_tree:insert(A, {B, LastTX,
+										big_patricia_tree:insert(A, {B, LastTX,
 												1 + rand:uniform(10), true}, Acc)
 								end
 						end
 					end,
-					ar_patricia_tree:new(),
+					big_patricia_tree:new(),
 					WL
 				)
 			end
@@ -967,14 +967,14 @@ test_wallet_list_performance2(Length, Algo, Denominations) ->
 				end
 		end,
 	{Time3, {_, T2, _}} =
-		timer:tc(fun() -> ar_patricia_tree:compute_hash(T1, ComputeHashFun) end),
+		timer:tc(fun() -> big_patricia_tree:compute_hash(T1, ComputeHashFun) end),
 	io:format("root hash from scratch          | ~f seconds~n", [Time3 / 1000000]),
 	{Time4, T3} =
 		timer:tc(
 			fun() ->
 				lists:foldl(
 					fun({A, B, LastTX}, Acc) ->
-						ar_patricia_tree:insert(A, {B, LastTX}, Acc)
+						big_patricia_tree:insert(A, {B, LastTX}, Acc)
 					end,
 					T2,
 					[random_wallet() || _ <- lists:seq(1, 2000)]
@@ -983,18 +983,18 @@ test_wallet_list_performance2(Length, Algo, Denominations) ->
 		),
 	io:format("2000 inserts                    | ~f seconds~n", [Time4 / 1000000]),
 	{Time5, _} =
-		timer:tc(fun() -> ar_patricia_tree:compute_hash(T3, ComputeHashFun) end),
+		timer:tc(fun() -> big_patricia_tree:compute_hash(T3, ComputeHashFun) end),
 	io:format("recompute hash after 2k inserts | ~f seconds~n", [Time5 / 1000000]),
 	{Time6, T4} =
 		timer:tc(
 			fun() ->
 				{A, B, LastTX} = random_wallet(),
-				ar_patricia_tree:insert(A, {B, LastTX}, T2)
+				big_patricia_tree:insert(A, {B, LastTX}, T2)
 			end
 		),
 	io:format("1 insert                        | ~f seconds~n", [Time6 / 1000000]),
 	{Time7, _} =
-		timer:tc(fun() -> ar_patricia_tree:compute_hash(T4, ComputeHashFun) end),
+		timer:tc(fun() -> big_patricia_tree:compute_hash(T4, ComputeHashFun) end),
 	io:format("recompute hash after 1 insert   | ~f seconds~n", [Time7 / 1000000]).
 
 random_wallet() ->

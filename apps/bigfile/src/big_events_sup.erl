@@ -3,7 +3,7 @@
 %% with this file, You can obtain one at
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
--module(ar_events_sup).
+-module(big_events_sup).
 
 -behaviour(supervisor).
 

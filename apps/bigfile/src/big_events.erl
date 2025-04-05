@@ -198,7 +198,7 @@ code_change(_OldVsn, State, _Extra) ->
 subscribe_send_cancel_test() ->
 	%% Check whether all the "event"-processes are alive.
 	%% This list should be aligned with the total number
-	%% of running gen_server's by ar_events_sup.
+	%% of running gen_server's by big_events_sup.
 	Processes = [tx, block, testing],
 	true = lists:all(fun(P) -> whereis(big_events:event_to_process(P)) /= undefined end, Processes),
 	EventNetworkStateOnStart = sys:get_state(big_events:event_to_process(testing)),

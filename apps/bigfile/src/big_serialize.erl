@@ -1690,7 +1690,7 @@ etf_to_wallet_chunk_response_unsafe(ETF) ->
 %% appears in the list for the first time, it is placed on the first position. Except for that,
 %% wallets are sorted in the alphabetical order.
 wallet_list_to_json_struct(RewardAddr, IsRewardAddrNew, WL) ->
-	List = ar_patricia_tree:foldr(
+	List = big_patricia_tree:foldr(
 		fun(Addr, Value, Acc) ->
 			case Addr == RewardAddr andalso IsRewardAddrNew of
 				true ->
@@ -1702,7 +1702,7 @@ wallet_list_to_json_struct(RewardAddr, IsRewardAddrNew, WL) ->
 		[],
 		WL
 	),
-	case {ar_patricia_tree:get(RewardAddr, WL), IsRewardAddrNew} of
+	case {big_patricia_tree:get(RewardAddr, WL), IsRewardAddrNew} of
 		{not_found, _} ->
 			List;
 		{_, false} ->
@@ -1727,9 +1727,9 @@ json_struct_to_wallet_list(WalletsStruct) ->
 	lists:foldl(
 		fun(WalletStruct, Acc) ->
 			{Address, Value} = json_struct_to_wallet(WalletStruct),
-			ar_patricia_tree:insert(Address, Value, Acc)
+			big_patricia_tree:insert(Address, Value, Acc)
 		end,
-		ar_patricia_tree:new(),
+		big_patricia_tree:new(),
 		WalletsStruct
 	).
 

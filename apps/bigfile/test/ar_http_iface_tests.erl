@@ -980,7 +980,7 @@ test_get_recent_hash_list_diff({_B0, Wallet1, _Wallet2, _StaticWallet}) ->
 test_get_total_supply(_Args) ->
 	BlockDenomination = (big_node:get_current_block())#block.denomination,
 	TotalSupply =
-		ar_patricia_tree:foldr(
+		big_patricia_tree:foldr(
 			fun	(_, {B, _}, Acc) ->
 					Acc + big_pricing:redenominate(B, 1, BlockDenomination);
 				(_, {B, _, Denomination, _}, Acc) ->

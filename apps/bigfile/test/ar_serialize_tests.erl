@@ -222,8 +222,8 @@ test_wallet_list_roundtrip() ->
 	WL = B#block.account_tree,
 	JSONWL = big_serialize:jsonify(
 		big_serialize:wallet_list_to_json_struct(B#block.reward_addr, false, WL)),
-	ExpectedWL = ar_patricia_tree:foldr(fun(K, V, Acc) -> [{K, V} | Acc] end, [], WL),
-	ActualWL = ar_patricia_tree:foldr(
+	ExpectedWL = big_patricia_tree:foldr(fun(K, V, Acc) -> [{K, V} | Acc] end, [], WL),
+	ActualWL = big_patricia_tree:foldr(
 		fun(K, V, Acc) -> [{K, V} | Acc] end, [], big_serialize:json_struct_to_wallet_list(JSONWL)
 	),
 	?assertEqual(ExpectedWL, ActualWL).

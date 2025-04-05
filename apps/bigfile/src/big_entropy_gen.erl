@@ -1,4 +1,4 @@
--module(ar_entropy_gen).
+-module(big_entropy_gen).
 
 -behaviour(gen_server).
 
@@ -132,7 +132,7 @@ init({StoreID, Packing}) ->
     PrepareStatus = 
         case initialize_context(StoreID, Packing) of
             {_IsPrepared, none} ->
-                %% ar_entropy_gen is only used for replica_2_9 packing
+                %% big_entropy_gen is only used for replica_2_9 packing
                 ?LOG_ERROR([{event, invalid_packing_for_entropy}, {module, ?MODULE},
                     {store_id, StoreID},
                     {packing, big_serialize:encode_packing(Packing, true)}]),

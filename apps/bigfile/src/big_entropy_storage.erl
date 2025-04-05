@@ -148,7 +148,7 @@ delete_record(PaddedEndOffset, StoreID) ->
     big_sync_record:delete(BucketStart + ?DATA_CHUNK_SIZE, BucketStart, ID, StoreID).
 
 generate_missing_entropy(PaddedEndOffset, RewardAddr) ->
-    Entropies = ar_entropy_gen:generate_entropies(RewardAddr, PaddedEndOffset),
+    Entropies = big_entropy_gen:generate_entropies(RewardAddr, PaddedEndOffset),
     case Entropies of
         {error, Reason} ->
             {error, Reason};

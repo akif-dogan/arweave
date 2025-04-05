@@ -79,14 +79,14 @@ get_size() ->
 init([{blocks, []} | _]) ->
 	%% Trap exit to avoid corrupting any open files on quit.
 	process_flag(trap_exit, true),
-	DAG = big_diff_dag:new(<<>>, ar_patricia_tree:new(), not_set),
+	DAG = big_diff_dag:new(<<>>, big_patricia_tree:new(), not_set),
 	big_node_worker ! wallets_ready,
 	{ok, DAG};
 init([{blocks, Blocks} | Args]) ->
 	%% Trap exit to avoid corrupting any open files on quit.
 	process_flag(trap_exit, true),
 	gen_server:cast(?MODULE, {init, Blocks, Args}),
-	DAG = big_diff_dag:new(<<>>, ar_patricia_tree:new(), not_set),
+	DAG = big_diff_dag:new(<<>>, big_patricia_tree:new(), not_set),
 	{ok, DAG}.
 
 handle_call({get, Addresses}, _From, DAG) ->
@@ -110,10 +110,10 @@ handle_call({get_chunk, RootHash, Cursor}, _From, DAG) ->
 	end;
 
 handle_call(get_size, _From, DAG) ->
-	{reply, ar_patricia_tree:size(big_diff_dag:get_sink(DAG)), DAG};
+	{reply, big_patricia_tree:size(big_diff_dag:get_sink(DAG)), DAG};
 
 handle_call({get_balance, Address}, _From, DAG) ->
-	case ar_patricia_tree:get(Address, big_diff_dag:get_sink(DAG)) of
+	case big_patricia_tree:get(Address, big_diff_dag:get_sink(DAG)) of
 		not_found ->
 			{reply, 0, DAG};
 		Entry ->
@@ -132,7 +132,7 @@ handle_call({get_balance, RootHash, Address}, _From, DAG) ->
 		{error, _} = Error ->
 			{reply, Error, DAG};
 		Tree ->
-			case ar_patricia_tree:get(Address, Tree) of
+			case big_patricia_tree:get(Address, Tree) of
 				not_found ->
 					{reply, 0, DAG};
 				Entry ->
@@ -149,7 +149,7 @@ handle_call({get_balance, RootHash, Address}, _From, DAG) ->
 
 handle_call({get_last_tx, Address}, _From, DAG) ->
 	{reply,
-		case ar_patricia_tree:get(Address, big_diff_dag:get_sink(DAG)) of
+		case big_patricia_tree:get(Address, big_diff_dag:get_sink(DAG)) of
 			not_found ->
 				<<>>;
 			{_Balance, LastTX} ->
@@ -264,7 +264,7 @@ get_tree_from_peers(B, Peers) ->
 			{ok, Tree} = load_wallet_tree_from_peers(
 				ID,
 				Peers,
-				ar_patricia_tree:from_proplist(Chunk),
+				big_patricia_tree:from_proplist(Chunk),
 				Cursor,
 				2
 			),
@@ -285,7 +285,7 @@ load_wallet_tree_from_peers(ID, Peers, Acc, Cursor, N) ->
 		{ok, {NextCursor, Chunk}} ->
 			Acc3 =
 				lists:foldl(
-					fun({K, V}, Acc2) -> ar_patricia_tree:insert(K, V, Acc2)
+					fun({K, V}, Acc2) -> big_patricia_tree:insert(K, V, Acc2)
 					end,
 					Acc,
 					Chunk
@@ -380,17 +380,17 @@ set_current(DAG, RootHash, Height, PruneDepth) ->
 	),
 	Tree = big_diff_dag:get_sink(UpdatedDAG),
 	true = Height >= ar_fork:height_2_2(),
-	prometheus_gauge:set(wallet_list_size, ar_patricia_tree:size(Tree)),
+	prometheus_gauge:set(wallet_list_size, big_patricia_tree:size(Tree)),
 	big_diff_dag:filter(UpdatedDAG, PruneDepth).
 
 apply_diff(Diff, Tree) ->
 	maps:fold(
 		fun (Addr, remove, Acc) ->
-				ar_patricia_tree:delete(Addr, Acc);
+				big_patricia_tree:delete(Addr, Acc);
 			(Addr, {Balance, LastTX}, Acc) ->
-				ar_patricia_tree:insert(Addr, {Balance, LastTX}, Acc);
+				big_patricia_tree:insert(Addr, {Balance, LastTX}, Acc);
 			(Addr, {Balance, LastTX, Denomination, MiningPermission}, Acc) ->
-				ar_patricia_tree:insert(Addr,
+				big_patricia_tree:insert(Addr,
 						{Balance, LastTX, Denomination, MiningPermission}, Acc)
 		end,
 		Tree,
@@ -400,7 +400,7 @@ apply_diff(Diff, Tree) ->
 reverse_diff(Diff, Tree) ->
 	maps:map(
 		fun(Addr, _Value) ->
-			case ar_patricia_tree:get(Addr, Tree) of
+			case big_patricia_tree:get(Addr, Tree) of
 				not_found ->
 					remove;
 				Value ->
@@ -413,7 +413,7 @@ reverse_diff(Diff, Tree) ->
 get_map(Tree, Addresses) ->
 	lists:foldl(
 		fun(Addr, Acc) ->
-			case ar_patricia_tree:get(Addr, Tree) of
+			case big_patricia_tree:get(Addr, Tree) of
 				not_found ->
 					Acc;
 				Value ->
@@ -428,9 +428,9 @@ get_account_tree_range(Tree, Cursor) ->
 	Range =
 		case Cursor of
 			first ->
-				ar_patricia_tree:get_range(?WALLET_LIST_CHUNK_SIZE + 1, Tree);
+				big_patricia_tree:get_range(?WALLET_LIST_CHUNK_SIZE + 1, Tree);
 			_ ->
-				ar_patricia_tree:get_range(Cursor, ?WALLET_LIST_CHUNK_SIZE + 1, Tree)
+				big_patricia_tree:get_range(Cursor, ?WALLET_LIST_CHUNK_SIZE + 1, Tree)
 		end,
 	case length(Range) of
 		?WALLET_LIST_CHUNK_SIZE + 1 ->

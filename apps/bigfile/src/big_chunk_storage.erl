@@ -406,7 +406,7 @@ init({StoreID, RepackInPlacePacking}) ->
 			}
 	end,
 
-	EntropyContext = ar_entropy_gen:initialize_context(StoreID, State2#state.target_packing),
+	EntropyContext = big_entropy_gen:initialize_context(StoreID, State2#state.target_packing),
 	State3 = State2#state{ entropy_context = EntropyContext },
 
 	{ok, State3}.
@@ -431,7 +431,7 @@ handle_cast(store_repack_cursor,
 		#state{ repack_cursor = Cursor, store_id = StoreID,
 				target_packing = TargetPacking } = State) ->
 	ar_repack:store_cursor(Cursor, StoreID, TargetPacking),
-	ar_entropy_gen:set_repack_cursor(StoreID, Cursor),
+	big_entropy_gen:set_repack_cursor(StoreID, Cursor),
 	{noreply, State};
 
 handle_cast({repack, Packing},
@@ -637,7 +637,7 @@ store_chunk(PaddedEndOffset, Chunk, Packing, StoreID, FileIndex, EntropyContext)
 store_chunk(
 		PaddedEndOffset, Chunk, Packing, StoreID, StoreIDLabel,
 		PackingLabel, FileIndex, EntropyContext) ->
-	case ar_entropy_gen:is_entropy_packing(Packing) of
+	case big_entropy_gen:is_entropy_packing(Packing) of
 		true ->
 			big_entropy_storage:record_chunk(
 				PaddedEndOffset, Chunk, StoreID,

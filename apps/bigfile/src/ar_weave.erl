@@ -38,7 +38,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 	TX = create_genesis_tx(Key, GenesisDataSize),
 	WalletList2 = WalletList ++ [{big_wallet:to_address(Key), 0, TX#tx.id}],
 	TXs = [TX],
-	AccountTree = ar_patricia_tree:from_proplist([{A, {B, LTX}}
+	AccountTree = big_patricia_tree:from_proplist([{A, {B, LTX}}
 			|| {A, B, LTX} <- WalletList2]),
 	WLH = element(1, big_block:hash_wallet_list(AccountTree)),
 	SizeTaggedTXs = big_block:generate_size_tagged_list_from_txs(TXs, 0),
