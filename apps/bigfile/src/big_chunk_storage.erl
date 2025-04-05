@@ -382,7 +382,7 @@ init({StoreID, RepackInPlacePacking}) ->
 	
 	State2 = case RepackInPlacePacking of
 		none ->
-			ar_device_lock:set_device_lock_metric(StoreID, repack, off),
+			big_device_lock:set_device_lock_metric(StoreID, repack, off),
 			State#state{
 				repack_cursor = none,
 				repack_status = off,
@@ -398,7 +398,7 @@ init({StoreID, RepackInPlacePacking}) ->
 					{cursor, RepackCursor},
 					{store_id, StoreID},
 					{target_packing, big_serialize:encode_packing(Packing, true)}]),
-			ar_device_lock:set_device_lock_metric(StoreID, repack, paused),
+			big_device_lock:set_device_lock_metric(StoreID, repack, paused),
 			State#state{ 
 				repack_cursor = RepackCursor, 
 				target_packing = Packing,
@@ -437,7 +437,7 @@ handle_cast(store_repack_cursor,
 handle_cast({repack, Packing},
 		#state{ store_id = StoreID, repack_cursor = Cursor,
 				range_start = RangeStart, range_end = RangeEnd } = State) ->
-	NewStatus = ar_device_lock:acquire_lock(repack, StoreID, State#state.repack_status),
+	NewStatus = big_device_lock:acquire_lock(repack, StoreID, State#state.repack_status),
 	State2 = State#state{ repack_status = NewStatus },
 	case NewStatus of
 		active ->
@@ -453,7 +453,7 @@ handle_cast({repack, Packing},
 handle_cast({repack, Cursor, RangeStart, RangeEnd, Packing}, State) ->
 	#state{ store_id = StoreID } = State,
 	gen_server:cast(self(), store_repack_cursor),
-	NewStatus = ar_device_lock:acquire_lock(repack, StoreID, State#state.repack_status),
+	NewStatus = big_device_lock:acquire_lock(repack, StoreID, State#state.repack_status),
 	State2 = State#state{ repack_status = NewStatus, repack_cursor = Cursor },
 	case NewStatus of
 		active ->
@@ -475,8 +475,8 @@ handle_cast({expire_repack_request, Ref}, #state{ packing_map = Map } = State) -
 
 handle_cast(repacking_complete, State) ->
 	#state{ store_id = StoreID } = State,
-	ar_device_lock:release_lock(repack, StoreID),
-	ar_device_lock:set_device_lock_metric(StoreID, repack, complete),
+	big_device_lock:release_lock(repack, StoreID),
+	big_device_lock:set_device_lock_metric(StoreID, repack, complete),
 	State2 = State#state{ repack_status = complete },
 	maybe_log_repacking_complete(State2),
 	{noreply, State2};

@@ -245,9 +245,9 @@ get_tx_fee(Args) ->
 	{LnDecayDividend, LnDecayDivisor} = ?LN_PRICE_DECAY_ANNUAL,
 	PerpetualPrice = {-FirstYearPrice * LnDecayDivisor * KryderPlusRateMultiplier
 			* (?N_REPLICATIONS(Height)), LnDecayDividend * (?GiB)},
-	MinerShare = ar_fraction:multiply(PerpetualPrice,
+	MinerShare = big_fraction:multiply(PerpetualPrice,
 			?MINER_MINIMUM_ENDOWMENT_CONTRIBUTION_SHARE),
-	{Dividend, Divisor} = ar_fraction:add(PerpetualPrice, MinerShare),
+	{Dividend, Divisor} = big_fraction:add(PerpetualPrice, MinerShare),
 	Dividend div Divisor.
 
 %% @doc Return the block reward, the new endowment pool, and the new debt supply.
@@ -514,9 +514,9 @@ get_expected_min_decline_rate(Timestamp, Period, Amount, Size, Rate, Height) ->
 	%% => -logRate = (Sum1 - Sum2) / Amount
 	%% => 1 / Rate = exp((Sum1 - Sum2) / Amount)
 	%% => Rate = 1 / exp((Sum1 - Sum2) / Amount)
-	{ExpDiv, ExpDivisor} = ar_fraction:natural_exponent(
+	{ExpDiv, ExpDivisor} = big_fraction:natural_exponent(
 			{(Sum1 - Sum2) * Size, Amount * (1024 * 1024 * 1024)}, 16),
-	ar_fraction:reduce({ExpDivisor, ExpDiv}, 1000000).
+	big_fraction:reduce({ExpDivisor, ExpDiv}, 1000000).
 
 %%%===================================================================
 %%% Private functions.
@@ -666,7 +666,7 @@ usd_p_gby(Y, Height) ->
 			{ADividend, ADivisor} = ?LN_PRICE_DECAY_ANNUAL,
 			T = Y - 2019,
 			P = ?TX_PRICE_NATURAL_EXPONENT_DECIMAL_FRACTION_PRECISION,
-			{EDividend, EDivisor} = ar_fraction:natural_exponent({ADividend * T, ADivisor}, P),
+			{EDividend, EDivisor} = big_fraction:natural_exponent({ADividend * T, ADivisor}, P),
 			{EDividend * KDividend, EDivisor * KDivisor};	
 		false ->
 			{Dividend, Divisor} = ?USD_PER_GBY_2019,
@@ -724,10 +724,10 @@ recalculate_usd_to_big_rate3(#block{ height = PrevHeight, diff = Diff } = B) ->
 	{Dividend, Divisor} = InitialRate,
 	ScheduledRate = {Dividend * (MaxDiff - Diff), Divisor * (MaxDiff - InitialDiff)},
 	Rate = B#block.scheduled_usd_to_big_rate,
-	MaxAdjustmentUp = ar_fraction:multiply(Rate, ?USD_TO_BIG_MAX_ADJUSTMENT_UP_MULTIPLIER),
-	MaxAdjustmentDown = ar_fraction:multiply(Rate, ?USD_TO_BIG_MAX_ADJUSTMENT_DOWN_MULTIPLIER),
-	CappedScheduledRate = ar_fraction:reduce(ar_fraction:maximum(
-			ar_fraction:minimum(ScheduledRate, MaxAdjustmentUp), MaxAdjustmentDown),
+	MaxAdjustmentUp = big_fraction:multiply(Rate, ?USD_TO_BIG_MAX_ADJUSTMENT_UP_MULTIPLIER),
+	MaxAdjustmentDown = big_fraction:multiply(Rate, ?USD_TO_BIG_MAX_ADJUSTMENT_DOWN_MULTIPLIER),
+	CappedScheduledRate = big_fraction:reduce(big_fraction:maximum(
+			big_fraction:minimum(ScheduledRate, MaxAdjustmentUp), MaxAdjustmentDown),
 			?USD_TO_BIG_FRACTION_REDUCTION_LIMIT),
 	?LOG_DEBUG([{event, recalculated_rate},
 			{new_rate, ar_util:safe_divide(element(1, Rate), element(2, Rate))},

@@ -126,7 +126,7 @@ validate_difficulty(NewB, OldB) ->
 %% @doc The number a hash must be greater than, to give the same odds of success
 %% as the old-style Diff (number of leading zeros in the bitstring).
 switch_to_linear_diff(LogDiff) ->
-	?MAX_DIFF - ar_fraction:pow(2, 256 - LogDiff).
+	?MAX_DIFF - big_fraction:pow(2, 256 - LogDiff).
 
 switch_to_linear_diff_pre_fork_2_5(Diff) ->
 	erlang:trunc(math:pow(2, 256)) - erlang:trunc(math:pow(2, 256 - Diff)).
@@ -169,7 +169,7 @@ calculate_difficulty_with_drop(OldDiff, TS, Last, Height, PrevTS, InitialCoeff, 
 	%% Drop the difficulty InitialCoeff times right away, then drop extra Coeff times
 	%% for every 10 minutes passed.
 	ActualTime2 = ActualTime * InitialCoeff
-			* ar_fraction:pow(Coeff, max(TS - PrevTS, 0) div Step),
+			* big_fraction:pow(Coeff, max(TS - PrevTS, 0) div Step),
 	%% Scale difficulty by TargetTime / ActualTime2
 	%% If ActualTime2 is less than TargetTime it means we need to *increase* the difficulty,
 	%% and vice versa.

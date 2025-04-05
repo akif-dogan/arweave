@@ -1,4 +1,4 @@
--module(ar_doctor_dump).
+-module(big_doctor_dump).
 
 -export([main/1, help/0]).
 

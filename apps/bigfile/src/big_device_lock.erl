@@ -1,4 +1,4 @@
--module(ar_device_lock).
+-module(big_device_lock).
 
 -behaviour(gen_server).
 

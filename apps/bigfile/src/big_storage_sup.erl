@@ -25,5 +25,5 @@ init([]) ->
 	ets:new(big_storage_module, [set, public, named_table]),
 	{ok, {{one_for_one, 5, 10}, [
 		?CHILD(big_storage, worker),
-		?CHILD(ar_device_lock, worker)
+		?CHILD(big_device_lock, worker)
 	]}}.

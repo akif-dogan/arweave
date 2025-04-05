@@ -1,8 +1,8 @@
 %%% @doc A process fetching the weave data from the network and from the local
 %%% storage modules, one chunk (or a range of chunks) at a time. The workers
-%%% are coordinated by ar_data_sync_worker_master. The workers do not update the
-%%% storage - updates are handled by ar_data_sync_* processes.
--module(ar_data_sync_worker).
+%%% are coordinated by big_data_sync_worker_master. The workers do not update the
+%%% storage - updates are handled by big_data_sync_* processes.
+-module(big_data_sync_worker).
 
 -behaviour(gen_server).
 
@@ -65,7 +65,7 @@ handle_cast({sync_range, Args}, State) ->
 		recast ->
 			ok;
 		_ ->
-			gen_server:cast(ar_data_sync_worker_master, {task_completed,
+			gen_server:cast(big_data_sync_worker_master, {task_completed,
 				{sync_range, {State#state.name, SyncResult, Args, EndTime-StartTime}}})
 	end,
 	{noreply, State};

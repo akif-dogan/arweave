@@ -165,13 +165,13 @@ init({StoreID, Packing}) ->
         prepare_status = PrepareStatus,
         repack_cursor = RepackCursor
     },
-    ar_device_lock:set_device_lock_metric(StoreID, prepare, PrepareStatus),
+    big_device_lock:set_device_lock_metric(StoreID, prepare, PrepareStatus),
 	{ok, State}.
 
 
 handle_cast(prepare_entropy, State) ->
     #state{ store_id = StoreID } = State,
-    NewStatus = ar_device_lock:acquire_lock(prepare, StoreID, State#state.prepare_status),
+    NewStatus = big_device_lock:acquire_lock(prepare, StoreID, State#state.prepare_status),
     State2 = State#state{ prepare_status = NewStatus },
     State3 = case NewStatus of
         active ->
@@ -235,7 +235,7 @@ do_prepare_entropy(State) ->
     CheckRangeEnd =
         case BucketEndOffset > PaddedRangeEnd of
             true ->
-                ar_device_lock:release_lock(prepare, StoreID),
+                big_device_lock:release_lock(prepare, StoreID),
                 ?LOG_INFO([{event, storage_module_entropy_preparation_complete},
                         {store_id, StoreID}]),
                 big:console("The storage module ~s is prepared for 2.9 replication.~n",
@@ -327,7 +327,7 @@ do_prepare_entropy(State) ->
         end,
     case StoreEntropy of
         complete ->
-            ar_device_lock:set_device_lock_metric(StoreID, prepare, complete),
+            big_device_lock:set_device_lock_metric(StoreID, prepare, complete),
             State#state{ prepare_status = complete };
         waiting_for_repack ->
             ?LOG_INFO([{event, waiting_for_repacking},

@@ -19,7 +19,7 @@ start_link() ->
 
 init([]) ->
 	Children = 
-		ar_data_sync_worker_master:register_workers() ++
+		big_data_sync_worker_master:register_workers() ++
 		big_chunk_copy:register_workers() ++
 		big_data_sync:register_workers(),
 	{ok, {{one_for_one, 5, 10}, Children}}.

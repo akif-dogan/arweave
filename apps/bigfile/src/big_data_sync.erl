@@ -787,7 +787,7 @@ init({StoreID, RepackInPlacePacking}) ->
 			State2 = State#sync_data_state{
 				sync_status = off
 			},
-			ar_device_lock:set_device_lock_metric(StoreID, sync, off),
+			big_device_lock:set_device_lock_metric(StoreID, sync, off),
 			{ok, State2}
 	end.
 
@@ -893,7 +893,7 @@ handle_cast({add_tip_block, BlockTXPairs, BI}, State) ->
 
 handle_cast(sync_data, State) ->
 	#sync_data_state{ store_id = StoreID } = State,
-	Status = ar_device_lock:acquire_lock(sync, StoreID, State#sync_data_state.sync_status),
+	Status = big_device_lock:acquire_lock(sync, StoreID, State#sync_data_state.sync_status),
 	State2 = State#sync_data_state{ sync_status = Status },
 	State3 = case Status of
 		active ->
@@ -908,7 +908,7 @@ handle_cast(sync_data, State) ->
 
 handle_cast(sync_data2, State) ->
 	#sync_data_state{ store_id = StoreID } = State,
-	Status = ar_device_lock:acquire_lock(sync, StoreID, State#sync_data_state.sync_status),
+	Status = big_device_lock:acquire_lock(sync, StoreID, State#sync_data_state.sync_status),
 	State2 = State#sync_data_state{ sync_status = Status },
 	State3 = case Status of
 		active ->
@@ -930,7 +930,7 @@ handle_cast(sync_data2, State) ->
 %%    we left off after a pause. There are 2 main conditions that can trigger a pause:
 %%    a. Insufficient disk space. Will pause until disk space frees up
 %%    b. Sync queue is busy. Will pause until previously queued intervals are scheduled to the
-%%       ar_data_sync_worker_master for syncing.
+%%       big_data_sync_worker_master for syncing.
 handle_cast(collect_peer_intervals, State) ->
 	#sync_data_state{ range_start = Start, range_end = End } = State,
 	gen_server:cast(self(), {collect_peer_intervals, Start, End}),
@@ -976,8 +976,8 @@ handle_cast({collect_peer_intervals, Start, End}, State) ->
 				%% Q is the number of chunks that we've already queued for syncing. We need
 				%% to manage the queue length.
 				%% 1. Periodically sync_intervals will pull from Q and send work to
-				%%    ar_data_sync_worker_master. We need to make sure Q is long enough so
-				%%    that we never starve ar_data_sync_worker_master of work.
+				%%    big_data_sync_worker_master. We need to make sure Q is long enough so
+				%%    that we never starve big_data_sync_worker_master of work.
 				%% 2. On the flip side we don't want Q to get so long as to trigger an
 				%%    out-of-memory condition. In the extreme case we could collect and
 				%%    enqueue all chunks in a full 3.6TB storage_module. A Q of this length
@@ -1071,7 +1071,7 @@ handle_cast({enqueue_intervals, Intervals}, State) ->
 
 handle_cast(sync_intervals, State) ->
 	#sync_data_state{ store_id = StoreID } = State,
-	Status = ar_device_lock:acquire_lock(sync, StoreID, State#sync_data_state.sync_status),
+	Status = big_device_lock:acquire_lock(sync, StoreID, State#sync_data_state.sync_status),
 	State2 = State#sync_data_state{ sync_status = Status },
 	State3 = case Status of
 		active ->
@@ -1477,11 +1477,11 @@ terminate(Reason, #sync_data_state{ store_id = StoreID } = State) ->
 %%%===================================================================
 
 init_sync_status(StoreID) ->
-	SyncStatus = case ar_data_sync_worker_master:is_syncing_enabled() of
+	SyncStatus = case big_data_sync_worker_master:is_syncing_enabled() of
 		true -> paused;
 		false -> off
 	end,
-	ar_device_lock:set_device_lock_metric(StoreID, sync, SyncStatus),
+	big_device_lock:set_device_lock_metric(StoreID, sync, SyncStatus),
 	SyncStatus.
 log_chunk_error(Event, ExtraLogData) ->
 	?LOG_ERROR([{event, Event}, {tags, [solution_proofs]} | ExtraLogData]).
@@ -1535,7 +1535,7 @@ do_sync_intervals(State) ->
 			true ->
 				true;
 			false ->
-				case ar_data_sync_worker_master:ready_for_work() of
+				case big_data_sync_worker_master:ready_for_work() of
 					false ->
 						ar_util:cast_after(200, self(), sync_intervals),
 						true;
@@ -1550,7 +1550,7 @@ do_sync_intervals(State) ->
 			gen_server:cast(self(), sync_intervals),
 			{{Start, End, Peer}, Q2} = gb_sets:take_smallest(Q),
 			I2 = ar_intervals:delete(QIntervals, End, Start),
-			gen_server:cast(ar_data_sync_worker_master,
+			gen_server:cast(big_data_sync_worker_master,
 					{sync_range, {Start, End, Peer, StoreID}}),
 			State#sync_data_state{ sync_intervals_queue = Q2,
 					sync_intervals_queue_intervals = I2 }

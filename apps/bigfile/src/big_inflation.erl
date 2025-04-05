@@ -64,7 +64,7 @@ calculate_base(Height) ->
 	Dividend = Height * Ln2Dividend,
 	Divisor = blocks_per_year(Height) * Ln2Divisor,
 	Precision = ?INFLATION_NATURAL_EXPONENT_DECIMAL_FRACTION_PRECISION,
-	{EXDividend, EXDivisor} = ar_fraction:natural_exponent({Dividend, Divisor}, Precision),
+	{EXDividend, EXDivisor} = big_fraction:natural_exponent({Dividend, Divisor}, Precision),
 	?GENESIS_TOKENS
 		* ?WINSTON_PER_BIG
 		* EXDivisor

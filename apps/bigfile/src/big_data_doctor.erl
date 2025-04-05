@@ -21,7 +21,7 @@ main(Args) ->
 		"bench" ->
 			big_doctor_bench:main(tl(Args));
 		"dump" ->
-			ar_doctor_dump:main(tl(Args));
+			big_doctor_dump:main(tl(Args));
 		_ ->
 			false
 	end,
@@ -39,6 +39,6 @@ help() ->
 	big:console("~n"),
 	big_doctor_bench:help(),
 	big:console("~n"),
-	ar_doctor_dump:help(),
+	big_doctor_dump:help(),
 	big:console("~n").
 

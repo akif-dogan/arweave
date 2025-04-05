@@ -1,6 +1,6 @@
 %%% @doc The module maintains a queue of processes fetching data from the network
 %%% and from the local storage modules.
--module(ar_data_sync_worker_master).
+-module(big_data_sync_worker_master).
 
 -behaviour(gen_server).
 
@@ -52,7 +52,7 @@ register_workers() ->
 		true ->
 			{Workers, WorkerNames} = register_sync_workers(),
 			WorkerMaster = ?CHILD_WITH_ARGS(
-				ar_data_sync_worker_master, worker, ar_data_sync_worker_master,
+				big_data_sync_worker_master, worker, big_data_sync_worker_master,
 				[WorkerNames]),
 				Workers ++ [WorkerMaster];
 		false ->
@@ -65,7 +65,7 @@ register_sync_workers() ->
 	{Workers, WorkerNames} = lists:foldl(
 		fun(Number, {AccWorkers, AccWorkerNames}) ->
 			Name = list_to_atom("ar_data_sync_worker_" ++ integer_to_list(Number)),
-			Worker = ?CHILD_WITH_ARGS(ar_data_sync_worker, worker, Name, [Name]),
+			Worker = ?CHILD_WITH_ARGS(big_data_sync_worker, worker, Name, [Name]),
 			{[Worker | AccWorkers], [Name | AccWorkerNames]}
 		end,
 		{[], []},
@@ -245,7 +245,7 @@ max_peer_queue(Performance, TotalThroughput, WorkerCount) ->
 	max(trunc((PeerThroughput / TotalThroughput) * max_tasks(WorkerCount)), ?MIN_PEER_QUEUE).
 
 %% @doc Cut a peer's queue to store roughly 15 minutes worth of tasks. This prevents
-%% a slow peer from filling up the ar_data_sync_worker_master queues, stalling the
+%% a slow peer from filling up the big_data_sync_worker_master queues, stalling the
 %% workers and preventing big_data_sync from pushing new tasks.
 cut_peer_queue(_MaxQueue, PeerTasks, #state{ scheduled_task_count = 0 } = State) ->
 	{PeerTasks, State};

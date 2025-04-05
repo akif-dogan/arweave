@@ -127,7 +127,7 @@ handle_call(Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast(initialize_state, State) ->
-	State3 = case ar_device_lock:is_ready() of
+	State3 = case big_device_lock:is_ready() of
 		false ->
 			ar_util:cast_after(1000, self(), initialize_state),
 			State;
@@ -196,7 +196,7 @@ start_io_threads(State) ->
 	#state{ mode = Mode } = State,
 
     % Step 1: Group StoreIDs by their system device
-	case ar_device_lock:get_store_id_to_device_map() of
+	case big_device_lock:get_store_id_to_device_map() of
 		{error, Reason} ->
 			?LOG_ERROR([{event, error_initializing_state}, {module, ?MODULE},
 				{reason, io_lib:format("~p", [Reason])}]),
