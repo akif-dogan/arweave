@@ -676,7 +676,7 @@ handle_info({event, node_state, {checkpoint_block, B}}, State) ->
 			#state{ sessions = Sessions, session_by_key = SessionByKey,
 					current_session_key = CurrentSessionKey } = State,
 			StepNumber = big_block:vdf_step_number(B),
-			BaseInterval = StepNumber div anonce_limiter:get_reset_frequency(),
+			BaseInterval = StepNumber div big_nonce_limiter:get_reset_frequency(),
 			{Sessions2, SessionByKey2} = prune_old_sessions(Sessions, SessionByKey,
 					BaseInterval),
 			true = maps:is_key(CurrentSessionKey, SessionByKey2),
