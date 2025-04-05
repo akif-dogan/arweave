@@ -718,7 +718,7 @@ recalculate_usd_to_big_rate2(#block{ height = PrevHeight } = B) ->
 
 recalculate_usd_to_big_rate3(#block{ height = PrevHeight, diff = Diff } = B) ->
 	Height = PrevHeight + 1,
-	InitialDiff = ar_retarget:switch_to_linear_diff(?INITIAL_USD_TO_BIG_DIFF(Height)()),
+	InitialDiff = big_retarget:switch_to_linear_diff(?INITIAL_USD_TO_BIG_DIFF(Height)()),
 	MaxDiff = ?MAX_DIFF,
 	InitialRate = ?INITIAL_USD_TO_BIG(Height)(),
 	{Dividend, Divisor} = InitialRate,

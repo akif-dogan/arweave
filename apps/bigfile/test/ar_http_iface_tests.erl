@@ -33,8 +33,8 @@ setup_all_batch() ->
 	%% run against difficulty 0. Because of this we also have to hardcode
 	%% the TX fee, otherwise it can jump pretty high.
 	{Setup, Cleanup} = ar_test_node:mock_functions([
-		{ar_retarget, is_retarget_height, fun(_Height) -> false end},
-		{ar_retarget, is_retarget_block, fun(_Block) -> false end},
+		{big_retarget, is_retarget_height, fun(_Height) -> false end},
+		{big_retarget, is_retarget_block, fun(_Block) -> false end},
 		{big_tx, get_tx_fee, fun(_Args) -> ?BIG(1) end}
 		]),
 	Functions = Setup(),

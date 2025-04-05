@@ -462,7 +462,7 @@ validate_block(strict_data_split_threshold,
 	end;
 
 validate_block(difficulty, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) ->
-	case ar_retarget:validate_difficulty(NewB, OldB) of
+	case big_retarget:validate_difficulty(NewB, OldB) of
 		false ->
 			{invalid, invalid_difficulty};
 		true ->

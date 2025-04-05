@@ -153,7 +153,7 @@ init({StoreID, Packing}) ->
             false ->
                 %% Provided Packing will only differ from the StoreID packing when this
                 %% module is configured to repack in place.
-                ar_repack:read_cursor(StoreID, Packing, RangeStart)
+                big_repack:read_cursor(StoreID, Packing, RangeStart)
         end,
     State = #state{
         store_id = StoreID,

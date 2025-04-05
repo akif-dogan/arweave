@@ -117,7 +117,7 @@ get_max_timestamp_deviation() ->
 
 %% @doc Verify the retarget timestamp on NewB is correct.
 verify_last_retarget(NewB, OldB) ->
-	case ar_retarget:is_retarget_height(NewB#block.height) of
+	case big_retarget:is_retarget_height(NewB#block.height) of
 		true ->
 			NewB#block.last_retarget == NewB#block.timestamp;
 		false ->

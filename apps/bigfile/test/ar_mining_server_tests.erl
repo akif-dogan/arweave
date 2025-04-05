@@ -219,7 +219,7 @@ do_test_chunk_cache_size_with_mocks(H1s, H2s, RecallRange2s, FirstChunks) ->
 	ets:insert(mock_counter, {get_range, 0}),
 	{Setup, Cleanup} = ar_test_node:mock_functions([
 		{
-			ar_retarget, is_retarget_height,
+			big_retarget, is_retarget_height,
 			fun (_Height) ->
 				false
 			end

@@ -128,7 +128,7 @@ init([]) ->
 			application:set_env(bigfile, config, Config2),
 			InitialBalance = ?BIG(?LOCALNET_BALANCE),
 			[B0] = ar_weave:init([{Config#config.mining_addr, InitialBalance, <<>>}],
-					ar_retarget:switch_to_linear_diff(Config#config.diff)),
+					big_retarget:switch_to_linear_diff(Config#config.diff)),
 			RootHash0 = B0#block.wallet_list,
 			RootHash0 = big_storage:write_wallet_list(0, B0#block.account_tree),
 			start_from_state([B0]);
@@ -1507,8 +1507,8 @@ record_economic_metrics(B, PrevB) ->
 
 record_economic_metrics2(B, PrevB) ->
 	{PoA1Diff, Diff} = big_difficulty:diff_pair(B),
-	prometheus_gauge:set(log_diff, [poa1], ar_retarget:switch_to_log_diff(PoA1Diff)),
-	prometheus_gauge:set(log_diff, [poa2], ar_retarget:switch_to_log_diff(Diff)),
+	prometheus_gauge:set(log_diff, [poa1], big_retarget:switch_to_log_diff(PoA1Diff)),
+	prometheus_gauge:set(log_diff, [poa2], big_retarget:switch_to_log_diff(Diff)),
 	prometheus_gauge:set(network_hashrate, big_difficulty:get_hash_rate_fixed_ratio(B)),
 	prometheus_gauge:set(endowment_pool, B#block.reward_pool),
 	Period_200_Years = 200 * 365 * 24 * 60 * 60,
@@ -1644,7 +1644,7 @@ get_current_diff(TS) ->
 	DiffPair = proplists:get_value(diff_pair, Props),
 	LastRetarget = proplists:get_value(last_retarget, Props),
 	PrevTS = proplists:get_value(timestamp, Props),
-	ar_retarget:maybe_retarget(Height + 1, DiffPair, TS, LastRetarget, PrevTS).
+	big_retarget:maybe_retarget(Height + 1, DiffPair, TS, LastRetarget, PrevTS).
 
 get_merkle_rebase_threshold(PrevB) ->
 	case PrevB#block.height + 1 == ar_fork:height_2_7() of
@@ -1975,7 +1975,7 @@ handle_found_solution(Args, PrevB, State) ->
 	PrevDiffPair = big_difficulty:diff_pair(PrevB),
 	LastRetarget = PrevB#block.last_retarget,
 	PrevTS = PrevB#block.timestamp,
-	DiffPair = {_PoA1Diff, Diff} = ar_retarget:maybe_retarget(PrevB#block.height + 1,
+	DiffPair = {_PoA1Diff, Diff} = big_retarget:maybe_retarget(PrevB#block.height + 1,
 			PrevDiffPair, Timestamp, LastRetarget, PrevTS),
 	PassesDiffCheck =
 		case PassesSeedCheck of
@@ -2111,7 +2111,7 @@ handle_found_solution(Args, PrevB, State) ->
 				previous_block = PrevH,
 				timestamp = Timestamp,
 				last_retarget =
-					case ar_retarget:is_retarget_height(Height) of
+					case big_retarget:is_retarget_height(Height) of
 						true -> Timestamp;
 						false -> PrevB#block.last_retarget
 					end,

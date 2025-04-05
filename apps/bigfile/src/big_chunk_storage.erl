@@ -389,7 +389,7 @@ init({StoreID, RepackInPlacePacking}) ->
 				target_packing = big_storage_module:get_packing(StoreID)
 			};
 		Packing ->
-			RepackCursor = ar_repack:read_cursor(StoreID, Packing, RangeStart),
+			RepackCursor = big_repack:read_cursor(StoreID, Packing, RangeStart),
 			gen_server:cast(self(), {repack, Packing}),
 			?LOG_INFO([{event, starting_repack_in_place},
 					{tags, [repack_in_place]},
@@ -430,7 +430,7 @@ handle_cast(store_repack_cursor, #state{ repack_status = complete } = State) ->
 handle_cast(store_repack_cursor,
 		#state{ repack_cursor = Cursor, store_id = StoreID,
 				target_packing = TargetPacking } = State) ->
-	ar_repack:store_cursor(Cursor, StoreID, TargetPacking),
+	big_repack:store_cursor(Cursor, StoreID, TargetPacking),
 	big_entropy_gen:set_repack_cursor(StoreID, Cursor),
 	{noreply, State};
 
@@ -442,7 +442,7 @@ handle_cast({repack, Packing},
 	case NewStatus of
 		active ->
 			spawn(fun() ->
-				ar_repack:repack(Cursor, RangeStart, RangeEnd, Packing, StoreID) end);
+				big_repack:repack(Cursor, RangeStart, RangeEnd, Packing, StoreID) end);
 		paused ->
 			ar_util:cast_after(?DEVICE_LOCK_WAIT, self(), {repack, Packing});
 		_ ->
@@ -458,7 +458,7 @@ handle_cast({repack, Cursor, RangeStart, RangeEnd, Packing}, State) ->
 	case NewStatus of
 		active ->
 			spawn(fun() ->
-				ar_repack:repack(Cursor, RangeStart, RangeEnd, Packing, StoreID) end);
+				big_repack:repack(Cursor, RangeStart, RangeEnd, Packing, StoreID) end);
 		paused ->
 			ar_util:cast_after(?DEVICE_LOCK_WAIT, self(),
 				{repack, Cursor, RangeStart, RangeEnd, Packing});
@@ -557,7 +557,7 @@ handle_info({chunk, {packed, Ref, ChunkArgs}},
 			State2 = State#state{ packing_map = maps:remove(Ref, Map) },
 			#state{ store_id = StoreID, entropy_context = EntropyContext, 
 				file_index = FileIndex } = State2,
-			case ar_repack:chunk_repacked(
+			case big_repack:chunk_repacked(
 					ChunkArgs, Args, StoreID, FileIndex, EntropyContext) of
 				{ok, FileIndex2} ->
 					{noreply, State2#state{ file_index = FileIndex2 }};
@@ -590,7 +590,7 @@ handle_info(Info, State) ->
 terminate(_Reason, #state{ repack_cursor = Cursor, store_id = StoreID,
 		target_packing = TargetPacking }) ->
 	sync_and_close_files(),
-	ar_repack:store_cursor(Cursor, StoreID, TargetPacking),
+	big_repack:store_cursor(Cursor, StoreID, TargetPacking),
 	ok.
 
 %%%===================================================================

@@ -152,9 +152,9 @@ min_difficulty(Height) ->
 		true ->
 			case Height >= ar_fork:height_2_5() of
 				true ->
-					ar_retarget:switch_to_linear_diff(Diff);
+					big_retarget:switch_to_linear_diff(Diff);
 				false ->
-					ar_retarget:switch_to_linear_diff_pre_fork_2_5(Diff)
+					big_retarget:switch_to_linear_diff_pre_fork_2_5(Diff)
 			end;
 		false ->
 			Diff

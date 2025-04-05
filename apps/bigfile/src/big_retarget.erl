@@ -2,7 +2,7 @@
 %%% blocks, that is those in which change the current mining difficulty
 %%% on the weave to maintain a constant block time.
 %%% @end
--module(ar_retarget).
+-module(big_retarget).
 
 -export([is_retarget_height/1, is_retarget_block/1, maybe_retarget/5,
 		calculate_difficulty/5, validate_difficulty/2,
@@ -64,7 +64,7 @@ is_retarget_block(Block) ->
 	?IS_RETARGET_BLOCK(Block).
 
 maybe_retarget(Height, {CurPoA1Diff, CurDiff}, TS, LastRetargetTS, PrevTS) ->
-	case ar_retarget:is_retarget_height(Height) of
+	case big_retarget:is_retarget_height(Height) of
 		true ->
 			NewDiff = calculate_difficulty(CurDiff, TS, LastRetargetTS, Height, PrevTS),
 			{big_difficulty:poa1_diff(NewDiff, Height), NewDiff};
@@ -112,7 +112,7 @@ calculate_difficulty(OldDiff, TS, Last, Height, PrevTS) ->
 
 %% @doc Assert the new block has an appropriate difficulty.
 validate_difficulty(NewB, OldB) ->
-	case ar_retarget:is_retarget_block(NewB) of
+	case big_retarget:is_retarget_block(NewB) of
 		true ->
 			(NewB#block.diff ==
 				calculate_difficulty(

@@ -558,7 +558,7 @@ pre_validate_last_retarget(B, PrevB, SolutionResigned, Peer) ->
 
 pre_validate_difficulty(B, PrevB, SolutionResigned, Peer) ->
 	true = B#block.height >= ar_fork:height_2_6(),
-	DiffValid = ar_retarget:validate_difficulty(B, PrevB),
+	DiffValid = big_retarget:validate_difficulty(B, PrevB),
 	case DiffValid of
 		true ->
 			pre_validate_cumulative_difficulty(B, PrevB, SolutionResigned, Peer);

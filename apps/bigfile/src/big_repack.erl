@@ -1,4 +1,4 @@
--module(ar_repack).
+-module(big_repack).
 
 -export([read_cursor/3, store_cursor/3, repack/5, chunk_repacked/5]).
 
