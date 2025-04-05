@@ -369,7 +369,7 @@ generate_entropies(RewardAddr, PaddedEndOffset) ->
 	EntropyTasks = lists:map(
 		fun(Offset) ->
 			Ref = make_ref(),
-			ar_packing_server:request_entropy_generation(
+			big_packing_server:request_entropy_generation(
 				Ref, self(), {RewardAddr, PaddedEndOffset, Offset}),
 			Ref
 		end,

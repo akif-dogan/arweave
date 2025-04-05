@@ -281,7 +281,7 @@ jobs:
             # big_p3,
             # big_p3_config,
             # big_p3_db,
-            ar_packing_server,
+            big_packing_server,
             ar_patricia_tree,
             ar_peers,
             ar_pricing,

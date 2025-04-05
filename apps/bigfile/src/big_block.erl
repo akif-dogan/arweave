@@ -174,7 +174,7 @@ compute_h0(B, PrevB) ->
 
 compute_h0(NonceLimiterOutput, PartitionNumber, Seed, MiningAddr, PackingDifficulty) ->
 	compute_h0(NonceLimiterOutput, PartitionNumber, Seed, MiningAddr, PackingDifficulty,
-			ar_packing_server:get_packing_state()).
+			big_packing_server:get_packing_state()).
 
 %% @doc Compute "h0" - a cryptographic hash used as a source of entropy when choosing
 %% two recall ranges on the weave as unlocked by the given nonce limiter output.
@@ -190,7 +190,7 @@ compute_h0(NonceLimiterOutput, PartitionNumber, Seed, MiningAddr, PackingDifficu
 					PartitionNumber:256, Seed:32/binary, MiningAddr/binary,
 					PackingDifficulty:8 >>
 		end,
-	RandomXState = ar_packing_server:get_randomx_state_for_h0(PackingDifficulty, PackingState),
+	RandomXState = big_packing_server:get_randomx_state_for_h0(PackingDifficulty, PackingState),
 	big_mine_randomx:hash(RandomXState, Preimage).
 
 %% @doc Compute "h1" - a cryptographic hash which is either the hash of a solution not

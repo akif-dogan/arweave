@@ -1,4 +1,4 @@
--module(ar_process_sampler).
+-module(big_process_sampler).
 -behaviour(gen_server).
 
 -include_lib("bigfile/include/big.hrl").

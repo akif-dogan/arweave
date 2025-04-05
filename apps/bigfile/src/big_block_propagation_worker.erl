@@ -1,4 +1,4 @@
--module(ar_block_propagation_worker).
+-module(big_block_propagation_worker).
 
 -behaviour(gen_server).
 

@@ -1,4 +1,4 @@
--module(ar_global_sync_record).
+-module(big_global_sync_record).
 
 -behaviour(gen_server).
 

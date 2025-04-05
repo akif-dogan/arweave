@@ -480,9 +480,9 @@ assert_chunk(Node, RequestPacking, Packing, Block, EndOffset, ChunkSize) ->
 			"~p: Chunk at offset ~p, size ~p, packing ~p does not match packed chunk",
 			[Node, EndOffset, ChunkSize, big_serialize:encode_packing(Packing, true)]))),
 
-	{ok, UnpackedChunk} = ar_packing_server:unpack(
+	{ok, UnpackedChunk} = big_packing_server:unpack(
 		Packing, EndOffset, Block#block.tx_root, Chunk, ?DATA_CHUNK_SIZE),
-	UnpaddedChunk = ar_packing_server:unpad_chunk(
+	UnpaddedChunk = big_packing_server:unpad_chunk(
 		Packing, UnpackedChunk, ChunkSize, byte_size(Chunk)),
 	ExpectedUnpackedChunk = ar_test_node:get_genesis_chunk(EndOffset),
 	?assertEqual(ExpectedUnpackedChunk, UnpaddedChunk,

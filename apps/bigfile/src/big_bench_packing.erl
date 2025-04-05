@@ -347,7 +347,7 @@ pack_legacy_chunks(WorkerID, Config, Offset, Size) ->
 		dst_address = DstAddress
 	} = Config,
 	ChunkSize = min(Size, ?DATA_CHUNK_SIZE),
-	{spora_2_6, Key} = ar_packing_server:chunk_key({spora_2_6, DstAddress}, Offset, Root),
+	{spora_2_6, Key} = big_packing_server:chunk_key({spora_2_6, DstAddress}, Offset, Root),
 	ReadResult = file:pread(UnpackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, UnpackedChunk} ->
@@ -385,7 +385,7 @@ pack_composite_chunks(WorkerID, Config, Offset, Size) ->
 		rounds = Rounds
 	} = Config,
 	ChunkSize = min(Size, ?DATA_CHUNK_SIZE),
-	{composite, Key} = ar_packing_server:chunk_key({composite, DstAddress, PackingDifficulty}, Offset, Root),
+	{composite, Key} = big_packing_server:chunk_key({composite, DstAddress, PackingDifficulty}, Offset, Root),
 	ReadResult = file:pread(UnpackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, UnpackedChunk} ->
@@ -421,8 +421,8 @@ erl_repack_legacy_chunks(WorkerID, Config, Offset, Size) ->
 		dst_address = DstAddress
 	} = Config,
 	ChunkSize = min(Size, ?DATA_CHUNK_SIZE),
-	{spora_2_6, UnpackKey} = ar_packing_server:chunk_key({spora_2_6, SrcAddress}, Offset, Root),
-	{spora_2_6, PackKey} = ar_packing_server:chunk_key({spora_2_6, DstAddress}, Offset, Root),
+	{spora_2_6, UnpackKey} = big_packing_server:chunk_key({spora_2_6, SrcAddress}, Offset, Root),
+	{spora_2_6, PackKey} = big_packing_server:chunk_key({spora_2_6, DstAddress}, Offset, Root),
 	ReadResult = file:pread(PackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, PackedChunk} ->
@@ -460,8 +460,8 @@ nif_repack_legacy_chunks(WorkerID, Config, Offset, Size) ->
 		dst_address = DstAddress
 	} = Config,
 	ChunkSize = min(Size, ?DATA_CHUNK_SIZE),
-	{spora_2_6, UnpackKey} = ar_packing_server:chunk_key({spora_2_6, SrcAddress}, Offset, Root),
-	{spora_2_6, PackKey} = ar_packing_server:chunk_key({spora_2_6, DstAddress}, Offset, Root),
+	{spora_2_6, UnpackKey} = big_packing_server:chunk_key({spora_2_6, SrcAddress}, Offset, Root),
+	{spora_2_6, PackKey} = big_packing_server:chunk_key({spora_2_6, DstAddress}, Offset, Root),
 	ReadResult = file:pread(PackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, PackedChunk} ->
@@ -496,8 +496,8 @@ nif_repack_composite_chunks(WorkerID, Config, Offset, Size) ->
 		rounds = Rounds
 	} = Config,
 	ChunkSize = min(Size, ?DATA_CHUNK_SIZE),
-	{composite, UnpackKey} = ar_packing_server:chunk_key({composite, SrcAddress, PackingDifficulty}, Offset, Root),
-	{composite, PackKey} = ar_packing_server:chunk_key({composite, DstAddress, PackingDifficulty}, Offset, Root),
+	{composite, UnpackKey} = big_packing_server:chunk_key({composite, SrcAddress, PackingDifficulty}, Offset, Root),
+	{composite, PackKey} = big_packing_server:chunk_key({composite, DstAddress, PackingDifficulty}, Offset, Root),
 	ReadResult = file:pread(PackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, PackedChunk} ->

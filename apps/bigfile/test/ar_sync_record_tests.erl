@@ -26,7 +26,7 @@ test_sync_record() ->
 		Options = #{ format => etf, random_subset => false },
 
 		%% Genesis data only
-		{ok, Binary1} = ar_global_sync_record:get_serialized_sync_record(Options),
+		{ok, Binary1} = big_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global1} = ar_intervals:safe_from_etf(Binary1),
 
 		?assertEqual([{1048576, 0}], ar_intervals:to_list(Global1)),
@@ -38,7 +38,7 @@ test_sync_record() ->
 		big_sync_record:add(
 			DiskPoolStart+?DATA_CHUNK_SIZE, DiskPoolStart, big_data_sync, "default"),
 		timer:sleep(SleepTime),
-		{ok, Binary2} = ar_global_sync_record:get_serialized_sync_record(Options),
+		{ok, Binary2} = big_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global2} = ar_intervals:safe_from_etf(Binary2),
 
 		?assertEqual([{1048576, 0},{DiskPoolStart+?DATA_CHUNK_SIZE,DiskPoolStart}],
@@ -51,7 +51,7 @@ test_sync_record() ->
 			big_sync_record:delete(
 			DiskPoolStart+?DATA_CHUNK_SIZE, DiskPoolStart, big_data_sync, "default"),
 		timer:sleep(SleepTime),
-		{ok, Binary3} = ar_global_sync_record:get_serialized_sync_record(Options),
+		{ok, Binary3} = big_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global3} = ar_intervals:safe_from_etf(Binary3),
 		?assertEqual([{1048576, 0},{DiskPoolStart+?DATA_CHUNK_SIZE,DiskPoolStart}],
 			ar_intervals:to_list(Global3)),
@@ -60,7 +60,7 @@ test_sync_record() ->
 				{global_remove_range, DiskPoolStart+?DATA_CHUNK_SIZE, DiskPoolStart}),
 		true = ar_util:do_until(
 				fun() ->
-					{ok, Binary4} = ar_global_sync_record:get_serialized_sync_record(Options),
+					{ok, Binary4} = big_global_sync_record:get_serialized_sync_record(Options),
 					{ok, Global4} = ar_intervals:safe_from_etf(Binary4),
 					[{1048576, 0}] == ar_intervals:to_list(Global4) end,
 				200,
@@ -70,7 +70,7 @@ test_sync_record() ->
 		big_sync_record:add(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, PartitionID),
 		timer:sleep(SleepTime),
-		{ok, Binary5} = ar_global_sync_record:get_serialized_sync_record(Options),
+		{ok, Binary5} = big_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global5} = ar_intervals:safe_from_etf(Binary5),
 
 		?assertEqual([{1048576, 0},{PartitionStart+?DATA_CHUNK_SIZE,PartitionStart}],
@@ -91,7 +91,7 @@ test_sync_record() ->
 				{global_remove_range, PartitionStart+?DATA_CHUNK_SIZE,PartitionStart}),
 		true = ar_util:do_until(
 				fun() ->
-					{ok, Binary6} = ar_global_sync_record:get_serialized_sync_record(Options),
+					{ok, Binary6} = big_global_sync_record:get_serialized_sync_record(Options),
 					{ok, Global6} = ar_intervals:safe_from_etf(Binary6),
 					[{1048576, 0}] == ar_intervals:to_list(Global6) end,
 				200,
@@ -108,7 +108,7 @@ test_sync_record() ->
 		big_sync_record:add(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, PartitionID),
 		timer:sleep(SleepTime),
-		{ok, Binary6} = ar_global_sync_record:get_serialized_sync_record(Options),
+		{ok, Binary6} = big_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global6} = ar_intervals:safe_from_etf(Binary6),
 
 		?assertEqual([{1048576, 0}, {PartitionStart+?DATA_CHUNK_SIZE,PartitionStart}],
@@ -123,7 +123,7 @@ test_sync_record() ->
 		big_sync_record:delete(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, "default"),
 		timer:sleep(SleepTime),
-		{ok, Binary7} = ar_global_sync_record:get_serialized_sync_record(Options),
+		{ok, Binary7} = big_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global7} = ar_intervals:safe_from_etf(Binary7),
 
 		?assertEqual([{1048576, 0}, {PartitionStart+?DATA_CHUNK_SIZE,PartitionStart}],
@@ -155,7 +155,7 @@ test_sync_record_with_replica_2_9() when ?BLOCK_2_9_SYNCING ->
 		Options = #{ format => etf, random_subset => false },
 
 		%% Genesis data only
-		{ok, Binary1} = ar_global_sync_record:get_serialized_sync_record(Options),
+		{ok, Binary1} = big_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global1} = ar_intervals:safe_from_etf(Binary1),
 
 		?assertEqual([], ar_intervals:to_list(Global1)),
@@ -165,7 +165,7 @@ test_sync_record_with_replica_2_9() when ?BLOCK_2_9_SYNCING ->
 		big_sync_record:add(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, PartitionID),
 		timer:sleep(SleepTime),
-		{ok, Binary5} = ar_global_sync_record:get_serialized_sync_record(Options),
+		{ok, Binary5} = big_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global5} = ar_intervals:safe_from_etf(Binary5),
 
 		?assertEqual([], ar_intervals:to_list(Global5)),

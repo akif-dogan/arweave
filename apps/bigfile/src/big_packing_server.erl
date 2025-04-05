@@ -1,4 +1,4 @@
--module(ar_packing_server).
+-module(big_packing_server).
 
 -behaviour(gen_server).
 

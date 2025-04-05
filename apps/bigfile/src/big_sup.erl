@@ -37,7 +37,7 @@ init([]) ->
 	ets:new(ignored_ids, [bag, public, named_table]),
 	ets:new(ar_tx_emitter_recently_emitted, [set, public, named_table]),
 	ets:new(big_tx_db, [set, public, named_table]),
-	ets:new(ar_packing_server, [set, public, named_table]),
+	ets:new(big_packing_server, [set, public, named_table]),
 	ets:new(replica_2_9_entropy_cache, [set, public, named_table]),
 	ets:new(replica_2_9_entropy_cache_ordered_keys, [ordered_set, public, named_table]),
 	ets:new(big_nonce_limiter, [set, public, named_table]),
@@ -49,7 +49,7 @@ init([]) ->
 	ets:new(big_chunk_storage, [set, public, named_table]),
 	ets:new(ar_entropy_storage, [set, public, named_table]),
 	ets:new(big_mining_stats, [set, public, named_table]),
-	ets:new(ar_global_sync_record, [set, public, named_table]),
+	ets:new(big_global_sync_record, [set, public, named_table]),
 	ets:new(ar_disk_pool_data_roots, [set, public, named_table, {read_concurrency, true}]),
 	ets:new(big_tx_blacklist, [set, public, named_table, {read_concurrency, true}]),
 	ets:new(big_tx_blacklist_pending_headers,
@@ -74,17 +74,17 @@ init([]) ->
 		?CHILD_SUP(big_storage_sup, supervisor),
 		?CHILD(big_peers, worker),
 		?CHILD(big_disk_cache, worker),
-		?CHILD(ar_watchdog, worker),
+		?CHILD(big_watchdog, worker),
 		?CHILD(big_tx_blacklist, worker),
 		?CHILD_SUP(big_bridge_sup, supervisor),
-		?CHILD(ar_packing_server, worker),
+		?CHILD(big_packing_server, worker),
 		?CHILD_SUP(big_sync_record_sup, supervisor),
 		?CHILD(big_data_discovery, worker),
 		?CHILD(big_header_sync, worker),
 		?CHILD_SUP(big_data_sync_sup, supervisor),
 		?CHILD_SUP(big_chunk_storage_sup, supervisor),
 		?CHILD_SUP(big_verify_chunks_sup, supervisor),
-		?CHILD(ar_global_sync_record, worker),
+		?CHILD(big_global_sync_record, worker),
 		?CHILD_SUP(big_nonce_limiter_sup, supervisor),
 		?CHILD_SUP(big_mining_sup, supervisor),
 		?CHILD(big_coordination, worker),
@@ -103,7 +103,7 @@ init([]) ->
 	],
 	{ok, Config} = application:get_env(bigfile, config),
 	DebugChildren = case Config#config.debug of
-		true -> [?CHILD(ar_process_sampler, worker)];
+		true -> [?CHILD(big_process_sampler, worker)];
 		false -> []
 	end,
 	{ok, {{one_for_one, 5, 10}, Children ++ DebugChildren}}.

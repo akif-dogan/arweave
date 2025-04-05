@@ -115,7 +115,7 @@ start_hashing_thread(State) ->
 	#state{ hashing_threads = Threads, hashing_thread_monitor_refs = Refs } = State,
 	Thread = spawn_link(
 		fun() ->
-			hashing_thread(ar_packing_server:get_packing_state())
+			hashing_thread(big_packing_server:get_packing_state())
 		end
 	),
 	Ref = monitor(process, Thread),

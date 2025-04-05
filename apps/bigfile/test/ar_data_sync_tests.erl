@@ -258,13 +258,13 @@ test_disk_pool_rotation() ->
 	assert_wait_until_height(main, 1),
 	timer:sleep(2000),
 	Options = #{ format => etf, random_subset => false },
-	{ok, Binary1} = ar_global_sync_record:get_serialized_sync_record(Options),
+	{ok, Binary1} = big_global_sync_record:get_serialized_sync_record(Options),
 	{ok, Global1} = ar_intervals:safe_from_etf(Binary1),
 	%% 3 genesis chunks plus the two we upload here.
 	?assertEqual([{1048576, 0}], ar_intervals:to_list(Global1)),
 	ar_test_node:mine(main),
 	assert_wait_until_height(main, 2),
-	{ok, Binary2} = ar_global_sync_record:get_serialized_sync_record(Options),
+	{ok, Binary2} = big_global_sync_record:get_serialized_sync_record(Options),
 	{ok, Global2} = ar_intervals:safe_from_etf(Binary2),
 	?assertEqual([{1048576, 0}], ar_intervals:to_list(Global2)),
 	ar_test_node:mine(main),
@@ -275,7 +275,7 @@ test_disk_pool_rotation() ->
 	?assertEqual(3, ?SEARCH_SPACE_UPPER_BOUND_DEPTH),
 	true = ar_util:do_until(
 		fun() ->
-			{ok, Binary3} = ar_global_sync_record:get_serialized_sync_record(Options),
+			{ok, Binary3} = big_global_sync_record:get_serialized_sync_record(Options),
 			{ok, Global3} = ar_intervals:safe_from_etf(Binary3),
 			[{786432, 0}] == ar_intervals:to_list(Global3)
 		end,

@@ -1141,7 +1141,7 @@ read_poa(RecallByte, Packing) ->
 							read_unpacked_chunk(RecallByte, Proof);
 						UnpackedChunk ->
 							{ok, #poa{ option = 1, chunk = Chunk,
-								unpacked_chunk = ar_packing_server:pad_chunk(UnpackedChunk),
+								unpacked_chunk = big_packing_server:pad_chunk(UnpackedChunk),
 								tx_path = TXPath, data_path = DataPath }}
 					end;
 				_ ->
@@ -1157,7 +1157,7 @@ read_unpacked_chunk(RecallByte, Proof) ->
 	case big_data_sync:get_chunk(RecallByte + 1, Options) of
 		{ok, #{ chunk := UnpackedChunk, tx_path := TXPath, data_path := DataPath }} ->
 			{ok, #poa{ option = 1, chunk = maps:get(chunk, Proof),
-				unpacked_chunk = ar_packing_server:pad_chunk(UnpackedChunk),
+				unpacked_chunk = big_packing_server:pad_chunk(UnpackedChunk),
 				tx_path = TXPath, data_path = DataPath }};
 		Error ->
 			Error

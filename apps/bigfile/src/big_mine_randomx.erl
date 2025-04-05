@@ -62,7 +62,7 @@ randomx_decrypt_chunk(Packing, RandomxState, Key, Chunk, ChunkSize) ->
 	%% the padding in the unpacked chunk is all zeros.
 	%% To do that we pass in the maximum chunk size (?DATA_CHUNK_SIZE) to prevent the NIF
 	%% from removing the padding. We can then validate the padding and remove it in
-	%% ar_packing_server:unpad_chunk/4.
+	%% big_packing_server:unpad_chunk/4.
 	Size = case Packing of
 		{spora_2_6, _Addr} ->
 			?DATA_CHUNK_SIZE;
@@ -79,7 +79,7 @@ randomx_decrypt_chunk(Packing, RandomxState, Key, Chunk, ChunkSize) ->
 			{exception, Error};
 		{ok, Unpacked} ->
 			%% Validating the padding (for spora_2_6 and composite) and then remove it.
-			case ar_packing_server:unpad_chunk(Packing, Unpacked, ChunkSize, PackedSize) of
+			case big_packing_server:unpad_chunk(Packing, Unpacked, ChunkSize, PackedSize) of
 				error ->
 					{error, invalid_padding};
 				UnpackedChunk ->
@@ -328,7 +328,7 @@ randomx_decrypt_sub_chunk2(_Packing, _BadState, _Key, _Chunk, _SubChunkStartOffs
 randomx_encrypt_chunk2({composite, _, PackingDifficulty} = _Packing, {_, {stub_state, _}}, Key, Chunk) ->
 	Options = [{encrypt, true}, {padding, zero}],
 	IV = binary:part(Key, {0, 16}),
-	SubChunks = split_into_sub_chunks(ar_packing_server:pad_chunk(Chunk)),
+	SubChunks = split_into_sub_chunks(big_packing_server:pad_chunk(Chunk)),
 	{ok, iolist_to_binary(lists:map(
 			fun({SubChunkStartOffset, SubChunk}) ->
 				Key2 = crypto:hash(sha256, << Key/binary, SubChunkStartOffset:24 >>),
@@ -345,7 +345,7 @@ randomx_encrypt_chunk2(_Packing, {_, {stub_state, _}}, Key, Chunk) ->
 	Options = [{encrypt, true}, {padding, zero}],
 	IV = binary:part(Key, {0, 16}),
 	{ok, crypto:crypto_one_time(aes_256_cbc, Key, IV,
-			ar_packing_server:pad_chunk(Chunk), Options)};
+			big_packing_server:pad_chunk(Chunk), Options)};
 %% Non-STUB implementation
 randomx_encrypt_chunk2(spora_2_5, {rx512, RandomxState}, Key, Chunk) ->
 	ar_rx512_nif:rx512_encrypt_chunk_nif(RandomxState, Key, Chunk, ?RANDOMX_PACKING_ROUNDS,
@@ -366,7 +366,7 @@ randomx_reencrypt_chunk2(SourcePacking, TargetPacking,
 	case randomx_decrypt_chunk(SourcePacking, State, UnpackKey, Chunk, ChunkSize) of
 		{ok, UnpackedChunk} ->
 			{ok, RepackedChunk} = randomx_encrypt_chunk2(TargetPacking, State, PackKey,
-					ar_packing_server:pad_chunk(UnpackedChunk)),
+					big_packing_server:pad_chunk(UnpackedChunk)),
 			case {SourcePacking, TargetPacking} of
 				{{composite, Addr, _}, {composite, Addr, _}} ->
 					%% See the same function defined for the non-STUB mode.
@@ -396,7 +396,7 @@ randomx_reencrypt_chunk2({composite, Addr1, PackingDifficulty1},
 					{ok, Repacked, none};
 				false ->
 					%% RepackInput is the unpacked chunk - return it.
-					Unpadded = ar_packing_server:unpad_chunk(RepackInput, ChunkSize,
+					Unpadded = big_packing_server:unpad_chunk(RepackInput, ChunkSize,
 							?DATA_CHUNK_SIZE),
 					{ok, Repacked, Unpadded}
 			end;

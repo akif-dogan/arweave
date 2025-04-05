@@ -4,7 +4,7 @@
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
 %%% @doc Watchdog process. Logs the information about mined blocks or missing external blocks.
--module(ar_watchdog).
+-module(big_watchdog).
 
 -behaviour(gen_server).
 

@@ -119,7 +119,7 @@ prepare_context(spora_2_6, Threads, DataMiB) ->
 	Address = crypto:strong_rand_bytes(32),
 	Chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	Offset = rand:uniform(1024 * 1024 * 1024),
-	{spora_2_6, Key} = ar_packing_server:chunk_key({spora_2_6, Address}, Offset, Root),
+	{spora_2_6, Key} = big_packing_server:chunk_key({spora_2_6, Address}, Offset, Root),
 	{rx512, RandomXState} = big_mine_randomx:init_fast2(
 		rx512, ?RANDOMX_PACKING_KEY, 1, 1, 
 		erlang:system_info(dirty_cpu_schedulers_online)),
@@ -130,7 +130,7 @@ prepare_context({composite, Difficulty}, Threads, DataMiB) ->
 	Address = crypto:strong_rand_bytes(32),
 	Chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	Offset = rand:uniform(1024 * 1024 * 1024),
-	{composite, Key} = ar_packing_server:chunk_key({composite, Address, Difficulty}, Offset, Root),
+	{composite, Key} = big_packing_server:chunk_key({composite, Address, Difficulty}, Offset, Root),
 	{rx4096, RandomXState} = big_mine_randomx:init_fast2(
 		rx4096, ?RANDOMX_PACKING_KEY, 1, 1, 
 		erlang:system_info(dirty_cpu_schedulers_online)),

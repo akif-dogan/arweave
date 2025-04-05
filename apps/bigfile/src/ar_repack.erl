@@ -96,7 +96,7 @@ repack_batch(Cursor, RangeStart, RangeEnd, RequiredPacking, StoreID) ->
 	Cursor2 = advance_cursor(Cursor, RangeStart, RangeEnd),
 	RepackFurtherArgs = {repack, Cursor2, RangeStart, RangeEnd, RequiredPacking},
 	CheckPackingBuffer =
-		case ar_packing_server:is_buffer_full() of
+		case big_packing_server:is_buffer_full() of
 			true ->
 				?LOG_DEBUG([{event, repack_in_place_buffer_full},
 						{tags, [repack_in_place]},
@@ -273,7 +273,7 @@ send_chunk_for_repacking(AbsoluteOffset, ChunkMeta, Args) ->
 							{register_packing_ref, Ref, RepackArgs}),
 					ar_util:cast_after(300000, Server,
 							{expire_repack_request, Ref}),
-					ar_packing_server:request_repack(Ref, whereis(Server),
+					big_packing_server:request_repack(Ref, whereis(Server),
 							{RequiredPacking2, Packing, Chunk,
 									AbsoluteOffset, TXRoot, ChunkSize})
 			end;

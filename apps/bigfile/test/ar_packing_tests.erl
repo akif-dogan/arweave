@@ -82,28 +82,28 @@ test_full_chunk() ->
 
 	?assertEqual(
 		{ok, UnpackedData},
-		ar_packing_server:pack(
+		big_packing_server:pack(
 			unpacked, ?CHUNK_OFFSET, TXRoot, UnpackedData)),
 	?assertEqual(
 		{ok, Spora25Data},
-		ar_packing_server:pack(
+		big_packing_server:pack(
 			spora_2_5, ?CHUNK_OFFSET, TXRoot, UnpackedData)),
 	?assertEqual(
 		{ok, Spora26Data},
-		ar_packing_server:pack(
+		big_packing_server:pack(
 			{spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, UnpackedData)),
 
 	?assertEqual(
 		{ok, UnpackedData},
-		ar_packing_server:unpack(
+		big_packing_server:unpack(
 			unpacked, ?CHUNK_OFFSET, TXRoot, UnpackedData, ChunkSize)),
 	?assertEqual(
 		{ok, UnpackedData},
-		ar_packing_server:unpack(
+		big_packing_server:unpack(
 			spora_2_5, ?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize)),
 	?assertEqual(
 		{ok, UnpackedData},
-		ar_packing_server:unpack(
+		big_packing_server:unpack(
 			{spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)).
 
 test_partial_chunk() ->
@@ -117,28 +117,28 @@ test_partial_chunk() ->
 
 	?assertEqual(
 		{ok, UnpackedData},
-		ar_packing_server:pack(
+		big_packing_server:pack(
 			unpacked, ?CHUNK_OFFSET, TXRoot, UnpackedData)),
 	?assertEqual(
 		{ok, Spora25Data},
-		ar_packing_server:pack(
+		big_packing_server:pack(
 			spora_2_5, ?CHUNK_OFFSET, TXRoot, UnpackedData)),
 	?assertEqual(
 		{ok, Spora26Data},
-		ar_packing_server:pack(
+		big_packing_server:pack(
 			{spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, UnpackedData)),
 
 	?assertEqual(
 		{ok, UnpackedData},
-		ar_packing_server:unpack(
+		big_packing_server:unpack(
 			unpacked, ?CHUNK_OFFSET, TXRoot, UnpackedData, ChunkSize)),
 	?assertEqual(
 		{ok, UnpackedData},
-		ar_packing_server:unpack(
+		big_packing_server:unpack(
 			spora_2_5, ?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize)),
 	?assertEqual(
 		{ok, UnpackedData},
-		ar_packing_server:unpack(
+		big_packing_server:unpack(
 			{spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)).
 
 test_full_chunk_repack() ->
@@ -152,41 +152,41 @@ test_full_chunk_repack() ->
 
 	?assertEqual(
 		{ok, UnpackedData, UnpackedData},
-		ar_packing_server:repack(unpacked, unpacked,
+		big_packing_server:repack(unpacked, unpacked,
 			?CHUNK_OFFSET, TXRoot, UnpackedData, ChunkSize)),
 	?assertEqual(
 		{ok, Spora25Data, UnpackedData},
-		ar_packing_server:repack(spora_2_5, unpacked,
+		big_packing_server:repack(spora_2_5, unpacked,
 			?CHUNK_OFFSET, TXRoot, UnpackedData, ChunkSize)),
 	?assertEqual(
 		{ok, Spora26Data, UnpackedData},
-		ar_packing_server:repack({spora_2_6, RewardAddress}, unpacked,
+		big_packing_server:repack({spora_2_6, RewardAddress}, unpacked,
 			?CHUNK_OFFSET, TXRoot, UnpackedData, ChunkSize)),
 
 	?assertEqual(
 		{ok, UnpackedData, UnpackedData},
-		ar_packing_server:repack(unpacked, spora_2_5,
+		big_packing_server:repack(unpacked, spora_2_5,
 			?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize)),
 	?assertEqual(
 		{ok, Spora25Data, none},
-		ar_packing_server:repack(spora_2_5, spora_2_5,
+		big_packing_server:repack(spora_2_5, spora_2_5,
 			?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize)),
 	?assertEqual(
 		{ok, Spora26Data, UnpackedData},
-		ar_packing_server:repack({spora_2_6, RewardAddress}, spora_2_5,
+		big_packing_server:repack({spora_2_6, RewardAddress}, spora_2_5,
 			?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize)),
 
 	?assertEqual(
 		{ok, UnpackedData, UnpackedData},
-		ar_packing_server:repack(unpacked, {spora_2_6, RewardAddress},
+		big_packing_server:repack(unpacked, {spora_2_6, RewardAddress},
 			?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)),
 	?assertEqual(
 		{ok, Spora25Data, UnpackedData},
-		ar_packing_server:repack(spora_2_5, {spora_2_6, RewardAddress},
+		big_packing_server:repack(spora_2_5, {spora_2_6, RewardAddress},
 			?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)),
 	?assertEqual(
 		{ok, Spora26Data, none},
-		ar_packing_server:repack({spora_2_6, RewardAddress}, {spora_2_6, RewardAddress},
+		big_packing_server:repack({spora_2_6, RewardAddress}, {spora_2_6, RewardAddress},
 			?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)).
 
 test_partial_chunk_repack() ->
@@ -200,40 +200,40 @@ test_partial_chunk_repack() ->
 
 	?assertEqual(
 		{ok, UnpackedData, UnpackedData},
-		ar_packing_server:repack(unpacked, unpacked,
+		big_packing_server:repack(unpacked, unpacked,
 			?CHUNK_OFFSET, TXRoot, UnpackedData, ChunkSize)),
 	?assertEqual(
 		{ok, Spora25Data, UnpackedData},
-		ar_packing_server:repack(spora_2_5, unpacked,
+		big_packing_server:repack(spora_2_5, unpacked,
 			?CHUNK_OFFSET, TXRoot, UnpackedData, ChunkSize)),
 	?assertEqual(
 		{ok, Spora26Data, UnpackedData},
-		ar_packing_server:repack({spora_2_6, RewardAddress}, unpacked,
+		big_packing_server:repack({spora_2_6, RewardAddress}, unpacked,
 			?CHUNK_OFFSET, TXRoot, UnpackedData, ChunkSize)),
 
 	?assertEqual(
 		{ok, UnpackedData, UnpackedData},
-		ar_packing_server:repack(unpacked, spora_2_5,
+		big_packing_server:repack(unpacked, spora_2_5,
 			?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize)),
 	?assertEqual(
 		{ok, Spora25Data, none},
-		ar_packing_server:repack(spora_2_5, spora_2_5,
+		big_packing_server:repack(spora_2_5, spora_2_5,
 			?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize)),
 	?assertEqual(
 		{ok, Spora26Data, UnpackedData},
-		ar_packing_server:repack({spora_2_6, RewardAddress}, spora_2_5,
+		big_packing_server:repack({spora_2_6, RewardAddress}, spora_2_5,
 			?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize)),
 	?assertEqual(
 		{ok, UnpackedData, UnpackedData},
-		ar_packing_server:repack(unpacked, {spora_2_6, RewardAddress},
+		big_packing_server:repack(unpacked, {spora_2_6, RewardAddress},
 			?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)),
 	?assertEqual(
 		{ok, Spora25Data, UnpackedData},
-		ar_packing_server:repack(spora_2_5, {spora_2_6, RewardAddress},
+		big_packing_server:repack(spora_2_5, {spora_2_6, RewardAddress},
 			?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)),
 	?assertEqual(
 		{ok, Spora26Data, none},
-		ar_packing_server:repack({spora_2_6, RewardAddress}, {spora_2_6, RewardAddress},
+		big_packing_server:repack({spora_2_6, RewardAddress}, {spora_2_6, RewardAddress},
 			?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)).
 
 test_invalid_pad() ->
@@ -250,32 +250,32 @@ test_invalid_pad() ->
 
 	?assertEqual(
 		{ok, ShortUnpackedData},
-		ar_packing_server:unpack(
+		big_packing_server:unpack(
 			spora_2_5, ?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize),
 		"We don't check the pad when unpacking SPoRA 2.5"),
 	?assertEqual(
 		{error, invalid_padding},
-		ar_packing_server:unpack(
+		big_packing_server:unpack(
 			{spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize),
 			"We do check the pad when unpacking SPoRA 2.6"),
 	?assertEqual(
 		{ok, ShortUnpackedData, ShortUnpackedData},
-		ar_packing_server:repack(
+		big_packing_server:repack(
 			unpacked, spora_2_5, ?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize),
 			"We don't check the pad when repacking from SPoRA 2.5"),
 	?assertMatch(
 		{ok, _, ShortUnpackedData},
-		ar_packing_server:repack(
+		big_packing_server:repack(
 			{spora_2_6, RewardAddress}, spora_2_5, ?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize),
 			"We don't check the pad when repacking from SPoRA 2.5"),
 	?assertEqual(
 		{error, invalid_padding},
-		ar_packing_server:repack(
+		big_packing_server:repack(
 			unpacked, {spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize),
 			"We do check the pad when repacking from SPoRA 2.6"),
 	?assertMatch(
 		{error, invalid_padding},
-		ar_packing_server:repack(
+		big_packing_server:repack(
 			spora_2_5, {spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, Spora25Data, ChunkSize),
 			"We do check the pad when repacking from SPoRA 2.6").
 
@@ -288,7 +288,7 @@ test_request_repack() ->
 	RewardAddress = ar_test_node:load_fixture("ar_packing_tests/address.bin"),
 
 	%% unpacked -> unpacked
-	ar_packing_server:request_repack(?CHUNK_OFFSET, {
+	big_packing_server:request_repack(?CHUNK_OFFSET, {
 		unpacked,
 		unpacked, UnpackedData,
 		?CHUNK_OFFSET, TXRoot, ChunkSize}),
@@ -299,7 +299,7 @@ test_request_repack() ->
         erlang:error(timeout)
     end,
 	%% unpacked -> packed
-	ar_packing_server:request_repack(?CHUNK_OFFSET, {
+	big_packing_server:request_repack(?CHUNK_OFFSET, {
 		{spora_2_6, RewardAddress},
 		unpacked, UnpackedData,
 		?CHUNK_OFFSET, TXRoot, ChunkSize}),
@@ -310,7 +310,7 @@ test_request_repack() ->
         erlang:error(timeout)
     end,
 	%% packed -> unpacked
-	ar_packing_server:request_repack(?CHUNK_OFFSET, {
+	big_packing_server:request_repack(?CHUNK_OFFSET, {
 		unpacked,
 		{spora_2_6, RewardAddress}, Spora26Data,
 		?CHUNK_OFFSET, TXRoot, ChunkSize}),
@@ -321,7 +321,7 @@ test_request_repack() ->
         erlang:error(timeout)
     end,
 	%% packed -> packed
-	ar_packing_server:request_repack(?CHUNK_OFFSET, {
+	big_packing_server:request_repack(?CHUNK_OFFSET, {
 		{spora_2_6, RewardAddress},
 		{spora_2_6, RewardAddress}, Spora26Data,
 		?CHUNK_OFFSET, TXRoot, ChunkSize}),
@@ -341,7 +341,7 @@ test_request_unpack() ->
 	RewardAddress = ar_test_node:load_fixture("ar_packing_tests/address.bin"),
 
 	%% unpacked -> unpacked
-	ar_packing_server:request_unpack(?CHUNK_OFFSET, {
+	big_packing_server:request_unpack(?CHUNK_OFFSET, {
 		unpacked,
 		UnpackedData,
 		?CHUNK_OFFSET, TXRoot, ChunkSize}),
@@ -352,7 +352,7 @@ test_request_unpack() ->
         erlang:error(timeout)
     end,
 	%% packed -> unpacked
-	ar_packing_server:request_unpack(?CHUNK_OFFSET, {
+	big_packing_server:request_unpack(?CHUNK_OFFSET, {
 		{spora_2_6, RewardAddress}, Spora26Data,
 		?CHUNK_OFFSET, TXRoot, ChunkSize}),
 	receive
@@ -496,14 +496,14 @@ test_packs_chunks_depending_on_packing_threshold() ->
 						{ok, #{ chunk := UnpackedChunk }}
 							= big_data_sync:get_chunk(RecallByte + 1,
 								#{ packing => unpacked, pack => true, origin => test }),
-						UnpackedChunk2 = ar_packing_server:pad_chunk(UnpackedChunk),
+						UnpackedChunk2 = big_packing_server:pad_chunk(UnpackedChunk),
 						{{replica_2_9, B#block.reward_addr},
 								PoA#poa{ unpacked_chunk = UnpackedChunk2 }};
 					_ ->
 						{ok, #{ chunk := UnpackedChunk }}
 							= big_data_sync:get_chunk(RecallByte + 1,
 								#{ packing => unpacked, pack => true, origin => test }),
-						UnpackedChunk2 = ar_packing_server:pad_chunk(UnpackedChunk),
+						UnpackedChunk2 = big_packing_server:pad_chunk(UnpackedChunk),
 						{{composite, B#block.reward_addr, B#block.packing_difficulty},
 								PoA#poa{ unpacked_chunk = UnpackedChunk2 }}
 				end,

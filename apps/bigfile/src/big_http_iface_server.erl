@@ -58,7 +58,7 @@ start() ->
 	Semaphores = Config#config.semaphores,
 	maps:map(
 		fun(Name, N) ->
-			ok = ar_semaphore:start_link(Name, N)
+			ok = big_semaphore:start_link(Name, N)
 		end,
 		Semaphores
 	),
@@ -67,7 +67,7 @@ start() ->
 	ok.
 
 start_http_iface_listener(Config) ->
-	Dispatch = cowboy_router:compile([{'_', ?HTTP_IFACE_ROUTES}]),
+	Dispatch = cowboy_router 		:compile([{'_', ?HTTP_IFACE_ROUTES}]),
 	TlsCertfilePath = Config#config.tls_cert_file,
 	TlsKeyfilePath = Config#config.tls_key_file,
 	TransportOpts = [

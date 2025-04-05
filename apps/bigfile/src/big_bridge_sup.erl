@@ -23,9 +23,9 @@ start_link() ->
 init([]) ->
 	Children = lists:map(
 		fun(Num) ->
-			Name = list_to_atom("ar_block_propagation_worker" ++ integer_to_list(Num)),
-			{Name, {ar_block_propagation_worker, start_link, [Name]}, permanent,
-			 ?SHUTDOWN_TIMEOUT, worker, [ar_block_propagation_worker]}
+			Name = list_to_atom("big_block_propagation_worker" ++ integer_to_list(Num)),
+			{Name, {big_block_propagation_worker, start_link, [Name]}, permanent,
+			 ?SHUTDOWN_TIMEOUT, worker, [big_block_propagation_worker]}
 		end,
 		lists:seq(1, ?BLOCK_PROPAGATION_PARALLELIZATION)
 	),

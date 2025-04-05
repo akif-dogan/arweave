@@ -1669,11 +1669,11 @@ get_chunk(Offset, SeekOffset, Pack, Packing, StoredPacking, StoreID, RequestOrig
 						%% and repacking is disabled.
 						{error, chunk_stored_in_different_packing_only};
 					{_, false, true} ->
-						ar_packing_server:repack(
+						big_packing_server:repack(
 							Packing, StoredPacking, AbsoluteOffset,
 							TXRoot, Chunk, ChunkSize);
 					_ ->
-						ar_packing_server:repack(
+						big_packing_server:repack(
 							Packing, StoredPacking, AbsoluteOffset, TXRoot, Chunk, ChunkSize)
 				end,
 			case {PackResult, ChunkID} of
@@ -2698,12 +2698,12 @@ unpack_fetched_chunk(Cast, AbsoluteOffset, ChunkArgs, Args, State) ->
 			decrement_chunk_cache_size(),
 			{noreply, State};
 		false ->
-			case ar_packing_server:is_buffer_full() of
+			case big_packing_server:is_buffer_full() of
 				true ->
 					ar_util:cast_after(1000, self(), Cast),
 					{noreply, State};
 				false ->
-					ar_packing_server:request_unpack(AbsoluteOffset, ChunkArgs),
+					big_packing_server:request_unpack(AbsoluteOffset, ChunkArgs),
 					ar_util:cast_after(600000, self(),
 							{expire_unpack_fetched_chunk_request,
 							{AbsoluteOffset, unpacked}}),
@@ -3029,7 +3029,7 @@ pack_and_store_chunk(Args, State) ->
 					decrement_chunk_cache_size(),
 					{noreply, State};
 				false ->
-					case ar_packing_server:is_buffer_full() of
+					case big_packing_server:is_buffer_full() of
 						true ->
 							ar_util:cast_after(1000, self(), {pack_and_store_chunk, Args}),
 							{noreply, State};
@@ -3041,7 +3041,7 @@ pack_and_store_chunk(Args, State) ->
 									_ ->
 										{unpacked, UnpackedChunk}
 								end,
-							ar_packing_server:request_repack(AbsoluteOffset,
+							big_packing_server:request_repack(AbsoluteOffset,
 									{RequiredPacking, Packing2, Chunk2, AbsoluteOffset,
 										TXRoot, ChunkSize}),
 							ar_util:cast_after(600000, self(),

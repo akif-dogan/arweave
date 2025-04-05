@@ -257,7 +257,7 @@ record_chunk(PaddedEndOffset,
                     {error, Reason} ->
                         {error, Reason};
                     _ ->
-                        PackedChunk = ar_packing_server:encipher_replica_2_9_chunk(Chunk, Entropy),
+                        PackedChunk = big_packing_server:encipher_replica_2_9_chunk(Chunk, Entropy),
                         big_chunk_storage:record_chunk(PaddedEndOffset,
                                                       PackedChunk,
                                                       Packing,
@@ -276,7 +276,7 @@ record_chunk(PaddedEndOffset,
                                               FileIndex);
             {_EndOffset, Entropy} ->
                 Packing = {replica_2_9, RewardAddr},
-                PackedChunk = ar_packing_server:encipher_replica_2_9_chunk(Chunk, Entropy),
+                PackedChunk = big_packing_server:encipher_replica_2_9_chunk(Chunk, Entropy),
                 big_chunk_storage:record_chunk(PaddedEndOffset,
                                               PackedChunk,
                                               Packing,
@@ -363,7 +363,7 @@ record_entropy(ChunkEntropy, BucketEndOffset, StoreID, RewardAddr) ->
                         Error;
                     {_, UnpackedChunk} ->
                         big_sync_record:delete(EndOffset, StartOffset, big_data_sync, StoreID),
-                        ar_packing_server:encipher_replica_2_9_chunk(UnpackedChunk, ChunkEntropy)
+                        big_packing_server:encipher_replica_2_9_chunk(UnpackedChunk, ChunkEntropy)
                 end;
             false ->
                 %% The entropy for the first sub-chunk of the chunk.
@@ -569,27 +569,27 @@ test_replica_2_9() ->
         ?assertEqual({ok, {replica_2_9, RewardAddr}},
                      big_chunk_storage:put(4 * ?DATA_CHUNK_SIZE, C1, Packing, StoreID1)),
         {ok, P1, _Entropy} =
-            ar_packing_server:pack_replica_2_9_chunk(RewardAddr, 4 * ?DATA_CHUNK_SIZE, C1),
+            big_packing_server:pack_replica_2_9_chunk(RewardAddr, 4 * ?DATA_CHUNK_SIZE, C1),
         assert_get(P1, 4 * ?DATA_CHUNK_SIZE, StoreID1),
 
         assert_get(not_found, 8 * ?DATA_CHUNK_SIZE, StoreID1),
         ?assertEqual({ok, {replica_2_9, RewardAddr}},
                      big_chunk_storage:put(8 * ?DATA_CHUNK_SIZE, C1, Packing, StoreID1)),
         {ok, P2, _} =
-            ar_packing_server:pack_replica_2_9_chunk(RewardAddr, 8 * ?DATA_CHUNK_SIZE, C1),
+            big_packing_server:pack_replica_2_9_chunk(RewardAddr, 8 * ?DATA_CHUNK_SIZE, C1),
         assert_get(P2, 8 * ?DATA_CHUNK_SIZE, StoreID1),
 
         %% Store chunks in the second partition.
         ?assertEqual({ok, {replica_2_9, RewardAddr}},
                      big_chunk_storage:put(12 * ?DATA_CHUNK_SIZE, C1, Packing, StoreID2)),
         {ok, P3, Entropy3} =
-            ar_packing_server:pack_replica_2_9_chunk(RewardAddr, 12 * ?DATA_CHUNK_SIZE, C1),
+            big_packing_server:pack_replica_2_9_chunk(RewardAddr, 12 * ?DATA_CHUNK_SIZE, C1),
 
         assert_get(P3, 12 * ?DATA_CHUNK_SIZE, StoreID2),
         ?assertEqual({ok, {replica_2_9, RewardAddr}},
                      big_chunk_storage:put(15 * ?DATA_CHUNK_SIZE, C1, Packing, StoreID2)),
         {ok, P4, Entropy4} =
-            ar_packing_server:pack_replica_2_9_chunk(RewardAddr, 15 * ?DATA_CHUNK_SIZE, C1),
+            big_packing_server:pack_replica_2_9_chunk(RewardAddr, 15 * ?DATA_CHUNK_SIZE, C1),
         assert_get(P4, 15 * ?DATA_CHUNK_SIZE, StoreID2),
         ?assertNotEqual(P3, P4),
         ?assertNotEqual(Entropy3, Entropy4),
@@ -597,7 +597,7 @@ test_replica_2_9() ->
         ?assertEqual({ok, {replica_2_9, RewardAddr}},
                      big_chunk_storage:put(16 * ?DATA_CHUNK_SIZE, C1, Packing, StoreID2)),
         {ok, P5, Entropy5} =
-            ar_packing_server:pack_replica_2_9_chunk(RewardAddr, 16 * ?DATA_CHUNK_SIZE, C1),
+            big_packing_server:pack_replica_2_9_chunk(RewardAddr, 16 * ?DATA_CHUNK_SIZE, C1),
         assert_get(P5, 16 * ?DATA_CHUNK_SIZE, StoreID2),
         ?assertNotEqual(Entropy4, Entropy5)
     after

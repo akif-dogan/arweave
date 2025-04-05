@@ -1328,7 +1328,7 @@ get_missing_txs_and_retry(H, TXIDs, Worker, Peers, TXs, TotalSize) ->
 
 apply_validated_block(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	?LOG_DEBUG([{event, apply_validated_block}, {block, ar_util:encode(B#block.indep_hash)}]),
-	case ar_watchdog:is_mined_block(B) of
+	case big_watchdog:is_mined_block(B) of
 		true ->
 			ar_events:send(block, {new, B, #{ source => miner }});
 		false ->
@@ -1492,7 +1492,7 @@ maybe_report_n_confirmations(B, BI) ->
 	case length(LastNBlocks) == N of
 		true ->
 			{H, _, _} = lists:last(LastNBlocks),
-			ar_watchdog:block_received_n_confirmations(H, B#block.height - N + 1);
+			big_watchdog:block_received_n_confirmations(H, B#block.height - N + 1);
 		false ->
 			do_nothing
 	end.
@@ -2169,7 +2169,7 @@ handle_found_solution(Args, PrevB, State) ->
 			Signature = big_wallet:sign(element(1, RewardKey), SignaturePreimage),
 			H = big_block:indep_hash2(SignedH, Signature),
 			B = UnsignedB2#block{ indep_hash = H, signature = Signature },
-			ar_watchdog:mined_block(H, Height, PrevH),
+			big_watchdog:mined_block(H, Height, PrevH),
 			?LOG_INFO([{event, mined_block}, {indep_hash, ar_util:encode(H)},
 					{solution, ar_util:encode(SolutionH)}, {height, Height},
 					{step_number, StepNumber}, {steps, length(Steps)},
