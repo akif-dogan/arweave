@@ -30,7 +30,7 @@ handle_call(Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast({emit, TXID, Peer, ConnectTimeout, Timeout, ReplyTo}, State) ->
-	case ar_mempool:get_tx(TXID) of
+	case big_mempool:get_tx(TXID) of
 		not_found ->
 			ok;
 		TX ->

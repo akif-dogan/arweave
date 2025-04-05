@@ -20,7 +20,7 @@ start_node() ->
 	{Key, LastTXID, OtherKey, B0}.
 
 reset_node_state() ->
-	ar_mempool:reset(),
+	big_mempool:reset(),
 	ets:delete_all_objects(ar_tx_emitter_recently_emitted),
 	ets:match_delete(node_state, {{tx, '_'}, '_'}),
 	ets:match_delete(node_state, {{tx_prefixes, '_'}, '_'}).
@@ -55,23 +55,23 @@ test_mempool_sorting({{_, {_, Owner}}, _LastTXID, _OtherKey, _B0}) ->
 	%% 
 	%% Only the above criteria are expected to impact sort order
 	TX9 = tx(1, Owner, 15, crypto:strong_rand_bytes(200)),
-	ar_mempool:add_tx(TX9, waiting),
+	big_mempool:add_tx(TX9, waiting),
 	TX8 = tx(1, Owner, 20, crypto:strong_rand_bytes(200)),
-	ar_mempool:add_tx(TX8, waiting),
+	big_mempool:add_tx(TX8, waiting),
 	TX5 = tx(2, Owner, 1, <<>>),
-	ar_mempool:add_tx(TX5, waiting),
+	big_mempool:add_tx(TX5, waiting),
 	TX6 = tx(2, Owner, 1, <<"abc">>),
-	ar_mempool:add_tx(TX6, waiting),
+	big_mempool:add_tx(TX6, waiting),
 	TX7 = tx(1, Owner, 1, <<>>),
-	ar_mempool:add_tx(TX7, waiting),
+	big_mempool:add_tx(TX7, waiting),
 	TX1 = tx(1, Owner, 10, <<>>),
-	ar_mempool:add_tx(TX1, waiting),
+	big_mempool:add_tx(TX1, waiting),
 	TX2 = tx(1, Owner, 10, <<"abcdef">>),
-	ar_mempool:add_tx(TX2, waiting),
+	big_mempool:add_tx(TX2, waiting),
 	TX3 = tx(2, Owner, 10, <<>>),
-	ar_mempool:add_tx(TX3, waiting),
+	big_mempool:add_tx(TX3, waiting),
 	TX4 = tx(1, Owner, 10, <<>>),
-	ar_mempool:add_tx(TX4, waiting),
+	big_mempool:add_tx(TX4, waiting),
 
 	%% {HeaderSize, DataSize}
 	%% HeaderSize: TX_SIZE_BASE per transaction plus the data size of all
@@ -109,13 +109,13 @@ test_drop_low_priority_txs_header({{_, {_, Owner}}, _LastTXID, _OtherKey, _B0}) 
 
 	%% Add multiple low priority transactions to push us over the header size
 	%% limit. All of these new transactions should be dropped
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(1, Owner, LowestReward-2, crypto:strong_rand_bytes(500)), waiting),
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(1, Owner, LowestReward-2, crypto:strong_rand_bytes(500)), waiting),
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(1, Owner, LowestReward-2, crypto:strong_rand_bytes(500)), waiting),
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(1, Owner, LowestReward-1, crypto:strong_rand_bytes(DataSize)), waiting),
 	assertMempoolTXIDs(
 		ExpectedTXIDs, "Multiple low priority TX pushed Mempool over the header size limit"),
@@ -125,7 +125,7 @@ test_drop_low_priority_txs_header({{_, {_, Owner}}, _LastTXID, _OtherKey, _B0}) 
 	%% This newest transaction should *not* be dropped, instead a lower priority
 	%% transaction should be dropped
 	TXHigh = tx(1, Owner, HighestReward+1, crypto:strong_rand_bytes(DataSize)),
-	ar_mempool:add_tx(TXHigh, waiting),
+	big_mempool:add_tx(TXHigh, waiting),
 	ExpectedTXIDs2 = [TXHigh#tx.id | lists:delete(lists:last(ExpectedTXIDs), ExpectedTXIDs)],
 	assertMempoolTXIDs(
 		ExpectedTXIDs2, "High priority TX pushed Mempool over the header size limit"),
@@ -147,13 +147,13 @@ test_drop_low_priority_txs_data({{_, {_, Owner}}, _LastTXID, _OtherKey, _B0}) ->
 
 	%% Add multiple low priority transactions to push us over the data size
 	%% limit. All of these new transactions should be dropped
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(2, Owner, LowestReward-2, crypto:strong_rand_bytes(500)), waiting),
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(2, Owner, LowestReward-2, crypto:strong_rand_bytes(500)), waiting),
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(2, Owner, LowestReward-2, crypto:strong_rand_bytes(500)), waiting),
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(2, Owner, LowestReward-1, crypto:strong_rand_bytes(DataSize)), waiting),
 	assertMempoolTXIDs(
 		ExpectedTXIDs, "Low priority TX pushed Mempool over the data size limit"),
@@ -163,7 +163,7 @@ test_drop_low_priority_txs_data({{_, {_, Owner}}, _LastTXID, _OtherKey, _B0}) ->
 	%% This newest transaction should *not* be dropped, instead a lower priority
 	%% transaction should be dropped
 	TXHigh = tx(2, Owner, HighestReward+1, crypto:strong_rand_bytes(DataSize)),
-	ar_mempool:add_tx(TXHigh, waiting),
+	big_mempool:add_tx(TXHigh, waiting),
 	ExpectedTXIDs2 = [TXHigh#tx.id | lists:delete(lists:last(ExpectedTXIDs), ExpectedTXIDs)],
 	assertMempoolTXIDs(
 		ExpectedTXIDs2, "High priority TX pushed Mempool over the data size limit"),
@@ -189,7 +189,7 @@ test_drop_low_priority_txs_data_and_header({{_, {_, Owner}}, _LastTXID, _OtherKe
 	assertMempoolSize({ExpectedHeaderSize, ExpectedDataSize}),
 
 	RemainingHeaderSpace = ?MEMPOOL_HEADER_SIZE_LIMIT - ExpectedHeaderSize,
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(
 			1, 
 			Owner, 
@@ -198,7 +198,7 @@ test_drop_low_priority_txs_data_and_header({{_, {_, Owner}}, _LastTXID, _OtherKe
 		), waiting),
 	%% This transaction will cause both the header and data size limits to be
 	%% exceeded simultaneously
-	ar_mempool:add_tx(
+	big_mempool:add_tx(
 		tx(
 			2,
 			Owner,
@@ -231,23 +231,23 @@ test_clashing_last_tx({{_, {_, Owner}}, LastTXID, _OtherKey, B0}) ->
 	Test1 = "Test 1: Lower reward TX is dropped",
 	TX1 = tx(2, Owner, Format2HighestReward+2, <<>>, <<"c", BaseID/binary>>, LastTXID),
 	TX2 = tx(2, Owner, Format2HighestReward+1, <<>>, <<"d", BaseID/binary>>, LastTXID),
-	ar_mempool:add_tx(TX1, waiting),
-	ar_mempool:add_tx(TX2, waiting),
+	big_mempool:add_tx(TX1, waiting),
+	big_mempool:add_tx(TX2, waiting),
 	assertMempoolTXIDs([TX1#tx.id | ExpectedTXIDs], Test1),
 
 	Test2 = "Test 2: Higher reward TX replace existing TX with lower reward",
 	TX3 = tx(2, Owner, Format2HighestReward+3, <<>>, <<"e", BaseID/binary>>,  LastTXID),
-	ar_mempool:add_tx(TX3, waiting),
+	big_mempool:add_tx(TX3, waiting),
 	assertMempoolTXIDs([TX3#tx.id | ExpectedTXIDs], Test2),
 
 	Test3 = "Test 3: Higher TXID alphanumeric order replaces lower",
 	TX4 = tx(2, Owner, Format2HighestReward+3, <<>>, <<"f", BaseID/binary>>, LastTXID),
-	ar_mempool:add_tx(TX4, waiting),
+	big_mempool:add_tx(TX4, waiting),
 	assertMempoolTXIDs([TX4#tx.id | ExpectedTXIDs], Test3),
 
 	Test4 = "Test 4: Lower TXID alphanumeric order is dropped",
 	TX5 = tx(2, Owner, Format2HighestReward+3, <<>>, <<"b", BaseID/binary>>, LastTXID),
-	ar_mempool:add_tx(TX5, waiting),
+	big_mempool:add_tx(TX5, waiting),
 	assertMempoolTXIDs([TX4#tx.id | ExpectedTXIDs], Test4),
 
 	Test5 = "Test 5: Deprioritized format 1 TX is dropped",
@@ -258,12 +258,12 @@ test_clashing_last_tx({{_, {_, Owner}}, LastTXID, _OtherKey, B0}) ->
 			crypto:strong_rand_bytes(200), <<"g", BaseID/binary>>,
 			LastTXID
 		),
-	ar_mempool:add_tx(TX6, waiting),
+	big_mempool:add_tx(TX6, waiting),
 	assertMempoolTXIDs([TX4#tx.id | ExpectedTXIDs], Test5),
 
 	Test6 = "Test 6: High priority format 1 replaces a low priority format 2",
 	TX7 = tx(1, Owner, Format1HighestReward+3, <<>>, <<"h", BaseID/binary>>, LastTXID),
-	ar_mempool:add_tx(TX7, waiting),
+	big_mempool:add_tx(TX7, waiting),
 	assertMempoolTXIDs([TX7#tx.id | ExpectedTXIDs], Test6),
 
 	Test7 = "Test 7: TX last_tx set to block hash can not clash",
@@ -283,16 +283,16 @@ test_clashing_last_tx({{_, {_, Owner}}, LastTXID, _OtherKey, B0}) ->
 			<<"j", BaseID/binary>>,
 			B0#block.indep_hash
 		),
-	ar_mempool:add_tx(TX8, waiting),
-	ar_mempool:add_tx(TX9, waiting),
+	big_mempool:add_tx(TX8, waiting),
+	big_mempool:add_tx(TX9, waiting),
 	ExpectedTXIDs2 = [TX9#tx.id | [TX8#tx.id | [TX7#tx.id | ExpectedTXIDs]]],
 	assertMempoolTXIDs(ExpectedTXIDs2, Test7),	
 
 	Test8 = "Test 8: TX last_tx set to <<>> can not clash",
 	TX10 = tx(2, Owner, Format2HighestReward+6, <<>>, <<"k", BaseID/binary>>, <<>>),
 	TX11 = tx(2, Owner, Format2HighestReward+7, <<>>, <<"l", BaseID/binary>>, <<>>),
-	ar_mempool:add_tx(TX10, waiting),
-	ar_mempool:add_tx(TX11, waiting),
+	big_mempool:add_tx(TX10, waiting),
+	big_mempool:add_tx(TX11, waiting),
 	assertMempoolTXIDs([TX11#tx.id | [TX10#tx.id | ExpectedTXIDs2]], Test8).
 
 %% @doc Test that TXs that would overspend an account are dropped from the
@@ -304,39 +304,39 @@ test_overspent_tx({{_, {_, Owner}}, _LastTXID, _OtherKey, _B0}) ->
 	TX1 = tx(2, Owner, 3, <<>>, <<"c", BaseID/binary>>, <<>>, 400),
 	TX2 = tx(2, Owner, 2, <<>>, <<"d", BaseID/binary>>, <<>>, 400),
 	TX3 = tx(2, Owner, 1, <<>>, <<"e", BaseID/binary>>, <<>>, 400),
-	ar_mempool:add_tx(TX1, waiting),
-	ar_mempool:add_tx(TX2, waiting),
-	ar_mempool:add_tx(TX3, waiting),
+	big_mempool:add_tx(TX1, waiting),
+	big_mempool:add_tx(TX2, waiting),
+	big_mempool:add_tx(TX3, waiting),
 	assertMempoolTXIDs([TX1#tx.id, TX2#tx.id], Test1),
 
 	Test2 = "Test 2: Higher reward TX replace existing TX with lower reward",
 	TX4 = tx(2, Owner, 4, <<>>, <<"f", BaseID/binary>>, <<>>, 400),
-	ar_mempool:add_tx(TX4, waiting),
+	big_mempool:add_tx(TX4, waiting),
 	assertMempoolTXIDs([TX4#tx.id, TX1#tx.id], Test2),
 
 	Test3 = "Test 3: Higher TXID alphanumeric order replaces lower",
 	TX5 = tx(2, Owner, 3, <<>>, <<"g", BaseID/binary>>, <<>>, 400),
-	ar_mempool:add_tx(TX5, waiting),
+	big_mempool:add_tx(TX5, waiting),
 	assertMempoolTXIDs([TX4#tx.id, TX5#tx.id], Test3),
 
 	Test4 = "Test 4: Lower TXID alphanumeric order is dropped",
 	TX6 = tx(2, Owner, 3, <<>>, <<"b", BaseID/binary>>, <<>>, 400),
-	ar_mempool:add_tx(TX6, waiting),
+	big_mempool:add_tx(TX6, waiting),
 	assertMempoolTXIDs([TX4#tx.id, TX5#tx.id], Test4),
 
 	Test5 = "Test 5: Deprioritized format 1 TX is dropped",
 	TX7 = tx(1, Owner, 3, crypto:strong_rand_bytes(200), <<"h", BaseID/binary>>, <<>>, 400),
-	ar_mempool:add_tx(TX7, waiting),
+	big_mempool:add_tx(TX7, waiting),
 	assertMempoolTXIDs([TX4#tx.id, TX5#tx.id], Test5),
 
 	Test6 = "Test 6: High priority format 1 replaces a low priority format 2",
 	TX8 = tx(1, Owner, 3, <<>>, <<"i", BaseID/binary>>, <<>>, 400),
-	ar_mempool:add_tx(TX8, waiting),
+	big_mempool:add_tx(TX8, waiting),
 	assertMempoolTXIDs([TX4#tx.id, TX8#tx.id], Test6),
 
 	Test7 = "Test 7: 0 quantity TX can still overspend",
 	TX9 = tx(2, Owner, 400, <<>>, <<"j", BaseID/binary>>, <<>>, 0),
-	ar_mempool:add_tx(TX9, waiting),
+	big_mempool:add_tx(TX9, waiting),
 	assertMempoolTXIDs([TX9#tx.id, TX4#tx.id], Test7).
 
 %% @doc Test that unconfirmed deposit TXs are ignored when determining whether an
@@ -354,9 +354,9 @@ test_mixed_deposit_spend_tx_old_address({
 	TX2 = tx(2, OtherOwner, 9, <<>>, <<"d", BaseID/binary>>, <<>>, 500, Origin),
 	TX3 = tx(2, Owner, 8, <<>>, <<"c", BaseID/binary>>, <<>>, 600),
 	TX4 = tx(2, Owner, 7, <<>>, <<"b", BaseID/binary>>, <<>>, 600),
-	ar_mempool:add_tx(TX2, waiting),
-	ar_mempool:add_tx(TX3, waiting),
-	ar_mempool:add_tx(TX4, waiting),
+	big_mempool:add_tx(TX2, waiting),
+	big_mempool:add_tx(TX3, waiting),
+	big_mempool:add_tx(TX4, waiting),
 	assertMempoolTXIDs([TX2#tx.id, TX3#tx.id], Test1).
 
 %% @doc Test that unconfirmed deposit TXs are ignored when determining whether an
@@ -375,10 +375,10 @@ test_mixed_deposit_spend_tx_new_address({
 	TX2 = tx(2, NewOwner, 9, <<>>, <<"d", BaseID/binary>>, <<>>, 400, Origin),
 	TX3 = tx(2, Owner, 8, <<>>, <<"c", BaseID/binary>>, <<>>, 400),
 	TX4 = tx(2, Owner, 7, <<>>, <<"b", BaseID/binary>>, <<>>, 400),
-	ar_mempool:add_tx(TX1, waiting),
-	ar_mempool:add_tx(TX2, waiting),
-	ar_mempool:add_tx(TX3, waiting),
-	ar_mempool:add_tx(TX4, waiting),
+	big_mempool:add_tx(TX1, waiting),
+	big_mempool:add_tx(TX2, waiting),
+	big_mempool:add_tx(TX3, waiting),
+	big_mempool:add_tx(TX4, waiting),
 	assertMempoolTXIDs([TX1#tx.id, TX3#tx.id], Test1).
 
 %% @doc Test a TX that has a last_tx clash and overspends an account is
@@ -391,10 +391,10 @@ test_clash_and_overspend_tx({{_, {_, Owner}}, LastTXID, _OtherKey, _B0}) ->
 	TX2 = tx(2, Owner, 2, <<>>, <<"c", BaseID/binary>>, LastTXID, 400),
 	TX3 = tx(2, Owner, 1, <<>>, <<"b", BaseID/binary>>, LastTXID, 400),
 	TX4 = tx(2, Owner, 4, <<>>, <<"e", BaseID/binary>>, LastTXID, 400),
-	ar_mempool:add_tx(TX1, waiting),
-	ar_mempool:add_tx(TX2, waiting),
-	ar_mempool:add_tx(TX3, waiting),
-	ar_mempool:add_tx(TX4, waiting),
+	big_mempool:add_tx(TX1, waiting),
+	big_mempool:add_tx(TX2, waiting),
+	big_mempool:add_tx(TX3, waiting),
+	big_mempool:add_tx(TX4, waiting),
 	assertMempoolTXIDs([TX4#tx.id, TX1#tx.id], Test1).
 
 %% @doc Test that the right TXs are dropped when the mempool max data size is reached due to
@@ -409,7 +409,7 @@ test_clash_and_low_priority_tx({{_, {_, Owner}}, LastTXID, _OtherKey, _B0}) ->
 		add_transactions(NumTransactions, 2, Owner, DataSize),
 
 	TX1 = tx(2, Owner, HighestReward+1, <<>>, crypto:strong_rand_bytes(32), LastTXID),
-	ar_mempool:add_tx(TX1, waiting),
+	big_mempool:add_tx(TX1, waiting),
 
 	ExpectedMempoolSize = {(NumTransactions+1) * ?TX_SIZE_BASE, NumTransactions * DataSize},
 
@@ -419,7 +419,7 @@ test_clash_and_low_priority_tx({{_, {_, Owner}}, LastTXID, _OtherKey, _B0}) ->
 	ClashTX = tx(
 		2, Owner, LowestReward-1, crypto:strong_rand_bytes(DataSize),
 		crypto:strong_rand_bytes(32), LastTXID),
-	ar_mempool:add_tx(ClashTX, waiting),
+	big_mempool:add_tx(ClashTX, waiting),
 
 	assertMempoolTXIDs([TX1#tx.id] ++ ExpectedTXIDs, "Clashing TX dropped"),
 	assertMempoolSize(ExpectedMempoolSize).
@@ -433,7 +433,7 @@ add_transactions(NumTransactions, Format, Owner, DataSize) ->
 	],
 	lists:foreach(
 		fun(TX) ->
-			ar_mempool:add_tx(TX, waiting)
+			big_mempool:add_tx(TX, waiting)
 		end,
 		TXs),
 	ExpectedTXIDs = lists:map(
@@ -492,7 +492,7 @@ assertMempoolTXIDs(ExpectedTXIDs, Title) ->
 	%% gb_sets:to_list returns elements in ascending order of utility
 	%% (lowest reward, latest TX first), so we need to reverse the list to get
 	%% the true priority order (highest reward, oldest TX first)
-	MempoolInPriorityOrder = lists:reverse(gb_sets:to_list(ar_mempool:get_priority_set())),
+	MempoolInPriorityOrder = lists:reverse(gb_sets:to_list(big_mempool:get_priority_set())),
 	%% Ordered list of actual TXIDs paired with their actual status
 	ActualTXIDsStatuses = lists:map(
 		fun({_, ActualTXID, ActualStatus}) ->
@@ -515,7 +515,7 @@ assertMempoolTXIDs(ExpectedTXIDs, Title) ->
 					[gb_sets:to_list(Set) | Acc]
 				end,
 				[],
-				maps:values(ar_mempool:get_last_tx_map())
+				maps:values(big_mempool:get_last_tx_map())
 			)
 		)
 	),
@@ -531,7 +531,7 @@ assertMempoolTXIDs(ExpectedTXIDs, Title) ->
 					[gb_sets:to_list(Set) | Acc]
 				end,
 				[],
-				maps:values(ar_mempool:get_origin_tx_map())
+				maps:values(big_mempool:get_origin_tx_map())
 			)
 		)
 	),

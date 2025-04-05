@@ -1079,7 +1079,7 @@ get_txs(Height, Peers, [TXID | Rest], TXs, TotalSize) ->
 get_tx(_Peers, #tx{} = TX) ->
 	TX;
 get_tx(Peers, TXID) ->
-	case ar_mempool:get_tx(TXID) of
+	case big_mempool:get_tx(TXID) of
 		not_found ->
 			get_tx_from_disk_or_peer(Peers, TXID);
 		TX ->

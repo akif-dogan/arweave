@@ -327,7 +327,7 @@ get_fun_msg_pair(send_tx_binary) ->
 -spec node_blacklisting_test_frame(fun(), any(), non_neg_integer(), non_neg_integer()) -> ok.
 node_blacklisting_test_frame(RequestFun, ErrorResponse, NRequests, ExpectedErrors) ->
 	big_blacklist_middleware:reset(),
-	ar_rate_limiter:off(),
+	big_rate_limiter:off(),
 	Responses = lists:map(RequestFun, lists:seq(1, NRequests)),
 	?assertEqual(length(Responses), NRequests),
 	big_blacklist_middleware:reset(),
@@ -337,7 +337,7 @@ node_blacklisting_test_frame(RequestFun, ErrorResponse, NRequests, ExpectedError
 		ok_responses => NRequests - ExpectedErrors
 	},
 	?assertEqual(Expected, ByResponseType),
-	ar_rate_limiter:on().
+	big_rate_limiter:on().
 
 %% @doc Count the number of successful and error responses.
 count_by_response_type(ErrorResponse, Responses) ->

@@ -25,7 +25,7 @@ dump([IncludeTXs, H, MinHeight, DataDir, OutputDir]) ->
 
 	Config = #config{data_dir = DataDir},
 	application:set_env(bigfile, config, Config),
-	ar_kv_sup:start_link(),
+	big_kv_sup:start_link(),
 	big_storage_sup:start_link(),
 
 	dump_blocks(ar_util:decode(H),

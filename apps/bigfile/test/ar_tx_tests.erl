@@ -316,7 +316,7 @@ keeps_txs_after_new_block(B0, FirstTXSetFuns, SecondTXSetFuns) ->
 			end,
 			SecondTXSet ++ FirstTXSet
 		),
-		?assertEqual([], ar_test_node:remote_call(peer1, ar_mempool, get_all_txids, [])),
+		?assertEqual([], ar_test_node:remote_call(peer1, big_mempool, get_all_txids, [])),
 		%% Post transactions from the second set to peer1.
 		lists:foreach(
 			fun(TX) ->
@@ -759,7 +759,7 @@ joins_network_successfully() ->
 			assert_wait_until_height(peer1, Height),
 			ar_util:do_until(
 				fun() ->
-					ar_test_node:remote_call(peer1, ar_mempool, get_all_txids, []) == []
+					ar_test_node:remote_call(peer1, big_mempool, get_all_txids, []) == []
 				end,
 				200,
 				1000

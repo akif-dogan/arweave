@@ -1,4 +1,4 @@
--module(ar_kv_sup).
+-module(big_kv_sup).
 
 -behaviour(supervisor).
 

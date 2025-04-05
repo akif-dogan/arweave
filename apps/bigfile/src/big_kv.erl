@@ -75,7 +75,7 @@ start_link() ->
 
 
 %% @doc Creates a named ETS table.
-%% This function is used within `ar_kv_sup` as well as `ar_test_node` modules.
+%% This function is used within `big_kv_sup` as well as `ar_test_node` modules.
 create_ets() ->
 	ets:new(?MODULE, [set, public, named_table, {keypos, #db.name}]).
 

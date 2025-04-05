@@ -1,4 +1,4 @@
--module(ar_rate_limiter).
+-module(big_rate_limiter).
 
 -behaviour(gen_server).
 

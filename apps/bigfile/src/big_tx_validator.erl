@@ -34,7 +34,7 @@ validate(TX) ->
 	Denomination = proplists:get_value(denomination, Props),
 	RedenominationHeight = proplists:get_value(redenomination_height, Props),
 	Wallets = big_wallets:get(WL, big_tx:get_addresses([TX])),
-	Mempool = ar_mempool:get_map(),
+	Mempool = big_mempool:get_map(),
 	Result = big_tx_replay_pool:verify_tx({TX, USDToBIGRate, PricePerGiBMinute,
 			KryderPlusRateMultiplier, Denomination, Height, RedenominationHeight, BlockAnchors,
 			RecentTXMap, Mempool, Wallets}),

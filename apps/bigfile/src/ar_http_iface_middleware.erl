@@ -235,7 +235,7 @@ handle(<<"GET">>, [<<"tx">>, <<"pending">>], Req, _Pid) ->
 						%% Should encode
 						lists:map(
 							fun ar_util:encode/1,
-							ar_mempool:get_all_txids()
+							big_mempool:get_all_txids()
 						)
 					),
 			Req}
@@ -1620,7 +1620,7 @@ handle_get_unconfirmed_tx(Hash, Req, Encoding) ->
 		{error, invalid} ->
 			{400, #{}, <<"Invalid hash.">>, Req};
 		{ok, TXID} ->
-			case ar_mempool:get_tx(TXID) of
+			case big_mempool:get_tx(TXID) of
 				not_found ->
 					handle_get_tx(Hash, Req, Encoding);
 				TX ->
@@ -2301,7 +2301,7 @@ block_field_to_string(_, Res) -> Res.
 
 %% @doc Return true if TXID is a pending tx.
 is_a_pending_tx(TXID) ->
-	ar_mempool:has_tx(TXID).
+	big_mempool:has_tx(TXID).
 
 decode_block(JSON, json) ->
 	try
@@ -2948,7 +2948,7 @@ post_tx_parse_id(check_header, {Req, Pid, Encoding}) ->
 			end
 	end;
 post_tx_parse_id(check_ignore_list, {TXID, Req, Pid, Encoding}) ->
-	case ar_mempool:is_known_tx(TXID) of
+	case big_mempool:is_known_tx(TXID) of
 		true ->
 			{error, tx_already_processed, TXID, Req};
 		false ->
@@ -3036,7 +3036,7 @@ post_tx_parse_id(verify_id_match, {MaybeTXID, Req, TX}) ->
 				true ->
 					{error, invalid_hash, Req};
 				false ->
-					case ar_mempool:is_known_tx(TXID) of
+					case big_mempool:is_known_tx(TXID) of
 						true ->
 							{error, tx_already_processed, TXID, Req};
 						false ->

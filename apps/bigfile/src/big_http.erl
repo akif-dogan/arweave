@@ -68,7 +68,7 @@ req(Args, ReestablishedConnection) ->
 	#{ peer := Peer, path := Path, method := Method } = Args,
 	Response = case catch gen_server:call(?MODULE, {get_connection, Args}, infinity) of
 		{ok, PID} ->
-			ar_rate_limiter:throttle(Peer, Path),
+			big_rate_limiter:throttle(Peer, Path),
 			case request(PID, Args) of
 				{error, Error} when Error == {shutdown, normal}; Error == noproc ->
 					case ReestablishedConnection of

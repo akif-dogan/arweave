@@ -50,7 +50,7 @@ bench_read(Args) ->
 		mining_addr = Address},
 	application:set_env(bigfile, config, Config2),
 
-	ar_kv_sup:start_link(),
+	big_kv_sup:start_link(),
 	big_storage_sup:start_link(),
 	big_sync_record_sup:start_link(),
 	big_chunk_storage_sup:start_link(),

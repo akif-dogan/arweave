@@ -102,7 +102,7 @@ get_ready_for_mining_txs() ->
 				Acc
 		end,
 		[],
-		ar_mempool:get_priority_set()
+		big_mempool:get_priority_set()
 	).
 
 %% @doc Return true if the given block hash is found in the block index.

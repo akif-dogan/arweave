@@ -76,7 +76,7 @@ handle_cast(process_chunk, State) ->
 	Peers = TrustedPeers ++ CleanedPeers,
 
 	% prepare to emit chunk(s)
-	PropagationQueue = ar_mempool:get_propagation_queue(),
+	PropagationQueue = big_mempool:get_propagation_queue(),
 	PropagationMax = max_propagation_peers(),
 	State2 = emit(
 		PropagationQueue, Peers, PropagationMax, ?CHUNK_SIZE, State),

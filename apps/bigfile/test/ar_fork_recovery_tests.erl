@@ -80,7 +80,7 @@ test_missing_txs_fork_recovery() ->
 	%% Wait to make sure the tx will not be gossiped upon reconnect.
 	timer:sleep(2000), % == 2 * ?CHECK_MEMPOOL_FREQUENCY
 	ar_test_node:rejoin_on(#{ node => main, join_on => peer1 }),
-	?assertEqual([], ar_mempool:get_all_txids()),
+	?assertEqual([], big_mempool:get_all_txids()),
 	ar_test_node:mine(peer1),
 	[{H1, _, _} | _] = wait_until_height(main, 1),
 	?assertEqual(1, length((read_block_when_stored(H1))#block.txs)).

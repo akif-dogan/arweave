@@ -91,7 +91,7 @@ init([]) ->
 	process_flag(trap_exit, true),
 	[ok, ok, ok, ok] = ar_events:subscribe([tx, block, nonce_limiter, node_state]),
 	%% Read persisted mempool.
-	ar_mempool:load_from_disk(),
+	big_mempool:load_from_disk(),
 	%% Join the network.
 	{ok, Config} = application:get_env(bigfile, config),
 	validate_trusted_peers(Config),
@@ -140,10 +140,10 @@ init([]) ->
 		fun ({_Utility, _TXID, ready_for_mining}) ->
 				false;
 			({_Utility, TXID, waiting}) ->
-				start_tx_mining_timer(ar_mempool:get_tx(TXID)),
+				start_tx_mining_timer(big_mempool:get_tx(TXID)),
 				true
 		end,
-		ar_mempool:get_priority_set()
+		big_mempool:get_priority_set()
 	),
 	%% May be start mining.
 	case Config#config.mine of
@@ -489,7 +489,7 @@ handle_info({event, nonce_limiter, _}, State) ->
 	{noreply, State};
 
 handle_info({tx_ready_for_mining, TX}, State) ->
-	ar_mempool:add_tx(TX, ready_for_mining),
+	big_mempool:add_tx(TX, ready_for_mining),
 	ar_events:send(tx, {ready_for_mining, TX}),
 	{noreply, State};
 
@@ -546,10 +546,10 @@ handle_info({event, block, _}, State) ->
 %% Add the new waiting transaction to the server state.
 handle_info({event, tx, {new, TX, _Source}}, State) ->
 	TXID = TX#tx.id,
-	case ar_mempool:has_tx(TXID) of
+	case big_mempool:has_tx(TXID) of
 		false ->
-			ar_mempool:add_tx(TX, waiting),
-			case ar_mempool:has_tx(TXID) of
+			big_mempool:add_tx(TX, waiting),
+			case big_mempool:has_tx(TXID) of
 				true ->
 					start_tx_mining_timer(TX);
 				false ->
@@ -563,12 +563,12 @@ handle_info({event, tx, {new, TX, _Source}}, State) ->
 	end;
 
 handle_info({event, tx, {emitting_scheduled, Utility, TXID}}, State) ->
-	ar_mempool:del_from_propagation_queue(Utility, TXID),
+	big_mempool:del_from_propagation_queue(Utility, TXID),
 	{noreply, State};
 
 %% Add the transaction to the mining pool, to be included in the mined block.
 handle_info({event, tx, {ready_for_mining, TX}}, State) ->
-	ar_mempool:add_tx(TX, ready_for_mining),
+	big_mempool:add_tx(TX, ready_for_mining),
 	{noreply, State};
 
 handle_info({event, tx, _}, State) ->
@@ -600,10 +600,10 @@ terminate(Reason, _State) ->
 			Mempool =
 				gb_sets:fold(
 					fun({_Utility, TXID, Status}, Acc) ->
-						maps:put(TXID, {ar_mempool:get_tx(TXID), Status}, Acc)
+						maps:put(TXID, {big_mempool:get_tx(TXID), Status}, Acc)
 					end,
 					#{},
-					ar_mempool:get_priority_set()	
+					big_mempool:get_priority_set()	
 				),
 			dump_mempool(Mempool, MempoolSize);
 		_ ->
@@ -673,7 +673,7 @@ handle_task(automine, State) ->
 	{noreply, start_mining(State#{ automine => true })};
 
 handle_task({filter_mempool, Mempool}, State) ->
-	{ok, List, RemainingMempool} = ar_mempool:take_chunk(Mempool, ?FILTER_MEMPOOL_CHUNK_SIZE),
+	{ok, List, RemainingMempool} = big_mempool:take_chunk(Mempool, ?FILTER_MEMPOOL_CHUNK_SIZE),
 	case List of
 		[] ->
 			{noreply, State};
@@ -706,7 +706,7 @@ handle_task({filter_mempool, Mempool}, State) ->
 					[],
 					List
 				),
-			ar_mempool:drop_txs(InvalidTXs),
+			big_mempool:drop_txs(InvalidTXs),
 			case RemainingMempool of
 				[] ->
 					scan_complete;
@@ -986,7 +986,7 @@ request_nonce_limiter_validation(#block{ indep_hash = H } = B, PrevB) ->
 	big_nonce_limiter:request_validation(H, Info, PrevInfo).
 
 pick_txs(TXIDs) ->
-	Mempool = ar_mempool:get_map(),
+	Mempool = big_mempool:get_map(),
 	lists:foldr(
 		fun (TX, {Found, Missing}) when is_record(TX, tx) ->
 				{[TX | Found], Missing};
@@ -1004,7 +1004,7 @@ pick_txs(TXIDs) ->
 								{[TX | Found], Missing}
 						end;
 					_Status ->
-						{[ar_mempool:get_tx(TXID) | Found], Missing}
+						{[big_mempool:get_tx(TXID) | Found], Missing}
 				end
 		end,
 		{[], []},
@@ -1387,8 +1387,8 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	),
 	big_disk_cache:write_block(B),
 	BlockTXs = B#block.txs,
-	ar_mempool:drop_txs(BlockTXs, false, false),
-	gen_server:cast(self(), {filter_mempool, ar_mempool:get_all_txids()}),
+	big_mempool:drop_txs(BlockTXs, false, false),
+	gen_server:cast(self(), {filter_mempool, big_mempool:get_all_txids()}),
 	{BlockAnchors, RecentTXMap} = get_block_anchors_and_recent_txs_map(BlockTXPairs),
 	Height = B#block.height,
 	{Rate, ScheduledRate} =
@@ -1593,7 +1593,7 @@ return_orphaned_txs_to_mempool(H, BaseH) ->
 		ar_events:send(tx, {ready_for_mining, TX}),
 		%% Add it to the mempool here even though have triggered an event - processes
 		%% do not handle their own events.
-		ar_mempool:add_tx(TX, ready_for_mining)
+		big_mempool:add_tx(TX, ready_for_mining)
 	end, TXs),
 	return_orphaned_txs_to_mempool(PrevH, BaseH).
 
@@ -1655,7 +1655,7 @@ get_merkle_rebase_threshold(PrevB) ->
 	end.
 
 collect_mining_transactions(Limit) ->
-	collect_mining_transactions(Limit, ar_mempool:get_priority_set(), []).
+	collect_mining_transactions(Limit, big_mempool:get_priority_set(), []).
 
 collect_mining_transactions(0, _Set, TXs) ->
 	TXs;
@@ -1667,7 +1667,7 @@ collect_mining_transactions(Limit, Set, TXs) ->
 			{{_Utility, TXID, Status}, Set2} = gb_sets:take_largest(Set),
 			case Status of
 				ready_for_mining ->
-					TX = ar_mempool:get_tx(TXID),
+					TX = big_mempool:get_tx(TXID),
 					collect_mining_transactions(Limit - 1, Set2, [TX | TXs]);
 				_ ->
 					collect_mining_transactions(Limit, Set2, TXs)

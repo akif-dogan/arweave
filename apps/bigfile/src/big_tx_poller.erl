@@ -111,7 +111,7 @@ terminate(Reason, _State) ->
 %%% Internal functions.
 
 check_for_received_txs(#state{ pending_txids = [TXID | PendingTXIDs] } = State) ->
-	case ar_mempool:is_known_tx(TXID) of
+	case big_mempool:is_known_tx(TXID) of
 		true ->
 			ok;
 		false ->

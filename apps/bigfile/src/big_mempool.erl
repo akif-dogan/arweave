@@ -1,4 +1,4 @@
--module(ar_mempool).
+-module(big_mempool).
 
 -include("../include/big.hrl").
 
@@ -278,7 +278,7 @@ get_origin_tx_map() ->
 del_from_propagation_queue(Priority, TXID) ->
 	ets:insert(node_state, {
 		tx_propagation_queue,
-		del_from_propagation_queue(ar_mempool:get_propagation_queue(), Priority, TXID)
+		del_from_propagation_queue(big_mempool:get_propagation_queue(), Priority, TXID)
 	}).
 del_from_propagation_queue(PropagationQueue, TX = #tx{}, Timestamp) ->
 	Priority = {big_tx:utility(TX), Timestamp},
