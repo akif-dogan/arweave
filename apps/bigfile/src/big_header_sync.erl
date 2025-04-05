@@ -63,7 +63,7 @@ init([]) ->
 	process_flag(trap_exit, true),
 	[ok, ok] = ar_events:subscribe([tx, disksup]),
 	{ok, Config} = application:get_env(bigfile, config),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "ar_header_sync_db"), ?MODULE),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "ar_header_sync_db"), ?MODULE),
 	{SyncRecord, Height, CurrentBI} =
 		case big_storage:read_term(header_sync_state) of
 			not_found ->
@@ -117,7 +117,7 @@ handle_cast({join, Height, RecentBI, Blocks}, State) ->
 				%% Delete from the kv store only after the sync record is saved - no matter
 				%% what happens to the process, if a height is in the record, it must be
 				%% present in the kv store.
-				ok = ar_kv:delete_range(?MODULE, << (IntersectionHeight + 1):256 >>,
+				ok = big_kv:delete_range(?MODULE, << (IntersectionHeight + 1):256 >>,
 						<< (PrevHeight + 1):256 >>),
 				S
 		end,
@@ -148,7 +148,7 @@ handle_cast({add_tip_block, #block{ height = Height } = B, RecentBI}, State) ->
 			%% Delete from the kv store only after the sync record is saved - no matter
 			%% what happens to the process, if a height is in the record, it must be present
 			%% in the kv store.
-			ok = ar_kv:delete_range(?MODULE, << (BaseHeight + 1):256 >>,
+			ok = big_kv:delete_range(?MODULE, << (BaseHeight + 1):256 >>,
 					<< (PrevHeight + 1):256 >>),
 			{noreply, State3};
 		Error ->
@@ -225,7 +225,7 @@ handle_cast({remove_tx, TXID}, State) ->
 handle_cast({remove_block, Height}, State) ->
 	?LOG_INFO([{event, removing_block_record}, {height, Height}]),
 	#state{ sync_record = Record } = State,
-	ok = ar_kv:delete(?MODULE, << Height:256 >>),
+	ok = big_kv:delete(?MODULE, << Height:256 >>),
 	{noreply, State#state{ sync_record = ar_intervals:delete(Record, Height, Height - 1) }};
 
 handle_cast(store_sync_state, State) ->
@@ -256,7 +256,7 @@ handle_info({event, tx, {preparing_unblacklisting, TXID}}, State) ->
 					Height - 1), retry_record = ar_intervals:delete(RetryRecord, Height,
 					Height - 1) },
 			ok = store_sync_state(State2),
-			ok = ar_kv:delete(?MODULE, << Height:256 >>),
+			ok = big_kv:delete(?MODULE, << Height:256 >>),
 			ar_events:send(tx, {ready_for_unblacklisting, TXID}),
 			{noreply, State2};
 		not_found ->
@@ -388,7 +388,7 @@ add_block2(B, #state{ sync_record = SyncRecord, retry_record = RetryRecord } = S
 				true ->
 					{ok, State};
 				false ->
-					ok = ar_kv:put(?MODULE, << Height:256 >>, term_to_binary({H, PrevH})),
+					ok = big_kv:put(?MODULE, << Height:256 >>, term_to_binary({H, PrevH})),
 					SyncRecord2 = ar_intervals:add(SyncRecord, Height, Height - 1),
 					RetryRecord2 = ar_intervals:delete(RetryRecord, Height, Height - 1),
 					{ok, State#state{ sync_record = SyncRecord2, retry_record = RetryRecord2 }}

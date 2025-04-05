@@ -280,7 +280,7 @@ init(StoreID) ->
 							big_node:get_partition_number(Size * Index)}
 		end,
 	StateDB = {sync_record, StoreID},
-	ok = ar_kv:open(Dir, StateDB),
+	ok = big_kv:open(Dir, StateDB),
 	{SyncRecordByID, SyncRecordByIDType, WAL} = read_sync_records(StateDB, StoreID),
 	initialize_sync_record_by_id_type_ets(SyncRecordByIDType, StoreID),
 	initialize_sync_record_by_id_ets(SyncRecordByID, StoreID),
@@ -556,7 +556,7 @@ is_recorded2(Offset, Key, ID, StoreID) ->
 
 read_sync_records(StateDB, StoreID) ->
 	{SyncRecordByID, SyncRecordByIDType} =
-		case ar_kv:get(StateDB, ?SYNC_RECORDS_KEY) of
+		case big_kv:get(StateDB, ?SYNC_RECORDS_KEY) of
 			not_found ->
 				{#{}, #{}};
 			{ok, V} ->
@@ -568,7 +568,7 @@ read_sync_records(StateDB, StoreID) ->
 
 replay_write_ahead_log(SyncRecordByID, SyncRecordByIDType, StateDB, StoreID) ->
 	WAL =
-		case ar_kv:get(StateDB, ?WAL_COUNT_KEY) of
+		case big_kv:get(StateDB, ?WAL_COUNT_KEY) of
 			not_found ->
 				0;
 			{ok, V} ->
@@ -583,7 +583,7 @@ replay_write_ahead_log(SyncRecordByID, SyncRecordByIDType, N, WAL, _StateDB, _St
 		when N > WAL ->
 	{SyncRecordByID, SyncRecordByIDType, WAL};
 replay_write_ahead_log(SyncRecordByID, SyncRecordByIDType, N, WAL, StateDB, StoreID) ->
-	case ar_kv:get(StateDB, binary:encode_unsigned(N)) of
+	case big_kv:get(StateDB, binary:encode_unsigned(N)) of
 		not_found ->
 			%% The VM crashed after recording the number.
 			{SyncRecordByID, SyncRecordByIDType, WAL};
@@ -690,7 +690,7 @@ store_state(State) ->
 			storage_module_size = StorageModuleSize,
 			storage_module_index = StorageModuleIndex } = State,
 	StoreSyncRecords =
-		ar_kv:put(
+		big_kv:put(
 			StateDB,
 			?SYNC_RECORDS_KEY,
 			term_to_binary({SyncRecordByID, SyncRecordByIDType})
@@ -700,7 +700,7 @@ store_state(State) ->
 			{error, _} = Error ->
 				Error;
 			ok ->
-				ar_kv:put(StateDB, ?WAL_COUNT_KEY, binary:encode_unsigned(0))
+				big_kv:put(StateDB, ?WAL_COUNT_KEY, binary:encode_unsigned(0))
 		end,
 	case ResetWAL of
 		{error, Reason} = Error2 ->
@@ -738,11 +738,11 @@ update_write_ahead_log(OpParams, StateDB, State) ->
 	#state{
 		wal = WAL
 	} = State,
-	case ar_kv:put(StateDB, binary:encode_unsigned(WAL + 1), term_to_binary(OpParams)) of
+	case big_kv:put(StateDB, binary:encode_unsigned(WAL + 1), term_to_binary(OpParams)) of
 		{error, _Reason} = Error ->
 			{Error, State};
 		ok ->
-			case ar_kv:put(StateDB, ?WAL_COUNT_KEY, binary:encode_unsigned(WAL + 1)) of
+			case big_kv:put(StateDB, ?WAL_COUNT_KEY, binary:encode_unsigned(WAL + 1)) of
 				ok ->
 					{ok, State#state{ wal = WAL + 1 }};
 				Error2 ->

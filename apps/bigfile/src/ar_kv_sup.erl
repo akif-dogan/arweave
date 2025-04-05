@@ -21,5 +21,5 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-	ar_kv:create_ets(),
-	{ok, {{one_for_one, 5, 10}, [?CHILD(ar_kv, worker)]}}.
+	big_kv:create_ets(),
+	{ok, {{one_for_one, 5, 10}, [?CHILD(big_kv, worker)]}}.

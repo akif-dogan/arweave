@@ -38,7 +38,7 @@ read_block_index() ->
 		not_found ->
 			not_found;
 		{Height,{_H, _, _, _PrevH}} ->
-			{ok, Map} = ar_kv:get_range(block_index_db, << 0:256 >>, << Height:256 >>),
+			{ok, Map} = big_kv:get_range(block_index_db, << 0:256 >>, << Height:256 >>),
 			read_block_index_from_map(Map, 0, Height, <<>>, [])
 	end.
 
@@ -70,7 +70,7 @@ read_reward_history([{H, _WeaveSize, _TXRoot} | BI]) ->
 		not_found ->
 			not_found;
 		History ->
-			case ar_kv:get(reward_history_db, H) of
+			case big_kv:get(reward_history_db, H) of
 				not_found ->
 					?LOG_DEBUG([{event, read_reward_history_not_found},
 							{reason, missing_block},
@@ -94,7 +94,7 @@ read_block_time_history(Height, [{H, _WeaveSize, _TXRoot} | BI]) ->
 				not_found ->
 					not_found;
 				History ->
-					case ar_kv:get(block_time_history_db, H) of
+					case big_kv:get(block_time_history_db, H) of
 						not_found ->
 							not_found;
 						{ok, Bin} ->
@@ -111,14 +111,14 @@ store_block_index(BI) ->
 	%% Use a key that is bigger than any << Height:256 >> (<<"a">> > << Height:256 >>)
 	%% to retrieve the largest stored Height.
 	NewHeight = length(BI) - 1,
-	case ar_kv:get_prev(block_index_db, <<"a">>) of
+	case big_kv:get_prev(block_index_db, <<"a">>) of
 		none ->
 			update_block_index(NewHeight, 0, lists:reverse(BI));
 		{ok, << StoredHeight:256 >>, _V} ->
 			%% RootHeight should a historical height shared by both the stored BI and the
 			%% new BI
 			RootHeight = max(0, min(StoredHeight, NewHeight) - ?STORE_BLOCKS_BEHIND_CURRENT),
-			{ok, V} = ar_kv:get(block_index_db, << RootHeight:256 >>),
+			{ok, V} = big_kv:get(block_index_db, << RootHeight:256 >>),
 			{H, WeaveSize, TXRoot} = lists:nth(NewHeight - RootHeight + 1, BI),
 			case binary_to_term(V) of
 				{H, WeaveSize, TXRoot, _PrevH} ->
@@ -170,7 +170,7 @@ update_block_index(NewTipHeight, OrphanCount, BI) ->
 
 update_block_index2(IndexHeight, OrphanCount, BI) ->
 	%% 1. Delete all the orphaned blocks from the block index
-	case ar_kv:delete_range(block_index_db,
+	case big_kv:delete_range(block_index_db,
 			<< IndexHeight:256 >>, << (IndexHeight + OrphanCount):256 >>) of
 		ok ->
 			case IndexHeight of
@@ -180,7 +180,7 @@ update_block_index2(IndexHeight, OrphanCount, BI) ->
 					%% 2. Add all the entries in BI to the block index
 					%% BI will include the new tip block at the current height, as well as any new
 					%% history blocks if the tip is on a new branch.
-					case ar_kv:get(block_index_db, << (IndexHeight - 1):256 >>) of
+					case big_kv:get(block_index_db, << (IndexHeight - 1):256 >>) of
 						not_found ->
 							?LOG_ERROR([{event, failed_to_update_block_index},
 									{reason, prev_element_not_found},
@@ -204,7 +204,7 @@ update_block_index3(_Height, _PrevH, []) ->
 	ok;
 update_block_index3(Height, PrevH, [{H, WeaveSize, TXRoot} | BI]) ->
 	Bin = term_to_binary({H, WeaveSize, TXRoot, PrevH}),
-	case ar_kv:put(block_index_db, << Height:256 >>, Bin) of
+	case big_kv:put(block_index_db, << Height:256 >>, Bin) of
 		ok ->
 			update_block_index3(Height + 1, H, BI);
 		Error ->
@@ -225,7 +225,7 @@ store_reward_history_part2([]) ->
 	ok;
 store_reward_history_part2([{H, El} | History]) ->
 	Bin = term_to_binary(El),
-	case ar_kv:put(reward_history_db, H, Bin) of
+	case big_kv:put(reward_history_db, H, Bin) of
 		ok ->
 			store_reward_history_part2(History);
 		Error ->
@@ -245,7 +245,7 @@ store_block_time_history_part2([]) ->
 	ok;
 store_block_time_history_part2([{H, El} | History]) ->
 	Bin = term_to_binary(El),
-	case ar_kv:put(block_time_history_db, H, Bin) of
+	case big_kv:put(block_time_history_db, H, Bin) of
 		ok ->
 			store_block_time_history_part2(History);
 		Error ->
@@ -298,7 +298,7 @@ put_tx_confirmation_data(B) ->
 	Data = term_to_binary({B#block.height, B#block.indep_hash}),
 	lists:foldl(
 		fun	(TX, ok) ->
-				ar_kv:put(tx_confirmation_db, TX#tx.id, Data);
+				big_kv:put(tx_confirmation_db, TX#tx.id, Data);
 			(_TX, Acc) ->
 				Acc
 		end,
@@ -309,7 +309,7 @@ put_tx_confirmation_data(B) ->
 %% @doc Return {BlockHeight, BlockHash} belonging to the block where
 %% the given transaction was included.
 get_tx_confirmation_data(TXID) ->
-	case ar_kv:get(tx_confirmation_db, TXID) of
+	case big_kv:get(tx_confirmation_db, TXID) of
 		{ok, Binary} ->
 			{ok, binary_to_term(Binary)};
 		not_found ->
@@ -347,7 +347,7 @@ read_block(BH) ->
 			%% node is out of disk space.
 			read_block_from_file(Filename, Encoding);
 		_ ->
-			case ar_kv:get(block_db, BH) of
+			case big_kv:get(block_db, BH) of
 				not_found ->
 					case lookup_block_filename(BH) of
 						unavailable ->
@@ -504,12 +504,12 @@ lookup_block_filename(H) ->
 %% bytes does not include the migrated v1 data. The removal of migrated v1 data is requested
 %% from big_data_sync asynchronously. The v2 headers are not removed.
 delete_blacklisted_tx(Hash) ->
-	case ar_kv:get(tx_db, Hash) of
+	case big_kv:get(tx_db, Hash) of
 		{ok, V} ->
 			TX = parse_tx_kv_binary(V),
 			case TX#tx.format == 1 andalso TX#tx.data_size > 0 of
 				true ->
-					case ar_kv:delete(tx_db, Hash) of
+					case big_kv:delete(tx_db, Hash) of
 						ok ->
 							{ok, byte_size(V)};
 						Error ->
@@ -671,7 +671,7 @@ write_tx_header(TX) ->
 			_ ->
 				TX#tx{ data = <<>> }
 		end,
-	ar_kv:put(tx_db, TX#tx.id, big_serialize:tx_to_binary(TX2)).
+	big_kv:put(tx_db, TX#tx.id, big_serialize:tx_to_binary(TX2)).
 
 write_tx_data(ExpectedDataRoot, Data, TXID) ->
 	Chunks = big_tx:chunk_binary(?DATA_CHUNK_SIZE, Data),
@@ -739,7 +739,7 @@ read_tx(ID) ->
 	end.
 
 read_tx2(ID) ->
-	case ar_kv:get(tx_db, ID) of
+	case big_kv:get(tx_db, ID) of
 		not_found ->
 			read_tx_from_file(ID);
 		{ok, Binary} ->
@@ -1036,15 +1036,15 @@ init([]) ->
 	ensure_directories(Config#config.data_dir),
 	%% Copy genesis transactions (snapshotted in the repo) into data_dir/txs
 	ar_weave:add_mainnet_v1_genesis_txs(),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "ar_storage_tx_confirmation_db"),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "ar_storage_tx_confirmation_db"),
 			tx_confirmation_db),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "ar_storage_tx_db"), tx_db),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "ar_storage_block_db"), block_db),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "reward_history_db"), reward_history_db),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "block_time_history_db"),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "ar_storage_tx_db"), tx_db),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "ar_storage_block_db"), block_db),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "reward_history_db"), reward_history_db),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "block_time_history_db"),
 			block_time_history_db),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "block_index_db"), block_index_db),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "account_tree_db"), account_tree_db),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "block_index_db"), block_index_db),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "account_tree_db"), account_tree_db),
 	ets:insert(?MODULE, [{same_disk_storage_modules_total_size,
 			get_same_disk_storage_modules_total_size()}]),
 	{ok, #state{}}.
@@ -1076,7 +1076,7 @@ terminate(_Reason, _State) ->
 block_index_tip() ->
 	%% Use a key that is bigger than any << Height:256 >> (<<"a">> > << Height:256 >>)
 	%% to retrieve the largest stored Height.
-	case ar_kv:get_prev(block_index_db, <<"a">>) of
+	case big_kv:get_prev(block_index_db, <<"a">>) of
 		none ->
 			not_found;
 		{ok, << Height:256 >>, V} ->
@@ -1094,7 +1094,7 @@ write_block(B) ->
 	end,
 	TXIDs = lists:map(fun(TXID) when is_binary(TXID) -> TXID;
 			(#tx{ id = TXID }) -> TXID end, B#block.txs),
-	ar_kv:put(block_db, B#block.indep_hash, big_serialize:block_to_binary(B#block{
+	big_kv:put(block_db, B#block.indep_hash, big_serialize:block_to_binary(B#block{
 			txs = TXIDs })).
 
 write_full_block2(BShadow, _) ->
@@ -1269,9 +1269,9 @@ store_account_tree_update(Height, RootHash, Map) ->
 		fun({H, Prefix} = Key, Value) ->
 			Prefix2 = case Prefix of root -> <<>>; _ -> Prefix end,
 			DBKey = << H/binary, Prefix2/binary >>,
-			case ar_kv:get(account_tree_db, DBKey) of
+			case big_kv:get(account_tree_db, DBKey) of
 				not_found ->
-					case ar_kv:put(account_tree_db, DBKey, term_to_binary(Value)) of
+					case big_kv:put(account_tree_db, DBKey, term_to_binary(Value)) of
 						ok ->
 							ok;
 						{error, Reason} ->
@@ -1302,13 +1302,13 @@ store_account_tree_update(Height, RootHash, Map) ->
 %% @doc Ignore the prefix when querying a key since the prefix might depend on the order of
 %% insertions and is only used to optimize certain lookups.
 get_account_tree_value(Key, Prefix) ->
-	ar_kv:get_prev(account_tree_db, << Key/binary, Prefix/binary >>).
+	big_kv:get_prev(account_tree_db, << Key/binary, Prefix/binary >>).
 	% does not work:
-	%ar_kv:get_next(account_tree_db, << Key/binary, Prefix/binary >>).
+	%big_kv:get_next(account_tree_db, << Key/binary, Prefix/binary >>).
 	% works:
 	%<< N:(48 * 8) >> = Key,
 	%Key2 = << (N + 1):(48 * 8) >>,
-	%ar_kv:get_prev(account_tree_db, Key2).
+	%big_kv:get_prev(account_tree_db, Key2).
 
 %%%===================================================================
 %%% Tests
@@ -1438,7 +1438,7 @@ test_store_and_retrieve_wallet_list_permutations() ->
 store_and_retrieve_wallet_list(Keys) ->
 	MinBinary = <<>>,
 	MaxBinary = << <<1:1>> || _ <- lists:seq(1, 512) >>,
-	ar_kv:delete_range(account_tree_db, MinBinary, MaxBinary),
+	big_kv:delete_range(account_tree_db, MinBinary, MaxBinary),
 	store_and_retrieve_wallet_list(Keys, ar_patricia_tree:new(), maps:new(), false).
 
 store_and_retrieve_wallet_list([], Tree, InsertedKeys, IsUpdate) ->
@@ -1514,7 +1514,7 @@ update_block_index_test_() ->
 	].
 
 test_update_block_index() ->
-	ar_kv:delete_range(block_index_db, <<0:256>>, <<"a">>),
+	big_kv:delete_range(block_index_db, <<0:256>>, <<"a">>),
 
 	?assertEqual(
 		{error, not_found},

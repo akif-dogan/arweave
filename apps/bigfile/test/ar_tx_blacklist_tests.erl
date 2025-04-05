@@ -347,7 +347,7 @@ assert_removed_txs(BadTXIDs) ->
 							%% Do not use big_storage:read_tx because the
 							%% transaction is temporarily kept in the disk cache,
 							%% even when blacklisted.
-							andalso ar_kv:get(tx_db, TXID) == not_found
+							andalso big_kv:get(tx_db, TXID) == not_found
 				end,
 				BadTXIDs
 			)

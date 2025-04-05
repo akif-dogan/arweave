@@ -42,7 +42,7 @@ list_to_boolean(_) -> false.
 
 dump_blocks(BH, MinHeight, OutputDir, IncludeTXs) ->
 	H = ar_util:encode(BH),
-	case ar_kv:get(block_db, BH) of
+	case big_kv:get(block_db, BH) of
 		{ok, Bin} ->
 			try
 				case big_serialize:binary_to_block(Bin) of
@@ -88,7 +88,7 @@ dump_blocks(BH, MinHeight, OutputDir, IncludeTXs) ->
 dump_txs([], _OutputDir) ->
 	ok;
 dump_txs([TXID | TXIDs], OutputDir) ->
-	case ar_kv:get(tx_db, TXID) of
+	case big_kv:get(tx_db, TXID) of
 		{ok, Bin} ->
 			{ok, TX} = big_serialize:binary_to_tx(Bin),
 			Json = big_serialize:tx_to_json_struct(TX),

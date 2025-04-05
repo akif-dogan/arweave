@@ -38,11 +38,11 @@ get_forks(StartTime) ->
 init([]) ->
     %% Trap exit to avoid corrupting any open files on quit..
     process_flag(trap_exit, true),
-	ok = ar_kv:open(filename:join(?ROCKS_DB_DIR, "forks_db"), forks_db),
+	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "forks_db"), forks_db),
     {ok, #{}}.
 
 handle_call({get_forks, StartTime}, _From, State) ->
-    {ok, ForksMap} = ar_kv:get_range(forks_db, <<(StartTime * 1000):64>>),
+    {ok, ForksMap} = big_kv:get_range(forks_db, <<(StartTime * 1000):64>>),
     %% Sort forks by their key (the timestamp when they were detected)
     SortedForks = lists:sort(maps:to_list(ForksMap)),
     Forks = [binary_to_term(Fork) || {_Timestamp, Fork} <- SortedForks],
@@ -67,7 +67,7 @@ terminate(_Reason, _state) ->
 %%%===================================================================
 log_fork(Orphans, ForkRootB, ForkTime) ->
     Fork = create_fork(Orphans, ForkRootB, ForkTime),
-    ar_kv:put(forks_db, <<ForkTime:64>>, term_to_binary(Fork)),
+    big_kv:put(forks_db, <<ForkTime:64>>, term_to_binary(Fork)),
     record_fork_depth(Orphans),
     ok.
 
@@ -201,4 +201,4 @@ assert_forks_equal(ExpectedForks, ActualForks) ->
 
 clear_forks_db() ->
     Time = os:system_time(millisecond),
-    ar_kv:delete_range(forks_db, integer_to_binary(0), integer_to_binary(Time)).
+    big_kv:delete_range(forks_db, integer_to_binary(0), integer_to_binary(Time)).
