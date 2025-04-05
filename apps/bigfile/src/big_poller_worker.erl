@@ -29,7 +29,7 @@ start_link(Name) ->
 
 init([]) ->
 	{ok, Config} = application:get_env(bigfile, config),
-	[ok] = ar_events:subscribe([node_state]),
+	[ok] = big_events:subscribe([node_state]),
 	State = #state{ polling_frequency_ms = Config#config.polling * 1000 },
 	case big_node:is_joined() of
 		true ->

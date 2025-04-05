@@ -144,7 +144,7 @@ test_invalid_block_with_high_cumulative_difficulty() ->
 	B2 = fake_block_with_strong_cumulative_difficulty(B1, B0, 10000000000000000),
 	B2H = B2#block.indep_hash,
 	?debugFmt("Fake block: ~s.", [ar_util:encode(B2H)]),
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
 			big_http_iface_client:send_block_binary(ar_test_node:peer_ip(main), B2#block.indep_hash,
 					big_serialize:block_to_binary(B2))),

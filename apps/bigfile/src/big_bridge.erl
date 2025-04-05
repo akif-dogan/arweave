@@ -49,7 +49,7 @@ start_link(Name, Workers) ->
 %% @end
 %%--------------------------------------------------------------------
 init(Workers) ->
-	ar_events:subscribe(block),
+	big_events:subscribe(block),
 	WorkerMap = lists:foldl(fun(W, Acc) -> maps:put(W, free, Acc) end, #{}, Workers),
 	State = #state{ workers = WorkerMap },
 	{ok, State}.

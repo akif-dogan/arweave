@@ -81,7 +81,7 @@ init([]) ->
 	{ok, _} = timer:apply_interval(
 		?DATA_DISCOVERY_COLLECT_PEERS_FREQUENCY_MS, ?MODULE, collect_peers, []),
 	gen_server:cast(?MODULE, update_network_data_map),
-	ok = ar_events:subscribe(peer),
+	ok = big_events:subscribe(peer),
 	{ok, #state{
 		peer_queue = queue:new(),
 		peers_pending = 0,

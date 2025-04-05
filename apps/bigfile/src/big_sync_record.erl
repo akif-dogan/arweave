@@ -649,15 +649,15 @@ replay_write_ahead_log(SyncRecordByID, SyncRecordByIDType, N, WAL, StateDB, Stor
 	end.
 
 emit_add_range(Start, End, big_data_sync, StoreID) ->
-	ar_events:send(sync_record, {add_range, Start, End, big_data_sync, StoreID});
+	big_events:send(sync_record, {add_range, Start, End, big_data_sync, StoreID});
 emit_add_range(_Start, _End, _ID, _StoreID) ->
 	ok.
 
 emit_remove_range(Start, End, StoreID) ->
-	ar_events:send(sync_record, {remove_range, Start, End, StoreID}).
+	big_events:send(sync_record, {remove_range, Start, End, StoreID}).
 
 emit_cut(Offset, StoreID) ->
-	ar_events:send(sync_record, {cut, Offset, StoreID}).
+	big_events:send(sync_record, {cut, Offset, StoreID}).
 
 initialize_sync_record_by_id_ets(SyncRecordByID, StoreID) ->
 	Iterator = maps:iterator(SyncRecordByID),

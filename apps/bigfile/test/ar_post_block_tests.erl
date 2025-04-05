@@ -96,7 +96,7 @@ post_2_8_test_() ->
 
 test_mitm_poa_chunk_tamper_warn({_Key, B, _PrevB}) ->
 	%% Verify that, in 2.7, we don't ban a peer if the poa.chunk is tampered with.
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	assert_not_banned(ar_test_node:peer_ip(main)),
 	B2 = B#block{ poa = #poa{ chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE) } },
 	post_block(B2, invalid_first_chunk),
@@ -106,7 +106,7 @@ test_mitm_poa2_chunk_tamper_warn({Key, B, PrevB}) ->
 	%% Verify that, in 2.7, we don't ban a peer if the poa2.chunk is tampered with.
 	%% For this test we have to re-sign the block with the new poa2.chunk - but that's just a
 	%% test limitation. In the wild the poa2 chunk could be modified without resigning.
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	assert_not_banned(ar_test_node:peer_ip(main)),
 	B2 = sign_block(B#block{ 
 			recall_byte2 = 100000000,
@@ -115,7 +115,7 @@ test_mitm_poa2_chunk_tamper_warn({Key, B, PrevB}) ->
 	assert_not_banned(ar_test_node:peer_ip(main)).
 
 test_reject_block_invalid_proof_size({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	MaxDataPathSize = 349504,
 	MaxTxPathSize = 2176,
 	post_block(sign_block(
@@ -163,7 +163,7 @@ test_reject_block_invalid_proof_size({Key, B, PrevB}) ->
 
 test_cached_poa({Key, B, PrevB}) ->
 	%% Verify that comparing against a cached poa works
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B, PrevB, Key),
 	post_block(B2, valid),
 	B3 = sign_block(B, PrevB, Key),
@@ -196,7 +196,7 @@ assert_not_banned(Peer) ->
 %% ------------------------------------------------------------------------------------------
 
 test_reject_block_invalid_miner_reward({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ reward = 0 }, PrevB, Key),
 	post_block(B2, invalid_reward_history_hash),
 	HashRate = big_difficulty:get_hash_rate_fixed_ratio(B2),
@@ -211,32 +211,32 @@ test_reject_block_invalid_miner_reward({Key, B, PrevB}) ->
 	post_block(B3, invalid_miner_reward).
 
 test_reject_block_invalid_denomination({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ denomination = 0 }, PrevB, Key),
 	post_block(B2, invalid_denomination).
 
 test_reject_block_invalid_kryder_plus_rate_multiplier({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ kryder_plus_rate_multiplier = 0 }, PrevB, Key),
 	post_block(B2, invalid_kryder_plus_rate_multiplier).
 
 test_reject_block_invalid_kryder_plus_rate_multiplier_latch({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ kryder_plus_rate_multiplier_latch = 2 }, PrevB, Key),
 	post_block(B2, invalid_kryder_plus_rate_multiplier_latch).
 
 test_reject_block_invalid_endowment_pool({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ reward_pool = 2 }, PrevB, Key),
 	post_block(B2, invalid_reward_pool).
 
 test_reject_block_invalid_debt_supply({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ debt_supply = 100000000 }, PrevB, Key),
 	post_block(B2, invalid_debt_supply).
 
 test_reject_block_invalid_wallet_list({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ wallet_list = crypto:strong_rand_bytes(32) }, PrevB, Key),
 	post_block(B2, invalid_wallet_list).
 
@@ -245,7 +245,7 @@ test_reject_block_invalid_wallet_list({Key, B, PrevB}) ->
 %% ------------------------------------------------------------------------------------------
 
 test_reject_block_invalid_packing_difficulty({Key, B, PrevB}) ->
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	assert_not_banned(ar_test_node:peer_ip(main)),
 	B2 = sign_block(B#block{ unpacked_chunk_hash = <<>>,
 			packing_difficulty = 33 }, PrevB, Key),
@@ -278,7 +278,7 @@ test_add_external_block_with_invalid_timestamp() ->
 	FutureTimestampTolerance = ?JOIN_CLOCK_TOLERANCE * 2 + ?CLOCK_DRIFT_MAX,
 	TooFarFutureTimestamp = os:system_time(second) + FutureTimestampTolerance + 3,
 	B2 = sign_block(B#block{ timestamp = TooFarFutureTimestamp }, PrevB, Key),
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	post_block(B2, invalid_timestamp),
 	%% Expect the timestamp from the future within the tolerance interval to be accepted.
 	OkFutureTimestamp = os:system_time(second) + FutureTimestampTolerance - 3,
@@ -306,7 +306,7 @@ test_rejects_invalid_blocks() ->
 	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	%% Try to post an invalid block.
 	InvalidH = crypto:strong_rand_bytes(48),
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	post_block(B1#block{ indep_hash = InvalidH }, invalid_hash),
 	%% Verify the IP address of self is NOT banned in big_blacklist_middleware.
 	InvalidH2 = crypto:strong_rand_bytes(48),
@@ -420,7 +420,7 @@ test_rejects_invalid_blocks() ->
 					last_step_checkpoints = [crypto:strong_rand_bytes(32)] } }, B0, Key),
 	%% Reset the node to the genesis block.
 	ar_test_node:start(B0),
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	post_block(B12, invalid_nonce_limiter),
 	?assertMatch({ok, {{<<"403">>, _}, _,
 			<<"IP address blocked due to previous request.">>, _, _}},
@@ -476,7 +476,7 @@ rejects_blocks_with_small_rsa_keys_test_() ->
 test_rejects_blocks_with_small_rsa_keys() ->
 	[B0] = ar_weave:init(),
 	ar_test_node:start(B0),
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	ar_test_node:mine(main),
 	BI = ar_test_node:assert_wait_until_height(main, 1),
 	B1 = big_storage:read_block(hd(BI)),
@@ -505,7 +505,7 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	ar_test_node:start(B0),
 	ar_test_node:start_peer(peer1, B0, MiningAddr),
 	ar_test_node:disconnect_from(peer1),
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	{Priv, _} = Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [MiningAddr]),
 	TX0 = ar_test_node:sign_tx(Key0, #{ target => big_wallet:to_address(Key), quantity => ?BIG(10) }),
 	ar_test_node:assert_post_tx_to_peer(peer1, TX0),
@@ -739,7 +739,7 @@ test_resigned_solution() ->
 	B = big_node:get_current_block(),
 	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
 	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ tags = [<<"tag1">>] }, B0, Key),
 	post_block(B2, [valid]),
 	B3 = sign_block(B#block{ tags = [<<"tag2">>] }, B0, Key),

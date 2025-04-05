@@ -253,7 +253,7 @@ initialize_state(Blocks, Tree) ->
 	WalletList = LastB#block.wallet_list,
 	LastHeight = LastB#block.height,
 	DAG4 = set_current(DAG3, WalletList, LastHeight, InitialDepth),
-	ar_events:send(node_state, {account_tree_initialized, LastB#block.height}),
+	big_events:send(node_state, {account_tree_initialized, LastB#block.height}),
 	{noreply, DAG4}.
 
 get_tree_from_peers(B, Peers) ->

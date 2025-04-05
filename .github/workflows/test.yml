@@ -267,7 +267,7 @@ jobs:
             big_diff_dag,
             big_entropy_storage,
             big_ets_intervals,
-            ar_events,
+            big_events,
             ar_inflation,
             big_intervals,
             big_join,

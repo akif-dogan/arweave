@@ -243,7 +243,7 @@ broadcast_disk_free({unix, _} = Os, Port) ->
 	DataDirDfResult = disk_free_cmd(Os, Df, DataDirPath, Port),
 	check_for_hardware_error(DataDirDfResult, true),
 	[DataDirFs, DataDirBytes, DataDirPercentage] = parse_df_2(DataDirDfResult),
-	ar_events:send(disksup, {
+	big_events:send(disksup, {
 		remaining_disk_space,
 			DataDirID,
 			true,
@@ -260,7 +260,7 @@ broadcast_disk_free({unix, _} = Os, Port) ->
 			false ->
 						[StorageModuleFs, Bytes, Percentage] = parse_df_2(Result),
 						IsDataDirDrive = string:equal(DataDirFs, StorageModuleFs),
-						ar_events:send(disksup, {
+						big_events:send(disksup, {
 							remaining_disk_space,
 							StoreID, IsDataDirDrive, Percentage, Bytes
 						})

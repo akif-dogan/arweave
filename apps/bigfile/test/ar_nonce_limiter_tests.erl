@@ -23,7 +23,7 @@ step() ->
 	Self = self(),
 	spawn(
 		fun() ->
-			ok = ar_events:subscribe(nonce_limiter),
+			ok = big_events:subscribe(nonce_limiter),
 			gen_server:cast(big_nonce_limiter, compute_step),
 			receive
 				{event, nonce_limiter, {computed_output, _}} ->
@@ -130,7 +130,7 @@ test_applies_validated_steps() ->
 	B2NextVDFDifficulty = 4,
 	B2 = test_block(2, Output2, Seed, NextSeed, [], [Output2], 
 			B2VDFDifficulty, B2NextVDFDifficulty),
-	ok = ar_events:subscribe(nonce_limiter),
+	ok = big_events:subscribe(nonce_limiter),
 	assert_validate(B2, B1, valid),
 	assert_validate(B2, B1, valid),
 	assert_validate(B2#block{ nonce_limiter_info = #nonce_limiter_info{} }, B1, {invalid, 1}),
@@ -143,7 +143,7 @@ test_applies_validated_steps() ->
 	assert_step_number(2),
 	[step() || _ <- lists:seq(1, 3)],
 	assert_step_number(5),
-	ar_events:send(node_state, {new_tip, B2, B1}),
+	big_events:send(node_state, {new_tip, B2, B1}),
 	%% We have just applied B2 with a VDF difficulty update => a new session has to be opened.
 	assert_step_number(2),
 	assert_session(B2, B1),
@@ -164,7 +164,7 @@ test_applies_validated_steps() ->
 	[step() || _ <- lists:seq(1, 6)],
 	assert_step_number(10),
 	assert_validate(B4, B3, valid),
-	ar_events:send(node_state, {new_tip, B4, B3}),
+	big_events:send(node_state, {new_tip, B4, B3}),
 	assert_step_number(9),
 	assert_session(B4, B3),
 	assert_validate(B4, B4, {invalid, 1}),
@@ -200,7 +200,7 @@ test_applies_validated_steps() ->
 	B8NextVDFDifficulty = 6, 
 	B8 = test_block(8, Output8, NextSeed, NextSeed2, [], [Output8, Output7, Output6],
 			B8VDFDifficulty, B8NextVDFDifficulty),
-	ar_events:send(node_state, {new_tip, B8, B4}),
+	big_events:send(node_state, {new_tip, B8, B4}),
 	timer:sleep(1000),
 	assert_session(B8, B4),
 	assert_validate(B8, B4, valid),

@@ -12,7 +12,7 @@
 
 -import(ar_test_node, [assert_wait_until_height/2, post_block/2, send_new_block/2]).
 
-%% we have to wait to let the ar_events get processed whenever we apply a VDF step
+%% we have to wait to let the big_events get processed whenever we apply a VDF step
 -define(WAIT_TIME, 1000).
 
 %% -------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ setup_external_update() ->
 	ets:new(add_task, [named_table, bag, public]),
 	Pid = spawn(
 		fun() ->
-			ok = ar_events:subscribe(nonce_limiter),
+			ok = big_events:subscribe(nonce_limiter),
 			computed_output()
 		end
 	),
@@ -185,7 +185,7 @@ test_vdf_server_push_fast_block() ->
 	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	%% Post the block to main which will cause it to validate VDF for the block under
 	%% the B0 session and then begin using the B1 VDF session going forward
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	post_block(B1, valid),
 	timer:sleep(3000),
 
@@ -231,7 +231,7 @@ test_vdf_server_push_slow_block() ->
 
 	%% Post the block to main which will cause it to validate VDF for the block under
 	%% the B0 session and then begin using the B1 VDF session going forward
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	post_block(B1, valid),
 	timer:sleep(3000),
 

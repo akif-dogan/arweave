@@ -65,7 +65,7 @@ pre_validate(B, Peer, ReceiveTimestamp) ->
 
 init([]) ->
 	gen_server:cast(?MODULE, pre_validate),
-	ok = ar_events:subscribe(block),
+	ok = big_events:subscribe(block),
 	{ok, Config} = application:get_env(bigfile, config),
 	ThrottleBySolutionInterval = Config#config.block_throttle_by_solution_interval,
 	ThrottleByIPInterval = Config#config.block_throttle_by_ip_interval,
@@ -228,7 +228,7 @@ pre_validate_proof_sizes(B, PrevB, Peer) ->
 			may_be_pre_validate_first_chunk_hash(B, PrevB, Peer);
 		false ->
 			post_block_reject_warn(B, check_proof_size, Peer),
-			ar_events:send(block, {rejected, invalid_proof_size, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_proof_size, B#block.indep_hash, Peer}),
 			invalid
 	end.
 
@@ -236,7 +236,7 @@ may_be_pre_validate_first_chunk_hash(B, PrevB, Peer) ->
 	case crypto:hash(sha256, (B#block.poa)#poa.chunk) == B#block.chunk_hash of
 		false ->
 			post_block_reject_warn(B, check_first_chunk, Peer),
-			ar_events:send(block, {rejected, invalid_first_chunk, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_first_chunk, B#block.indep_hash, Peer}),
 			invalid;
 		true ->
 			may_be_pre_validate_second_chunk_hash(B, PrevB, Peer)
@@ -246,7 +246,7 @@ may_be_pre_validate_second_chunk_hash(#block{ recall_byte2 = undefined } = B, Pr
 	case B#block.height < ar_fork:height_2_7_2() orelse B#block.poa2 == #poa{} of
 		false ->
 			post_block_reject_warn(B, check_second_chunk, Peer),
-			ar_events:send(block, {rejected, invalid_poa2_recall_byte2_undefined,
+			big_events:send(block, {rejected, invalid_poa2_recall_byte2_undefined,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -257,7 +257,7 @@ may_be_pre_validate_second_chunk_hash(B, PrevB, Peer) ->
 	case crypto:hash(sha256, (B#block.poa2)#poa.chunk) == B#block.chunk2_hash of
 		false ->
 			post_block_reject_warn(B, check_second_chunk, Peer),
-			ar_events:send(block, {rejected, invalid_second_chunk, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_second_chunk, B#block.indep_hash, Peer}),
 			invalid;
 		true ->
 			may_be_pre_validate_first_unpacked_chunk_hash(B, PrevB, Peer)
@@ -273,7 +273,7 @@ may_be_pre_validate_first_unpacked_chunk_hash(
 			andalso byte_size(PoA#poa.unpacked_chunk) == ?DATA_CHUNK_SIZE of
 		false ->
 			post_block_reject_warn(B, check_first_unpacked_chunk, Peer),
-			ar_events:send(block, {rejected, invalid_first_unpacked_chunk,
+			big_events:send(block, {rejected, invalid_first_unpacked_chunk,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -286,7 +286,7 @@ may_be_pre_validate_first_unpacked_chunk_hash(B, PrevB, Peer) ->
 	case {UnpackedChunkHash, UnpackedChunk2Hash} == {undefined, undefined} of
 		false ->
 			post_block_reject_warn(B, check_first_unpacked_chunk_hash, Peer),
-			ar_events:send(block, {rejected, invalid_first_unpacked_chunk_hash,
+			big_events:send(block, {rejected, invalid_first_unpacked_chunk_hash,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -305,7 +305,7 @@ may_be_pre_validate_second_unpacked_chunk_hash(
 			andalso byte_size(PoA2#poa.unpacked_chunk) == ?DATA_CHUNK_SIZE of
 		false ->
 			post_block_reject_warn(B, check_second_unpacked_chunk, Peer),
-			ar_events:send(block, {rejected, invalid_second_unpacked_chunk,
+			big_events:send(block, {rejected, invalid_second_unpacked_chunk,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -316,7 +316,7 @@ may_be_pre_validate_second_unpacked_chunk_hash(B, PrevB, Peer) ->
 	case B#block.unpacked_chunk2_hash == undefined of
 		false ->
 			post_block_reject_warn(B, check_second_unpacked_chunk_hash, Peer),
-			ar_events:send(block, {rejected, invalid_second_unpacked_chunk_hash,
+			big_events:send(block, {rejected, invalid_second_unpacked_chunk_hash,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -335,11 +335,11 @@ pre_validate_indep_hash(#block{ indep_hash = H } = B, PrevB, Peer) ->
 			end;
 		{error, invalid_signature} ->
 			post_block_reject_warn(B, check_signature, Peer),
-			ar_events:send(block, {rejected, invalid_signature, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_signature, B#block.indep_hash, Peer}),
 			invalid;
 		{ok, _DifferentH} ->
 			post_block_reject_warn(B, check_indep_hash, Peer),
-			ar_events:send(block, {rejected, invalid_hash, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_hash, B#block.indep_hash, Peer}),
 			invalid
 	end.
 
@@ -351,7 +351,7 @@ pre_validate_timestamp(B, PrevB, Peer) ->
 		false ->
 			post_block_reject_warn(B, check_timestamp, Peer, [{block_time,
 					B#block.timestamp}, {current_time, os:system_time(seconds)}]),
-			ar_events:send(block, {rejected, invalid_timestamp, H, Peer}),
+			big_events:send(block, {rejected, invalid_timestamp, H, Peer}),
 			invalid
 	end.
 
@@ -432,7 +432,7 @@ pre_validate_existing_solution_hash(B, PrevB, Peer) ->
 			pre_validate_nonce_limiter_global_step_number(B, PrevB, false, Peer);
 		invalid ->
 			post_block_reject_warn(B, check_resigned_solution_hash, Peer),
-			ar_events:send(block, {rejected, invalid_resigned_solution_hash,
+			big_events:send(block, {rejected, invalid_resigned_solution_hash,
 					B#block.indep_hash, Peer}),
 			invalid;
 		{valid, B5} ->
@@ -459,7 +459,7 @@ may_be_report_double_signing(B, B2) ->
 				{block1, ar_util:encode(B#block.indep_hash)},
 				{block2, ar_util:encode(B2#block.indep_hash)},
 				{height1, B#block.height}, {height2, B2#block.height}]),
-			ar_events:send(block, {double_signing, Proof});
+			big_events:send(block, {double_signing, Proof});
 		false ->
 			ok
 	end.
@@ -525,7 +525,7 @@ pre_validate_nonce_limiter_global_step_number(B, PrevB, SolutionResigned, Peer) 
 					[{block_step_number, StepNumber},
 					{current_step_number, CurrentStepNumber}]),
 			H = B#block.indep_hash,
-			ar_events:send(block,
+			big_events:send(block,
 					{rejected, invalid_nonce_limiter_global_step_number, H, Peer}),
 			invalid;
 		true ->
@@ -537,7 +537,7 @@ pre_validate_previous_solution_hash(B, PrevB, SolutionResigned, Peer) ->
 	case B#block.previous_solution_hash == PrevB#block.hash of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_previous_solution_hash, Peer),
-			ar_events:send(block, {rejected, invalid_previous_solution_hash,
+			big_events:send(block, {rejected, invalid_previous_solution_hash,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -551,7 +551,7 @@ pre_validate_last_retarget(B, PrevB, SolutionResigned, Peer) ->
 			pre_validate_difficulty(B, PrevB, SolutionResigned, Peer);
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_last_retarget, Peer),
-			ar_events:send(block, {rejected, invalid_last_retarget,
+			big_events:send(block, {rejected, invalid_last_retarget,
 					B#block.indep_hash, Peer}),
 			invalid
 	end.
@@ -564,7 +564,7 @@ pre_validate_difficulty(B, PrevB, SolutionResigned, Peer) ->
 			pre_validate_cumulative_difficulty(B, PrevB, SolutionResigned, Peer);
 		_ ->
 			post_block_reject_warn_and_error_dump(B, check_difficulty, Peer),
-			ar_events:send(block, {rejected, invalid_difficulty, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_difficulty, B#block.indep_hash, Peer}),
 			invalid
 	end.
 
@@ -573,7 +573,7 @@ pre_validate_cumulative_difficulty(B, PrevB, SolutionResigned, Peer) ->
 	case big_block:verify_cumulative_diff(B, PrevB) of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_cumulative_difficulty, Peer),
-			ar_events:send(block, {rejected, invalid_cumulative_difficulty,
+			big_events:send(block, {rejected, invalid_cumulative_difficulty,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -585,7 +585,7 @@ pre_validate_packing_difficulty(B, PrevB, SolutionResigned, Peer) ->
 			B#block.replica_format) of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_packing_difficulty, Peer),
-			ar_events:send(block, {rejected, invalid_packing_difficulty,
+			big_events:send(block, {rejected, invalid_packing_difficulty,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -606,7 +606,7 @@ pre_validate_quick_pow(B, PrevB, SolutionResigned, Peer) ->
 	case big_node_utils:block_passes_diff_check(SolutionHash, B) of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_hash_preimage, Peer),
-			ar_events:send(block, {rejected, invalid_hash_preimage,
+			big_events:send(block, {rejected, invalid_hash_preimage,
 					B#block.indep_hash, Peer}),
 			invalid;
 		true ->
@@ -630,7 +630,7 @@ pre_validate_nonce_limiter_seed_data(B, PrevB, SolutionResigned, Peer) ->
 					SolutionResigned, Peer);
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_nonce_limiter_seed_data, Peer),
-			ar_events:send(block, {rejected, invalid_nonce_limiter_seed_data,
+			big_events:send(block, {rejected, invalid_nonce_limiter_seed_data,
 					B#block.indep_hash, Peer}),
 			invalid
 	end.
@@ -640,7 +640,7 @@ pre_validate_partition_number(B, PrevB, PartitionUpperBound, SolutionResigned, P
 	case B#block.partition_number > Max of
 		true ->
 			post_block_reject_warn_and_error_dump(B, check_partition_number, Peer),
-			ar_events:send(block, {rejected, invalid_partition_number, B#block.indep_hash,
+			big_events:send(block, {rejected, invalid_partition_number, B#block.indep_hash,
 					Peer}),
 			invalid;
 		false ->
@@ -652,7 +652,7 @@ pre_validate_nonce(B, PrevB, PartitionUpperBound, SolutionResigned, Peer) ->
 	case B#block.nonce > Max of
 		true ->
 			post_block_reject_warn_and_error_dump(B, check_nonce, Peer),
-			ar_events:send(block, {rejected, invalid_nonce, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_nonce, B#block.indep_hash, Peer}),
 			invalid;
 		false ->
 			case SolutionResigned of
@@ -685,7 +685,7 @@ pre_validate_pow_2_6(B, PrevB, PartitionUpperBound, Peer) ->
 					pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer);
 				false ->
 					post_block_reject_warn_and_error_dump(B, check_pow, Peer),
-					ar_events:send(block, {rejected, invalid_pow, B#block.indep_hash, Peer}),
+					big_events:send(block, {rejected, invalid_pow, B#block.indep_hash, Peer}),
 					invalid
 			end
 	end.
@@ -715,7 +715,7 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 			invalid;
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_poa, Peer),
-			ar_events:send(block, {rejected, invalid_poa, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_poa, B#block.indep_hash, Peer}),
 			invalid;
 		{true, ChunkID} ->
 			%% Cache the proof so that in case the miner signs additional blocks
@@ -743,7 +743,7 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 							invalid;
 						false ->
 							post_block_reject_warn_and_error_dump(B, check_poa2, Peer),
-							ar_events:send(block, {rejected, invalid_poa2,
+							big_events:send(block, {rejected, invalid_poa2,
 									B#block.indep_hash, Peer}),
 							invalid;
 						{true, Chunk2ID} ->
@@ -762,12 +762,12 @@ pre_validate_nonce_limiter(B, PrevB, Peer) ->
 	case big_nonce_limiter:validate_last_step_checkpoints(B, PrevB, PrevOutput) of
 		{false, cache_mismatch} ->
 			post_block_reject_warn_and_error_dump(B, check_nonce_limiter, Peer),
-			ar_events:send(block, {rejected, invalid_nonce_limiter_cache_mismatch,
+			big_events:send(block, {rejected, invalid_nonce_limiter_cache_mismatch,
 					B#block.indep_hash, Peer}),
 			invalid;
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_nonce_limiter, Peer),
-			ar_events:send(block, {rejected, invalid_nonce_limiter, B#block.indep_hash, Peer}),
+			big_events:send(block, {rejected, invalid_nonce_limiter, B#block.indep_hash, Peer}),
 			invalid;
 		{true, cache_match} ->
 			accept_block(B, Peer, true);
@@ -777,7 +777,7 @@ pre_validate_nonce_limiter(B, PrevB, Peer) ->
 
 accept_block(B, Peer, Gossip) ->
 	big_ignore_registry:add(B#block.indep_hash),
-	ar_events:send(block, {new, B, 
+	big_events:send(block, {new, B, 
 		#{ source => {peer, Peer}, gossip => Gossip }}),
 	?LOG_INFO([{event, accepted_block}, {height, B#block.height},
 			{indep_hash, ar_util:encode(B#block.indep_hash)}]),

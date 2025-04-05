@@ -54,7 +54,7 @@ resume() ->
 %%%===================================================================
 
 init(Workers) ->
-	ok = ar_events:subscribe(node_state),
+	ok = big_events:subscribe(node_state),
 	case big_node:is_joined() of
 		true ->
 			handle_node_state_initialized();

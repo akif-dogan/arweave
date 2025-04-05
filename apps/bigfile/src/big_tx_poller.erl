@@ -50,7 +50,7 @@ start_link() ->
 %%% Gen server callbacks.
 
 init([]) ->
-    [ok, ok] = ar_events:subscribe([tx, node_state]),
+    [ok, ok] = big_events:subscribe([tx, node_state]),
 	{ok, #state{}}.
 
 handle_call(Request, From, State) ->
@@ -149,7 +149,7 @@ download_and_verify_tx(TXID) ->
 					big_peers:rate_fetched_data(Peer, tx, Time, Size),
 					big_data_sync:add_data_root_to_disk_pool(TX2#tx.data_root,
 							TX2#tx.data_size, TX#tx.id),
-					ar_events:send(tx, {new, TX2, {pulled, Peer}}),
+					big_events:send(tx, {new, TX2, {pulled, Peer}}),
 					TXID = TX2#tx.id,
 					big_ignore_registry:remove_temporary(TXID),
 					big_ignore_registry:add_temporary(TXID, 10 * 60 * 1000)

@@ -694,7 +694,7 @@ init({"default" = StoreID, _}) ->
 	%% Trap exit to avoid corrupting any open files on quit..
 	process_flag(trap_exit, true),
 	{ok, Config} = application:get_env(bigfile, config),
-	[ok, ok] = ar_events:subscribe([node_state, disksup]),
+	[ok, ok] = big_events:subscribe([node_state, disksup]),
 	State = init_kv(StoreID),
 	move_disk_pool_index(State),
 	move_data_root_index(State),
@@ -763,7 +763,7 @@ init({StoreID, RepackInPlacePacking}) ->
 	?LOG_INFO([{event, ar_data_sync_start}, {store_id, StoreID}]),
 	%% Trap exit to avoid corrupting any open files on quit..
 	process_flag(trap_exit, true),
-	[ok, ok] = ar_events:subscribe([node_state, disksup]),
+	[ok, ok] = big_events:subscribe([node_state, disksup]),
 	State = init_kv(StoreID),
 
 	case RepackInPlacePacking of
@@ -820,7 +820,7 @@ handle_cast({join, RecentBI}, State) ->
 					{cut, Offset}) || Module <- Config#config.storage_modules],
 			ok = big_chunk_storage:cut(Offset, StoreID),
 			ok = big_sync_record:cut(Offset, big_data_sync, StoreID),
-			ar_events:send(sync_record, {global_cut, Offset}),
+			big_events:send(sync_record, {global_cut, Offset}),
 			reset_orphaned_data_roots_disk_pool_timestamps(OrphanedDataRoots)
 	end,
 	BI = big_block_index:get_list_by_hash(element(1, lists:last(RecentBI))),
@@ -880,7 +880,7 @@ handle_cast({add_tip_block, BlockTXPairs, BI}, State) ->
 	reset_orphaned_data_roots_disk_pool_timestamps(OrphanedDataRoots),
 	ok = big_chunk_storage:cut(BlockStartOffset, StoreID),
 	ok = big_sync_record:cut(BlockStartOffset, big_data_sync, StoreID),
-	ar_events:send(sync_record, {global_cut, BlockStartOffset}),
+	big_events:send(sync_record, {global_cut, BlockStartOffset}),
 	DiskPoolThreshold = get_disk_pool_threshold(BI),
 	ets:insert(ar_data_sync_state, {disk_pool_threshold, DiskPoolThreshold}),
 	State2 = store_sync_state(
@@ -2073,7 +2073,7 @@ remove_range(Start, End, Ref, ReplyTo) ->
 			case sets:is_empty(StorageRefs) of
 				true ->
 					ReplyTo ! {removed_range, Ref},
-					ar_events:send(sync_record, {global_remove_range, Start, End});
+					big_events:send(sync_record, {global_remove_range, Start, End});
 				false ->
 					receive
 						{removed_range, StorageRef} ->
@@ -2484,7 +2484,7 @@ update_tx_index(SizeTaggedTXs, BlockStartOffset, StoreID) ->
 						case big_kv:put({tx_index, StoreID}, TXID,
 								term_to_binary({AbsoluteEndOffset, TXSize})) of
 							ok ->
-								ar_events:send(tx, {registered_offset, TXID, AbsoluteEndOffset,
+								big_events:send(tx, {registered_offset, TXID, AbsoluteEndOffset,
 										TXSize}),
 								big_tx_blacklist:notify_about_added_tx(TXID, AbsoluteEndOffset,
 										AbsoluteStartOffset),
@@ -3309,7 +3309,7 @@ delete_disk_pool_chunk(Iterator, Args, State) ->
 									StoreID),
 							case big_sync_record:is_recorded(PaddedOffset, big_data_sync) of
 								false ->
-									ar_events:send(sync_record,
+									big_events:send(sync_record,
 											{global_remove_range, StartOffset, PaddedOffset});
 								_ ->
 									ok

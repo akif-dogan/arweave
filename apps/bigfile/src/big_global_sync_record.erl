@@ -69,7 +69,7 @@ get_serialized_sync_buckets() ->
 %%%===================================================================
 
 init([]) ->
-	ok = ar_events:subscribe(sync_record),
+	ok = big_events:subscribe(sync_record),
 	{ok, Config} = application:get_env(bigfile, config),
 	SyncRecord = lists:foldl(
 		fun(Module, Acc) ->

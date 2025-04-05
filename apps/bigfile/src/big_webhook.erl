@@ -78,14 +78,14 @@ init(Hook) ->
 	?LOG_DEBUG("Started web hook for ~p", [Hook]),
 	State = lists:foldl(
 		fun (transaction, Acc) ->
-				ar_events:subscribe(tx),
+				big_events:subscribe(tx),
 				Acc#state{ listen_to_transaction_stream = true };
 			(block, Acc) ->
-				ok = ar_events:subscribe(block),
+				ok = big_events:subscribe(block),
 				Acc#state{ listen_to_block_stream = true };
 			(transaction_data, Acc) ->
-				ar_events:subscribe(tx),
-				ok = ar_events:subscribe(sync_record),
+				big_events:subscribe(tx),
+				ok = big_events:subscribe(sync_record),
 				Acc#state{ listen_to_transaction_data_stream = true };
 			(_, Acc) ->
 				?LOG_WARNING("Wrong event name in webhook ~p", [Hook]),

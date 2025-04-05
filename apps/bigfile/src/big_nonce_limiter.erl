@@ -235,7 +235,7 @@ mix_seed2(PrevOutput, SeedH) ->
 %% Emit {nonce_limiter, {invalid, H, ErrorCode}} or {nonce_limiter, {valid, H}}.
 request_validation(H, #nonce_limiter_info{ global_step_number = N },
 		#nonce_limiter_info{ global_step_number = N }) ->
-	spawn(fun() -> ar_events:send(nonce_limiter, {invalid, H, 1}) end);
+	spawn(fun() -> big_events:send(nonce_limiter, {invalid, H, 1}) end);
 request_validation(H, #nonce_limiter_info{ output = Output,
 		steps = [Output | _] = StepsToValidate } = Info, PrevInfo) ->
 	#nonce_limiter_info{ output = PrevOutput,
@@ -285,7 +285,7 @@ request_validation(H, #nonce_limiter_info{ output = Output,
 			?LOG_WARNING([{event, nonce_limiter_validation_failed},
 					{step, exclude_computed_steps_from_steps_to_validate},
 					{error_dump, ErrorID}]),
-			spawn(fun() -> ar_events:send(nonce_limiter, {invalid, H, 2}) end);
+			spawn(fun() -> big_events:send(nonce_limiter, {invalid, H, 2}) end);
 
 		{[], NumAlreadyComputed} when StartStepNumber + NumAlreadyComputed == StepNumber ->
 			%% We've already computed up to StepNumber, so we can use the checkpoints from the
@@ -294,7 +294,7 @@ request_validation(H, #nonce_limiter_info{ output = Output,
 			Args = {StepNumber, SessionKey, NextSessionKey, Seed, UpperBound, NextUpperBound,
 					VDFDifficulty, NextVDFDifficulty, SessionSteps, LastStepCheckpoints},
 			gen_server:cast(?MODULE, {validated_steps, Args}),
-			spawn(fun() -> ar_events:send(nonce_limiter, {valid, H}) end);
+			spawn(fun() -> big_events:send(nonce_limiter, {valid, H}) end);
 
 		{_, NumAlreadyComputed} when StartStepNumber + NumAlreadyComputed >= StepNumber ->
 			ErrorID = dump_error({PrevStepNumber, StepNumber, StepsToValidate, SessionSteps,
@@ -303,7 +303,7 @@ request_validation(H, #nonce_limiter_info{ output = Output,
 					{step, exclude_computed_steps_from_steps_to_validate_shift},
 					{start_step_number, StartStepNumber}, {shift2, NumAlreadyComputed},
 					{error_dump, ErrorID}]),
-			spawn(fun() -> ar_events:send(nonce_limiter, {invalid, H, 2}) end);
+			spawn(fun() -> big_events:send(nonce_limiter, {invalid, H, 2}) end);
 		{RemainingStepsToValidate, NumAlreadyComputed}
 		  		when StartStepNumber + NumAlreadyComputed < StepNumber ->
 			case big_config:use_remote_vdf_server() and not big_config:compute_own_vdf() of
@@ -311,7 +311,7 @@ request_validation(H, #nonce_limiter_info{ output = Output,
 					%% Wait for our VDF server(s) to validate the remaining steps.
 					%% Alternatively, the network may abandon this block.
 					big_nonce_limiter_client:maybe_request_sessions(SessionKey),
-					spawn(fun() -> ar_events:send(nonce_limiter, {refuse_validation, H}) end);
+					spawn(fun() -> big_events:send(nonce_limiter, {refuse_validation, H}) end);
 				false ->
 					%% Validate the remaining steps.
 					StartOutput2 = case NumAlreadyComputed of
@@ -351,9 +351,9 @@ request_validation(H, #nonce_limiter_info{ output = Output,
 										{error_id, ErrorID},
 										{prev_output, ar_util:encode(StartOutput2)},
 										{exception, io_lib:format("~p", [Exc])}]),
-								ar_events:send(nonce_limiter, {validation_error, H});
+								big_events:send(nonce_limiter, {validation_error, H});
 							false ->
-								ar_events:send(nonce_limiter, {invalid, H, 3});
+								big_events:send(nonce_limiter, {invalid, H, 3});
 							{true, ValidatedSteps} ->
 								AllValidatedSteps = ValidatedSteps ++ SessionSteps,
 								%% The last_step_checkpoints in Info were validated as part
@@ -366,18 +366,18 @@ request_validation(H, #nonce_limiter_info{ output = Output,
 										VDFDifficulty, NextVDFDifficulty,
 										AllValidatedSteps, LastStepCheckpoints},
 								gen_server:cast(?MODULE, {validated_steps, Args}),
-								ar_events:send(nonce_limiter, {valid, H})
+								big_events:send(nonce_limiter, {valid, H})
 						end
 					end)
 			end;
 		Data ->
 			ErrorID = dump_error(Data),
-			ar_events:send(nonce_limiter, {validation_error, H}),
+			big_events:send(nonce_limiter, {validation_error, H}),
 			?LOG_ERROR([{event, unexpected_error_during_nonce_limiter_validation},
 					{error_id, ErrorID}])
 	end;
 request_validation(H, _Info, _PrevInfo) ->
-	spawn(fun() -> ar_events:send(nonce_limiter, {invalid, H, 4}) end).
+	spawn(fun() -> big_events:send(nonce_limiter, {invalid, H, 4}) end).
 
 get_last_step_checkpoints(Info) ->
 	Info#nonce_limiter_info.last_step_checkpoints.
@@ -411,7 +411,7 @@ apply_external_update(Update, Peer) ->
 %%%===================================================================
 
 init([]) ->
-	ok = ar_events:subscribe(node_state),
+	ok = big_events:subscribe(node_state),
 	State =
 		case big_node:is_joined() of
 			true ->
@@ -583,7 +583,7 @@ handle_cast(initialized, State) ->
 	gen_server:cast(?MODULE, schedule_step),
 	case State#state.emit_initialized_event of
 		true ->
-			ar_events:send(nonce_limiter, initialized);
+			big_events:send(nonce_limiter, initialized);
 		false ->
 			ok
 	end,
@@ -762,7 +762,7 @@ send_output(SessionKey, Session) ->
 			_ ->
 				Session#vdf_session.next_upper_bound
 		end,
-	ar_events:send(nonce_limiter, {computed_output, {SessionKey, StepNumber, Output, UpperBound}}).
+	big_events:send(nonce_limiter, {computed_output, {SessionKey, StepNumber, Output, UpperBound}}).
 
 dump_error(Data) ->
 	{ok, Config} = application:get_env(bigfile, config),

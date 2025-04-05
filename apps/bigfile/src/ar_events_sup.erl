@@ -34,28 +34,28 @@ init([]) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	{ok, {{one_for_one, 5, 10}, [
 		%% Events: remaining_disk_space.
-		?CHILD(ar_events, disksup, worker),
+		?CHILD(big_events, disksup, worker),
 		%% Events: new, ready_for_mining, orphaned, emitting_scheduled,
 		%% preparing_unblacklisting, ready_for_unblacklisting, registered_offset.
-		?CHILD(ar_events, tx, worker),
+		?CHILD(big_events, tx, worker),
 		%% Events: discovered, rejected, new, double_signing, mined_block_received.
-		?CHILD(ar_events, block, worker),
+		?CHILD(big_events, block, worker),
 		%% Events: unpacked, packed.
-		?CHILD(ar_events, chunk, worker),
+		?CHILD(big_events, chunk, worker),
 		%% Events: removed
-		?CHILD(ar_events, peer, worker),
+		?CHILD(big_events, peer, worker),
 		%% Events: account_tree_initialized, initialized,
 		%% new_tip, checkpoint_block, search_space_upper_bound.
-		?CHILD(ar_events, node_state, worker),
+		?CHILD(big_events, node_state, worker),
 		%% Events: initialized, valid, invalid, validation_error, refuse_validation,
 		%% computed_output.
-		?CHILD(ar_events, nonce_limiter, worker),
+		?CHILD(big_events, nonce_limiter, worker),
 		%% Events: removed_file.
-		?CHILD(ar_events, chunk_storage, worker),
+		?CHILD(big_events, chunk_storage, worker),
 		%% Events: add_range, remove_range, global_remove_range, cut, global_cut.
-		?CHILD(ar_events, sync_record, worker),
+		?CHILD(big_events, sync_record, worker),
 		%% Events: rejected, stale, partial, accepted.
-		?CHILD(ar_events, solution, worker),
+		?CHILD(big_events, solution, worker),
 		%% Used for the testing purposes.
-		?CHILD(ar_events, testing, worker)
+		?CHILD(big_events, testing, worker)
 	]}}.

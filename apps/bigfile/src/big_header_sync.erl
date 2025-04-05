@@ -61,7 +61,7 @@ init([]) ->
 	?LOG_INFO([{event, ar_header_sync_start}]),
 	%% Trap exit to avoid corrupting any open files on quit..
 	process_flag(trap_exit, true),
-	[ok, ok] = ar_events:subscribe([tx, disksup]),
+	[ok, ok] = big_events:subscribe([tx, disksup]),
 	{ok, Config} = application:get_env(bigfile, config),
 	ok = big_kv:open(filename:join(?ROCKS_DB_DIR, "ar_header_sync_db"), ?MODULE),
 	{SyncRecord, Height, CurrentBI} =
@@ -257,10 +257,10 @@ handle_info({event, tx, {preparing_unblacklisting, TXID}}, State) ->
 					Height - 1) },
 			ok = store_sync_state(State2),
 			ok = big_kv:delete(?MODULE, << Height:256 >>),
-			ar_events:send(tx, {ready_for_unblacklisting, TXID}),
+			big_events:send(tx, {ready_for_unblacklisting, TXID}),
 			{noreply, State2};
 		not_found ->
-			ar_events:send(tx, {ready_for_unblacklisting, TXID}),
+			big_events:send(tx, {ready_for_unblacklisting, TXID}),
 			{noreply, State};
 		{error, Reason} ->
 			?LOG_WARNING([{event, failed_to_read_tx_confirmation_index},

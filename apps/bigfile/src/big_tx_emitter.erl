@@ -203,6 +203,6 @@ emit_set_not_empty(Set, Peers, MaxPeers, N, State) ->
 			ets:insert(ar_tx_emitter_recently_emitted, {TXID}),
 			erlang:send_after(?CLEANUP_RECENTLY_EMITTED_TIMEOUT, ?MODULE,
 				{remove_from_recently_emitted, TXID}),
-			ar_events:send(tx, {emitting_scheduled, Utility, TXID}),
+			big_events:send(tx, {emitting_scheduled, Utility, TXID}),
 			emit(Set2, Peers, MaxPeers, N - 1, State2)
 	end.

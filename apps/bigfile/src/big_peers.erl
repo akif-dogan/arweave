@@ -377,7 +377,7 @@ init([]) ->
 		false ->
 			%% Trap exit to avoid corrupting any open files on quit.
 			process_flag(trap_exit, true),
-			ok = ar_events:subscribe(block),
+			ok = big_events:subscribe(block),
 			load_peers(),
 			gen_server:cast(?MODULE, rank_peers),
 			gen_server:cast(?MODULE, ping_peers),
@@ -897,7 +897,7 @@ remove_peer(Reason, RemovedPeer) ->
 	set_total_rating(current, TotalCurrentRating - get_peer_rating(current, Performance)),
 	ets:delete(?MODULE, {peer, RemovedPeer}),
 	remove_peer_port(RemovedPeer),
-	ar_events:send(peer, {removed, RemovedPeer}).
+	big_events:send(peer, {removed, RemovedPeer}).
 
 remove_peer_port(Peer) ->
 	{IP, Port} = get_ip_port(Peer),
@@ -1226,13 +1226,13 @@ test_block_rejected() ->
 	Peer = {127, 0, 0, 1, ar_test_node:get_unused_port()},
 	big_peers:add_peer(Peer, -1),
 
-	ar_events:send(block, {rejected, invalid_signature, <<>>, Peer}),
+	big_events:send(block, {rejected, invalid_signature, <<>>, Peer}),
 	timer:sleep(5000),
 
 	?assertEqual(#{Peer => #performance{}}, big_peers:get_peer_performances([Peer])),
 	?assertEqual(not_banned, big_blacklist_middleware:is_peer_banned(Peer)),
 
-	ar_events:send(block, {rejected, failed_to_fetch_first_chunk, <<>>, Peer}),
+	big_events:send(block, {rejected, failed_to_fetch_first_chunk, <<>>, Peer}),
 	timer:sleep(5000),
 
 	?assertEqual(
@@ -1240,7 +1240,7 @@ test_block_rejected() ->
 		big_peers:get_peer_performances([Peer])),
 	?assertEqual(not_banned, big_blacklist_middleware:is_peer_banned(Peer)),
 
-	ar_events:send(block, {rejected, invalid_previous_solution_hash, <<>>, Peer}),
+	big_events:send(block, {rejected, invalid_previous_solution_hash, <<>>, Peer}),
 	timer:sleep(5000),
 
 	?assertEqual(#{Peer => #performance{}}, big_peers:get_peer_performances([Peer])),

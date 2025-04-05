@@ -97,7 +97,7 @@ replay_attack_test_() ->
 		ar_test_node:assert_wait_until_height(peer1, 1),
 		?assertEqual(?BIG(8999), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub1])),
 		?assertEqual(?BIG(1000), ar_test_node:remote_call(peer1, big_node, get_balance, [Pub2])),
-		ar_events:send(tx, {ready_for_mining, SignedTX}),
+		big_events:send(tx, {ready_for_mining, SignedTX}),
 		ar_test_node:wait_until_receives_txs([SignedTX]),
 		ar_test_node:mine(),
 		ar_test_node:assert_wait_until_height(peer1, 2),

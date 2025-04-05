@@ -89,7 +89,7 @@ found_solution(Source, Solution, PoACache, PoA2Cache) ->
 init([]) ->
 	%% Trap exit to avoid corrupting any open files on quit.
 	process_flag(trap_exit, true),
-	[ok, ok, ok, ok] = ar_events:subscribe([tx, block, nonce_limiter, node_state]),
+	[ok, ok, ok, ok] = big_events:subscribe([tx, block, nonce_limiter, node_state]),
 	%% Read persisted mempool.
 	big_mempool:load_from_disk(),
 	%% Join the network.
@@ -450,9 +450,9 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 		{merkle_rebase_support_threshold, get_merkle_rebase_threshold(B)}
 	]),
 	SearchSpaceUpperBound = big_node:get_partition_upper_bound(RecentBI),
-	ar_events:send(node_state, {search_space_upper_bound, SearchSpaceUpperBound}),
-	ar_events:send(node_state, {initialized, B}),
-	ar_events:send(node_state, {checkpoint_block, 
+	big_events:send(node_state, {search_space_upper_bound, SearchSpaceUpperBound}),
+	big_events:send(node_state, {initialized, B}),
+	big_events:send(node_state, {checkpoint_block, 
 		big_block_cache:get_checkpoint_block(RecentBI)}),
 	big:console("Joined the BigFile network successfully at the block ~s, height ~B.~n",
 			[ar_util:encode(Current), Height]),
@@ -490,7 +490,7 @@ handle_info({event, nonce_limiter, _}, State) ->
 
 handle_info({tx_ready_for_mining, TX}, State) ->
 	big_mempool:add_tx(TX, ready_for_mining),
-	ar_events:send(tx, {ready_for_mining, TX}),
+	big_events:send(tx, {ready_for_mining, TX}),
 	{noreply, State};
 
 handle_info({event, block, {double_signing, Proof}}, State) ->
@@ -935,7 +935,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, Reason},
 					{h, ar_util:encode(B#block.indep_hash)}]),
-			ar_events:send(block, {rejected, Reason, B#block.indep_hash, no_peer}),
+			big_events:send(block, {rejected, Reason, B#block.indep_hash, no_peer}),
 			BH = B#block.indep_hash,
 			big_block_cache:remove(block_cache, BH),
 			big_ignore_registry:add(BH),
@@ -1191,92 +1191,92 @@ validate_wallet_list(#block{ indep_hash = H } = B, PrevB) ->
 		{error, invalid_denomination} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_denomination}, {h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_denomination, H, no_peer}),
+			big_events:send(block, {rejected, invalid_denomination, H, no_peer}),
 			error;
 		{error, mining_address_banned} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, mining_address_banned}, {h, ar_util:encode(H)},
 					{mining_address, ar_util:encode(B#block.reward_addr)}]),
-			ar_events:send(block, {rejected, mining_address_banned, H, no_peer}),
+			big_events:send(block, {rejected, mining_address_banned, H, no_peer}),
 			error;
 		{error, invalid_double_signing_proof_same_signature} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_double_signing_proof_same_signature},
 					{h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_double_signing_proof_same_signature, H,
+			big_events:send(block, {rejected, invalid_double_signing_proof_same_signature, H,
 					no_peer}),
 			error;
 		{error, invalid_double_signing_proof_cdiff} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_double_signing_proof_cdiff},
 					{h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_double_signing_proof_cdiff, H, no_peer}),
+			big_events:send(block, {rejected, invalid_double_signing_proof_cdiff, H, no_peer}),
 			error;
 		{error, invalid_double_signing_proof_same_address} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_double_signing_proof_same_address},
 					{h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_double_signing_proof_same_address, H,
+			big_events:send(block, {rejected, invalid_double_signing_proof_same_address, H,
 					no_peer}),
 			error;
 		{error, invalid_double_signing_proof_not_in_reward_history} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_double_signing_proof_not_in_reward_history},
 					{h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected,
+			big_events:send(block, {rejected,
 					invalid_double_signing_proof_not_in_reward_history, H, no_peer}),
 			error;
 		{error, invalid_double_signing_proof_already_banned} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_double_signing_proof_already_banned},
 					{h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected,
+			big_events:send(block, {rejected,
 					invalid_double_signing_proof_already_banned, H, no_peer}),
 			error;
 		{error, invalid_double_signing_proof_invalid_signature} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_double_signing_proof_invalid_signature},
 					{h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected,
+			big_events:send(block, {rejected,
 					invalid_double_signing_proof_invalid_signature, H, no_peer}),
 			error;
 		{error, invalid_account_anchors} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_account_anchors}, {h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_account_anchors, H, no_peer}),
+			big_events:send(block, {rejected, invalid_account_anchors, H, no_peer}),
 			error;
 		{error, invalid_reward_pool} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_reward_pool}, {h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_reward_pool, H, no_peer}),
+			big_events:send(block, {rejected, invalid_reward_pool, H, no_peer}),
 			error;
 		{error, invalid_miner_reward} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_miner_reward}, {h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_miner_reward, H, no_peer}),
+			big_events:send(block, {rejected, invalid_miner_reward, H, no_peer}),
 			error;
 		{error, invalid_debt_supply} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_debt_supply}, {h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_debt_supply, H, no_peer}),
+			big_events:send(block, {rejected, invalid_debt_supply, H, no_peer}),
 			error;
 		{error, invalid_kryder_plus_rate_multiplier_latch} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_kryder_plus_rate_multiplier_latch},
 					{h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_kryder_plus_rate_multiplier_latch, H,
+			big_events:send(block, {rejected, invalid_kryder_plus_rate_multiplier_latch, H,
 					no_peer}),
 			error;
 		{error, invalid_kryder_plus_rate_multiplier} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_kryder_plus_rate_multiplier},
 					{h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_kryder_plus_rate_multiplier, H, no_peer}),
+			big_events:send(block, {rejected, invalid_kryder_plus_rate_multiplier, H, no_peer}),
 			error;
 		{error, invalid_wallet_list} ->
 			?LOG_WARNING([{event, received_invalid_block},
 					{validation_error, invalid_wallet_list}, {h, ar_util:encode(H)}]),
-			ar_events:send(block, {rejected, invalid_wallet_list, H, no_peer}),
+			big_events:send(block, {rejected, invalid_wallet_list, H, no_peer}),
 			error;
 		{ok, _RootHash2} ->
 			ok
@@ -1330,7 +1330,7 @@ apply_validated_block(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	?LOG_DEBUG([{event, apply_validated_block}, {block, ar_util:encode(B#block.indep_hash)}]),
 	case big_watchdog:is_mined_block(B) of
 		true ->
-			ar_events:send(block, {new, B, #{ source => miner }});
+			big_events:send(block, {new, B, #{ source => miner }});
 		false ->
 			ok
 	end,
@@ -1443,9 +1443,9 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 		{merkle_rebase_support_threshold, get_merkle_rebase_threshold(B)}
 	]),
 	SearchSpaceUpperBound = big_node:get_partition_upper_bound(RecentBI),
-	ar_events:send(node_state, {search_space_upper_bound, SearchSpaceUpperBound}),
-	ar_events:send(node_state, {new_tip, B, PrevB}),
-	ar_events:send(node_state, {checkpoint_block, 
+	big_events:send(node_state, {search_space_upper_bound, SearchSpaceUpperBound}),
+	big_events:send(node_state, {new_tip, B, PrevB}),
+	big_events:send(node_state, {checkpoint_block, 
 		big_block_cache:get_checkpoint_block(RecentBI)}),
 	maybe_reset_miner(State).
 
@@ -1589,8 +1589,8 @@ return_orphaned_txs_to_mempool(H, H) ->
 return_orphaned_txs_to_mempool(H, BaseH) ->
 	#block{ txs = TXs, previous_block = PrevH } = big_block_cache:get(block_cache, H),
 	lists:foreach(fun(TX) ->
-		ar_events:send(tx, {orphaned, TX}),
-		ar_events:send(tx, {ready_for_mining, TX}),
+		big_events:send(tx, {orphaned, TX}),
+		big_events:send(tx, {ready_for_mining, TX}),
 		%% Add it to the mempool here even though have triggered an event - processes
 		%% do not handle their own events.
 		big_mempool:add_tx(TX, ready_for_mining)
@@ -1908,7 +1908,7 @@ handle_found_solution(Args, PrevB, State) ->
 	PassesTimelineCheck =
 		case IsBanned of
 			true ->
-				ar_events:send(solution, {rejected, #{ reason => mining_address_banned,
+				big_events:send(solution, {rejected, #{ reason => mining_address_banned,
 						source => Source }}),
 				big_mining_server:log_prepare_solution_failure(Solution,
 						mining_address_banned, []),
@@ -1916,7 +1916,7 @@ handle_found_solution(Args, PrevB, State) ->
 			false ->
 				case big_block:validate_replica_format(Height, PackingDifficulty, ReplicaFormat) of
 					false ->
-						ar_events:send(solution, {rejected,
+						big_events:send(solution, {rejected,
 								#{ reason => invalid_packing_difficulty, source => Source }}),
 						big_mining_server:log_prepare_solution_failure(Solution,
 								invalid_packing_difficulty, []),
@@ -1929,7 +1929,7 @@ handle_found_solution(Args, PrevB, State) ->
 									NonceLimiterInfo#nonce_limiter_info.global_step_number,
 								PrevBlockVDF =
 									PrevNonceLimiterInfo#nonce_limiter_info.global_step_number,
-								ar_events:send(solution, {stale, #{ source => Source }}),
+								big_events:send(solution, {stale, #{ source => Source }}),
 								big_mining_server:log_prepare_solution_failure(Solution,
 									stale_solution, [
 										{solution_vdf, SolutionVDF},
@@ -1955,7 +1955,7 @@ handle_found_solution(Args, PrevB, State) ->
 				case {IntervalNumber, NonceLimiterNextSeed, NonceLimiterNextVDFDifficulty}
 						== {PrevIntervalNumber, PrevNextSeed, PrevNextVDFDifficulty} of
 					false ->
-						ar_events:send(solution, {stale, #{ source => Source }}),
+						big_events:send(solution, {stale, #{ source => Source }}),
 						big_mining_server:log_prepare_solution_failure(Solution,
 							vdf_seed_data_does_not_match_current_block, [
 								{interval_number, IntervalNumber},
@@ -1984,7 +1984,7 @@ handle_found_solution(Args, PrevB, State) ->
 			true ->
 				case big_node_utils:solution_passes_diff_check(Solution, DiffPair) of
 					false ->
-						ar_events:send(solution, {partial, #{ source => Source }}),
+						big_events:send(solution, {partial, #{ source => Source }}),
 						big_mining_server:log_prepare_solution_failure(Solution,
 								does_not_pass_diff_check, []),
 						{false, diff};
@@ -2009,7 +2009,7 @@ handle_found_solution(Args, PrevB, State) ->
 			true ->
 				case RewardKey of
 					not_found ->
-						ar_events:send(solution,
+						big_events:send(solution,
 							{rejected, #{ reason => missing_key_file, source => Source }}),
 						big_mining_server:log_prepare_solution_failure(Solution,
 								mining_key_not_found, []),
@@ -2058,7 +2058,7 @@ handle_found_solution(Args, PrevB, State) ->
 		false ->
 			{noreply, State};
 		not_found ->
-			ar_events:send(solution,
+			big_events:send(solution,
 					{rejected, #{ reason => vdf_not_found, source => Source }}),
 			?LOG_WARNING([{event, did_not_find_steps_for_mined_block},
 					{seed, ar_util:encode(PrevNextSeed)}, {prev_step_number, PrevStepNumber},
@@ -2182,10 +2182,10 @@ handle_found_solution(Args, PrevB, State) ->
 							_ -> 2
 						end}]),
 			big_block_cache:add(block_cache, B),
-			ar_events:send(solution, {accepted, #{ indep_hash => H, source => Source }}),
+			big_events:send(solution, {accepted, #{ indep_hash => H, source => Source }}),
 			apply_block(update_solution_cache(H, Args, State));
 		_Steps ->
-			ar_events:send(solution,
+			big_events:send(solution,
 					{rejected, #{ reason => bad_vdf, source => Source }}),
 			?LOG_ERROR([{event, bad_steps},
 					{prev_block, ar_util:encode(PrevH)},

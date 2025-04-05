@@ -164,7 +164,7 @@ test_no_solution_then_h1_solution_h2_unsynced() ->
 %% ------------------------------------------------------------------------------------------------
 %% pool_job_test_
 %% ------------------------------------------------------------------------------------------------
-%% we have to wait to let the ar_events get processed whenever we add a pool job
+%% we have to wait to let the big_events get processed whenever we add a pool job
 -define(WAIT_TIME, 1000).
 
 test_pool_job_no_cached_sessions() ->

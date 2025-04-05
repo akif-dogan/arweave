@@ -1946,7 +1946,7 @@ handle_post_tx_accepted(Req, TX, Peer) ->
 	big_peers:rate_gossiped_data(Peer, tx,
 		erlang:convert_time_unit(BodyReadTime, native, microsecond),
 		byte_size(term_to_binary(TX))),
-	ar_events:send(tx, {new, TX, {pushed, Peer}}),
+	big_events:send(tx, {new, TX, {pushed, Peer}}),
 	TXID = TX#tx.id,
 	big_ignore_registry:remove_temporary(TXID),
 	big_ignore_registry:add_temporary(TXID, 10 * 60 * 1000),
@@ -2488,7 +2488,7 @@ check_block_receive_timestamp(H) ->
 				undefined ->
 					%% This node mined block H and this is the first time it's been
 					%% gossipped back to it. Update the node's receive_timestamp.
-					ar_events:send(block, {mined_block_received, H, erlang:timestamp()});
+					big_events:send(block, {mined_block_received, H, erlang:timestamp()});
 				_ ->
 					ok
 			end

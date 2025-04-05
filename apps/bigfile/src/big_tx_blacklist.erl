@@ -146,7 +146,7 @@ init([]) ->
 	ok = initialize_state(),
 	%% Trap exit to avoid corrupting any open files on quit.
 	process_flag(trap_exit, true),
-	ok = ar_events:subscribe(tx),
+	ok = big_events:subscribe(tx),
 	gen_server:cast(?MODULE, refresh_blacklist),
 	{ok, _} = timer:apply_interval(?STORE_STATE_FREQUENCY_MS, ?MODULE, store_state, []),
 	{ok, #big_tx_blacklist_state{}}.
@@ -229,7 +229,7 @@ handle_cast(maybe_restore, #big_tx_blacklist_state{ pending_restore_cursor = Cur
 					?LOG_DEBUG([{event, preparing_transaction_unblacklisting},
 							{tags, [tx_blacklist]},
 							{tx, ar_util:encode(TXID)}]),
-					ar_events:send(tx, {preparing_unblacklisting, TXID}),
+					big_events:send(tx, {preparing_unblacklisting, TXID}),
 					{noreply, State#big_tx_blacklist_state{ pending_restore_cursor = TXID,
 							unblacklist_timeout = Now }}
 			end;

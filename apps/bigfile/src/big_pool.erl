@@ -117,7 +117,7 @@ process_cm_jobs(Jobs, Peer) ->
 %%%===================================================================
 
 init([]) ->
-	ok = ar_events:subscribe(solution),
+	ok = big_events:subscribe(solution),
 	{ok, #state{}}.
 
 handle_call(get_current_session_key_seed_pairs, _From, State) ->
@@ -995,7 +995,7 @@ process_solution_test_() ->
 						1
 				end
 			end},
-		{ar_events, send, fun(_Type, _Payload) -> ok end},
+		{big_events, send, fun(_Type, _Payload) -> ok end},
 		{big_node_worker, found_solution, fun(_, _, _, _) -> ok end}],
 		fun test_process_solution/0
 	).

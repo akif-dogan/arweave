@@ -88,7 +88,7 @@ get_full_prev_update(Format) ->
 %%%===================================================================
 
 init([]) ->
-	ok = ar_events:subscribe(nonce_limiter),
+	ok = big_events:subscribe(nonce_limiter),
 	{ok, Config} = application:get_env(bigfile, config),
 	{ok, #state{}}.
 
