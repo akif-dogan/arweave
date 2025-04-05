@@ -183,7 +183,7 @@ is_recorded(Offset, ID, StoreID) ->
 		[] ->
 			false;
 		[{_, TID}] ->
-			case ar_ets_intervals:is_inside(TID, Offset) of
+			case big_ets_intervals:is_inside(TID, Offset) of
 				false ->
 					false;
 				true ->
@@ -204,7 +204,7 @@ is_recorded(Offset, Packing, ID, StoreID) ->
 		[] ->
 			false;
 		[{_, TID}] ->
-			ar_ets_intervals:is_inside(TID, Offset)
+			big_ets_intervals:is_inside(TID, Offset)
 	end.
 
 %% @doc Return the lowest synced interval with the end offset strictly above the given Offset
@@ -215,7 +215,7 @@ get_next_synced_interval(Offset, EndOffsetUpperBound, ID, StoreID) ->
 		[] ->
 			not_found;
 		[{_, TID}] ->
-			ar_ets_intervals:get_next_interval(TID, Offset, EndOffsetUpperBound)
+			big_ets_intervals:get_next_interval(TID, Offset, EndOffsetUpperBound)
 	end.
 
 %% @doc Return the lowest unsynced interval with the end offset strictly above the given Offset
@@ -226,7 +226,7 @@ get_next_unsynced_interval(Offset, EndOffsetUpperBound, ID, StoreID) ->
 		[] ->
 			not_found;
 		[{_, TID}] ->
-			ar_ets_intervals:get_next_interval_outside(TID, Offset, EndOffsetUpperBound)
+			big_ets_intervals:get_next_interval_outside(TID, Offset, EndOffsetUpperBound)
 	end.
 
 %% @doc Return the lowest synced interval with the end offset strictly above the given Offset
@@ -237,7 +237,7 @@ get_next_synced_interval(Offset, EndOffsetUpperBound, Packing, ID, StoreID) ->
 		[] ->
 			not_found;
 		[{_, TID}] ->
-			ar_ets_intervals:get_next_interval(TID, Offset, EndOffsetUpperBound)
+			big_ets_intervals:get_next_interval(TID, Offset, EndOffsetUpperBound)
 	end.
 
 %% @doc Return the interval containing the given Offset, including the right bound,
@@ -248,7 +248,7 @@ get_interval(Offset, ID, StoreID) ->
 		[] ->
 			not_found;
 		[{_, TID}] ->
-			ar_ets_intervals:get_interval_with_byte(TID, Offset)
+			big_ets_intervals:get_interval_with_byte(TID, Offset)
 	end.
 
 %% @doc Return the size of the intersection between the intervals and the given range.
@@ -258,7 +258,7 @@ get_intersection_size(End, Start, ID, StoreID) ->
 		[] ->
 			0;
 		[{_, TID}] ->
-			ar_ets_intervals:get_intersection_size(TID, End, Start)
+			big_ets_intervals:get_intersection_size(TID, End, Start)
 	end.
 
 %%%===================================================================
@@ -323,7 +323,7 @@ handle_call({cut, Offset, ID}, _From, State) ->
 	SyncRecord2 = big_intervals:cut(SyncRecord, Offset),
 	SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 	TID = get_or_create_type_tid({ID, StoreID}),
-	ar_ets_intervals:cut(TID, Offset),
+	big_ets_intervals:cut(TID, Offset),
 	SyncRecordByIDType2 =
 		maps:map(
 			fun
@@ -337,7 +337,7 @@ handle_call({cut, Offset, ID}, _From, State) ->
 	ets:foldl(
 		fun
 			({{ID2, _, SID}, TypeTID}, _) when ID2 == ID, SID == StoreID ->
-				ar_ets_intervals:cut(TypeTID, Offset);
+				big_ets_intervals:cut(TypeTID, Offset);
 			(_, _) ->
 				ok
 		end,
@@ -438,7 +438,7 @@ add2(End, Start, ID, State) ->
 	SyncRecord2 = big_intervals:add(SyncRecord, End, Start),
 	SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 	TID = get_or_create_type_tid({ID, StoreID}),
-	ar_ets_intervals:add(TID, End, Start),
+	big_ets_intervals:add(TID, End, Start),
 	State2 = State#state{ sync_record_by_id = SyncRecordByID2 },
 	{Reply, State3} = update_write_ahead_log({add, {End, Start, ID}}, StateDB, State2),
 	case Reply of
@@ -456,12 +456,12 @@ add2(End, Start, Packing, ID, State) ->
 	ByType2 = big_intervals:add(ByType, End, Start),
 	SyncRecordByIDType2 = maps:put({ID, Packing}, ByType2, SyncRecordByIDType),
 	TypeTID = get_or_create_type_tid({ID, Packing, StoreID}),
-	ar_ets_intervals:add(TypeTID, End, Start),
+	big_ets_intervals:add(TypeTID, End, Start),
 	SyncRecord = maps:get(ID, SyncRecordByID, big_intervals:new()),
 	SyncRecord2 = big_intervals:add(SyncRecord, End, Start),
 	SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 	TID = get_or_create_type_tid({ID, StoreID}),
-	ar_ets_intervals:add(TID, End, Start),
+	big_ets_intervals:add(TID, End, Start),
 	State2 = State#state{ sync_record_by_id = SyncRecordByID2,
 		sync_record_by_id_type = SyncRecordByIDType2 },
 	{Reply, State3} = update_write_ahead_log({{add, Packing}, {End, Start, ID}}, StateDB, State2),
@@ -480,7 +480,7 @@ delete2(End, Start, ID, State) ->
 	SyncRecord2 = big_intervals:delete(SyncRecord, End, Start),
 	SyncRecordByID2 = maps:put(ID, SyncRecord2, SyncRecordByID),
 	TID = get_or_create_type_tid({ID, StoreID}),
-	ar_ets_intervals:delete(TID, End, Start),
+	big_ets_intervals:delete(TID, End, Start),
 	SyncRecordByIDType2 =
 		maps:map(
 			fun
@@ -494,7 +494,7 @@ delete2(End, Start, ID, State) ->
 	ets:foldl(
 		fun
 			({{ID2, _, SID}, TypeTID}, _) when ID2 == ID, SID == StoreID ->
-				ar_ets_intervals:delete(TypeTID, End, Start);
+				big_ets_intervals:delete(TypeTID, End, Start);
 			(_, _) ->
 				ok
 		end,
@@ -540,7 +540,7 @@ is_recorded2(_Offset, '$end_of_table', _ID, _StoreID) ->
 is_recorded2(Offset, {ID, Packing, StoreID}, ID, StoreID) ->
 	case ets:lookup(sync_records, {ID, Packing, StoreID}) of
 		[{_, TID}] ->
-			case ar_ets_intervals:is_inside(TID, Offset) of
+			case big_ets_intervals:is_inside(TID, Offset) of
 				true ->
 					{true, Packing};
 				false ->
@@ -667,7 +667,7 @@ initialize_sync_record_by_id_ets2(none, _StoreID) ->
 	ok;
 initialize_sync_record_by_id_ets2({ID, SyncRecord, Iterator}, StoreID) ->
 	TID = ets:new(sync_record_type, [ordered_set, public, {read_concurrency, true}]),
-	ar_ets_intervals:init_from_gb_set(TID, SyncRecord),
+	big_ets_intervals:init_from_gb_set(TID, SyncRecord),
 	ets:insert(sync_records, {{ID, StoreID}, TID}),
 	initialize_sync_record_by_id_ets2(maps:next(Iterator), StoreID).
 
@@ -679,7 +679,7 @@ initialize_sync_record_by_id_type_ets2(none, _StoreID) ->
 	ok;
 initialize_sync_record_by_id_type_ets2({{ID, Packing}, SyncRecord, Iterator}, StoreID) ->
 	TID = ets:new(sync_record_type, [ordered_set, public, {read_concurrency, true}]),
-	ar_ets_intervals:init_from_gb_set(TID, SyncRecord),
+	big_ets_intervals:init_from_gb_set(TID, SyncRecord),
 	ets:insert(sync_records, {{ID, Packing, StoreID}, TID}),
 	initialize_sync_record_by_id_type_ets2(maps:next(Iterator), StoreID).
 

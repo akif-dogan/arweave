@@ -79,7 +79,7 @@ is_tx_blacklisted(TXID) ->
 
 %% @doc Check whether the byte with the given global offset is blacklisted.
 is_byte_blacklisted(Offset) ->
-	ar_ets_intervals:is_inside(big_tx_blacklist_offsets, Offset).
+	big_ets_intervals:is_inside(big_tx_blacklist_offsets, Offset).
 
 %% @doc Return the smallest not blacklisted byte bigger than or equal to
 %% the byte at the given global offset.
@@ -635,10 +635,10 @@ store_state() ->
 	]).
 
 restore_offsets(End, Start) ->
-	ar_ets_intervals:delete(big_tx_blacklist_offsets, End, Start).
+	big_ets_intervals:delete(big_tx_blacklist_offsets, End, Start).
 
 blacklist_offsets(End, Start, State) ->
-	ar_ets_intervals:add(big_tx_blacklist_offsets, End, Start),
+	big_ets_intervals:add(big_tx_blacklist_offsets, End, Start),
 	Ref = make_ref(),
 	erlang:put(Ref, {range, {Start, End}}),
 	?LOG_DEBUG([{event, requesting_data_removal},
@@ -651,7 +651,7 @@ blacklist_offsets(End, Start, State) ->
 	}.
 
 blacklist_offsets(TXID, End, Start, State) ->
-	ar_ets_intervals:add(big_tx_blacklist_offsets, End, Start),
+	big_ets_intervals:add(big_tx_blacklist_offsets, End, Start),
 	Ref = make_ref(),
 	erlang:put(Ref, {tx, {TXID, Start, End}}),
 	?LOG_DEBUG([{event, requesting_tx_data_removal},
