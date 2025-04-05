@@ -291,7 +291,7 @@ jobs:
             big_storage_module,
             big_storage,
             big_sync_buckets,
-            ar_sync_record,
+            big_sync_record,
             big_tx_db,
             big_unbalanced_merkle,
             ar_util,

@@ -72,7 +72,7 @@ repack(Cursor, RangeStart, RangeEnd, Packing, StoreID) ->
 			{range_start, RangeStart},
 			{range_end, RangeEnd},
 			{packing, big_serialize:encode_packing(Packing, true)}]),
-	case ar_sync_record:get_next_synced_interval(Cursor, RightBound,
+	case big_sync_record:get_next_synced_interval(Cursor, RightBound,
 			big_data_sync, StoreID) of
 		not_found ->
 			?LOG_DEBUG([{event, repack_in_place_no_synced_interval},
@@ -211,7 +211,7 @@ send_chunk_for_repacking(AbsoluteOffset, ChunkMeta, Args) ->
 	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
 	{ChunkDataKey, TXRoot, DataRoot, TXPath,
 			RelativeOffset, ChunkSize} = ChunkMeta,
-	case ar_sync_record:is_recorded(PaddedOffset, big_data_sync, StoreID) of
+	case big_sync_record:is_recorded(PaddedOffset, big_data_sync, StoreID) of
 		{true, unpacked_padded} ->
 			%% unpacked_padded is a special internal packing used
 			%% for temporary storage of unpacked and padded chunks
@@ -298,12 +298,12 @@ chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 	IsStorageSupported =
 		big_chunk_storage:is_storage_supported(PaddedEndOffset, ChunkSize, Packing),
 
-	RemoveFromSyncRecordResult = ar_sync_record:delete(PaddedEndOffset,
+	RemoveFromSyncRecordResult = big_sync_record:delete(PaddedEndOffset,
 			StartOffset, big_data_sync, StoreID),
 	RemoveFromSyncRecordResult2 =
 		case RemoveFromSyncRecordResult of
 			ok ->
-				ar_sync_record:delete(PaddedEndOffset,
+				big_sync_record:delete(PaddedEndOffset,
 					StartOffset, big_chunk_storage, StoreID);
 			Error ->
 				Error
@@ -318,7 +318,7 @@ chunk_repacked(ChunkArgs, Args, StoreID, FileIndex, EntropyContext) ->
 					StoreID, FileIndex, EntropyContext),
 			case StoreResults of
 				{ok, FileIndex2, NewPacking} ->
-					ar_sync_record:add_async(repacked_chunk,
+					big_sync_record:add_async(repacked_chunk,
 							PaddedEndOffset, StartOffset,
 							NewPacking, big_data_sync, StoreID),
 					{ok, FileIndex2};

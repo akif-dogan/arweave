@@ -45,7 +45,7 @@ test_syncs_headers() ->
 		lists:reverse(lists:seq(0, ?MAX_TX_ANCHOR_DEPTH + 5))
 	),
 	%% Throw the event to simulate running out of disk space.
-	ar_disksup:pause(),
+	big_disksup:pause(),
 	ar_events:send(disksup, {remaining_disk_space, "default", true, 0, 0}),
 	NoSpaceHeight = ?MAX_TX_ANCHOR_DEPTH + 6,
 	NoSpaceTX = sign_v1_tx(main, Wallet,
@@ -85,7 +85,7 @@ test_syncs_headers() ->
 	?assertMatch(#block{}, LatestB),
 	?assertMatch(#tx{}, big_storage:read_tx(lists:nth(1, LatestB#block.txs))),
 	?assertMatch({ok, _}, big_storage:read_wallet_list(LatestB#block.wallet_list)),
-	ar_disksup:resume().
+	big_disksup:resume().
 
 post_random_blocks(Wallet, TargetHeight, B0) ->
 	lists:foldl(

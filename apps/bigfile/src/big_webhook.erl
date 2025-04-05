@@ -562,7 +562,7 @@ is_synced_by_storage_modules(Start, End, StoreID) ->
 is_synced_by_storage_modules([]) ->
 	true;
 is_synced_by_storage_modules([{Start, End, StoreID} | Intervals]) ->
-	case ar_sync_record:get_next_unsynced_interval(Start, End, big_data_sync, StoreID) of
+	case big_sync_record:get_next_unsynced_interval(Start, End, big_data_sync, StoreID) of
 		not_found ->
 			is_synced_by_storage_modules(Intervals);
 		_I ->

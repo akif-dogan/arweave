@@ -28,18 +28,18 @@ init([]) ->
 			StoreID = big_storage_module:id(StorageModule),
 			Label = big_storage_module:label(StorageModule),
 			Name = list_to_atom("ar_sync_record_" ++ Label),
-			?CHILD_WITH_ARGS(ar_sync_record, worker, Name, [Name, StoreID])
+			?CHILD_WITH_ARGS(big_sync_record, worker, Name, [Name, StoreID])
 		end,
 		Config#config.storage_modules
 	),
-	DefaultSyncRecordWorker = ?CHILD_WITH_ARGS(ar_sync_record, worker, ar_sync_record_default,
+	DefaultSyncRecordWorker = ?CHILD_WITH_ARGS(big_sync_record, worker, ar_sync_record_default,
 		[ar_sync_record_default, "default"]),
 	RepackInPlaceWorkers = lists:map(
 		fun({StorageModule, _Packing}) ->
 			StoreID = big_storage_module:id(StorageModule),
 			Label = big_storage_module:label(StorageModule),
 			Name = list_to_atom("ar_sync_record_" ++ Label),
-			?CHILD_WITH_ARGS(ar_sync_record, worker, Name, [Name, StoreID])
+			?CHILD_WITH_ARGS(big_sync_record, worker, Name, [Name, StoreID])
 		end,
 		Config#config.repack_in_place_storage_modules
 	),

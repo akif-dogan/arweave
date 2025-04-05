@@ -22,7 +22,7 @@
 %%% @doc The server is a modified version of disksup from Erlang OTP - it periodically
 %%% checks for available disk space and returns it in bytes (disksup only serves it in %).
 %%% @end
--module(ar_disksup).
+-module(big_disksup).
 -behaviour(gen_server).
 
 -export([start_link/0, get_disk_space_check_frequency/0, get_disk_data/0, pause/0, resume/0]).

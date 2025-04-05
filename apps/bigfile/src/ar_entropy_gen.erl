@@ -386,7 +386,7 @@ generate_entropies(RewardAddr, PaddedEndOffset) ->
 
 advance_entropy_offset(BucketEndOffset, StoreID) ->
     ID = ar_chunk_storage_replica_2_9_1_entropy,
-    case ar_sync_record:get_next_unsynced_interval(
+    case big_sync_record:get_next_unsynced_interval(
             BucketEndOffset, infinity, ID, StoreID) of
         not_found ->
             BucketEndOffset + ?DATA_CHUNK_SIZE;

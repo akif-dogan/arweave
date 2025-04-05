@@ -165,7 +165,7 @@ get(Byte) ->
 
 %% @doc Return {AbsoluteEndOffset, Chunk} for the chunk containing the given byte.
 get(Byte, StoreID) ->
-	case ar_sync_record:get_interval(Byte + 1, big_chunk_storage, StoreID) of
+	case big_sync_record:get_interval(Byte + 1, big_chunk_storage, StoreID) of
 		not_found ->
 			not_found;
 		{_End, IntervalStart} ->
@@ -207,7 +207,7 @@ get_range(Start, Size) ->
 %% at most Start + Size + ?DATA_CHUNK_SIZE - 1.
 get_range(Start, Size, StoreID) ->
 	?assert(Size < get_chunk_group_size()),
-	case ar_sync_record:get_next_synced_interval(Start, infinity, big_chunk_storage, StoreID) of
+	case big_sync_record:get_next_synced_interval(Start, infinity, big_chunk_storage, StoreID) of
 		{_End, IntervalStart} when Start + Size > IntervalStart ->
 			Start2 = max(Start, IntervalStart),
 			Size2 = Start + Size - Start2,
@@ -250,7 +250,7 @@ close_files(StoreID) ->
 
 %% @doc Soft-delete everything above the given end offset.
 cut(Offset, StoreID) ->
-	ar_sync_record:cut(Offset, big_chunk_storage, StoreID).
+	big_sync_record:cut(Offset, big_chunk_storage, StoreID).
 
 %% @doc Remove the chunk with the given end offset.
 delete(Offset) ->
@@ -510,7 +510,7 @@ handle_call({put, PaddedEndOffset, Chunk, Packing}, _From, State)
 handle_call({delete, PaddedEndOffset}, _From, State) ->
 	#state{	store_id = StoreID } = State,
 	StartOffset = PaddedEndOffset - ?DATA_CHUNK_SIZE,
-	case ar_sync_record:delete(PaddedEndOffset, StartOffset, big_chunk_storage, StoreID) of
+	case big_sync_record:delete(PaddedEndOffset, StartOffset, big_chunk_storage, StoreID) of
 		ok ->
 			case ar_entropy_storage:delete_record(PaddedEndOffset, StoreID) of
 				ok ->
@@ -534,7 +534,7 @@ handle_call(reset, _, #state{ store_id = StoreID, file_index = FileIndex } = Sta
 		end,
 		FileIndex
 	),
-	ok = ar_sync_record:cut(0, big_chunk_storage, StoreID),
+	ok = big_sync_record:cut(0, big_chunk_storage, StoreID),
 	erlang:erase(),
 	{reply, ok, State#state{ file_index = #{} }};
 
@@ -653,7 +653,7 @@ record_chunk(
 	case write_chunk(PaddedEndOffset, Chunk, FileIndex, StoreID) of
 		{ok, Filepath} ->
 			prometheus_counter:inc(chunks_stored, [PackingLabel, StoreIDLabel]),
-			case ar_sync_record:add(
+			case big_sync_record:add(
 					PaddedEndOffset, PaddedEndOffset - ?DATA_CHUNK_SIZE,
 					sync_record_id(Packing), StoreID) of
 				ok ->

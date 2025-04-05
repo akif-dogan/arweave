@@ -31,11 +31,11 @@ test_sync_record() ->
 
 		?assertEqual([{1048576, 0}], ar_intervals:to_list(Global1)),
 		?assertEqual(not_found,
-			ar_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
-		?assertEqual({1048576, 0}, ar_sync_record:get_interval(1, big_data_sync, PartitionID)),
+			big_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
+		?assertEqual({1048576, 0}, big_sync_record:get_interval(1, big_data_sync, PartitionID)),
 
 		%% Add a diskpool chunk
-		ar_sync_record:add(
+		big_sync_record:add(
 			DiskPoolStart+?DATA_CHUNK_SIZE, DiskPoolStart, big_data_sync, "default"),
 		timer:sleep(SleepTime),
 		{ok, Binary2} = ar_global_sync_record:get_serialized_sync_record(Options),
@@ -44,11 +44,11 @@ test_sync_record() ->
 		?assertEqual([{1048576, 0},{DiskPoolStart+?DATA_CHUNK_SIZE,DiskPoolStart}],
 			ar_intervals:to_list(Global2)),
 		?assertEqual({DiskPoolStart+?DATA_CHUNK_SIZE,DiskPoolStart},
-			ar_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
-		?assertEqual({1048576, 0}, ar_sync_record:get_interval(1, big_data_sync, PartitionID)),
+			big_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
+		?assertEqual({1048576, 0}, big_sync_record:get_interval(1, big_data_sync, PartitionID)),
 
 		%% Remove the diskpool chunk
-		ar_sync_record:delete(
+			big_sync_record:delete(
 			DiskPoolStart+?DATA_CHUNK_SIZE, DiskPoolStart, big_data_sync, "default"),
 		timer:sleep(SleepTime),
 		{ok, Binary3} = ar_global_sync_record:get_serialized_sync_record(Options),
@@ -67,7 +67,7 @@ test_sync_record() ->
 				5000),
 
 		%% Add a storage module chunk
-		ar_sync_record:add(
+		big_sync_record:add(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, PartitionID),
 		timer:sleep(SleepTime),
 		{ok, Binary5} = ar_global_sync_record:get_serialized_sync_record(Options),
@@ -76,13 +76,13 @@ test_sync_record() ->
 		?assertEqual([{1048576, 0},{PartitionStart+?DATA_CHUNK_SIZE,PartitionStart}],
 			ar_intervals:to_list(Global5)),
 		?assertEqual(not_found,
-			ar_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
-		?assertEqual({1048576, 0}, ar_sync_record:get_interval(1, big_data_sync, PartitionID)),
+			big_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
+		?assertEqual({1048576, 0}, big_sync_record:get_interval(1, big_data_sync, PartitionID)),
 		?assertEqual({PartitionStart+?DATA_CHUNK_SIZE, PartitionStart},
-				ar_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
+				big_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
 
 		%% Remove the storage module chunk
-		ar_sync_record:delete(
+		big_sync_record:delete(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, PartitionID),
 		timer:sleep(SleepTime),
 		?assertEqual([{1048576, 0},{PartitionStart+?DATA_CHUNK_SIZE,PartitionStart}],
@@ -97,15 +97,15 @@ test_sync_record() ->
 				200,
 				1000),
 		?assertEqual(not_found,
-			ar_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
-		?assertEqual({1048576, 0}, ar_sync_record:get_interval(1, big_data_sync, PartitionID)),
+			big_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
+		?assertEqual({1048576, 0}, big_sync_record:get_interval(1, big_data_sync, PartitionID)),
 		?assertEqual(not_found,
-				ar_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
+				big_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
 
 		%% Add chunk to both diskpool and storage module
-		ar_sync_record:add(
+		big_sync_record:add(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, "default"),
-		ar_sync_record:add(
+		big_sync_record:add(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, PartitionID),
 		timer:sleep(SleepTime),
 		{ok, Binary6} = ar_global_sync_record:get_serialized_sync_record(Options),
@@ -114,13 +114,13 @@ test_sync_record() ->
 		?assertEqual([{1048576, 0}, {PartitionStart+?DATA_CHUNK_SIZE,PartitionStart}],
 			ar_intervals:to_list(Global6)),
 		?assertEqual({PartitionStart+?DATA_CHUNK_SIZE,PartitionStart},
-			ar_sync_record:get_interval(PartitionStart+1, big_data_sync, "default")),
-		?assertEqual({1048576, 0}, ar_sync_record:get_interval(1, big_data_sync, PartitionID)),
+			big_sync_record:get_interval(PartitionStart+1, big_data_sync, "default")),
+		?assertEqual({1048576, 0}, big_sync_record:get_interval(1, big_data_sync, PartitionID)),
 		?assertEqual({PartitionStart+?DATA_CHUNK_SIZE, PartitionStart},
-			ar_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
+			big_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
 
 		%% Now remove it from just the diskpool
-		ar_sync_record:delete(
+		big_sync_record:delete(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, "default"),
 		timer:sleep(SleepTime),
 		{ok, Binary7} = ar_global_sync_record:get_serialized_sync_record(Options),
@@ -129,10 +129,10 @@ test_sync_record() ->
 		?assertEqual([{1048576, 0}, {PartitionStart+?DATA_CHUNK_SIZE,PartitionStart}],
 			ar_intervals:to_list(Global7)),
 		?assertEqual(not_found,
-			ar_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
-		?assertEqual({1048576, 0}, ar_sync_record:get_interval(1, big_data_sync, PartitionID)),
+			big_sync_record:get_interval(DiskPoolStart+1, big_data_sync, "default")),
+		?assertEqual({1048576, 0}, big_sync_record:get_interval(1, big_data_sync, PartitionID)),
 		?assertEqual({PartitionStart+?DATA_CHUNK_SIZE, PartitionStart},
-			ar_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
+			big_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
 
 		ar_test_node:stop()
 	after
@@ -159,19 +159,19 @@ test_sync_record_with_replica_2_9() when ?BLOCK_2_9_SYNCING ->
 		{ok, Global1} = ar_intervals:safe_from_etf(Binary1),
 
 		?assertEqual([], ar_intervals:to_list(Global1)),
-		?assertEqual({1048576, 0}, ar_sync_record:get_interval(1, big_data_sync, PartitionID)),
+		?assertEqual({1048576, 0}, big_sync_record:get_interval(1, big_data_sync, PartitionID)),
 
 		%% Add a storage module chunk
-		ar_sync_record:add(
+		big_sync_record:add(
 			PartitionStart+?DATA_CHUNK_SIZE, PartitionStart, big_data_sync, PartitionID),
 		timer:sleep(SleepTime),
 		{ok, Binary5} = ar_global_sync_record:get_serialized_sync_record(Options),
 		{ok, Global5} = ar_intervals:safe_from_etf(Binary5),
 
 		?assertEqual([], ar_intervals:to_list(Global5)),
-		?assertEqual({1048576, 0}, ar_sync_record:get_interval(1, big_data_sync, PartitionID)),
+		?assertEqual({1048576, 0}, big_sync_record:get_interval(1, big_data_sync, PartitionID)),
 		?assertEqual({PartitionStart+?DATA_CHUNK_SIZE, PartitionStart},
-				ar_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
+				big_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
 
 		ar_test_node:stop()
 	after

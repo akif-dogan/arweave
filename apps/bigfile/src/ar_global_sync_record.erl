@@ -81,7 +81,7 @@ init([]) ->
 					Acc;
 				_ ->
 					StoreID = big_storage_module:id(Module),
-					ar_intervals:union(ar_sync_record:get(big_data_sync, StoreID), Acc)
+					ar_intervals:union(big_sync_record:get(big_data_sync, StoreID), Acc)
 			end
 		end,
 		ar_intervals:new(),

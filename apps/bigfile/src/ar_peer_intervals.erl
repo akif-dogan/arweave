@@ -63,7 +63,7 @@ get_unsynced_intervals(Start, End, StoreID) ->
 get_unsynced_intervals(Start, End, Intervals, _StoreID) when Start >= End ->
 	Intervals;
 get_unsynced_intervals(Start, End, Intervals, StoreID) ->
-	case ar_sync_record:get_next_synced_interval(Start, End, big_data_sync, StoreID) of
+	case big_sync_record:get_next_synced_interval(Start, End, big_data_sync, StoreID) of
 		not_found ->
 			ar_intervals:add(Intervals, End, Start);
 		{End2, Start2} ->

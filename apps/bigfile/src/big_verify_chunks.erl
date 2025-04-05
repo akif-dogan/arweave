@@ -155,7 +155,7 @@ verify_packing(Metadata, State) ->
 	{AbsoluteOffset, ChunkDataKey, TXRoot, _DataRoot, TXPath,
 			_TXRelativeOffset, ChunkSize} = Metadata,
 	PaddedOffset = big_block:get_chunk_padded_offset(AbsoluteOffset),
-	StoredPackingCheck = ar_sync_record:is_recorded(AbsoluteOffset, big_data_sync, StoreID),
+	StoredPackingCheck = big_sync_record:is_recorded(AbsoluteOffset, big_data_sync, StoreID),
 	ExpectedPacking =
 		case big_chunk_storage:is_storage_supported(PaddedOffset, ChunkSize, Packing) of
 			true ->
@@ -165,7 +165,7 @@ verify_packing(Metadata, State) ->
 		end,
 	case {StoredPackingCheck, ExpectedPacking} of
 		{{true, ExpectedPacking}, _} ->
-			%% Chunk is recorded in ar_sync_record under the expected Packing.
+			%% Chunk is recorded in big_sync_record under the expected Packing.
 			ok;
 		{{true, unpacked_padded}, {replica_2_9, _}} ->
 			%% The module is in the process of entropy generation and has
@@ -240,9 +240,9 @@ query_intervals(State) ->
 	{UnionInterval, {ChunkStorageInterval, DataSyncInterval}}.
 
 align_intervals(Cursor, StoreID) ->
-	ChunkStorageInterval = ar_sync_record:get_next_synced_interval(
+	ChunkStorageInterval = big_sync_record:get_next_synced_interval(
 		Cursor, infinity, big_chunk_storage, StoreID),
-	DataSyncInterval = ar_sync_record:get_next_synced_interval(
+	DataSyncInterval = big_sync_record:get_next_synced_interval(
 		Cursor, infinity, big_data_sync, StoreID),
 	align_intervals(Cursor, ChunkStorageInterval, DataSyncInterval).
 

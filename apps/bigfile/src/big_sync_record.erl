@@ -1,4 +1,4 @@
--module(ar_sync_record).
+-module(big_sync_record).
 
 -behaviour(gen_server).
 
@@ -112,7 +112,7 @@ add_async(Event, End, Start, ID, StoreID) ->
 	GenServerID = name(StoreID),
 	gen_server:cast(GenServerID, {add_async, Event, End, Start, ID}).
 
-%% @doc Special case of add/5 for repacked chunks. When repacking the ar_sync_record add
+%% @doc Special case of add/5 for repacked chunks. When repacking the big_sync_record add
 %% happens at the end so we don't need to block on it to complete.
 add_async(Event, End, Start, Packing, ID, StoreID) ->
 	GenServerID = name(StoreID),

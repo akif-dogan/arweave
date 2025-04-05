@@ -458,14 +458,14 @@ wait_until_syncs_data(Left, Right, WeaveSize, Packing) ->
 		fun() ->
 			case Packing of
 				any ->
-					case ar_sync_record:is_recorded(Left + 1, big_data_sync) of
+					case big_sync_record:is_recorded(Left + 1, big_data_sync) of
 						false ->
 							false;
 						_ ->
 							true
 					end;
 				_ ->
-					case ar_sync_record:is_recorded(Left + 1, {big_data_sync, Packing}) of
+					case big_sync_record:is_recorded(Left + 1, {big_data_sync, Packing}) of
 						{{true, _}, _} ->
 							true;
 						_ ->

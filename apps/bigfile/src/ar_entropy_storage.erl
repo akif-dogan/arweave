@@ -104,7 +104,7 @@ is_entropy_recorded(PaddedEndOffset, StoreID) ->
     %% The old id (ar_chunk_storage_replica_2_9_entropy) should not be used.
     ID = ar_chunk_storage_replica_2_9_1_entropy,
     ChunkBucketStart = big_chunk_storage:get_chunk_bucket_start(PaddedEndOffset),
-    ar_sync_record:is_recorded(ChunkBucketStart + 1, ID, StoreID).
+    big_sync_record:is_recorded(ChunkBucketStart + 1, ID, StoreID).
 
 update_sync_records(IsComplete, PaddedEndOffset, StoreID, RewardAddr) ->
     %% Entropy indexing changed between 2.9.0 and 2.9.1. So we'll use a new
@@ -113,7 +113,7 @@ update_sync_records(IsComplete, PaddedEndOffset, StoreID, RewardAddr) ->
     ID = ar_chunk_storage_replica_2_9_1_entropy,
     BucketEnd = big_chunk_storage:get_chunk_bucket_end(PaddedEndOffset),
     BucketStart = big_chunk_storage:get_chunk_bucket_start(PaddedEndOffset),
-    ar_sync_record:add_async(replica_2_9_entropy, BucketEnd, BucketStart, ID, StoreID),
+    big_sync_record:add_async(replica_2_9_entropy, BucketEnd, BucketStart, ID, StoreID),
     prometheus_counter:inc(replica_2_9_entropy_stored,
                            [big_storage_module:label_by_id(StoreID)],
                            ?DATA_CHUNK_SIZE),
@@ -124,12 +124,12 @@ update_sync_records(IsComplete, PaddedEndOffset, StoreID, RewardAddr) ->
             prometheus_counter:inc(chunks_stored,
                                    [big_storage_module:packing_label(Packing),
                                     big_storage_module:label_by_id(StoreID)]),
-            ar_sync_record:add_async(replica_2_9_entropy_with_chunk,
+            big_sync_record:add_async(replica_2_9_entropy_with_chunk,
                                      PaddedEndOffset,
                                      StartOffset,
                                      big_chunk_storage,
                                      StoreID),
-            ar_sync_record:add_async(replica_2_9_entropy_with_chunk,
+            big_sync_record:add_async(replica_2_9_entropy_with_chunk,
                                      PaddedEndOffset,
                                      StartOffset,
                                      {replica_2_9, RewardAddr},
@@ -145,7 +145,7 @@ delete_record(PaddedEndOffset, StoreID) ->
     %% The old id (ar_chunk_storage_replica_2_9_entropy) should not be used.
     ID = ar_chunk_storage_replica_2_9_1_entropy,
     BucketStart = big_chunk_storage:get_chunk_bucket_start(PaddedEndOffset),
-    ar_sync_record:delete(BucketStart + ?DATA_CHUNK_SIZE, BucketStart, ID, StoreID).
+    big_sync_record:delete(BucketStart + ?DATA_CHUNK_SIZE, BucketStart, ID, StoreID).
 
 generate_missing_entropy(PaddedEndOffset, RewardAddr) ->
     Entropies = ar_entropy_gen:generate_entropies(RewardAddr, PaddedEndOffset),
@@ -217,7 +217,7 @@ record_chunk(PaddedEndOffset,
         big_chunk_storage:locate_chunk_on_disk(PaddedEndOffset, StoreID),
     acquire_semaphore(Filepath),
     CheckIsChunkStoredAlready =
-        ar_sync_record:is_recorded(PaddedEndOffset, big_chunk_storage, StoreID),
+        big_sync_record:is_recorded(PaddedEndOffset, big_chunk_storage, StoreID),
     CheckIsEntropyRecorded =
         case CheckIsChunkStoredAlready of
             true ->
@@ -316,7 +316,7 @@ record_entropy(ChunkEntropy, BucketEndOffset, StoreID, RewardAddr) ->
     %% End sanity checks
     Byte = get_chunk_byte_from_bucket_end(BucketEndOffset),
     CheckUnpackedChunkRecorded =
-        ar_sync_record:get_interval(Byte + 1,
+        big_sync_record:get_interval(Byte + 1,
                                     big_chunk_storage:sync_record_id(unpacked_padded),
                                     StoreID),
 
@@ -362,7 +362,7 @@ record_entropy(ChunkEntropy, BucketEndOffset, StoreID, RewardAddr) ->
                     {error, _} = Error ->
                         Error;
                     {_, UnpackedChunk} ->
-                        ar_sync_record:delete(EndOffset, StartOffset, big_data_sync, StoreID),
+                        big_sync_record:delete(EndOffset, StartOffset, big_data_sync, StoreID),
                         ar_packing_server:encipher_replica_2_9_chunk(UnpackedChunk, ChunkEntropy)
                 end;
             false ->

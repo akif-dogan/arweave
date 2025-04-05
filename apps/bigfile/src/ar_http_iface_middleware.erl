@@ -2004,7 +2004,7 @@ handle_get_chunk(OffsetBinary, Req, Encoding) ->
 								true
 						end,
 					{ReadPacking, CheckRecords} =
-						case ar_sync_record:is_recorded(Offset, big_data_sync) of
+						case big_sync_record:is_recorded(Offset, big_data_sync) of
 							false ->
 								{none, {reply, {404, #{}, <<>>, Req}}};
 							{true, _} ->
@@ -2103,7 +2103,7 @@ handle_get_chunk_proof2(Offset, Req, Encoding) ->
 		end,
 	ok = ar_semaphore:acquire(get_chunk, infinity),
 	CheckRecords =
-		case ar_sync_record:is_recorded(Offset, big_data_sync) of
+		case big_sync_record:is_recorded(Offset, big_data_sync) of
 			false ->
 				{none, {reply, {404, #{}, <<>>, Req}}};
 			{{true, _Packing}, _StoreID} ->

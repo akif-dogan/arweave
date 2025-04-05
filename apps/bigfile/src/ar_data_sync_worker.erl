@@ -114,9 +114,9 @@ read_range2(_MessagesRemaining,
 	ok;
 read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 	CheckIsRecordedAlready =
-		case ar_sync_record:is_recorded(Start + 1, big_data_sync, TargetStoreID) of
+		case big_sync_record:is_recorded(Start + 1, big_data_sync, TargetStoreID) of
 			{true, _} ->
-				case ar_sync_record:get_next_unsynced_interval(Start, End, big_data_sync,
+				case big_sync_record:get_next_unsynced_interval(Start, End, big_data_sync,
 						TargetStoreID) of
 					not_found ->
 						ok;
@@ -134,7 +134,7 @@ read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 			recast ->
 				ok;
 			false ->
-				case ar_sync_record:is_recorded(Start + 1, big_data_sync, OriginStoreID) of
+				case big_sync_record:is_recorded(Start + 1, big_data_sync, OriginStoreID) of
 					{true, Packing} ->
 						{true, Packing};
 					SyncRecordReply ->
@@ -187,7 +187,7 @@ read_range2(MessagesRemaining, {Start, End, OriginStoreID, TargetStoreID}) ->
 					read_range2(MessagesRemaining,
 							{Start + ChunkSize, End, OriginStoreID, TargetStoreID});
 				{ok, {Chunk, DataPath}} ->
-					case ar_sync_record:is_recorded(AbsoluteOffset, big_data_sync,
+					case big_sync_record:is_recorded(AbsoluteOffset, big_data_sync,
 							OriginStoreID) of
 						{true, Packing3} ->
 							big_data_sync:increment_chunk_cache_size(),
