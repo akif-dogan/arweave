@@ -1,4 +1,4 @@
--module(ar_e2e).
+-module(big_e2e).
 
 -export([fixture_dir/1, fixture_dir/2, install_fixture/3, load_wallet_fixture/1,
 	write_chunk_fixture/3, load_chunk_fixture/2]).
@@ -79,8 +79,8 @@ start_source_node(Node, unpacked, _WalletFixture) ->
 		peer1 -> peer2;
 		peer2 -> peer1
 	end,
-	{Blocks, _SourceAddr, Chunks} = ar_e2e:start_source_node(TempNode, spora_2_6, wallet_a),
-	{_, StorageModules} = ar_e2e:source_node_storage_modules(Node, unpacked, wallet_a),
+	{Blocks, _SourceAddr, Chunks} = big_e2e:start_source_node(TempNode, spora_2_6, wallet_a),
+	{_, StorageModules} = big_e2e:source_node_storage_modules(Node, unpacked, wallet_a),
 	[B0, _, {TX2, _} | _] = Blocks,
 	{ok, Config} = ar_test_node:get_config(Node),
 	ar_test_node:start_other_node(Node, B0, Config#config{
@@ -91,15 +91,15 @@ start_source_node(Node, unpacked, _WalletFixture) ->
 
 	?LOG_INFO("Source node ~p started.", [Node]),
 	
-	ar_e2e:assert_syncs_range(Node, 0, 4*?PARTITION_SIZE),
+	big_e2e:assert_syncs_range(Node, 0, 4*?PARTITION_SIZE),
 	
-	ar_e2e:assert_partition_size(Node, 0, unpacked),
-	ar_e2e:assert_partition_size(Node, 1, unpacked),
-	ar_e2e:assert_partition_size(Node, 2, unpacked, floor(0.5*?PARTITION_SIZE)),
+	big_e2e:assert_partition_size(Node, 0, unpacked),
+	big_e2e:assert_partition_size(Node, 1, unpacked),
+	big_e2e:assert_partition_size(Node, 2, unpacked, floor(0.5*?PARTITION_SIZE)),
 
-	ar_e2e:assert_chunks(Node, unpacked, Chunks),
+	big_e2e:assert_chunks(Node, unpacked, Chunks),
 
-	ar_e2e:assert_empty_partition(Node, 3, unpacked),
+	big_e2e:assert_empty_partition(Node, 3, unpacked),
 
 	?LOG_INFO("Source node ~p assertions passed.", [Node]),
 
@@ -120,7 +120,7 @@ start_source_node(Node, unpacked, _WalletFixture) ->
 			peer => ar_test_node:peer_ip(Node),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TX2#tx.id)) ++ "/data"
 		}),
-	{ok, ExpectedData} = ar_e2e:load_chunk_fixture(
+	{ok, ExpectedData} = big_e2e:load_chunk_fixture(
 		unpacked, ?PARTITION_SIZE + floor(3.75 * ?DATA_CHUNK_SIZE)),
 	?assertEqual(ExpectedData, ar_util:decode(Data)),
 
@@ -178,18 +178,18 @@ start_source_node(Node, PackingType, WalletFixture) ->
 
 	?LOG_INFO("Source node ~p blocks mined.", [Node]),
 
-	SourcePacking = ar_e2e:packing_type_to_packing(PackingType, RewardAddr),
+	SourcePacking = big_e2e:packing_type_to_packing(PackingType, RewardAddr),
 
-	ar_e2e:assert_syncs_range(Node, SourcePacking, 0, 4*?PARTITION_SIZE),
+	big_e2e:assert_syncs_range(Node, SourcePacking, 0, 4*?PARTITION_SIZE),
 
 	%% No overlap since we aren't syncing or repacking chunks.
-	ar_e2e:assert_partition_size(Node, 0, SourcePacking, ?PARTITION_SIZE),
-	ar_e2e:assert_partition_size(Node, 1, SourcePacking, ?PARTITION_SIZE),
-	ar_e2e:assert_partition_size(Node, 2, SourcePacking, floor(0.5*?PARTITION_SIZE)),
+	big_e2e:assert_partition_size(Node, 0, SourcePacking, ?PARTITION_SIZE),
+	big_e2e:assert_partition_size(Node, 1, SourcePacking, ?PARTITION_SIZE),
+	big_e2e:assert_partition_size(Node, 2, SourcePacking, floor(0.5*?PARTITION_SIZE)),
 	
-	ar_e2e:assert_chunks(Node, SourcePacking, Chunks),
+	big_e2e:assert_chunks(Node, SourcePacking, Chunks),
 
-	ar_e2e:assert_empty_partition(Node, 3, SourcePacking),
+	big_e2e:assert_empty_partition(Node, 3, SourcePacking),
 
 	%% pack_served_chunks is not enabled so we shouldn't return unpacked data
 	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}},
@@ -209,7 +209,7 @@ max_chunk_offset(Chunks) ->
 source_node_storage_modules(_Node, unpacked, _WalletFixture) ->
 	{undefined, source_node_storage_modules(unpacked)};
 source_node_storage_modules(Node, PackingType, WalletFixture) ->
-	Wallet = ar_test_node:remote_call(Node, ar_e2e, load_wallet_fixture, [WalletFixture]),
+	Wallet = ar_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [WalletFixture]),
 	RewardAddr = big_wallet:to_address(Wallet),
 	SourcePacking = packing_type_to_packing(PackingType, RewardAddr),
 	{Wallet, source_node_storage_modules(SourcePacking)}.
@@ -402,7 +402,7 @@ assert_mine_and_validate(MinerNode, ValidatorNode, MinerPacking) ->
 
 	MinerBI = ar_test_node:wait_until_height(MinerNode, CurrentHeight + 1),
 	{ok, MinerBlock} = ar_test_node:http_get_block(element(1, hd(MinerBI)), MinerNode),
-	ar_e2e:assert_block(MinerPacking, MinerBlock),
+	big_e2e:assert_block(MinerPacking, MinerBlock),
 
 	ValidatorBI = ar_test_node:wait_until_height(ValidatorNode, MinerBlock#block.height),
 	{ok, ValidatorBlock} = ar_test_node:http_get_block(element(1, hd(ValidatorBI)), ValidatorNode),
@@ -474,7 +474,7 @@ assert_chunk(Node, RequestPacking, Packing, Block, EndOffset, ChunkSize) ->
 
 	maybe_write_chunk_fixture(Packing, EndOffset, Chunk),
 
-	{ok, ExpectedPackedChunk} = ar_e2e:load_chunk_fixture(Packing, EndOffset),
+	{ok, ExpectedPackedChunk} = big_e2e:load_chunk_fixture(Packing, EndOffset),
 	?assertEqual(ExpectedPackedChunk, Chunk,
 		iolist_to_binary(io_lib:format(
 			"~p: Chunk at offset ~p, size ~p, packing ~p does not match packed chunk",
@@ -518,7 +518,7 @@ write_wallet_fixtures() ->
 	lists:foreach(fun(Wallet) ->
 		WalletName = atom_to_list(Wallet),
 		big_wallet:new_keyfile(?DEFAULT_KEY_TYPE, WalletName),
-		ar_e2e:install_fixture(
+		big_e2e:install_fixture(
 			big_wallet:wallet_filepath(Wallet), wallets, WalletName ++ ".json")
 	end, Wallets),
 	ok.
@@ -526,6 +526,6 @@ write_wallet_fixtures() ->
 maybe_write_chunk_fixture(Packing, EndOffset, Chunk) when ?UPDATE_CHUNK_FIXTURES =:= true ->
 	?LOG_ERROR("WARNING: Updating chunk fixture! EndOffset: ~p, Packing: ~p", 
 		[EndOffset, big_serialize:encode_packing(Packing, true)]),
-	ar_e2e:write_chunk_fixture(Packing, EndOffset, Chunk);
+	big_e2e:write_chunk_fixture(Packing, EndOffset, Chunk);
 maybe_write_chunk_fixture(_, _, _) ->
 	ok.

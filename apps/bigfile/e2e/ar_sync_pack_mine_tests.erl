@@ -13,7 +13,7 @@ setup_source_node(PackingType) ->
 	SinkNode = peer2,
 	ar_test_node:stop(SinkNode),
 	ar_test_node:stop(SourceNode),
-	{Blocks, _SourceAddr, Chunks} = ar_e2e:start_source_node(SourceNode, PackingType, wallet_a),
+	{Blocks, _SourceAddr, Chunks} = big_e2e:start_source_node(SourceNode, PackingType, wallet_a),
 
 	{Blocks, Chunks, PackingType}.
 
@@ -136,7 +136,7 @@ disk_pool_threshold_test_() ->
 %% test_sync_pack_mine
 %% --------------------------------------------------------------------------------------------
 test_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
-	ar_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
+	big_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
 	?LOG_INFO([{event, test_sync_pack_mine}, {module, ?MODULE},
 		{from_packing_type, SourcePackingType}, {to_packing_type, SinkPackingType}]),
 	[B0 | _] = Blocks,
@@ -150,20 +150,20 @@ test_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
 	RangeSize = RangeEnd - RangeStart,
 
 	%% Partition 1 and half of partition 2 are below the disk pool threshold
-	ar_e2e:assert_syncs_range(SinkNode,	SinkPacking, RangeStart, RangeEnd),
-	ar_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
-	ar_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
+	big_e2e:assert_syncs_range(SinkNode,	SinkPacking, RangeStart, RangeEnd),
+	big_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
+	big_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
 
 	case SinkPackingType of
 		unpacked ->
 			ok;
 		_ ->
-			ar_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
+			big_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
 			ok
 	end.
 
 test_syncing_blocked({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
-	ar_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
+	big_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
 	?LOG_INFO([{event, test_syncing_blocked}, {module, ?MODULE},
 		{from_packing_type, SourcePackingType}, {to_packing_type, SinkPackingType}]),
 	[B0 | _] = Blocks,
@@ -171,12 +171,12 @@ test_syncing_blocked({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
 	SinkNode = peer2,
 
 	start_sink_node(SinkNode, SourceNode, B0, SinkPackingType),
-	ar_e2e:assert_does_not_sync_range(SinkNode, ?PARTITION_SIZE, 2*?PARTITION_SIZE),
-	ar_e2e:assert_no_chunks(SinkNode, Chunks).
+	big_e2e:assert_does_not_sync_range(SinkNode, ?PARTITION_SIZE, 2*?PARTITION_SIZE),
+	big_e2e:assert_no_chunks(SinkNode, Chunks).
 
 test_unpacked_and_packed_sync_pack_mine(
 		{{Blocks, _Chunks, SourcePackingType}, {PackingType1, PackingType2}}) ->
-	ar_e2e:delayed_print(<<" ~p -> {~p, ~p} ">>, [SourcePackingType, PackingType1, PackingType2]),
+	big_e2e:delayed_print(<<" ~p -> {~p, ~p} ">>, [SourcePackingType, PackingType1, PackingType2]),
 	?LOG_INFO([{event, test_unpacked_and_packed_sync_pack_mine}, {module, ?MODULE},
 		{from_packing_type, SourcePackingType}, {to_packing_type, {PackingType1, PackingType2}}]),
 	[B0 | _] = Blocks,
@@ -196,36 +196,36 @@ test_unpacked_and_packed_sync_pack_mine(
 
 	%% Data exists as both packed and unmpacked, so will exist in the global sync record
 	%% even though replica_2_9 data is filtered out.
-	ar_e2e:assert_syncs_range(SinkNode, RangeStart1, RangeEnd1),
-	ar_e2e:assert_partition_size(SinkNode, 1, SinkPacking1, RangeSize1),
-	ar_e2e:assert_partition_size(SinkNode, 1, SinkPacking2, RangeSize2),
+	big_e2e:assert_syncs_range(SinkNode, RangeStart1, RangeEnd1),
+	big_e2e:assert_partition_size(SinkNode, 1, SinkPacking1, RangeSize1),
+	big_e2e:assert_partition_size(SinkNode, 1, SinkPacking2, RangeSize2),
 	%% XXX: we should be able to assert the chunks here, but since we have two
 	%% storage modules configured and are querying the replica_2_9 chunk, GET /chunk gets
 	%% confused and tries to load the unpacked chunk, which then fails within the middleware
 	%% handler and 404s. To fix we'd need to update GET /chunk to query all matching
 	%% storage modules and then find the best one to return. But since this is a rare edge
 	%% case, we'll just disable the assertion for now.
-	%% ar_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
+	%% big_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
 	
 	MinablePacking = case PackingType1 of
 		unpacked -> SinkPacking2;
 		_ -> SinkPacking1
 	end,
-	ar_e2e:assert_mine_and_validate(SinkNode, SourceNode, MinablePacking),
+	big_e2e:assert_mine_and_validate(SinkNode, SourceNode, MinablePacking),
 	ok.
 	
 
 test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
-	ar_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
+	big_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
 	?LOG_INFO([{event, test_entropy_first_sync_pack_mine}, {module, ?MODULE},
 		{from_packing_type, SourcePackingType}, {to_packing_type, SinkPackingType}]),
 	[B0 | _] = Blocks,
 	SourceNode = peer1,
 	SinkNode = peer2,
 
-	Wallet = ar_test_node:remote_call(SinkNode, ar_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = ar_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
-	SinkPacking = ar_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
+	SinkPacking = big_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 	
 	Module = {?PARTITION_SIZE, 1, SinkPacking},
@@ -250,9 +250,9 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 	RangeEnd = 2*?PARTITION_SIZE + big_storage_module:get_overlap(SinkPacking),
 	RangeSize = RangeEnd - RangeStart,
 
-	ar_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
+	big_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
 
 	%% Delete two chunks of entropy from storage to test that the node will heal itself.
 	%% 1. Delete the chunk from disk as well as all sync records.
@@ -269,27 +269,27 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 		sync_jobs = 100
 	}),
 
-	ar_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
-	ar_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
-	ar_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
+	big_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
+	big_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
+	big_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
 
 	%% 3. Make sure the data is minable
-	ar_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
+	big_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
 	ok.
 
 test_entropy_last_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
-	ar_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
+	big_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
 	?LOG_INFO([{event, test_entropy_last_sync_pack_mine}, {module, ?MODULE},
 		{from_packing_type, SourcePackingType}, {to_packing_type, SinkPackingType}]),
 	[B0 | _] = Blocks,
 	SourceNode = peer1,
 	SinkNode = peer2,
 
-	Wallet = ar_test_node:remote_call(SinkNode, ar_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = ar_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
-	SinkPacking = ar_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
+	SinkPacking = big_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 	
 	Module = {?PARTITION_SIZE, 1, SinkPacking},
@@ -313,37 +313,37 @@ test_entropy_last_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPacki
 	RangeEnd = 2*?PARTITION_SIZE + big_storage_module:get_overlap(SinkPacking),
 	RangeSize = RangeEnd - RangeStart,
 
-	ar_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
-	ar_e2e:assert_partition_size(SinkNode, 1, unpacked_padded, RangeSize),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked),
+	big_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
+	big_e2e:assert_partition_size(SinkNode, 1, unpacked_padded, RangeSize),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked),
 
 	%% 2. Run node with sync jobs so that it syncs and packs data
 	ar_test_node:restart_with_config(SinkNode, Config2#config{
 		replica_2_9_workers = 8
 	}),
 
-	ar_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
-	ar_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
-	ar_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked),
-	ar_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
+	big_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
+	big_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
+	big_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked),
+	big_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
 
 	%% 3. Make sure the data is minable
-	ar_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
+	big_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
 	ok.
 
 test_small_module_aligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
-	ar_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
+	big_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
 	?LOG_INFO([{event, test_small_module_aligned_sync_pack_mine}, {module, ?MODULE},
 		{from_packing_type, SourcePackingType}, {to_packing_type, SinkPackingType}]),
 	[B0 | _] = Blocks,
 	SourceNode = peer1,
 	SinkNode = peer2,
 
-	Wallet = ar_test_node:remote_call(SinkNode, ar_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = ar_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
-	SinkPacking = ar_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
+	SinkPacking = big_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 
 	Module = {floor(0.5 * ?PARTITION_SIZE), 2, SinkPacking},
@@ -367,31 +367,31 @@ test_small_module_aligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, S
 	RangeSize = RangeEnd - RangeStart,
 
 	%% Make sure the expected data was synced
-	ar_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked),
-	ar_e2e:assert_chunks(SinkNode, SinkPacking, lists:sublist(Chunks, 1, 4)),
-	ar_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
+	big_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked),
+	big_e2e:assert_chunks(SinkNode, SinkPacking, lists:sublist(Chunks, 1, 4)),
+	big_e2e:assert_syncs_range(SinkNode, SinkPacking, RangeStart, RangeEnd),
 
 	%% Make sure no extra entropy was generated
-	ar_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
-	ar_e2e:assert_no_entropy(SinkNode, RangeEnd, 2 * ?PARTITION_SIZE, StoreID),
+	big_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
+	big_e2e:assert_no_entropy(SinkNode, RangeEnd, 2 * ?PARTITION_SIZE, StoreID),
 
 	%% Make sure the data is minable
-	ar_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
+	big_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
 	ok.
 
 test_small_module_unaligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPackingType}) ->
-	ar_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
+	big_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
 	?LOG_INFO([{event, test_small_module_unaligned_sync_pack_mine}, {module, ?MODULE},
 		{from_packing_type, SourcePackingType}, {to_packing_type, SinkPackingType}]),
 	[B0 | _] = Blocks,
 	SourceNode = peer1,
 	SinkNode = peer2,
 
-	Wallet = ar_test_node:remote_call(SinkNode, ar_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = ar_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
-	SinkPacking = ar_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
+	SinkPacking = big_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(SinkNode),
 
 	Module = {floor(0.5 * ?PARTITION_SIZE), 3, SinkPacking},
@@ -415,24 +415,24 @@ test_small_module_unaligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType},
 	RangeSize = RangeEnd - RangeStart,
 
 	%% Make sure the expected data was synced	
-	ar_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
-	ar_e2e:assert_empty_partition(SinkNode, 1, unpacked),
-	ar_e2e:assert_chunks(SinkNode, SinkPacking, lists:sublist(Chunks, 5, 8)),
+	big_e2e:assert_partition_size(SinkNode, 1, SinkPacking, RangeSize),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked_padded),
+	big_e2e:assert_empty_partition(SinkNode, 1, unpacked),
+	big_e2e:assert_chunks(SinkNode, SinkPacking, lists:sublist(Chunks, 5, 8)),
 	%% Even though the packing type is replica_2_9, the data will still exist in the
 	%% default partition as unpacked - and so will exist in the global sync record.
-	ar_e2e:assert_syncs_range(SinkNode, RangeStart, RangeEnd),
+	big_e2e:assert_syncs_range(SinkNode, RangeStart, RangeEnd),
 
 	%% Make sure no extra entropy was generated
-	ar_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
-	ar_e2e:assert_no_entropy(SinkNode, 0, RangeStart, StoreID),
+	big_e2e:assert_has_entropy(SinkNode, RangeStart, RangeEnd, StoreID),
+	big_e2e:assert_no_entropy(SinkNode, 0, RangeStart, StoreID),
 
 	%% Make sure the data is minable
-	ar_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
+	big_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
 	ok.
 
 test_disk_pool_threshold({SourcePackingType, SinkPackingType}) ->
-	ar_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
+	big_e2e:delayed_print(<<" ~p -> ~p ">>, [SourcePackingType, SinkPackingType]),
 	?LOG_INFO([{event, test_disk_pool_threshold}, {module, ?MODULE},
 		{from_packing_type, SourcePackingType}, {to_packing_type, SinkPackingType}]),
 
@@ -454,33 +454,33 @@ test_disk_pool_threshold({SourcePackingType, SinkPackingType}) ->
 
 	SinkPacking = start_sink_node(SinkNode, SourceNode, B0, SinkPackingType),
 	%% Partition 1 and half of partition 2 are below the disk pool threshold
-	ar_e2e:assert_syncs_range(SinkNode, SinkPacking, ?PARTITION_SIZE, 4*?PARTITION_SIZE),
-	ar_e2e:assert_partition_size(SinkNode, 1, SinkPacking),
-	ar_e2e:assert_partition_size(SinkNode, 2, SinkPacking, floor(0.5*?PARTITION_SIZE)),
-	ar_e2e:assert_empty_partition(SinkNode, 3, SinkPacking),
-	ar_e2e:assert_does_not_sync_range(SinkNode, 0, ?PARTITION_SIZE),
-	ar_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
+	big_e2e:assert_syncs_range(SinkNode, SinkPacking, ?PARTITION_SIZE, 4*?PARTITION_SIZE),
+	big_e2e:assert_partition_size(SinkNode, 1, SinkPacking),
+	big_e2e:assert_partition_size(SinkNode, 2, SinkPacking, floor(0.5*?PARTITION_SIZE)),
+	big_e2e:assert_empty_partition(SinkNode, 3, SinkPacking),
+	big_e2e:assert_does_not_sync_range(SinkNode, 0, ?PARTITION_SIZE),
+	big_e2e:assert_chunks(SinkNode, SinkPacking, Chunks),
 
 	case SinkPackingType of
 		unpacked ->
 			ok;
 		_ ->
-			ar_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
+			big_e2e:assert_mine_and_validate(SinkNode, SourceNode, SinkPacking),
 
 			%% Now that we mined a block, the rest of partition 2 is below the disk pool
 			%% threshold
-			ar_e2e:assert_syncs_range(SinkNode, SinkPacking, ?PARTITION_SIZE, 4*?PARTITION_SIZE),
-			ar_e2e:assert_partition_size(SinkNode, 2, SinkPacking, ?PARTITION_SIZE),
+			big_e2e:assert_syncs_range(SinkNode, SinkPacking, ?PARTITION_SIZE, 4*?PARTITION_SIZE),
+			big_e2e:assert_partition_size(SinkNode, 2, SinkPacking, ?PARTITION_SIZE),
 			%% All of partition 3 is still above the disk pool threshold
-			ar_e2e:assert_empty_partition(SinkNode, 3, SinkPacking),
-			ar_e2e:assert_does_not_sync_range(SinkNode, 0, ?PARTITION_SIZE),
+			big_e2e:assert_empty_partition(SinkNode, 3, SinkPacking),
+			big_e2e:assert_does_not_sync_range(SinkNode, 0, ?PARTITION_SIZE),
 			ok
 	end.
 
 start_sink_node(Node, SourceNode, B0, PackingType) ->
-	Wallet = ar_test_node:remote_call(Node, ar_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = ar_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
-	SinkPacking = ar_e2e:packing_type_to_packing(PackingType, SinkAddr),
+	SinkPacking = big_e2e:packing_type_to_packing(PackingType, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(Node),
 	
 	StorageModules = [
@@ -505,10 +505,10 @@ start_sink_node(Node, SourceNode, B0, PackingType) ->
 	SinkPacking.
 
 start_sink_node(Node, SourceNode, B0, PackingType1, PackingType2) ->
-	Wallet = ar_test_node:remote_call(Node, ar_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = ar_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
-	SinkPacking1 = ar_e2e:packing_type_to_packing(PackingType1, SinkAddr),
-	SinkPacking2 = ar_e2e:packing_type_to_packing(PackingType2, SinkAddr),
+	SinkPacking1 = big_e2e:packing_type_to_packing(PackingType1, SinkAddr),
+	SinkPacking2 = big_e2e:packing_type_to_packing(PackingType2, SinkAddr),
 	{ok, Config} = ar_test_node:get_config(Node),
 	
 	StorageModules = [

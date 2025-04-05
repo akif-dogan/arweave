@@ -24,27 +24,27 @@ repack_in_place_mine_test_() ->
 %% test_repack_in_place_mine
 %% --------------------------------------------------------------------------------------------
 test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
-	ar_e2e:delayed_print(<<" ~p -> ~p ">>, [FromPackingType, ToPackingType]),
+	big_e2e:delayed_print(<<" ~p -> ~p ">>, [FromPackingType, ToPackingType]),
 	?LOG_INFO([{event, test_repack_in_place_mine}, {module, ?MODULE},
 		{from_packing_type, FromPackingType}, {to_packing_type, ToPackingType}]),
 	ValidatorNode = peer1,
 	RepackerNode = peer2,
 	ar_test_node:stop(ValidatorNode),
 	ar_test_node:stop(RepackerNode),
-	{Blocks, _AddrA, Chunks} = ar_e2e:start_source_node(
+	{Blocks, _AddrA, Chunks} = big_e2e:start_source_node(
 		RepackerNode, FromPackingType, wallet_a),
 
 	[B0 | _] = Blocks,
 	start_validator_node(ValidatorNode, RepackerNode, B0),
 
-	{WalletB, SourceStorageModules} = ar_e2e:source_node_storage_modules(
+	{WalletB, SourceStorageModules} = big_e2e:source_node_storage_modules(
 		RepackerNode, ToPackingType, wallet_b),
 	AddrB = case WalletB of
 		undefined -> undefined;
 		_ -> big_wallet:to_address(WalletB)
 	end,
 	FinalStorageModules = lists:sublist(SourceStorageModules, 2),
-	ToPacking = ar_e2e:packing_type_to_packing(ToPackingType, AddrB),
+	ToPacking = big_e2e:packing_type_to_packing(ToPackingType, AddrB),
 	{ok, Config} = ar_test_node:get_config(RepackerNode),
 
 	RepackInPlaceStorageModules = lists:sublist([ 
@@ -65,8 +65,8 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 		_ -> ?PARTITION_SIZE
 	end,
 
-	ar_e2e:assert_partition_size(RepackerNode, 0, ToPacking, ExpectedPartitionSize),
-	ar_e2e:assert_partition_size(RepackerNode, 1, ToPacking, ExpectedPartitionSize),
+	big_e2e:assert_partition_size(RepackerNode, 0, ToPacking, ExpectedPartitionSize),
+	big_e2e:assert_partition_size(RepackerNode, 1, ToPacking, ExpectedPartitionSize),
 
 	ar_test_node:stop(RepackerNode),
 
@@ -113,20 +113,20 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 			%% bug.
 			RegularChunks = lists:filter(
 				fun({_, _, ChunkSize}) -> ChunkSize >= ?DATA_CHUNK_SIZE end, Chunks),
-			ar_e2e:assert_chunks(RepackerNode, ToPacking, RegularChunks),
+			big_e2e:assert_chunks(RepackerNode, ToPacking, RegularChunks),
 
 			SmallChunks = lists:filter(
 				fun({_, _, ChunkSize}) -> ChunkSize < ?DATA_CHUNK_SIZE end, Chunks),
-			ar_e2e:assert_chunks(RepackerNode, ToPacking, unpacked,SmallChunks);
+			big_e2e:assert_chunks(RepackerNode, ToPacking, unpacked,SmallChunks);
 		_ ->
-			ar_e2e:assert_chunks(RepackerNode, ToPacking, Chunks)
+			big_e2e:assert_chunks(RepackerNode, ToPacking, Chunks)
 	end,
 
 	case ToPackingType of
 		unpacked ->
 			ok;
 		_ ->
-			ar_e2e:assert_mine_and_validate(RepackerNode, ValidatorNode, ToPacking)
+			big_e2e:assert_mine_and_validate(RepackerNode, ValidatorNode, ToPacking)
 	end.
 
 
