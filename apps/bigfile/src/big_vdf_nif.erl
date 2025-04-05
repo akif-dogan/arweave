@@ -1,4 +1,4 @@
--module(ar_vdf_nif).
+-module(big_vdf_nif).
 
 -on_load(init_nif/0).
 

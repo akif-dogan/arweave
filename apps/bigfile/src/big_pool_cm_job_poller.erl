@@ -1,4 +1,4 @@
--module(ar_pool_cm_job_poller).
+-module(big_pool_cm_job_poller).
 
 -behaviour(gen_server).
 

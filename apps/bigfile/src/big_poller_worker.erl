@@ -1,4 +1,4 @@
--module(ar_poller_worker).
+-module(big_poller_worker).
 
 -behaviour(gen_server).
 

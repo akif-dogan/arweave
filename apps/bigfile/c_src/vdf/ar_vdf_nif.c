@@ -138,4 +138,4 @@ static ErlNifFunc nif_funcs[] = {
 		ERL_NIF_DIRTY_JOB_CPU_BOUND}
 };
 
-ERL_NIF_INIT(ar_vdf_nif, nif_funcs, NULL, NULL, NULL, NULL);
+ERL_NIF_INIT(big_vdf_nif, nif_funcs, NULL, NULL, NULL, NULL);

@@ -13,9 +13,9 @@
 
 -define(HTTP_IFACE_MIDDLEWARES, [
 	big_blacklist_middleware,
-	ar_network_middleware,
+	big_network_middleware,
 	cowboy_router,
-	ar_http_iface_middleware,
+	big_http_iface_middleware,
 	cowboy_handler
 ]).
 

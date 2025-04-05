@@ -1,4 +1,4 @@
--module(ar_nonce_limiter_client).
+-module(big_nonce_limiter_client).
 
 -behaviour(gen_server).
 

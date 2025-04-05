@@ -1,4 +1,4 @@
--module(ar_network_middleware).
+-module(big_network_middleware).
 
 -behaviour(cowboy_middleware).
 

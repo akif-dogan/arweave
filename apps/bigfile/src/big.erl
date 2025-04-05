@@ -711,7 +711,7 @@ start(Config) ->
 start(normal, _Args) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	%% Configure logger
-	ar_logger:init(Config),
+	big_logger:init(Config),
 	%% Start the Prometheus metrics subsystem.
 	prometheus_registry:register_collector(prometheus_process_collector),
 	prometheus_registry:register_collector(big_metrics_collector),

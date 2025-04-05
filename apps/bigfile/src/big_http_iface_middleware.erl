@@ -1,4 +1,4 @@
--module(ar_http_iface_middleware).
+-module(big_http_iface_middleware).
 
 -behaviour(cowboy_middleware).
 
@@ -3119,11 +3119,11 @@ handle_get_vdf2(Req, Call, Format) ->
 	Update =
 		case Call of
 			get_update ->
-				ar_nonce_limiter_server:get_update(Format);
+				big_nonce_limiter_server:get_update(Format);
 			get_session ->
-				ar_nonce_limiter_server:get_full_update(Format);
+				big_nonce_limiter_server:get_full_update(Format);
 			get_previous_session ->
-				ar_nonce_limiter_server:get_full_prev_update(Format)
+				big_nonce_limiter_server:get_full_prev_update(Format)
 		end,
 	case Update of
 		not_found ->

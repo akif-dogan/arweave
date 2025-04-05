@@ -1,4 +1,4 @@
--module(ar_nonce_limiter_server_worker).
+-module(big_nonce_limiter_server_worker).
 
 -behaviour(gen_server).
 
@@ -19,7 +19,7 @@
 %% The frequency in milliseconds of re-resolving the domain name of the client,
 %% if the client is configured via the domain name.
 %%
-%% ar_nonce_limiter_server_worker periodically re-resolves and caches the address
+%% big_nonce_limiter_server_worker periodically re-resolves and caches the address
 %% of the corresponding client such that they can be identified upon request,
 %% unless we are configured as a public VDF server.
 -define(RE_RESOLVE_PEER_DOMAIN_MS, (30 * 1000)).
@@ -109,7 +109,7 @@ handle_computed_output(Peer, Args, State) ->
 
 push_update(SessionKey, StepNumber, Output, Peer, Format, State) ->
 	Session = big_nonce_limiter:get_session(SessionKey),
-	Update = ar_nonce_limiter_server:make_partial_nonce_limiter_update(
+	Update = big_nonce_limiter_server:make_partial_nonce_limiter_update(
 		SessionKey, Session, StepNumber, Output),
 	case Update of
 		not_found -> State;
@@ -169,7 +169,7 @@ push_update(SessionKey, StepNumber, Output, Peer, Format, State) ->
 	end.
 
 push_session(SessionKey, Session, Peer, Format) ->
-	Update = ar_nonce_limiter_server:make_full_nonce_limiter_update(SessionKey, Session),
+	Update = big_nonce_limiter_server:make_full_nonce_limiter_update(SessionKey, Session),
 	case Update of
 		not_found -> ok;
 		_ ->

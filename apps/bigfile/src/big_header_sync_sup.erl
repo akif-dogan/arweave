@@ -1,4 +1,4 @@
--module(ar_header_sync_sup).
+-module(big_header_sync_sup).
 -behaviour(supervisor).
 
 -export([start_link/1]).

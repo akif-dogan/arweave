@@ -2,7 +2,7 @@
 %%% @doc module in charge of the logging features.
 %%% @end
 %%%===================================================================
--module(ar_logger).
+-module(big_logger).
 -export([init/1]).
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").

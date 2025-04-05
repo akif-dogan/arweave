@@ -24,9 +24,9 @@ init([]) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	Children = lists:map(
 		fun(Num) ->
-			Name = list_to_atom("ar_poller_worker_" ++ integer_to_list(Num)),
-			{Name, {ar_poller_worker, start_link, [Name]}, permanent, ?SHUTDOWN_TIMEOUT,
-					worker, [ar_poller_worker]}
+			Name = list_to_atom("big_poller_worker_" ++ integer_to_list(Num)),
+			{Name, {big_poller_worker, start_link, [Name]}, permanent, ?SHUTDOWN_TIMEOUT,
+					worker, [big_poller_worker]}
 		end,
 		lists:seq(1, Config#config.block_pollers)
 	),

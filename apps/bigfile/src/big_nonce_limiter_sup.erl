@@ -1,4 +1,4 @@
--module(ar_nonce_limiter_sup).
+-module(big_nonce_limiter_sup).
 
 -behaviour(supervisor).
 
@@ -24,15 +24,15 @@ init([]) ->
 	{ok, Config} = application:get_env(bigfile, config),
 	ServerWorkers = lists:map(
 		fun(Peer) ->
-			Name = list_to_atom("ar_nonce_limiter_server_worker_"
+			Name = list_to_atom("big_nonce_limiter_server_worker_"
 					++ ar_util:peer_to_str(Peer)),
-			?CHILD_WITH_ARGS(ar_nonce_limiter_server_worker,
+			?CHILD_WITH_ARGS(big_nonce_limiter_server_worker,
 					worker, Name, [Name, Peer])
 		end,
 		Config#config.nonce_limiter_client_peers
 	),
-	Client = ?CHILD(ar_nonce_limiter_client, worker),
-	Server = ?CHILD(ar_nonce_limiter_server, worker),
+	Client = ?CHILD(big_nonce_limiter_client, worker),
+	Server = ?CHILD(big_nonce_limiter_server, worker),
 	NonceLimiter = ?CHILD(big_nonce_limiter, worker),
 
 	Workers = case big_config:is_vdf_server() of
