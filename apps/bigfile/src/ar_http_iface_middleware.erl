@@ -61,13 +61,13 @@ loop(TimeoutRef) ->
 			RepliedReq = cowboy_req:reply(CowboyStatus, Headers, Body, HandledReq),
 			{stop, RepliedReq};
 		{read_complete_body, From, Req, SizeLimit} ->
-			case catch ar_http_req:body(Req, SizeLimit) of
+			case catch big_http_req:body(Req, SizeLimit) of
 				Term ->
 					From ! {read_complete_body, Term}
 			end,
 			loop(TimeoutRef);
 		{read_body_chunk, From, Req, Size, Timeout} ->
-			case catch ar_http_req:read_body_chunk(Req, Size, Timeout) of
+			case catch big_http_req:read_body_chunk(Req, Size, Timeout) of
 				Term ->
 					From ! {read_body_chunk, Term}
 			end,
@@ -1942,7 +1942,7 @@ handle_post_tx_accepted(Req, TX, Peer) ->
 	%% of excessive transaction volumes.
 	{A, B, C, D, _} = Peer,
 	big_blacklist_middleware:decrement_ip_addr({A, B, C, D}, Req),
-	BodyReadTime = ar_http_req:body_read_time(Req),
+	BodyReadTime = big_http_req:body_read_time(Req),
 	big_peers:rate_gossiped_data(Peer, tx,
 		erlang:convert_time_unit(BodyReadTime, native, microsecond),
 		byte_size(term_to_binary(TX))),
@@ -2468,8 +2468,8 @@ post_block(enqueue_block, {B, Peer}, Req, ReceiveTimestamp) ->
 		end,
 	?LOG_INFO([{event, received_block}, {block, ar_util:encode(B#block.indep_hash)},
 		{peer, ar_util:format_peer(Peer)}]),
-	BodyReadTime = ar_http_req:body_read_time(Req),
-	case ar_block_pre_validator:pre_validate(B2, Peer, ReceiveTimestamp) of
+	BodyReadTime = big_http_req:body_read_time(Req),
+	case big_block_pre_validator:pre_validate(B2, Peer, ReceiveTimestamp) of
 		ok ->
 			big_peers:rate_gossiped_data(Peer, block,
 				erlang:convert_time_unit(BodyReadTime, native, microsecond),
@@ -2580,7 +2580,7 @@ handle_get_jobs_pool_server(PrevOutput, Req) ->
 	Info = proplists:get_value(nonce_limiter_info, Props),
 	Result = ar_util:do_until(
 		fun() ->
-			S = ar_nonce_limiter:get_step_triplets(Info, PrevOutput, ?GET_JOBS_COUNT),
+			S = big_nonce_limiter:get_step_triplets(Info, PrevOutput, ?GET_JOBS_COUNT),
 			case S of
 				[] ->
 					false;
@@ -2592,7 +2592,7 @@ handle_get_jobs_pool_server(PrevOutput, Req) ->
 		(?GET_JOBS_TIMEOUT_S) * 1000
 	),
 	Steps = case Result of {ok, S} -> S; _ -> [] end,
-	{NextSeed, IntervalNumber, NextVDFDiff} = ar_nonce_limiter:session_key(Info),
+	{NextSeed, IntervalNumber, NextVDFDiff} = big_nonce_limiter:session_key(Info),
 	JobList = [#job{ output = O, global_step_number = SN,
 			partition_upper_bound = U } || {O, SN, U} <- Steps],
 	Jobs = #jobs{ jobs = JobList, seed = Info#nonce_limiter_info.seed,
@@ -3081,7 +3081,7 @@ handle_post_vdf3(Req, Pid, Peer) ->
 				end,
 			case big_serialize:binary_to_nonce_limiter_update(Format, Body) of
 				{ok, Update} ->
-					case ar_nonce_limiter:apply_external_update(Update, Peer) of
+					case big_nonce_limiter:apply_external_update(Update, Peer) of
 						ok ->
 							{200, #{}, <<>>, Req2};
 						#nonce_limiter_update_response{} = Response ->

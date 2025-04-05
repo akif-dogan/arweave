@@ -215,7 +215,7 @@ compute_next_vdf_difficulty(PrevB) ->
 		vdf_difficulty = VDFDifficulty,
 		next_vdf_difficulty = NextVDFDifficulty
 	} = PrevB#block.nonce_limiter_info,
-	case ar_block_time_history:has_history(Height) of
+	case big_block_time_history:has_history(Height) of
 		true ->
 			case (Height rem ?VDF_DIFFICULTY_RETARGET == 0) andalso
 					(VDFDifficulty == NextVDFDifficulty) of
@@ -225,7 +225,7 @@ compute_next_vdf_difficulty(PrevB) ->
 					case Height < ar_fork:height_2_7_1() of
 						true ->
 							HistoryPart = lists:nthtail(?VDF_HISTORY_CUT,
-									ar_block_time_history:get_history(PrevB)),
+									big_block_time_history:get_history(PrevB)),
 							{IntervalTotal, VDFIntervalTotal} =
 								lists:foldl(
 									fun({BlockInterval, VDFInterval, _ChunkCount}, {Acc1, Acc2}) ->
@@ -248,7 +248,7 @@ compute_next_vdf_difficulty(PrevB) ->
 							NewVDFDifficulty;
 						false ->
 							HistoryPartCut1 = lists:nthtail(?VDF_HISTORY_CUT,
-								ar_block_time_history:get_history(PrevB)),
+								big_block_time_history:get_history(PrevB)),
 							HistoryPart = lists:sublist(HistoryPartCut1, ?VDF_DIFFICULTY_RETARGET),
 							{IntervalTotal, VDFIntervalTotal} =
 								lists:foldl(

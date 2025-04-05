@@ -1,4 +1,4 @@
--module(ar_block_time_history).
+-module(big_block_time_history).
 
 -export([history_length/0, has_history/1, get_history/1, get_history_from_blocks/2, 
 	set_history/2, get_hashes/1, sum_history/1, compute_block_interval/1,

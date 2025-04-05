@@ -546,7 +546,7 @@ get_block_time_history([Peer | Peers], B, ExpectedBlockTimeHistoryHashes) ->
 	Fork_2_7 = ar_fork:height_2_7(),
 	true = Height >= Fork_2_7,
 	ExpectedLength = min(Height - Fork_2_7 + 1,
-			ar_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
+			big_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
 	true = length(ExpectedBlockTimeHistoryHashes) == min(Height - Fork_2_7 + 1,
 			?STORE_BLOCKS_BEHIND_CURRENT),
 	case big_http:req(#{
@@ -559,7 +559,7 @@ get_block_time_history([Peer | Peers], B, ExpectedBlockTimeHistoryHashes) ->
 		{ok, {{<<"200">>, _}, _, Body, _, _}} ->
 			case big_serialize:binary_to_block_time_history(Body) of
 				{ok, BlockTimeHistory} when length(BlockTimeHistory) == ExpectedLength ->
-					case ar_block_time_history:validate_hashes(BlockTimeHistory,
+					case big_block_time_history:validate_hashes(BlockTimeHistory,
 							ExpectedBlockTimeHistoryHashes) of
 						true ->
 							{ok, BlockTimeHistory};

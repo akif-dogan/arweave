@@ -144,7 +144,7 @@ handle_cast({block, Peer, B, BlockQueryTime}, State) ->
 		true ->
 			ok
 	end,
-	case ar_block_pre_validator:pre_validate(B, Peer, erlang:timestamp()) of
+	case big_block_pre_validator:pre_validate(B, Peer, erlang:timestamp()) of
 		ok ->
 			big_peers:rate_fetched_data(Peer, block, BlockQueryTime, byte_size(term_to_binary(B)));
 		_ ->

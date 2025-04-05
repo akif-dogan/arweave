@@ -270,7 +270,7 @@ request_blocks([{H, _, _} | Trail], WorkerQ, PeerQ) ->
 get_block_trail_loop(WorkerQ, PeerQ, Retries, Trail, FetchState) ->
 	receive
 		{block_response, H, _Peer, {_, #block{} = BShadow, _, _}} ->
-			ar_disk_cache:write_block_shadow(BShadow),
+			big_disk_cache:write_block_shadow(BShadow),
 			TXCount = length(BShadow#block.txs),
 			FetchState2 = maps:put(H, {BShadow, #{}, TXCount}, FetchState),
 			AwaitingBlockCount = maps:get(awaiting_block_count, FetchState2),
@@ -340,7 +340,7 @@ get_block_trail_loop(WorkerQ, PeerQ, Retries, Trail, FetchState) ->
 					end
 			end;
 		{tx_response, H, TXID, _Peer, #tx{} = TX} ->
-			ar_disk_cache:write_tx(TX),
+			big_disk_cache:write_tx(TX),
 			{BShadow, TXMap, AwaitingTXCount} = maps:get(H, FetchState),
 			TXMap2 = maps:put(TXID, TX, TXMap),
 			AwaitingTXCount2 = AwaitingTXCount - 1,
@@ -459,9 +459,9 @@ maybe_set_block_time_history([#block{ height = Height } | _] = Blocks, Peers) ->
 	case Height >= ar_fork:height_2_7() of
 		true ->
 			case big_http_iface_client:get_block_time_history(
-					Peers, hd(Blocks), ar_block_time_history:get_hashes(Blocks)) of
+					Peers, hd(Blocks), big_block_time_history:get_hashes(Blocks)) of
 				{ok, BlockTimeHistory} ->
-					ar_block_time_history:set_history(Blocks, BlockTimeHistory);
+					big_block_time_history:set_history(Blocks, BlockTimeHistory);
 				_ ->
 					big:console("Failed to fetch the block time history for the block ~s from "
 							"any of the peers. Consider changing the peers.~n",

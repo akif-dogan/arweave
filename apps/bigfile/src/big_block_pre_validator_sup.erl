@@ -1,4 +1,4 @@
--module(ar_block_pre_validator_sup).
+-module(big_block_pre_validator_sup).
 
 -behaviour(supervisor).
 
@@ -20,5 +20,5 @@ start_link() ->
 %%%===================================================================
 
 init([]) ->
-	Children = [?CHILD(ar_block_pre_validator, worker)],
+	Children = [?CHILD(big_block_pre_validator, worker)],
 	{ok, {{one_for_one, 5, 10}, Children}}.

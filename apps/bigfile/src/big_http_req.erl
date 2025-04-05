@@ -1,4 +1,4 @@
--module(ar_http_req).
+-module(big_http_req).
 
 -include_lib("bigfile/include/big.hrl").
 

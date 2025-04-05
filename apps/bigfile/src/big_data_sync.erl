@@ -46,19 +46,19 @@
 %%%===================================================================
 
 name(StoreID) ->
-	list_to_atom("ar_data_sync_" ++ big_storage_module:label_by_id(StoreID)).
+	list_to_atom("big_data_sync_" ++ big_storage_module:label_by_id(StoreID)).
 
 start_link(Name, StoreID) ->
 	gen_server:start_link({local, Name}, ?MODULE, StoreID, []).
 
-%% @doc Register the workers that will be monitored by ar_data_sync_sup.erl.
+%% @doc Register the workers that will be monitored by big_data_sync_sup.erl.
 register_workers() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	StorageModuleWorkers = lists:map(
 		fun(StorageModule) ->
 			StoreID = big_storage_module:id(StorageModule),
 			StoreLabel = big_storage_module:label(StorageModule),
-			Name = list_to_atom("ar_data_sync_" ++ StoreLabel),
+			Name = list_to_atom("big_data_sync_" ++ StoreLabel),
 			?CHILD_WITH_ARGS(big_data_sync, worker, Name, [Name, {StoreID, none}])
 		end,
 		Config#config.storage_modules

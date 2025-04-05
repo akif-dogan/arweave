@@ -87,7 +87,7 @@ handle_cast(pull, State) ->
 											step_number = SessionStepNumber } } = Update,
 							State2 = update_latest_session_key(Peer, SessionKey, State),
 							UpdateResponse =
-								ar_nonce_limiter:apply_external_update(Update, Peer),
+								big_nonce_limiter:apply_external_update(Update, Peer),
 
 							SessionFound = case UpdateResponse of
 								#nonce_limiter_update_response{ session_found = false } ->
@@ -210,8 +210,8 @@ fetch_and_apply_session_and_previous_session(Peer) ->
 				prev_session_key = PrevSessionKey } } = Update} ->
 			case big_http_iface_client:get_previous_vdf_session(Peer) of
 				{ok, #nonce_limiter_update{ session_key = PrevSessionKey } = Update2} ->
-					ar_nonce_limiter:apply_external_update(Update2, Peer),
-					ar_nonce_limiter:apply_external_update(Update, Peer);
+					big_nonce_limiter:apply_external_update(Update2, Peer),
+					big_nonce_limiter:apply_external_update(Update, Peer);
 				{ok, _} ->
 					%% The session should have just changed, retry.
 					fetch_and_apply_session_and_previous_session(Peer);
@@ -231,7 +231,7 @@ fetch_and_apply_session_and_previous_session(Peer) ->
 fetch_and_apply_session(Peer) ->
 	case big_http_iface_client:get_vdf_session(Peer) of
 		{ok, Update} ->
-			ar_nonce_limiter:apply_external_update(Update, Peer);
+			big_nonce_limiter:apply_external_update(Update, Peer);
 		{error, Reason} = Error ->
 			?LOG_WARNING([{event, failed_to_fetch_vdf_session},
 					{peer, ar_util:format_peer(Peer)},

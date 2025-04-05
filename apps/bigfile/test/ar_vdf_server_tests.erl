@@ -874,7 +874,7 @@ init(Req, State) ->
 	handle(SplitPath, Req, State).
 
 handle([<<"vdf">>], Req, State) ->
-	{ok, Body, _} = ar_http_req:body(Req, ?MAX_BODY_SIZE),
+	{ok, Body, _} = big_http_req:body(Req, ?MAX_BODY_SIZE),
 	case big_serialize:binary_to_nonce_limiter_update(2, Body) of
 		{ok, Update} ->
 			handle_update(Update, Req, State);
@@ -969,10 +969,10 @@ apply_external_update(SessionKey, ExistingSteps, StepNumber, IsPartial, PrevSess
 		is_partial = IsPartial,
 		session = Session
 	},
-	ar_nonce_limiter:apply_external_update(Update, Peer).
+	big_nonce_limiter:apply_external_update(Update, Peer).
 
 get_current_session_key() ->
-	{CurrentSessionKey, _} = ar_nonce_limiter:get_current_session(),
+	{CurrentSessionKey, _} = big_nonce_limiter:get_current_session(),
 	CurrentSessionKey.
 
 mock_add_task() ->
@@ -985,7 +985,7 @@ mock_add_task() ->
 
 mock_reset_frequency() ->
 	{
-		ar_nonce_limiter, get_reset_frequency,
+		big_nonce_limiter, get_reset_frequency,
 		fun() ->
 			5
 		end

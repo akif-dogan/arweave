@@ -94,7 +94,7 @@ terminate(_Reason, _State) ->
 handle_computed_output(Peer, Args, State) ->
 	#state{ pause_until = Timestamp, format = Format } = State,
 	{SessionKey, StepNumber, Output, _PartitionUpperBound} = Args,
-	CurrentStepNumber = ar_nonce_limiter:get_current_step_number(),
+	CurrentStepNumber = big_nonce_limiter:get_current_step_number(),
 	case os:system_time(second) < Timestamp of
 		true ->
 			{noreply, State};
@@ -108,7 +108,7 @@ handle_computed_output(Peer, Args, State) ->
 	end.
 
 push_update(SessionKey, StepNumber, Output, Peer, Format, State) ->
-	Session = ar_nonce_limiter:get_session(SessionKey),
+	Session = big_nonce_limiter:get_session(SessionKey),
 	Update = ar_nonce_limiter_server:make_partial_nonce_limiter_update(
 		SessionKey, Session, StepNumber, Output),
 	case Update of
@@ -143,7 +143,7 @@ push_update(SessionKey, StepNumber, Output, Peer, Format, State) ->
 						{true, true, false, _} ->
 							%% Client requested the full session
 							PrevSessionKey = Session#vdf_session.prev_session_key,
-							PrevSession = ar_nonce_limiter:get_session(PrevSessionKey),
+							PrevSession = big_nonce_limiter:get_session(PrevSessionKey),
 							case push_session(PrevSessionKey, PrevSession, Peer, Format) of
 								ok ->
 									%% Do not push the new session until the previous

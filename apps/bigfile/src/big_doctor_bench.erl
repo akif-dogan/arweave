@@ -52,8 +52,8 @@ bench_read(Args) ->
 
 	ar_kv_sup:start_link(),
 	big_storage_sup:start_link(),
-	ar_sync_record_sup:start_link(),
-	ar_chunk_storage_sup:start_link(),
+	big_sync_record_sup:start_link(),
+	big_chunk_storage_sup:start_link(),
 	big_mining_io:start_link(standalone),
 
 	big:console("~n~nDisk read benchmark will run for ~B seconds.~n", [Duration]),

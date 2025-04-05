@@ -1,4 +1,4 @@
--module(ar_block_pre_validator).
+-module(big_block_pre_validator).
 
 -behaviour(gen_server).
 
@@ -504,7 +504,7 @@ pre_validate_nonce_limiter_global_step_number(B, PrevB, SolutionResigned, Peer) 
 	PrevBlockInfo = PrevB#block.nonce_limiter_info,
 	PrevStepNumber = big_block:vdf_step_number(PrevB),
 	CurrentStepNumber =
-		case ar_nonce_limiter:get_current_step_number(PrevB) of
+		case big_nonce_limiter:get_current_step_number(PrevB) of
 			not_found ->
 				%% Not necessarily computed already, but will be after we
 				%% validate the previous block's chain.
@@ -512,7 +512,7 @@ pre_validate_nonce_limiter_global_step_number(B, PrevB, SolutionResigned, Peer) 
 			N ->
 				N
 		end,
-	IsAhead = ar_nonce_limiter:is_ahead_on_the_timeline(BlockInfo, PrevBlockInfo),
+	IsAhead = big_nonce_limiter:is_ahead_on_the_timeline(BlockInfo, PrevBlockInfo),
 	MaxDistance = ?NONCE_LIMITER_MAX_CHECKPOINTS_COUNT,
 	ExpectedStepCount = min(MaxDistance, StepNumber - PrevStepNumber),
 	Steps = BlockInfo#nonce_limiter_info.steps,
@@ -622,7 +622,7 @@ pre_validate_nonce_limiter_seed_data(B, PrevB, SolutionResigned, Peer) ->
 			vdf_difficulty = VDFDifficulty,
 			next_partition_upper_bound = NextPartitionUpperBound } = Info,
 	StepNumber = big_block:vdf_step_number(B),
-	ExpectedSeedData = ar_nonce_limiter:get_seed_data(StepNumber, PrevB),
+	ExpectedSeedData = big_nonce_limiter:get_seed_data(StepNumber, PrevB),
 	case ExpectedSeedData == {Seed, NextSeed, PartitionUpperBound,
 			NextPartitionUpperBound, VDFDifficulty} of
 		true ->
@@ -759,7 +759,7 @@ pre_validate_poa(B, PrevB, PartitionUpperBound, H0, H1, Peer) ->
 
 pre_validate_nonce_limiter(B, PrevB, Peer) ->
 	PrevOutput = get_last_step_prev_output(B),
-	case ar_nonce_limiter:validate_last_step_checkpoints(B, PrevB, PrevOutput) of
+	case big_nonce_limiter:validate_last_step_checkpoints(B, PrevB, PrevOutput) of
 		{false, cache_mismatch} ->
 			post_block_reject_warn_and_error_dump(B, check_nonce_limiter, Peer),
 			ar_events:send(block, {rejected, invalid_nonce_limiter_cache_mismatch,

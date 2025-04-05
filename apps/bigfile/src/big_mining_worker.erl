@@ -147,7 +147,7 @@ handle_cast({chunks_read, {WhichChunk, Candidate, RangeStart, ChunkOffsets}}, St
 				{active_sessions,
 					big_mining_server:encode_sessions(State#state.active_sessions)},
 				{candidate_session, 
-					ar_nonce_limiter:encode_session_key(Candidate#mining_candidate.session_key)},
+					big_nonce_limiter:encode_session_key(Candidate#mining_candidate.session_key)},
 				{partition_number, Candidate#mining_candidate.partition_number},
 				{step_number, Candidate#mining_candidate.step_number}]),
 			{noreply, State}
@@ -164,7 +164,7 @@ handle_cast({add_task, {TaskType, Candidate, _ExtraArgs} = Task}, State) ->
 				{active_sessions,
 					big_mining_server:encode_sessions(State#state.active_sessions)},
 				{candidate_session, 
-					ar_nonce_limiter:encode_session_key(Candidate#mining_candidate.session_key)},
+					big_nonce_limiter:encode_session_key(Candidate#mining_candidate.session_key)},
 				{partition_number, Candidate#mining_candidate.partition_number},
 				{step_number, Candidate#mining_candidate.step_number},
 				{nonce, Candidate#mining_candidate.nonce}]),
@@ -190,7 +190,7 @@ handle_cast(handle_task, #state{ task_queue = Q } = State) ->
 						{task, TaskType},
 						{active_sessions,
 							big_mining_server:encode_sessions(State#state.active_sessions)},
-						{candidate_session, ar_nonce_limiter:encode_session_key(
+						{candidate_session, big_nonce_limiter:encode_session_key(
 							Candidate#mining_candidate.session_key)},
 						{partition_number, Candidate#mining_candidate.partition_number},
 						{step_number, Candidate#mining_candidate.step_number},
@@ -363,7 +363,7 @@ process_sub_chunk(chunk2, Candidate, SubChunk, State) ->
 						{cm_peer, ar_util:format_peer(Candidate2#mining_candidate.cm_lead_peer)},
 						{cache_ref, Candidate2#mining_candidate.cache_ref},
 						{nonce, Candidate2#mining_candidate.nonce},
-						{session, ar_nonce_limiter:encode_session_key(SessionKey)}])
+						{session, big_nonce_limiter:encode_session_key(SessionKey)}])
 			end,
 			State2
 	end.
@@ -710,7 +710,7 @@ add_sessions([], State) ->
 add_sessions([SessionKey | AddedSessions], State) ->
 	?LOG_DEBUG([{event, mining_debug_add_session},
 		{worker, State#state.name}, {partition, State#state.partition_number},
-		{session_key, ar_nonce_limiter:encode_session_key(SessionKey)}]),
+		{session_key, big_nonce_limiter:encode_session_key(SessionKey)}]),
 	add_sessions(AddedSessions, State).
 
 remove_sessions([], State) ->
@@ -723,7 +723,7 @@ remove_sessions([SessionKey | RemovedSessions], State) ->
 	State2 = update_sub_chunk_cache_size(-ChunksDiscarded, SessionKey, State),
 	?LOG_DEBUG([{event, mining_debug_remove_session},
 		{worker, State#state.name}, {partition, State#state.partition_number},
-		{session, ar_nonce_limiter:encode_session_key(SessionKey)},
+		{session, big_nonce_limiter:encode_session_key(SessionKey)},
 		{tasks_discarded, TasksDiscarded },
 		{chunks_discarded, ChunksDiscarded}]),
 

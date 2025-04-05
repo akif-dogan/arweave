@@ -46,7 +46,7 @@ update_accounts(B, PrevB, Accounts) ->
 	Denomination = PrevB#block.denomination,
 	DebtSupply = PrevB#block.debt_supply,
 	TXs = B#block.txs,
-	BlockInterval = ar_block_time_history:compute_block_interval(PrevB),
+	BlockInterval = big_block_time_history:compute_block_interval(PrevB),
 	Args =
 		get_miner_reward_and_endowment_pool({EndowmentPool, DebtSupply, TXs,
 				B#block.reward_addr, B#block.weave_size, B#block.height, B#block.timestamp,
@@ -57,7 +57,7 @@ update_accounts(B, PrevB, Accounts) ->
 	update_accounts2(B, PrevB, Accounts2, Args).
 
 %% @doc Perform the last stage of block validation. The majority of the checks
-%% are made in ar_block_pre_validator.erl, ar_nonce_limiter.erl, and
+%% are made in  , big_nonce_limiter.erl, and
 %% big_node_utils:update_accounts/3.
 validate(NewB, B, Wallets, BlockAnchors, RecentTXMap, PartitionUpperBound) ->
 	?LOG_INFO([{event, validating_block}, {hash, ar_util:encode(NewB#block.indep_hash)}]),
@@ -518,8 +518,8 @@ validate_block(block_time_history_hash, {NewB, OldB, Wallets, BlockAnchors, Rece
 					RecentTXMap});
 		true ->
 			#block{ block_time_history_hash = HistoryHash } = NewB,
-			History = ar_block_time_history:update_history(NewB, OldB),
-			case ar_block_time_history:hash(History) of
+			History = big_block_time_history:update_history(NewB, OldB),
+			case big_block_time_history:hash(History) of
 				HistoryHash ->
 					validate_block(next_vdf_difficulty, {NewB, OldB, Wallets, BlockAnchors,
 							RecentTXMap});

@@ -1,4 +1,4 @@
--module(ar_sync_record_sup).
+-module(big_sync_record_sup).
 
 -behaviour(supervisor).
 

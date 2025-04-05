@@ -114,7 +114,7 @@ mines_off_only_last_chunks_test_() ->
 			fun test_mines_off_only_last_chunks/0).
 
 mock_reset_frequency() ->
-	{ar_nonce_limiter, get_reset_frequency, fun() -> 5 end}.
+	{big_nonce_limiter, get_reset_frequency, fun() -> 5 end}.
 
 test_mines_off_only_last_chunks() ->
 	Wallet = ar_test_data_sync:setup_nodes(),
@@ -147,8 +147,8 @@ test_mines_off_only_last_chunks() ->
 					PrevStepNumber = Info#nonce_limiter_info.global_step_number,
 					true = ar_util:do_until(
 						fun() ->
-							ar_nonce_limiter:get_current_step_number()
-									> PrevStepNumber + ar_nonce_limiter:get_reset_frequency()
+							big_nonce_limiter:get_current_step_number()
+									> PrevStepNumber + big_nonce_limiter:get_reset_frequency()
 						end,
 						100,
 						60000

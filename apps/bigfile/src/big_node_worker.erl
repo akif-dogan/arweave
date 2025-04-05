@@ -388,7 +388,7 @@ handle_info({event, node_state, {account_tree_initialized, Height}}, State) ->
 	Blocks4 = may_be_initialize_nonce_limiter(Blocks3, BI2),
 	Blocks5 = Blocks4 ++ lists:nthtail(length(Blocks3), Blocks2),
 	ets:insert(node_state, {join_state, {Height, Blocks5, BI2}}),
-	ar_nonce_limiter:account_tree_initialized(Blocks5),
+	big_nonce_limiter:account_tree_initialized(Blocks5),
 	{noreply, State};
 
 handle_info({event, node_state, _Event}, State) ->
@@ -414,7 +414,7 @@ handle_info({event, nonce_limiter, initialized}, State) ->
 					lists:sublist(BI, length(B#block.block_time_history)))],
 	big_storage:store_block_time_history_part2(BlockTimeHistory),
 	Height = B#block.height,
-	ar_disk_cache:write_block(B),
+	big_disk_cache:write_block(B),
 	big_data_sync:join(RecentBI),
 	big_header_sync:join(Height, RecentBI, Blocks),
 	big_tx_blacklist:start_taking_down(),
@@ -965,8 +965,8 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 					B3 =
 						case B#block.height >= ar_fork:height_2_7() of
 							true ->
-								BlockTimeHistory2 = ar_block_time_history:update_history(B, PrevB),
-								Len2 = ar_block_time_history:history_length()
+								BlockTimeHistory2 = big_block_time_history:update_history(B, PrevB),
+								Len2 = big_block_time_history:history_length()
 										+ ?STORE_BLOCKS_BEHIND_CURRENT,
 								BlockTimeHistory3 = lists:sublist(BlockTimeHistory2, Len2),
 								B2#block{ block_time_history = BlockTimeHistory3 };
@@ -982,8 +982,8 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 
 request_nonce_limiter_validation(#block{ indep_hash = H } = B, PrevB) ->
 	Info = B#block.nonce_limiter_info,
-	PrevInfo = ar_nonce_limiter:get_or_init_nonce_limiter_info(PrevB),
-	ar_nonce_limiter:request_validation(H, Info, PrevInfo).
+	PrevInfo = big_nonce_limiter:get_or_init_nonce_limiter_info(PrevB),
+	big_nonce_limiter:request_validation(H, Info, PrevInfo).
 
 pick_txs(TXIDs) ->
 	Mempool = ar_mempool:get_map(),
@@ -1385,7 +1385,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 		start,
 		lists:reverse([B | PrevBlocks])
 	),
-	ar_disk_cache:write_block(B),
+	big_disk_cache:write_block(B),
 	BlockTXs = B#block.txs,
 	ar_mempool:drop_txs(BlockTXs, false, false),
 	gen_server:cast(self(), {filter_mempool, ar_mempool:get_all_txids()}),
@@ -1408,7 +1408,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	lists:foreach(
 		fun(PrevB3) ->
 			big_header_sync:add_block(PrevB3),
-			ar_disk_cache:write_block(PrevB3)
+			big_disk_cache:write_block(PrevB3)
 		end,
 		tl(lists:reverse(PrevBlocks))
 	),
@@ -1525,7 +1525,7 @@ record_economic_metrics2(B, PrevB) ->
 					|| {_, _, R, _} <- RewardHistory]), RewardHistorySize),
 			prometheus_gauge:set(average_block_reward, AverageBlockReward),
 			prometheus_gauge:set(price_per_gibibyte_minute, B#block.price_per_gib_minute),
-			BlockInterval = ar_block_time_history:compute_block_interval(PrevB),
+			BlockInterval = big_block_time_history:compute_block_interval(PrevB),
 			Args = {PrevB#block.reward_pool, PrevB#block.debt_supply, B#block.txs,
 					B#block.weave_size, B#block.height, PrevB#block.price_per_gib_minute,
 					PrevB#block.kryder_plus_rate_multiplier_latch,
@@ -1728,7 +1728,7 @@ start_from_state(BI, Height) ->
 			),
 
 			BlockTimeHistoryBI = lists:sublist(BI2,
-					ar_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
+					big_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
 			case {big_storage:read_reward_history(RewardHistoryBI),
 					big_storage:read_block_time_history(Height2, BlockTimeHistoryBI)} of
 				{not_found, _} ->
@@ -1747,7 +1747,7 @@ start_from_state(BI, Height) ->
 					block_time_history_not_found;
 				{RewardHistory, BlockTimeHistory} ->
 					Blocks2 = big_rewards:set_reward_history(Blocks, RewardHistory),
-					Blocks3 = ar_block_time_history:set_history(Blocks2, BlockTimeHistory),
+					Blocks3 = big_block_time_history:set_history(Blocks2, BlockTimeHistory),
 					self() ! {join_from_state, Height2, BI2, Blocks3},
 					ok
 			end
@@ -1922,7 +1922,7 @@ handle_found_solution(Args, PrevB, State) ->
 								invalid_packing_difficulty, []),
 						{false, invalid_packing_difficulty};
 					true ->
-						case ar_nonce_limiter:is_ahead_on_the_timeline(NonceLimiterInfo,
+						case big_nonce_limiter:is_ahead_on_the_timeline(NonceLimiterInfo,
 								PrevNonceLimiterInfo) of
 							false ->
 								SolutionVDF =
@@ -1946,7 +1946,7 @@ handle_found_solution(Args, PrevB, State) ->
 	#nonce_limiter_info{ next_seed = PrevNextSeed,
 			next_vdf_difficulty = PrevNextVDFDifficulty,
 			global_step_number = PrevStepNumber } = PrevNonceLimiterInfo,
-	PrevIntervalNumber = PrevStepNumber div ar_nonce_limiter:get_reset_frequency(),
+	PrevIntervalNumber = PrevStepNumber div big_nonce_limiter:get_reset_frequency(),
 	PassesSeedCheck =
 		case PassesTimelineCheck of
 			{false, Reason} ->
@@ -2041,7 +2041,7 @@ handle_found_solution(Args, PrevB, State) ->
 					{reason, Reason5}, {solution, ar_util:encode(SolutionH)}]),
 				false;
 			true ->
-				ar_nonce_limiter:get_steps(PrevStepNumber, StepNumber, PrevNextSeed,
+				big_nonce_limiter:get_steps(PrevStepNumber, StepNumber, PrevNextSeed,
 						PrevNextVDFDifficulty)
 		end,
 	HaveSteps2 =
@@ -2068,7 +2068,7 @@ handle_found_solution(Args, PrevB, State) ->
 			{noreply, State};
 		[NonceLimiterOutput | _] = Steps ->
 			{Seed, NextSeed, PartitionUpperBound, NextPartitionUpperBound, VDFDifficulty}
-				= ar_nonce_limiter:get_seed_data(StepNumber, PrevB),
+				= big_nonce_limiter:get_seed_data(StepNumber, PrevB),
 			LastStepCheckpoints2 =
 				case LastStepCheckpoints of
 					Empty when Empty == not_found orelse Empty == [] ->
@@ -2079,9 +2079,9 @@ handle_found_solution(Args, PrevB, State) ->
 								_ ->
 									PrevNonceLimiterInfo#nonce_limiter_info.output
 							end,
-						PrevOutput2 = ar_nonce_limiter:maybe_add_entropy(
+						PrevOutput2 = big_nonce_limiter:maybe_add_entropy(
 								PrevOutput, PrevStepNumber, StepNumber, PrevNextSeed),
-						{ok, NonceLimiterOutput, Checkpoints} = ar_nonce_limiter:compute(
+						{ok, NonceLimiterOutput, Checkpoints} = big_nonce_limiter:compute(
 								StepNumber, PrevOutput2, VDFDifficulty),
 						Checkpoints;
 					_ ->
@@ -2155,11 +2155,11 @@ handle_found_solution(Args, PrevB, State) ->
 			}, PrevB),
 			
 			BlockTimeHistory2 = lists:sublist(
-				ar_block_time_history:update_history(UnsignedB, PrevB),
-				ar_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
+				big_block_time_history:update_history(UnsignedB, PrevB),
+				big_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
 			UnsignedB2 = UnsignedB#block{
 				block_time_history = BlockTimeHistory2,
-				block_time_history_hash = ar_block_time_history:hash(BlockTimeHistory2)
+				block_time_history_hash = big_block_time_history:hash(BlockTimeHistory2)
 			},
 			SignedH = big_block:generate_signed_hash(UnsignedB2),
 			PrevCDiff = PrevB#block.cumulative_diff,

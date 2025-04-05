@@ -324,7 +324,7 @@ mock_add_task() ->
 
 mock_get_current_sesssion() ->
 	{
-		ar_nonce_limiter, get_current_session, 
+		big_nonce_limiter, get_current_session, 
 		fun() -> 
 			{undefined, not_found}
 		end

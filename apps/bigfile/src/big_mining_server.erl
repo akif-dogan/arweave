@@ -88,7 +88,7 @@ active_sessions() ->
 
 encode_sessions(Sessions) ->
 	lists:map(fun(SessionKey) ->
-		ar_nonce_limiter:encode_session_key(SessionKey)
+		big_nonce_limiter:encode_session_key(SessionKey)
 	end, sets:to_list(Sessions)).
 
 is_one_chunk_solution(Solution) ->
@@ -403,7 +403,7 @@ add_sessions([SessionKey | AddedSessions], State) ->
 		"next entropy nonce: ~s, interval number: ~B, next vdf difficulty: ~B.~n",
 		[ar_util:safe_encode(NextSeed), StartIntervalNumber, NextVDFDifficulty]),
 	?LOG_INFO([{event, new_mining_session}, 
-		{session_key, ar_nonce_limiter:encode_session_key(SessionKey)}]),
+		{session_key, big_nonce_limiter:encode_session_key(SessionKey)}]),
 	add_sessions(AddedSessions, add_seed(SessionKey, State)).
 
 remove_sessions([], State) ->
@@ -423,11 +423,11 @@ remove_seed(SessionKey, State) ->
 add_seed(SessionKey, State) ->
 	case get_seed(SessionKey, State) of
 		not_found ->
-			Session = ar_nonce_limiter:get_session(SessionKey),
+			Session = big_nonce_limiter:get_session(SessionKey),
 			case Session of
 				not_found ->
 					?LOG_ERROR([{event, mining_session_not_found},
-						{session_key, ar_nonce_limiter:encode_session_key(SessionKey)}]),
+						{session_key, big_nonce_limiter:encode_session_key(SessionKey)}]),
 					State;
 				_ ->
 					set_seed(SessionKey, Session#vdf_session.seed, State)
@@ -660,7 +660,7 @@ prepare_solution(last_step_checkpoints, Candidate, Solution) ->
 	#mining_candidate{
 		next_seed = NextSeed, next_vdf_difficulty = NextVDFDifficulty, 
 		start_interval_number = StartIntervalNumber, step_number = StepNumber } = Candidate,
-	LastStepCheckpoints = ar_nonce_limiter:get_step_checkpoints(
+	LastStepCheckpoints = big_nonce_limiter:get_step_checkpoints(
 			StepNumber, NextSeed, StartIntervalNumber, NextVDFDifficulty),
 	LastStepCheckpoints2 =
 		case LastStepCheckpoints of
@@ -681,7 +681,7 @@ prepare_solution(steps, Candidate, Solution) ->
 			next_vdf_difficulty = PrevNextVDFDifficulty } = TipNonceLimiterInfo,
 	case StepNumber > PrevStepNumber of
 		true ->
-			Steps = ar_nonce_limiter:get_steps(
+			Steps = big_nonce_limiter:get_steps(
 					PrevStepNumber, StepNumber, PrevNextSeed, PrevNextVDFDifficulty),
 			case Steps of
 				not_found ->
@@ -1036,7 +1036,7 @@ handle_computed_output(SessionKey, StepNumber, Output, PartitionUpperBound,
 		false ->
 			?LOG_DEBUG([{event, mining_debug_skipping_vdf_output}, {reason, stale_session},
 				{step_number, StepNumber},
-				{session_key, ar_nonce_limiter:encode_session_key(SessionKey)},
+				{session_key, big_nonce_limiter:encode_session_key(SessionKey)},
 				{active_sessions, encode_sessions(State#state.active_sessions)}]);
 		true ->
 			{NextSeed, StartIntervalNumber, NextVDFDifficulty} = SessionKey,
@@ -1055,7 +1055,7 @@ handle_computed_output(SessionKey, StepNumber, Output, PartitionUpperBound,
 			?LOG_DEBUG([{event, mining_debug_processing_vdf_output},
 				{step_number, StepNumber}, {output, ar_util:safe_encode(Output)},
 				{start_interval_number, StartIntervalNumber},
-				{session_key, ar_nonce_limiter:encode_session_key(SessionKey)},
+				{session_key, big_nonce_limiter:encode_session_key(SessionKey)},
 				{partition_upper_bound, PartitionUpperBound}])
 	end,
 	{noreply, State3}.

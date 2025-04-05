@@ -1,10 +1,13 @@
--module(ar_data_sync_sup).
+-module(big_chunk_storage_sup).
 
 -behaviour(supervisor).
 
 -export([start_link/0]).
 
 -export([init/1]).
+
+-include_lib("bigfile/include/big_sup.hrl").
+-include_lib("bigfile/include/big_config.hrl").
 
 %%%===================================================================
 %%% Public interface.
@@ -18,8 +21,9 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-	Children = 
-		ar_data_sync_worker_master:register_workers() ++
-		big_chunk_copy:register_workers() ++
-		big_data_sync:register_workers(),
-	{ok, {{one_for_one, 5, 10}, Children}}.
+	ets:new(chunk_storage_file_index, [set, public, named_table, {read_concurrency, true}]),
+
+	Workers = big_chunk_storage:register_workers() ++
+		ar_entropy_gen:register_workers(ar_entropy_gen) ++
+		ar_entropy_gen:register_workers(ar_entropy_storage),
+	{ok, {{one_for_one, 5, 10}, Workers}}.

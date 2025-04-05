@@ -102,7 +102,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 					merkle_rebase_support_threshold = ?STRICT_DATA_SPLIT_THRESHOLD * 2,
 					chunk_hash = crypto:strong_rand_bytes(32),
 					block_time_history = InitialHistory,
-					block_time_history_hash = ar_block_time_history:hash(InitialHistory)
+					block_time_history_hash = big_block_time_history:hash(InitialHistory)
 				};
 			true ->
 				B1

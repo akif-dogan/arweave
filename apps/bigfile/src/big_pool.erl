@@ -568,9 +568,9 @@ process_partial_solution_vdf(Solution, Ref, PoACache, PoA2Cache) ->
 		partition_upper_bound = PartitionUpperBound
 	} = Solution,
 	SessionKey = {NextSeed, StartIntervalNumber, NextVDFDifficulty},
-	MayBeLastStepCheckpoints = ar_nonce_limiter:get_step_checkpoints(StepNumber, SessionKey),
-	MayBeSeed = ar_nonce_limiter:get_seed(SessionKey),
-	MayBeUpperBound = ar_nonce_limiter:get_active_partition_upper_bound(StepNumber, SessionKey),
+	MayBeLastStepCheckpoints = big_nonce_limiter:get_step_checkpoints(StepNumber, SessionKey),
+	MayBeSeed = big_nonce_limiter:get_seed(SessionKey),
+	MayBeUpperBound = big_nonce_limiter:get_active_partition_upper_bound(StepNumber, SessionKey),
 	case {MayBeLastStepCheckpoints, MayBeSeed, MayBeUpperBound} of
 		{not_found, _, _} ->
 			#partial_solution_response{ status = <<"rejected_vdf_not_found">> };
@@ -956,7 +956,7 @@ process_solution_test_() ->
 			end},
 		{big_node, get_current_diff, fun() -> {0, 0} end},
 		{big_node, get_height, fun() -> 0 end},
-		{ar_nonce_limiter, get_step_checkpoints,
+		{big_nonce_limiter, get_step_checkpoints,
 			fun(S, {N, SIN, D}) ->
 				case {S, N, SIN, D} of
 					{0, << 10:(48*8) >>, 0, 0} ->
@@ -969,7 +969,7 @@ process_solution_test_() ->
 						[<< 0:256 >>]
 				end
 			end},
-		{ar_nonce_limiter, get_seed,
+		{big_nonce_limiter, get_seed,
 			fun({N, SIN, D}) ->
 				case {N, SIN, D} of
 					{<< 11:(48*8) >>, 0, 0} ->
@@ -982,7 +982,7 @@ process_solution_test_() ->
 						<< 0:(48*8) >>
 				end
 			end},
-		{ar_nonce_limiter, get_active_partition_upper_bound,
+		{big_nonce_limiter, get_active_partition_upper_bound,
 			fun(S, {N, SIN, D}) ->
 				case {S, N, SIN, D} of
 					{0, << 12:(48*8) >>, 0, 0} ->

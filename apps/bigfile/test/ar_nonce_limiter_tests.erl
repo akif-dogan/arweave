@@ -8,15 +8,15 @@
 
 %% @doc Reset the state and stop computing steps automatically. Used in tests.
 reset_and_pause() ->
-	gen_server:cast(ar_nonce_limiter, reset_and_pause).
+	gen_server:cast(big_nonce_limiter, reset_and_pause).
 
 %% @doc Do not emit the initialized event. Used in tests.
 turn_off_initialized_event() ->
-	gen_server:cast(ar_nonce_limiter, turn_off_initialized_event).
+	gen_server:cast(big_nonce_limiter, turn_off_initialized_event).
 
 %% @doc Get all steps starting from the latest on the current tip. Used in tests.
 get_steps() ->
-	gen_server:call(ar_nonce_limiter, get_steps).
+	gen_server:call(big_nonce_limiter, get_steps).
 
 %% @doc Compute a single step. Used in tests.
 step() ->
@@ -24,7 +24,7 @@ step() ->
 	spawn(
 		fun() ->
 			ok = ar_events:subscribe(nonce_limiter),
-			gen_server:cast(ar_nonce_limiter, compute_step),
+			gen_server:cast(big_nonce_limiter, compute_step),
 			receive
 				{event, nonce_limiter, {computed_output, _}} ->
 					Self ! done
@@ -46,10 +46,10 @@ assert_session(B, PrevB) ->
 	#nonce_limiter_info{
 		vdf_difficulty = BVDFDifficulty, next_vdf_difficulty = BNextVDFDifficulty
 	} = B#block.nonce_limiter_info,
-	PrevBSessionKey = ar_nonce_limiter:session_key(PrevB#block.nonce_limiter_info),
-	BSessionKey = ar_nonce_limiter:session_key(B#block.nonce_limiter_info),
+	PrevBSessionKey = big_nonce_limiter:session_key(PrevB#block.nonce_limiter_info),
+	BSessionKey = big_nonce_limiter:session_key(B#block.nonce_limiter_info),
 
-	BSession = ar_nonce_limiter:get_session(BSessionKey),
+	BSession = big_nonce_limiter:get_session(BSessionKey),
 	?assertEqual(BVDFDifficulty, BSession#vdf_session.vdf_difficulty),
 	?assertEqual(BNextVDFDifficulty,
 		BSession#vdf_session.next_vdf_difficulty),
@@ -57,7 +57,7 @@ assert_session(B, PrevB) ->
 		true ->
 			ok;
 		false ->
-			PrevBSession = ar_nonce_limiter:get_session(PrevBSessionKey),
+			PrevBSession = big_nonce_limiter:get_session(PrevBSessionKey),
 			?assertEqual(PrevBVDFDifficulty,
 				PrevBSession#vdf_session.vdf_difficulty),
 			?assertEqual(PrevBNextVDFDifficulty,
@@ -65,7 +65,7 @@ assert_session(B, PrevB) ->
 	end.
 
 assert_validate(B, PrevB, ExpectedResult) ->
-	ar_nonce_limiter:request_validation(B#block.indep_hash, B#block.nonce_limiter_info,
+	big_nonce_limiter:request_validation(B#block.indep_hash, B#block.nonce_limiter_info,
 			PrevB#block.nonce_limiter_info),
 	BH = B#block.indep_hash,
 	receive
@@ -93,7 +93,7 @@ assert_validate(B, PrevB, ExpectedResult) ->
 
 assert_step_number(N) ->
 	timer:sleep(200),
-	?assert(ar_util:do_until(fun() -> ar_nonce_limiter:get_current_step_number() == N end, 100, 1000)).
+	?assert(ar_util:do_until(fun() -> big_nonce_limiter:get_current_step_number() == N end, 100, 1000)).
 
 test_block(StepNumber, Output, Seed, NextSeed, LastStepCheckpoints, Steps,
 		VDFDifficulty, NextVDFDifficulty) ->
@@ -105,7 +105,7 @@ test_block(StepNumber, Output, Seed, NextSeed, LastStepCheckpoints, Steps,
 	}.
 	
 mock_reset_frequency() ->
-	{ar_nonce_limiter, get_reset_frequency, fun() -> 5 end}.
+	{big_nonce_limiter, get_reset_frequency, fun() -> 5 end}.
 
 applies_validated_steps_test_() ->
 	ar_test_node:test_with_mocked_functions([mock_reset_frequency()],
@@ -122,10 +122,10 @@ test_applies_validated_steps() ->
 	B1 = test_block(1, InitialOutput, Seed, NextSeed, [], [],
 			B1VDFDifficulty, B1NextVDFDifficulty),
 	turn_off_initialized_event(),
-	ar_nonce_limiter:account_tree_initialized([B1]),
-	true = ar_util:do_until(fun() -> ar_nonce_limiter:get_current_step_number() == 1 end, 100, 1000),
+	big_nonce_limiter:account_tree_initialized([B1]),
+	true = ar_util:do_until(fun() -> big_nonce_limiter:get_current_step_number() == 1 end, 100, 1000),
 	assert_session(B1, B1),
-	{ok, Output2, _} = ar_nonce_limiter:compute(2, InitialOutput, B1VDFDifficulty),
+	{ok, Output2, _} = big_nonce_limiter:compute(2, InitialOutput, B1VDFDifficulty),
 	B2VDFDifficulty = 3,
 	B2NextVDFDifficulty = 4,
 	B2 = test_block(2, Output2, Seed, NextSeed, [], [Output2], 
@@ -147,8 +147,8 @@ test_applies_validated_steps() ->
 	%% We have just applied B2 with a VDF difficulty update => a new session has to be opened.
 	assert_step_number(2),
 	assert_session(B2, B1),
-	{ok, Output3, _} = ar_nonce_limiter:compute(3, Output2, B2VDFDifficulty),
-	{ok, Output4, _} = ar_nonce_limiter:compute(4, Output3, B2VDFDifficulty),
+	{ok, Output3, _} = big_nonce_limiter:compute(3, Output2, B2VDFDifficulty),
+	{ok, Output4, _} = big_nonce_limiter:compute(4, Output3, B2VDFDifficulty),
 	B3VDFDifficulty = 3,
 	B3NextVDFDifficulty = 4,
 	B3 = test_block(4, Output4, Seed, NextSeed, [], [Output4, Output3],
@@ -156,7 +156,7 @@ test_applies_validated_steps() ->
 	assert_validate(B3, B2, valid),
 	assert_validate(B3, B1, valid),
 	%% Entropy reset line crossed at step 5, add entropy and apply next_vdf_difficulty
-	{ok, Output5, _} = ar_nonce_limiter:compute(5, ar_nonce_limiter:mix_seed(Output4, NextSeed), B3NextVDFDifficulty),
+	{ok, Output5, _} = big_nonce_limiter:compute(5, big_nonce_limiter:mix_seed(Output4, NextSeed), B3NextVDFDifficulty),
 	B4VDFDifficulty = 4,
 	B4NextVDFDifficulty = 5,
 	B4 = test_block(5, Output5, NextSeed, NextSeed2, [], [Output5],
@@ -191,9 +191,9 @@ test_applies_validated_steps() ->
 	assert_validate(B7, B4, {invalid, 3}),
 	%% Last valid block was B4, so that's the vdf_difficulty to use (not next_vdf_difficulty cause
 	%% the next entropy reset line isn't until step 10)
-	{ok, Output6, _} = ar_nonce_limiter:compute(6, Output5, B4VDFDifficulty),
-	{ok, Output7, _} = ar_nonce_limiter:compute(7, Output6, B4VDFDifficulty),
-	{ok, Output8, _} = ar_nonce_limiter:compute(8, Output7, B4VDFDifficulty),
+	{ok, Output6, _} = big_nonce_limiter:compute(6, Output5, B4VDFDifficulty),
+	{ok, Output7, _} = big_nonce_limiter:compute(7, Output6, B4VDFDifficulty),
+	{ok, Output8, _} = big_nonce_limiter:compute(8, Output7, B4VDFDifficulty),
 	B8VDFDifficulty = 4,
 	%% Change the next_vdf_difficulty to confirm that apply_tip2 handles updating an
 	%% existing VDF session

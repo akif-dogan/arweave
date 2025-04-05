@@ -33,7 +33,7 @@ init([]) ->
 	),
 	Client = ?CHILD(ar_nonce_limiter_client, worker),
 	Server = ?CHILD(ar_nonce_limiter_server, worker),
-	NonceLimiter = ?CHILD(ar_nonce_limiter, worker),
+	NonceLimiter = ?CHILD(big_nonce_limiter, worker),
 
 	Workers = case big_config:is_vdf_server() of
 		true ->

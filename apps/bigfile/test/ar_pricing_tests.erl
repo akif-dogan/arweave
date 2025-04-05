@@ -364,7 +364,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	%% We are at the height ?PRICE_2_6_8_TRANSITION_START + ?PRICE_2_6_8_TRANSITION_BLOCKS
 	%% so the new algorithm kicks in which estimates the expected block reward and takes
 	%% the missing amount from the endowment pool or takes on debt.
-	AvgBlockTime4 = ar_block_time_history:compute_block_interval(B3),
+	AvgBlockTime4 = big_block_time_history:compute_block_interval(B3),
 	ExpectedReward4 = max(big_inflation:calculate(4), B3#block.price_per_gib_minute
 			* ?N_REPLICATIONS(B4#block.height)
 			* AvgBlockTime4 div 60
@@ -394,7 +394,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:assert_wait_until_height(peer1, 5),
 	B5 = big_node:get_current_block(),
 	?assertEqual(20, get_balance(MinerPub)),
-	AvgBlockTime5 = ar_block_time_history:compute_block_interval(B4),
+	AvgBlockTime5 = big_block_time_history:compute_block_interval(B4),
 	ExpectedReward5 = max(B4#block.price_per_gib_minute
 			* ?N_REPLICATIONS(B5#block.height)
 			* AvgBlockTime5 div 60
@@ -596,7 +596,7 @@ test_auto_redenomination_and_endowment_debt() ->
 	ar_test_node:assert_wait_until_height(peer1, 13),
 	B13 = big_node:get_current_block(),
 	Reward17_2 = erlang:ceil(Reward17 / 1000) * 1000,
-	AvgBlockTime13 = ar_block_time_history:compute_block_interval(B12),
+	AvgBlockTime13 = big_block_time_history:compute_block_interval(B12),
 	BaseReward13 =
 		B12#block.price_per_gib_minute
 		* ?N_REPLICATIONS(B13#block.height)

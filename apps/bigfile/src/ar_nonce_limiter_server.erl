@@ -145,15 +145,15 @@ handle_computed_output({SessionKey, StepNumber, _, _},
 	{noreply, State};
 handle_computed_output(Args, State) ->
 	{SessionKey, StepNumber, Output, _PartitionUpperBound} = Args,
-	case ar_nonce_limiter:get_session(SessionKey) of
+	case big_nonce_limiter:get_session(SessionKey) of
 		not_found ->
 			?LOG_WARNING([{event, computed_output_session_not_found},
-					{session_key, ar_nonce_limiter:encode_session_key(SessionKey)},
+					{session_key, big_nonce_limiter:encode_session_key(SessionKey)},
 					{step_number, StepNumber}]),
 			{noreply, State};
 		Session ->
 			PrevSessionKey = Session#vdf_session.prev_session_key,
-			PrevSession = ar_nonce_limiter:get_session(PrevSessionKey),
+			PrevSession = big_nonce_limiter:get_session(PrevSessionKey),
 			PartialUpdate = make_partial_nonce_limiter_update(SessionKey, Session,
 					StepNumber, Output),
 			FullUpdate = make_full_nonce_limiter_update(SessionKey, Session),

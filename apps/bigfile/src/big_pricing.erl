@@ -44,8 +44,8 @@ get_price_per_gib_minute(Height, B) ->
 	big_pricing_transition:get_transition_price(Height, V2Price).
 
 get_v2_price_per_gib_minute(Height, B) ->
-	OneDifficultyHeight = ar_fork:height_2_7() + ar_block_time_history:history_length(),
-	TwoDifficultyHeight = ar_fork:height_2_7_2() + ar_block_time_history:history_length(),
+	OneDifficultyHeight = ar_fork:height_2_7() + big_block_time_history:history_length(),
+	TwoDifficultyHeight = ar_fork:height_2_7_2() + big_block_time_history:history_length(),
 
 	case Height of
 		_ when Height >= TwoDifficultyHeight ->
@@ -59,7 +59,7 @@ get_v2_price_per_gib_minute(Height, B) ->
 get_v2_price_per_gib_minute_two_difficulty(Height, B) ->
 	{HashRateTotal, RewardTotal, History} = big_rewards:get_reward_history_totals(B),
 	{IntervalTotal, VDFIntervalTotal, OneChunkCount, TwoChunkCount} =
-		ar_block_time_history:sum_history(B),
+		big_block_time_history:sum_history(B),
 	%% The intent of the SolutionsPerPartitionPerVDFStep is to estimate network replica
 	%% count (how many copies of the weave are stored across the network).
 	%% The logic behind this is complex - an explanation from @vird:
@@ -155,7 +155,7 @@ get_v2_price_per_gib_minute_two_difficulty(Height, B) ->
 get_v2_price_per_gib_minute_one_difficulty(Height, B) ->
 	{HashRateTotal, RewardTotal, History} = big_rewards:get_reward_history_totals(B),
 	{IntervalTotal, VDFIntervalTotal, OneChunkCount, TwoChunkCount} =
-		ar_block_time_history:sum_history(B),
+		big_block_time_history:sum_history(B),
 	%% The intent of the SolutionsPerPartitionPerVDFStep is to estimate network replica
 	%% count (how many copies of the weave are stored across the network).
 	%% The logic behind this is complex - an explanation from @vird:

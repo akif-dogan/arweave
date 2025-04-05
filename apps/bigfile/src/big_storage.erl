@@ -238,7 +238,7 @@ store_reward_history_part2([{H, El} | History]) ->
 store_block_time_history_part([], _PrevB) ->
 	ok;
 store_block_time_history_part(Blocks, PrevB) ->
-	History = ar_block_time_history:get_history_from_blocks(Blocks, PrevB),
+	History = big_block_time_history:get_history_from_blocks(Blocks, PrevB),
 	store_block_time_history_part2(History).
 
 store_block_time_history_part2([]) ->
@@ -341,7 +341,7 @@ read_block(Blocks) when is_list(Blocks) ->
 read_block({H, _, _}) ->
 	read_block(H);
 read_block(BH) ->
-	case ar_disk_cache:lookup_block_filename(BH) of
+	case big_disk_cache:lookup_block_filename(BH) of
 		{ok, {Filename, Encoding}} ->
 			%% The cache keeps a rotated number of recent headers when the
 			%% node is out of disk space.
@@ -762,7 +762,7 @@ read_tx2(ID) ->
 	end.
 
 read_tx_from_disk_cache(ID) ->
-	case ar_disk_cache:lookup_tx_filename(ID) of
+	case big_disk_cache:lookup_tx_filename(ID) of
 		unavailable ->
 			unavailable;
 		{ok, Filename} ->

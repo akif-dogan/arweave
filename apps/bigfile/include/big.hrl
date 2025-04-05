@@ -685,11 +685,11 @@
 
 	%% Used internally, not gossiped. Convenient for validating potentially non-unique
 	%% merkle proofs assigned to the different signatures of the same solution
-	%% (see validate_poa_against_cached_poa in ar_block_pre_validator.erl).
+	%% (see validate_poa_against_cached_poa in big_block_pre_validator.erl).
 	poa_cache,
 	%% Used internally, not gossiped. Convenient for validating potentially non-unique
 	%% merkle proofs assigned to the different signatures of the same solution
-	%% (see validate_poa_against_cached_poa in ar_block_pre_validator.erl).
+	%% (see validate_poa_against_cached_poa in big_block_pre_validator.erl).
 	poa2_cache,
 
 	%% Used internally, not gossiped.

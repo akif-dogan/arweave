@@ -277,7 +277,7 @@ jobs:
             big_mining_stats,
             ar_node,
             big_node_utils,
-            ar_nonce_limiter,
+            big_nonce_limiter,
             # big_p3,
             # big_p3_config,
             # big_p3_db,

@@ -3,7 +3,7 @@
 %% with this file, You can obtain one at
 %% https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
--module(ar_disk_cache).
+-module(big_disk_cache).
 
 -behaviour(gen_server).
 
