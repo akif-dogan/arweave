@@ -50,7 +50,7 @@
 new(Tab, B) ->
 	#block{ indep_hash = H, hash = SolutionH, cumulative_diff = CDiff, height = Height } = B,
 	ets:delete_all_objects(Tab),
-	ar_ignore_registry:add(H),
+	big_ignore_registry:add(H),
 	insert(Tab, [
 		{max_cdiff, {CDiff, H}},
 		{links, gb_sets:from_list([{Height, H}])},
@@ -80,7 +80,7 @@ add(Tab,
 		} = B) ->
 	case ets:lookup(Tab, {block, H}) of
 		[] ->
-			ar_ignore_registry:add(H),
+			big_ignore_registry:add(H),
 			RemainingHs = remove_expired_alternative_blocks(Tab, SolutionH),
 			SolutionSet = sets:from_list([H | RemainingHs]),
 			[{_, Set}] = ets:lookup(Tab, links),
@@ -361,7 +361,7 @@ remove(Tab, H) ->
 				{{block, PrevH}, {PrevB, PrevBStatus, PrevTimestamp,
 						sets:del_element(H, PrevBChildren)}}
 			]),
-			ar_ignore_registry:remove(H),
+			big_ignore_registry:remove(H),
 			ok
 	end.
 
@@ -556,7 +556,7 @@ remove2(Tab, H) ->
 		[{_, {#block{ hash = SolutionH, height = Height }, _Status, _Timestamp, Children}}] ->
 			%% Don't update the cache here. remove/2 will do it.
 			delete(Tab, {block, H}, false), 
-			ar_ignore_registry:remove(H),
+			big_ignore_registry:remove(H),
 			remove_solution(Tab, H, SolutionH),
 			insert(Tab, {links, gb_sets:del_element({Height, H}, Set)}, false),
 			sets:fold(
@@ -697,7 +697,7 @@ prune2(Tab, Depth, TipHeight) ->
 					),
 					remove_solution(Tab, H, SolutionH),
 					delete(Tab, {block, H}),
-					ar_ignore_registry:remove(H),
+					big_ignore_registry:remove(H),
 					prune2(Tab, Depth, TipHeight)
 			end
 	end.

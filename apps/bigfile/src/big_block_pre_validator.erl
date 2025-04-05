@@ -42,19 +42,19 @@ start_link() ->
 %% Returns: ok, invalid, skipped
 pre_validate(B, Peer, ReceiveTimestamp) ->
 	#block{ indep_hash = H } = B,
-	case ar_ignore_registry:member(H) of
+	case big_ignore_registry:member(H) of
 		true ->
 			skipped;
 		false ->
 			Ref = make_ref(),
-			ar_ignore_registry:add_ref(H, Ref),
+			big_ignore_registry:add_ref(H, Ref),
 			erlang:put(ignore_registry_ref, Ref),
 			B2 = B#block{ receive_timestamp = ReceiveTimestamp },
 			case pre_validate_is_peer_banned(B2, Peer) of
 				enqueued ->
 					enqueued;
 				Other ->
-					ar_ignore_registry:remove_ref(H, Ref),
+					big_ignore_registry:remove_ref(H, Ref),
 					Other
 			end
 	end.
@@ -85,7 +85,7 @@ handle_cast(pre_validate, #state{ pqueue = Q, size = Size, ip_timestamps = IPTim
 			BlockSize = byte_size(term_to_binary(B)),				
 			Size2 = Size - BlockSize,
 			BH = B#block.indep_hash,
-			case ar_ignore_registry:permanent_member(BH) of
+			case big_ignore_registry:permanent_member(BH) of
 				true ->
 					gen_server:cast(?MODULE, pre_validate),
 					{noreply, State#state{ pqueue = Q2, size = Size2 }};
@@ -95,7 +95,7 @@ handle_cast(pre_validate, #state{ pqueue = Q, size = Size, ip_timestamps = IPTim
 					{IPTimestamps3, HashTimestamps3} =
 						case ThrottleByIPResult of
 							false ->
-								ar_ignore_registry:remove_ref(BH, Ref),
+								big_ignore_registry:remove_ref(BH, Ref),
 								{IPTimestamps, HashTimestamps};
 							{true, IPTimestamps2} ->
 								case throttle_by_solution_hash(B#block.hash, HashTimestamps,
@@ -116,7 +116,7 @@ handle_cast(pre_validate, #state{ pqueue = Q, size = Size, ip_timestamps = IPTim
 												B#block.receive_timestamp),
 										{IPTimestamps2, HashTimestamps2};
 									false ->
-										ar_ignore_registry:remove_ref(BH, Ref),
+										big_ignore_registry:remove_ref(BH, Ref),
 										{IPTimestamps2, HashTimestamps}
 								end
 						end,
@@ -327,7 +327,7 @@ may_be_pre_validate_second_unpacked_chunk_hash(B, PrevB, Peer) ->
 pre_validate_indep_hash(#block{ indep_hash = H } = B, PrevB, Peer) ->
 	case catch compute_hash(B, PrevB#block.cumulative_diff) of
 		{ok, H} ->
-			case ar_ignore_registry:permanent_member(H) of
+			case big_ignore_registry:permanent_member(H) of
 				true ->
 					skipped;
 				false ->
@@ -776,7 +776,7 @@ pre_validate_nonce_limiter(B, PrevB, Peer) ->
 	end.
 
 accept_block(B, Peer, Gossip) ->
-	ar_ignore_registry:add(B#block.indep_hash),
+	big_ignore_registry:add(B#block.indep_hash),
 	ar_events:send(block, {new, B, 
 		#{ source => {peer, Peer}, gossip => Gossip }}),
 	?LOG_INFO([{event, accepted_block}, {height, B#block.height},
@@ -835,7 +835,7 @@ drop_tail(Q, Size) when Size =< ?MAX_PRE_VALIDATION_QUEUE_SIZE ->
 	{Q, 0};
 drop_tail(Q, Size) ->
 	{{_Priority, {B, _PrevB, _SolutionResigned, _Peer, Ref}}, Q2} = gb_sets:take_smallest(Q),
-	ar_ignore_registry:remove_ref(B#block.indep_hash, Ref),
+	big_ignore_registry:remove_ref(B#block.indep_hash, Ref),
 	BlockSize = byte_size(term_to_binary(B)),
 	drop_tail(Q2, Size - BlockSize).
 

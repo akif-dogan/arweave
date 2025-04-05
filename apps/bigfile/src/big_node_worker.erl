@@ -465,7 +465,7 @@ handle_info({event, nonce_limiter, {invalid, H, Code}}, State) ->
 	?LOG_WARNING([{event, received_block_with_invalid_nonce_limiter_chain},
 			{block, ar_util:encode(H)}, {code, Code}]),
 	big_block_cache:remove(block_cache, H),
-	ar_ignore_registry:add(H),
+	big_ignore_registry:add(H),
 	gen_server:cast(?MODULE, apply_block),
 	{noreply, maps:remove({nonce_limiter_validation_scheduled, H}, State)};
 
@@ -938,7 +938,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 			ar_events:send(block, {rejected, Reason, B#block.indep_hash, no_peer}),
 			BH = B#block.indep_hash,
 			big_block_cache:remove(block_cache, BH),
-			ar_ignore_registry:add(BH),
+			big_ignore_registry:add(BH),
 			gen_server:cast(?MODULE, apply_block),
 			{noreply, State};
 		valid ->
@@ -948,7 +948,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 					?LOG_WARNING([{event, failed_to_validate_wallet_list},
 							{h, ar_util:encode(BH)}]),
 					big_block_cache:remove(block_cache, BH),
-					ar_ignore_registry:add(BH),
+					big_ignore_registry:add(BH),
 					gen_server:cast(?MODULE, apply_block),
 					{noreply, State};
 				ok ->

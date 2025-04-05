@@ -1907,7 +1907,7 @@ handle_post_tx({Req, Pid, Encoding}) ->
 								ok ->
 									{200, #{}, <<"OK">>, Req2};
 								{error_response, {Status, Headers, Body}} ->
-									ar_ignore_registry:remove_temporary(TX#tx.id),
+									big_ignore_registry:remove_temporary(TX#tx.id),
 									{Status, Headers, Body, Req2}
 							end
 					end
@@ -1948,8 +1948,8 @@ handle_post_tx_accepted(Req, TX, Peer) ->
 		byte_size(term_to_binary(TX))),
 	ar_events:send(tx, {new, TX, {pushed, Peer}}),
 	TXID = TX#tx.id,
-	ar_ignore_registry:remove_temporary(TXID),
-	ar_ignore_registry:add_temporary(TXID, 10 * 60 * 1000),
+	big_ignore_registry:remove_temporary(TXID),
+	big_ignore_registry:add_temporary(TXID, 10 * 60 * 1000),
 	ok.
 
 handle_post_tx_verification_response() ->
@@ -2330,7 +2330,7 @@ val_for_key(K, L) ->
 
 handle_block_announcement(#block_announcement{ indep_hash = H, previous_block = PrevH,
 		tx_prefixes = Prefixes, recall_byte2 = RecallByte2 }, Req) ->
-	case ar_ignore_registry:member(H) of
+	case big_ignore_registry:member(H) of
 		true ->
 			check_block_receive_timestamp(H),
 			{208, #{}, <<>>, Req};
@@ -2407,7 +2407,7 @@ post_block(check_block_hash_header, Peer, {Req, Pid, Encoding}, ReceiveTimestamp
 		EncodedBH ->
 			case ar_util:safe_decode(EncodedBH) of
 				{ok, BH} when byte_size(BH) =< 48 ->
-					case ar_ignore_registry:member(BH) of
+					case big_ignore_registry:member(BH) of
 						true ->
 							check_block_receive_timestamp(BH),
 							{208, #{}, <<"Block already processed.">>, Req};
@@ -2952,7 +2952,7 @@ post_tx_parse_id(check_ignore_list, {TXID, Req, Pid, Encoding}) ->
 		true ->
 			{error, tx_already_processed, TXID, Req};
 		false ->
-			ar_ignore_registry:add_temporary(TXID, 5000),
+			big_ignore_registry:add_temporary(TXID, 5000),
 			post_tx_parse_id(read_body, {TXID, Req, Pid, Encoding})
 	end;
 post_tx_parse_id(read_body, {TXID, Req, Pid, Encoding}) ->
@@ -2976,7 +2976,7 @@ post_tx_parse_id(parse_json, {TXID, Req, Body}) ->
 				not_set ->
 					noop;
 				_ ->
-					ar_ignore_registry:remove_temporary(TXID)
+					big_ignore_registry:remove_temporary(TXID)
 			end,
 			{error, invalid_json, Req};
 		{error, invalid_signature_type} ->
@@ -2984,7 +2984,7 @@ post_tx_parse_id(parse_json, {TXID, Req, Body}) ->
                 not_set ->
                     noop;
                 _ ->
-                    ar_ignore_registry:remove_temporary(TXID),
+                    big_ignore_registry:remove_temporary(TXID),
 					big_tx_db:put_error_codes(TXID, [<<"invalid_signature_type">>])
             end,
             {error, invalid_signature_type, Req};
@@ -2993,7 +2993,7 @@ post_tx_parse_id(parse_json, {TXID, Req, Body}) ->
 				not_set ->
 					noop;
 				_ ->
-					ar_ignore_registry:remove_temporary(TXID)
+					big_ignore_registry:remove_temporary(TXID)
 			end,
 			{error, invalid_json, Req};
 		TX ->
@@ -3006,7 +3006,7 @@ post_tx_parse_id(parse_binary, {TXID, Req, Body}) ->
 				not_set ->
 					noop;
 				_ ->
-					ar_ignore_registry:remove_temporary(TXID)
+					big_ignore_registry:remove_temporary(TXID)
 			end,
 			{error, invalid_json, Req};
 		{error, _} ->
@@ -3014,7 +3014,7 @@ post_tx_parse_id(parse_binary, {TXID, Req, Body}) ->
 				not_set ->
 					noop;
 				_ ->
-					ar_ignore_registry:remove_temporary(TXID)
+					big_ignore_registry:remove_temporary(TXID)
 			end,
 			{error, invalid_json, Req};
 		{ok, TX} ->
@@ -3030,7 +3030,7 @@ post_tx_parse_id(verify_id_match, {MaybeTXID, Req, TX}) ->
 				not_set ->
 					noop;
 				MismatchingTXID ->
-					ar_ignore_registry:remove_temporary(MismatchingTXID)
+					big_ignore_registry:remove_temporary(MismatchingTXID)
 			end,
 			case byte_size(TXID) > 32 of
 				true ->
@@ -3040,7 +3040,7 @@ post_tx_parse_id(verify_id_match, {MaybeTXID, Req, TX}) ->
 						true ->
 							{error, tx_already_processed, TXID, Req};
 						false ->
-							ar_ignore_registry:add_temporary(TXID, 5000),
+							big_ignore_registry:add_temporary(TXID, 5000),
 							{ok, TX, Req}
 					end
 			end

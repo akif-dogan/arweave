@@ -232,7 +232,7 @@ get_tx(TXID) ->
 	end.
 
 is_known_tx(TXID) ->
-	case ar_ignore_registry:member(TXID) of
+	case big_ignore_registry:member(TXID) of
 		true ->
 			true;
 		false ->

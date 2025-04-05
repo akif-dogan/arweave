@@ -136,7 +136,7 @@ handle_cast({peer_out_of_sync, Peer}, State) ->
 	end;
 
 handle_cast({block, Peer, B, BlockQueryTime}, State) ->
-	case ar_ignore_registry:member(B#block.indep_hash) of
+	case big_ignore_registry:member(B#block.indep_hash) of
 		false ->
 			?LOG_INFO([{event, fetched_block_for_validation},
 					{block, ar_util:encode(B#block.indep_hash)},
