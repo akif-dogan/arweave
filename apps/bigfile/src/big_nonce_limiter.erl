@@ -383,7 +383,7 @@ get_last_step_checkpoints(Info) ->
 	Info#nonce_limiter_info.last_step_checkpoints.
 
 get_or_init_nonce_limiter_info(#block{ height = Height, indep_hash = H } = B) ->
-	case Height >= ar_fork:height_2_6() of
+	case Height >= big_fork:height_2_6() of
 		true ->
 			B#block.nonce_limiter_info;
 		false ->
@@ -393,7 +393,7 @@ get_or_init_nonce_limiter_info(#block{ height = Height, indep_hash = H } = B) ->
 	end.
 
 get_or_init_nonce_limiter_info(#block{ height = Height } = B, RecentBI) ->
-	case Height >= ar_fork:height_2_6() of
+	case Height >= big_fork:height_2_6() of
 		true ->
 			B#block.nonce_limiter_info;
 		false ->
@@ -669,7 +669,7 @@ handle_info({event, node_state, {checkpoint_block, _B}},
 	%% applied yet.
 	{noreply, State};
 handle_info({event, node_state, {checkpoint_block, B}}, State) ->
-	case B#block.height < ar_fork:height_2_6() of
+	case B#block.height < big_fork:height_2_6() of
 		true ->
 			{noreply, State};
 		false ->
@@ -821,7 +821,7 @@ handle_initialized([B | Blocks], State) ->
 	handle_initialized2(lists:reverse(Blocks2), State).
 
 take_blocks_after_fork([#block{ height = Height } = B | Blocks]) ->
-	case Height + 1 >= ar_fork:height_2_6() of
+	case Height + 1 >= big_fork:height_2_6() of
 		true ->
 			[B | take_blocks_after_fork(Blocks)];
 		false ->
@@ -883,7 +883,7 @@ apply_chain(Info, PrevInfo) ->
 	gen_server:cast(?MODULE, {validated_steps, Args}).
 
 apply_tip(#block{ height = Height } = B, PrevB, #state{ sessions = Sessions } = State) ->
-	case Height + 1 < ar_fork:height_2_6() of
+	case Height + 1 < big_fork:height_2_6() of
 		true ->
 			State;
 		false ->
@@ -897,7 +897,7 @@ apply_tip(#block{ height = Height } = B, PrevB, #state{ sessions = Sessions } = 
 				end,
 			case gb_sets:is_empty(Sessions) of
 				true ->
-					true = (Height + 1) == ar_fork:height_2_6(),
+					true = (Height + 1) == big_fork:height_2_6(),
 					State3 = apply_base_block(B, State2),
 					State3;
 				false ->
@@ -1053,7 +1053,7 @@ schedule_step(State) ->
 get_or_init_nonce_limiter_info(#block{ height = Height } = B, Seed, PartitionUpperBound) ->
 	NextSeed = B#block.indep_hash,
 	NextPartitionUpperBound = B#block.weave_size,
-	case Height + 1 == ar_fork:height_2_6() of
+	case Height + 1 == big_fork:height_2_6() of
 		true ->
 			Output = crypto:hash(sha256, Seed),
 			#nonce_limiter_info{ output = Output, seed = Seed, next_seed = NextSeed,

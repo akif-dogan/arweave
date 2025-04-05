@@ -53,7 +53,7 @@ update_accounts(B, PrevB, Accounts) ->
 				Rate, PricePerGiBMinute, KryderPlusRateMultiplierLatch,
 				KryderPlusRateMultiplier, Denomination, BlockInterval}),
 	Accounts2 = apply_txs(Accounts, Denomination, TXs),
-	true = B#block.height >= ar_fork:height_2_6(),
+	true = B#block.height >= big_fork:height_2_6(),
 	update_accounts2(B, PrevB, Accounts2, Args).
 
 %% @doc Perform the last stage of block validation. The majority of the checks
@@ -123,7 +123,7 @@ passes_diff_check(SolutionHash, IsPoA1, {PoA1Diff, Diff}, PackingDifficulty) ->
 				big_difficulty:scale_diff(SubDiff, {1, PackingDifficulty * 4},
 						%% The minimal difficulty height. It does not change at the
 						%% packing difficulty fork.
-						ar_fork:height_2_8())
+						big_fork:height_2_8())
 		end,
 	binary:decode_unsigned(SolutionHash) > Diff3.
 
@@ -201,7 +201,7 @@ get_miner_reward_and_endowment_pool(Args) ->
 	{EndowmentPool, DebtSupply, TXs, RewardAddr, WeaveSize, Height, Timestamp, Rate,
 			PricePerGiBMinute, KryderPlusRateMultiplierLatch, KryderPlusRateMultiplier,
 			Denomination, BlockInterval} = Args,
-	true = Height >= ar_fork:height_2_4(),
+	true = Height >= big_fork:height_2_4(),
 	case big_pricing_transition:is_v2_pricing_height(Height) of
 		true ->
 			big_pricing:get_miner_reward_endowment_pool_debt_supply({EndowmentPool, DebtSupply,
@@ -249,7 +249,7 @@ may_be_apply_double_signing_proof(B, PrevB, Accounts) ->
 	end.
 
 get_reward_key(Pub, Height) ->
-	case Height >= ar_fork:height_2_9() of
+	case Height >= big_fork:height_2_9() of
 		false ->
 			{?DEFAULT_KEY_TYPE, Pub};
 		true ->
@@ -409,7 +409,7 @@ validate_block(previous_block, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap,
 
 validate_block(previous_solution_hash, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap,
 		PartitionUpperBound}) ->
-	true = NewB#block.height >= ar_fork:height_2_6(),
+	true = NewB#block.height >= big_fork:height_2_6(),
 	case NewB#block.previous_solution_hash == OldB#block.hash of
 		false ->
 			{invalid, invalid_previous_solution_hash};
@@ -439,7 +439,7 @@ validate_block(packing_2_5_threshold, {NewB, OldB, Wallets, BlockAnchors, Recent
 validate_block(strict_data_split_threshold,
 		{NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) ->
 	Height = NewB#block.height,
-	Fork_2_5 = ar_fork:height_2_5(),
+	Fork_2_5 = big_fork:height_2_5(),
 	Valid =
 		case Height == Fork_2_5 of
 			true ->
@@ -455,7 +455,7 @@ validate_block(strict_data_split_threshold,
 		end,
 	case Valid of
 		true ->
-			true = NewB#block.height >= ar_fork:height_2_6(),
+			true = NewB#block.height >= big_fork:height_2_6(),
 			validate_block(usd_to_big_rate, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap});
 		false ->
 			{error, invalid_strict_data_split_threshold}
@@ -482,7 +482,7 @@ validate_block(usd_to_big_rate, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}
 validate_block(denomination, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) ->
 	#block{ height = Height, denomination = Denomination,
 			redenomination_height = RedenominationHeight } = NewB,
-	true = Height >= ar_fork:height_2_6(),
+	true = Height >= big_fork:height_2_6(),
 	case big_pricing:may_be_redenominate(OldB) of
 		{Denomination, RedenominationHeight} ->
 			validate_block(reward_history_hash, {NewB, OldB, Wallets, BlockAnchors,
@@ -512,7 +512,7 @@ validate_block(reward_history_hash, {NewB, OldB, Wallets, BlockAnchors, RecentTX
 	end;
 
 validate_block(block_time_history_hash, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) ->
-	case NewB#block.height >= ar_fork:height_2_7() of
+	case NewB#block.height >= big_fork:height_2_7() of
 		false ->
 			validate_block(next_vdf_difficulty, {NewB, OldB, Wallets, BlockAnchors,
 					RecentTXMap});
@@ -529,7 +529,7 @@ validate_block(block_time_history_hash, {NewB, OldB, Wallets, BlockAnchors, Rece
 	end;
 
 validate_block(next_vdf_difficulty, {NewB, OldB, Wallets, BlockAnchors, RecentTXMap}) ->
-	case NewB#block.height >= ar_fork:height_2_7() of
+	case NewB#block.height >= big_fork:height_2_7() of
 		false ->
 			validate_block(price_per_gib_minute, {NewB, OldB, Wallets, BlockAnchors,
 					RecentTXMap});
@@ -573,7 +573,7 @@ validate_block(txs, {NewB = #block{ timestamp = Timestamp, height = Height, txs 
 		invalid ->
 			{invalid, invalid_txs};
 		valid ->
-			true = Height >= ar_fork:height_2_6(),
+			true = Height >= big_fork:height_2_6(),
 			%% The field size limits in 2.6 are naturally asserted in
 			%% big_serialize:binary_to_block/1.
 			validate_block(tx_root, {NewB, OldB})
@@ -621,7 +621,7 @@ validate_block(cumulative_diff, {NewB, OldB}) ->
 
 validate_block(merkle_rebase_support_threshold, {NewB, OldB}) ->
 	#block{ height = Height } = NewB,
-	case Height > ar_fork:height_2_7() of
+	case Height > big_fork:height_2_7() of
 		true ->
 			case NewB#block.merkle_rebase_support_threshold
 					== OldB#block.merkle_rebase_support_threshold of
@@ -631,7 +631,7 @@ validate_block(merkle_rebase_support_threshold, {NewB, OldB}) ->
 					valid
 			end;
 		false ->
-			case Height == ar_fork:height_2_7() of
+			case Height == big_fork:height_2_7() of
 				true ->
 					case NewB#block.merkle_rebase_support_threshold
 							== OldB#block.weave_size of

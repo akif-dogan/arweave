@@ -86,7 +86,7 @@ read_reward_history([{H, _WeaveSize, _TXRoot} | BI]) ->
 read_block_time_history(_Height, []) ->
 	[];
 read_block_time_history(Height, [{H, _WeaveSize, _TXRoot} | BI]) ->
-	case Height < ar_fork:height_2_7() of
+	case Height < big_fork:height_2_7() of
 	true ->
 			[];
 		false ->

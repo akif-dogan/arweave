@@ -18,7 +18,7 @@ history_length() ->
 	?BLOCK_TIME_HISTORY_BLOCKS.
 
 has_history(Height) ->
-	Height - history_length() > ar_fork:height_2_7().
+	Height - history_length() > big_fork:height_2_7().
 
 get_history(B) ->
 	lists:sublist(B#block.block_time_history, history_length()).
@@ -26,7 +26,7 @@ get_history(B) ->
 get_history_from_blocks([], _PrevB) ->
 	[];
 get_history_from_blocks([B | Blocks], PrevB) ->
-	case B#block.height >= ar_fork:height_2_7() of
+	case B#block.height >= big_fork:height_2_7() of
 		false ->
 			get_history_from_blocks(Blocks, B);
 		true ->
@@ -43,7 +43,7 @@ set_history([B | Blocks], History) ->
 
 get_hashes(Blocks) ->
 	TipB = hd(Blocks),
-	Len = min(TipB#block.height - ar_fork:height_2_7() + 1, ?STORE_BLOCKS_BEHIND_CURRENT),
+	Len = min(TipB#block.height - big_fork:height_2_7() + 1, ?STORE_BLOCKS_BEHIND_CURRENT),
 	[B#block.block_time_history_hash || B <- lists:sublist(Blocks, Len)].
 
 sum_history(B) ->
@@ -110,7 +110,7 @@ hash([{BlockInterval, VDFInterval, ChunkCount} | History], IOList) ->
 	hash(History, [BlockIntervalBin, VDFIntervalBin, ChunkCountBin | IOList]).
 
 update_history(B, PrevB) ->
-	case B#block.height >= ar_fork:height_2_7() of
+	case B#block.height >= big_fork:height_2_7() of
 		false ->
 			PrevB#block.block_time_history;
 		true ->

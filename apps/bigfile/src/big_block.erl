@@ -39,7 +39,7 @@ block_field_size_limit(B = #block{ reward_addr = unclaimed }) ->
 	block_field_size_limit(B#block{ reward_addr = <<>> });
 block_field_size_limit(B) ->
 	DiffBytesLimit =
-		case ar_fork:height_1_8() of
+		case big_fork:height_1_8() of
 			Height when B#block.height >= Height ->
 				78;
 			_ ->
@@ -134,7 +134,7 @@ verify_weave_size(NewB, OldB, TXs) ->
 		0,
 		TXs
 	),
-	(NewB#block.height < ar_fork:height_2_6() orelse BlockSize == NewB#block.block_size)
+	(NewB#block.height < big_fork:height_2_6() orelse BlockSize == NewB#block.block_size)
 			andalso NewB#block.weave_size == OldB#block.weave_size + BlockSize.
 
 %% @doc Verify the new cumulative difficulty is computed correctly.
@@ -148,7 +148,7 @@ verify_cumulative_diff(NewB, OldB) ->
 
 %% @doc Verify the root of the new block tree is computed correctly.
 verify_block_hash_list_merkle(NewB, CurrentB) ->
-	true = NewB#block.height > ar_fork:height_2_0(),
+	true = NewB#block.height > big_fork:height_2_0(),
 	NewB#block.hash_list_merkle == big_unbalanced_merkle:root(CurrentB#block.hash_list_merkle,
 			{CurrentB#block.indep_hash, CurrentB#block.weave_size, CurrentB#block.tx_root},
 			fun big_unbalanced_merkle:hash_block_index_entry/1).
@@ -222,7 +222,7 @@ compute_next_vdf_difficulty(PrevB) ->
 				false ->
 					NextVDFDifficulty;
 				true ->
-					case Height < ar_fork:height_2_7_1() of
+					case Height < big_fork:height_2_7_1() of
 						true ->
 							HistoryPart = lists:nthtail(?VDF_HISTORY_CUT,
 									big_block_time_history:get_history(PrevB)),
@@ -286,7 +286,7 @@ validate_proof_size(PoA) ->
 
 %% @doc Compute the block identifier (also referred to as "independent hash").
 indep_hash(B) ->
-	case B#block.height >= ar_fork:height_2_6() of
+	case B#block.height >= big_fork:height_2_6() of
 		true ->
 			H = big_block:generate_signed_hash(B),
 			indep_hash2(H, B#block.signature);
@@ -342,7 +342,7 @@ generate_signed_hash(#block{ previous_block = PrevH, timestamp = TS,
 	{RebaseThresholdBin, DataPathBin, TXPathBin, DataPath2Bin, TXPath2Bin,
 			ChunkHashBin, Chunk2HashBin, BlockTimeHistoryHashBin,
 			VDFDifficultyBin, NextVDFDifficultyBin} =
-		case Height >= ar_fork:height_2_7() of
+		case Height >= big_fork:height_2_7() of
 			true ->
 				{encode_int(RebaseThreshold, 16), big_serialize:encode_bin(DataPath, 24),
 						big_serialize:encode_bin(TXPath, 24),
@@ -357,7 +357,7 @@ generate_signed_hash(#block{ previous_block = PrevH, timestamp = TS,
 				{<<>>, <<>>, <<>>, <<>>, <<>>, <<>>, <<>>, <<>>, <<>>, <<>>}
 		end,
 	{PackingDifficultyBin, UnpackedChunkHashBin, UnpackedChunk2HashBin} =
-		case Height >= ar_fork:height_2_8() of
+		case Height >= big_fork:height_2_8() of
 			true ->
 				{<< PackingDifficulty:8 >>,
 						big_serialize:encode_bin(UnpackedChunkHash, 8),
@@ -366,7 +366,7 @@ generate_signed_hash(#block{ previous_block = PrevH, timestamp = TS,
 				{<<>>, <<>>, <<>>}
 		end,
 	ReplicaFormatBin =
-		case Height >= ar_fork:height_2_9() of
+		case Height >= big_fork:height_2_9() of
 			true ->
 				<< ReplicaFormat:8 >>;
 			false ->
@@ -419,7 +419,7 @@ indep_hash2(SignedH, Signature) ->
 
 %% @doc Compute the block identifier of a pre-2.6 block.
 indep_hash(BDS, B) ->
-	case B#block.height >= ar_fork:height_2_4() of
+	case B#block.height >= big_fork:height_2_4() of
 		true ->
 			big_deep_hash:hash([BDS, B#block.hash, B#block.nonce,
 					big_block:poa_to_list(B#block.poa)]);
@@ -433,7 +433,7 @@ get_block_signature_preimage(CDiff, PrevCDiff, Preimage, Height) ->
 	EncodedPrevCDiff = big_serialize:encode_int(PrevCDiff, 16),
 	SignaturePreimage = << EncodedCDiff/binary,
 			EncodedPrevCDiff/binary, Preimage/binary >>,
-	case Height >= ar_fork:height_2_9() of
+	case Height >= big_fork:height_2_9() of
 		false ->
 			SignaturePreimage;
 		true ->
@@ -458,7 +458,7 @@ verify_signature(BlockPreimage, PrevCDiff,
 		when byte_size(Signature) == ?ECDSA_SIG_SIZE, byte_size(Pub) == ?ECDSA_PUB_KEY_SIZE ->
 	SignaturePreimage = get_block_signature_preimage(CDiff, PrevCDiff,
 			<< PrevSolutionH/binary, BlockPreimage/binary >>, Height),
-	case Height >= ar_fork:height_2_9() of
+	case Height >= big_fork:height_2_9() of
 		true ->
 			big_wallet:to_address(RewardKey) == RewardAddr andalso
 					big_wallet:verify(RewardKey, SignaturePreimage, Signature);
@@ -497,7 +497,7 @@ generate_block_data_segment(BDSBase, B) ->
 %% previous block prefixes the solution hash preimage of the new block.
 generate_block_data_segment_base(B) ->
 	GetTXID = fun(TXID) when is_binary(TXID) -> TXID; (TX) -> TX#tx.id end,
-	case B#block.height >= ar_fork:height_2_4() of
+	case B#block.height >= big_fork:height_2_4() of
 		true ->
 			Props = [
 				integer_to_binary(B#block.height),
@@ -515,7 +515,7 @@ generate_block_data_segment_base(B) ->
 				encode_tags(B)
 			],
 			Props2 =
-				case B#block.height >= ar_fork:height_2_5() of
+				case B#block.height >= big_fork:height_2_5() of
 					true ->
 						{RateDividend, RateDivisor} = B#block.usd_to_big_rate,
 						{ScheduledRateDividend, ScheduledRateDivisor} =
@@ -575,17 +575,17 @@ get_packing(_PackingDifficulty, MiningAddress, 1) ->
 	{replica_2_9, MiningAddress}.
 
 validate_replica_format(Height, PackingDifficulty, 1) ->
-	Height >= ar_fork:height_2_9()
+	Height >= big_fork:height_2_9()
 			andalso PackingDifficulty == ?REPLICA_2_9_PACKING_DIFFICULTY;
 validate_replica_format(Height, 0, 0) ->
 	%% Support for spora_2_6 discontinued at
-	%% ar_fork:height_2_8() + ?SPORA_PACKING_EXPIRATION_PERIOD_BLOCKS.
-	Height - ?SPORA_PACKING_EXPIRATION_PERIOD_BLOCKS < ar_fork:height_2_8();
+	%% big_fork:height_2_8() + ?SPORA_PACKING_EXPIRATION_PERIOD_BLOCKS.
+	Height - ?SPORA_PACKING_EXPIRATION_PERIOD_BLOCKS < big_fork:height_2_8();
 validate_replica_format(Height, CompositePackingDifficulty, 0) ->
-	case Height - ?COMPOSITE_PACKING_EXPIRATION_PERIOD_BLOCKS < ar_fork:height_2_9() of
+	case Height - ?COMPOSITE_PACKING_EXPIRATION_PERIOD_BLOCKS < big_fork:height_2_9() of
 		true ->
 			%% Composite is still supported - difficulty 1 through 32
-			Height >= ar_fork:height_2_8()
+			Height >= big_fork:height_2_8()
 				andalso CompositePackingDifficulty =< ?MAX_PACKING_DIFFICULTY;
 		false ->
 			%% Composite packing is no longer supported.
@@ -653,7 +653,7 @@ get_chunk_padded_offset(Offset) ->
 %%%===================================================================
 
 validate_tags_size(B) ->
-	case B#block.height >= ar_fork:height_2_5() of
+	case B#block.height >= big_fork:height_2_5() of
 		true ->
 			Tags = B#block.tags,
 			validate_tags_length(Tags, 0) andalso byte_size(list_to_binary(Tags)) =< 2048;
@@ -711,7 +711,7 @@ generate_size_tagged_list_from_txs(TXs, Height) ->
 				fun(TX, {Pos, List}) ->
 					DataSize = TX#tx.data_size,
 					End = Pos + DataSize,
-					case Height >= ar_fork:height_2_5() of
+					case Height >= big_fork:height_2_5() of
 						true ->
 							Padding = big_tx:get_weave_size_increase(DataSize, Height)
 									- DataSize,
@@ -748,7 +748,7 @@ do_generate_hash_list_for_block(IndepHash, [_ | Rest]) ->
 	do_generate_hash_list_for_block(IndepHash, Rest).
 
 encode_tags(B) ->
-	case B#block.height >= ar_fork:height_2_5() of
+	case B#block.height >= big_fork:height_2_5() of
 		true ->
 			B#block.tags;
 		false ->
@@ -766,7 +766,7 @@ poa_to_list(POA) ->
 %% @doc Compute the 2.5 packing threshold.
 get_packing_threshold(B, SearchSpaceUpperBound) ->
 	#block{ height = Height, packing_2_5_threshold = PrevPackingThreshold } = B,
-	Fork_2_5 = ar_fork:height_2_5(),
+	Fork_2_5 = big_fork:height_2_5(),
 	case Height + 1 == Fork_2_5 of
 		true ->
 			SearchSpaceUpperBound;
@@ -783,7 +783,7 @@ get_packing_threshold(B, SearchSpaceUpperBound) ->
 shift_packing_2_5_threshold(0) ->
 	0;
 shift_packing_2_5_threshold(Threshold) ->
-	TargetTime = big_testnet:target_block_time(ar_fork:height_2_5()),
+	TargetTime = big_testnet:target_block_time(big_fork:height_2_5()),
 	Shift = (?DATA_CHUNK_SIZE) * (?PACKING_2_5_THRESHOLD_CHUNKS_PER_SECOND) * TargetTime,
 	max(0, Threshold - Shift).
 
@@ -831,7 +831,7 @@ test_hash_list_gen() ->
 			generate_hash_list_for_block(B2#block.indep_hash, BI2)).
 
 generate_size_tagged_list_from_txs_test() ->
-	Fork_2_5 = ar_fork:height_2_5(),
+	Fork_2_5 = big_fork:height_2_5(),
 	?assertEqual([], generate_size_tagged_list_from_txs([], Fork_2_5)),
 	?assertEqual([], generate_size_tagged_list_from_txs([], Fork_2_5 - 1)),
 	EmptyV1Root = (big_tx:generate_chunk_tree(#tx{}))#tx.data_root,
@@ -1007,8 +1007,8 @@ random_wallet() ->
 validate_replica_format_test_() ->
 	[
 		ar_test_node:test_with_mocked_functions([
-				{ar_fork, height_2_8, fun() -> 10 end},
-				{ar_fork, height_2_9, fun() -> 20 end}
+				{big_fork, height_2_8, fun() -> 10 end},
+				{big_fork, height_2_9, fun() -> 20 end}
 			],
 			fun test_validate_replica_format/0, 30)
 	].
@@ -1041,7 +1041,7 @@ test_validate_replica_format() ->
 	?assertEqual(false, validate_replica_format(25, 33, 1)),
 	?assertEqual(true, validate_replica_format(25, 2, 1)), %% 2 in tests.
 	%% post-2.9, post-composite expiration
-	CompositeExpiration = ar_fork:height_2_9() + ?COMPOSITE_PACKING_EXPIRATION_PERIOD_BLOCKS,
+	CompositeExpiration = big_fork:height_2_9() + ?COMPOSITE_PACKING_EXPIRATION_PERIOD_BLOCKS,
 	?assertEqual(true, validate_replica_format(CompositeExpiration, 0, 0)),
 	?assertEqual(false, validate_replica_format(CompositeExpiration, 1, 0)),
 	?assertEqual(false, validate_replica_format(CompositeExpiration, 33, 0)),
@@ -1051,7 +1051,7 @@ test_validate_replica_format() ->
 	?assertEqual(false, validate_replica_format(CompositeExpiration, 33, 1)),
 	?assertEqual(true, validate_replica_format(CompositeExpiration, 2, 1)),
 	%% post-2.9, post-spora expiration
-	SporaExpiration = ar_fork:height_2_8() + ?SPORA_PACKING_EXPIRATION_PERIOD_BLOCKS,
+	SporaExpiration = big_fork:height_2_8() + ?SPORA_PACKING_EXPIRATION_PERIOD_BLOCKS,
 	?assertEqual(false, validate_replica_format(SporaExpiration, 0, 0)),
 	?assertEqual(false, validate_replica_format(SporaExpiration, 1, 0)),
 	?assertEqual(false, validate_replica_format(SporaExpiration, 33, 0)),

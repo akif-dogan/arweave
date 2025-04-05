@@ -341,7 +341,7 @@ apply_block2(B, PrevB, Args, Tree, DAG) ->
 			B#block.debt_supply == DebtSupply2,
 			B#block.kryder_plus_rate_multiplier_latch == KryderPlusRateMultiplierLatch,
 			B#block.kryder_plus_rate_multiplier == KryderPlusRateMultiplier,
-			B#block.height >= ar_fork:height_2_6()} of
+			B#block.height >= big_fork:height_2_6()} of
 		{false, _, _, _, _, _} ->
 			{{error, invalid_reward_pool}, DAG};
 		{true, false, _, _, _, true} ->
@@ -379,7 +379,7 @@ set_current(DAG, RootHash, Height, PruneDepth) ->
 		end
 	),
 	Tree = big_diff_dag:get_sink(UpdatedDAG),
-	true = Height >= ar_fork:height_2_2(),
+	true = Height >= big_fork:height_2_2(),
 	prometheus_gauge:set(wallet_list_size, big_patricia_tree:size(Tree)),
 	big_diff_dag:filter(UpdatedDAG, PruneDepth).
 
@@ -441,7 +441,7 @@ get_account_tree_range(Tree, Cursor) ->
 
 compute_hash(Tree, Diff, Height) ->
 	Tree2 = apply_diff(Diff, Tree),
-	true = Height >= ar_fork:height_2_2(),
+	true = Height >= big_fork:height_2_2(),
 	element(1, big_block:hash_wallet_list(Tree2)).
 
 maybe_add_node(DAG, RootHash, RootHash, _Wallets, _Metadata) ->

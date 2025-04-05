@@ -198,7 +198,7 @@ handle_cast(process_item, #state{ retry_queue = Queue, retry_record = RetryRecor
 					%% the weave is very costly. Therefore, a list of 2.0 hashes for 1.0
 					%% blocks was computed and stored along with the network client.
 					H2 =
-						case Height < ar_fork:height_2_0() of
+						case Height < big_fork:height_2_0() of
 							true ->
 								big_node:get_2_0_hash_of_1_0_block(Height);
 							false ->
@@ -465,7 +465,7 @@ update_backoff({_Timestamp, Interval}) ->
 	{os:system_time(second) + Interval2, Interval2}.
 
 check_fork(Height, H, TXRoot) ->
-	case Height < ar_fork:height_2_0() of
+	case Height < big_fork:height_2_0() of
 		true ->
 			true;
 		false ->
@@ -491,7 +491,7 @@ download_block(H, H2, TXRoot) ->
 	end.
 
 download_block(Peers, H, H2, TXRoot) ->
-	Fork_2_0 = ar_fork:height_2_0(),
+	Fork_2_0 = big_fork:height_2_0(),
 	Opts = #{ rand_min => length(Peers) },
 	case big_http_iface_client:get_block_shadow(Peers, H, Opts) of
 		unavailable ->

@@ -12,7 +12,7 @@
 
 syncs_headers_test_() ->
 	ar_test_node:test_with_mocked_functions([
-			{ar_fork, height_2_8, fun() -> 10 end}],
+			{big_fork, height_2_8, fun() -> 10 end}],
 			fun test_syncs_headers/0).
 
 test_syncs_headers() ->

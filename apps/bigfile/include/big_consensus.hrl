@@ -176,8 +176,8 @@
 -ifndef(SPORA_MIN_DIFFICULTY).
 -define(SPORA_MIN_DIFFICULTY(Height), fun() ->
 	Forks = {
-		ar_fork:height_2_4(),
-		ar_fork:height_2_6()
+		big_fork:height_2_4(),
+		big_fork:height_2_6()
 	},
 	case Forks of
 		{_Fork_2_4, Fork_2_6} when Height >= Fork_2_6 ->

@@ -76,7 +76,7 @@ test_syncs_data() ->
 	).
 
 syncs_after_joining_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_5, fun() -> 0 end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
 		fun test_syncs_after_joining/0, 240).
 
 test_syncs_after_joining() ->
@@ -110,7 +110,7 @@ test_syncs_after_joining(Split) ->
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, infinity).
 
 mines_off_only_last_chunks_test_() ->
-	test_with_mocked_functions([{ar_fork, height_2_6, fun() -> 0 end}, mock_reset_frequency()],
+	test_with_mocked_functions([{big_fork, height_2_6, fun() -> 0 end}, mock_reset_frequency()],
 			fun test_mines_off_only_last_chunks/0).
 
 mock_reset_frequency() ->
@@ -176,7 +176,7 @@ test_mines_off_only_last_chunks() ->
 	).
 
 mines_off_only_second_last_chunks_test_() ->
-	test_with_mocked_functions([{ar_fork, height_2_6, fun() -> 0 end}, mock_reset_frequency()],
+	test_with_mocked_functions([{big_fork, height_2_6, fun() -> 0 end}, mock_reset_frequency()],
 			fun test_mines_off_only_second_last_chunks/0).
 
 test_mines_off_only_second_last_chunks() ->

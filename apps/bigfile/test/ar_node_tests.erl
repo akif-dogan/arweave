@@ -57,7 +57,7 @@ test_mining_reward() ->
 
 % @doc Check that other nodes accept a new block and associated mining reward.
 multi_node_mining_reward_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_6, fun() -> 0 end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_6, fun() -> 0 end}],
 		fun test_multi_node_mining_reward/0, 120).
 
 test_multi_node_mining_reward() ->
@@ -108,7 +108,7 @@ replay_attack_test_() ->
 %% @doc Create two new wallets and a blockweave with a wallet balance.
 %% Create and verify execution of a signed exchange of value tx.
 wallet_transaction_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_6, fun() -> 0 end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_6, fun() -> 0 end}],
 		fun test_wallet_transaction/0, 120).
 
 test_wallet_transaction() ->

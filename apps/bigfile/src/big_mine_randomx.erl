@@ -126,7 +126,7 @@ randomx_generate_replica_2_9_entropy({_, {stub_state, _}}, Key) ->
 
 %% Non-AR_TEST implementation
 randomx_generate_replica_2_9_entropy({rxsquared, RandomxState}, Key) ->
-	{ok, EntropyFused} = ar_rxsquared_nif:rsp_fused_entropy_nif(
+	{ok, EntropyFused} = big_rxsquared_nif:rsp_fused_entropy_nif(
 		RandomxState,
 		?COMPOSITE_PACKING_SUB_CHUNK_COUNT,
 		?COMPOSITE_PACKING_SUB_CHUNK_SIZE,
@@ -219,7 +219,7 @@ init_fast2(rx4096, Key, JIT, LargePages, Threads) ->
 	{ok, FastState} = ar_rx4096_nif:rx4096_init_nif(Key, ?RANDOMX_HASHING_MODE_FAST, JIT, LargePages, Threads),
 	{rx4096, FastState};
 init_fast2(rxsquared, Key, JIT, LargePages, Threads) ->
-	{ok, FastState} = ar_rxsquared_nif:rxsquared_init_nif(Key, ?RANDOMX_HASHING_MODE_FAST, JIT, LargePages, Threads),
+	{ok, FastState} = big_rxsquared_nif:rxsquared_init_nif(Key, ?RANDOMX_HASHING_MODE_FAST, JIT, LargePages, Threads),
 	{rxsquared, FastState};
 init_fast2(RxMode, _Key, _JIT, _LargePages, _Threads) ->
 	?LOG_ERROR([{event, invalid_randomx_mode}, {mode, RxMode}]),
@@ -231,7 +231,7 @@ init_light2(rx4096, Key, JIT, LargePages) ->
 	{ok, LightState} = ar_rx4096_nif:rx4096_init_nif(Key, ?RANDOMX_HASHING_MODE_LIGHT, JIT, LargePages, 0),
 	{rx4096, LightState};
 init_light2(rxsquared, Key, JIT, LargePages) ->
-	{ok, LightState} = ar_rxsquared_nif:rxsquared_init_nif(Key, ?RANDOMX_HASHING_MODE_LIGHT, JIT, LargePages, 0),
+	{ok, LightState} = big_rxsquared_nif:rxsquared_init_nif(Key, ?RANDOMX_HASHING_MODE_LIGHT, JIT, LargePages, 0),
 	{rxsquared, LightState};
 init_light2(RxMode, _Key, _JIT, _LargePages) ->
 	?LOG_ERROR([{event, invalid_randomx_mode}, {mode, RxMode}]),
@@ -242,7 +242,7 @@ info2({rx512, State}) ->
 info2({rx4096, State}) ->
 	ar_rx4096_nif:rx4096_info_nif(State);
 info2({rxsquared, State}) ->
-	ar_rxsquared_nif:rxsquared_info_nif(State);
+	big_rxsquared_nif:rxsquared_info_nif(State);
 info2(_) ->
 	{error, invalid_randomx_mode}.
 
@@ -263,7 +263,7 @@ hash2({rx4096, State}, Data, JIT, LargePages, HardwareAES) ->
 	{ok, Hash} = ar_rx4096_nif:rx4096_hash_nif(State, Data, JIT, LargePages, HardwareAES),
 	Hash;
 hash2({rxsquared, State}, Data, JIT, LargePages, HardwareAES) ->
-	{ok, Hash} = ar_rxsquared_nif:rxsquared_hash_nif(State, Data, JIT, LargePages, HardwareAES),
+	{ok, Hash} = big_rxsquared_nif:rxsquared_hash_nif(State, Data, JIT, LargePages, HardwareAES),
 	Hash;
 hash2(_BadState, _Data, _JIT, _LargePages, _HardwareAES) ->
 	{error, invalid_randomx_mode}.

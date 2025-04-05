@@ -426,7 +426,7 @@ write_genesis_files(DataDir, B0) ->
 	TXRoot = B0#block.tx_root,
 	ok = big_kv:put(block_index_db, << 0:256 >>, term_to_binary({H, WeaveSize, TXRoot, <<>>})),
 	ok = big_kv:put(reward_history_db, H, term_to_binary(hd(B0#block.reward_history))),
-	case ar_fork:height_2_7() of
+	case big_fork:height_2_7() of
 		0 ->
 			ok = big_kv:put(block_time_history_db, H,
 					term_to_binary(hd(B0#block.block_time_history)));
@@ -817,7 +817,7 @@ get_default_storage_module_packing(RewardAddr, Index) ->
 	get_default_storage_module_packing(RewardAddr, Index, #{}).
 
 get_default_storage_module_packing(RewardAddr, Index, Options) ->
-	case {ar_fork:height_2_9(), ar_fork:height_2_8()} of
+	case {big_fork:height_2_9(), big_fork:height_2_8()} of
 		{infinity, infinity} ->
 			{spora_2_6, RewardAddr};
 		{infinity, 0} ->

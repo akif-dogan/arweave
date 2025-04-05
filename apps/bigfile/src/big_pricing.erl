@@ -44,8 +44,8 @@ get_price_per_gib_minute(Height, B) ->
 	big_pricing_transition:get_transition_price(Height, V2Price).
 
 get_v2_price_per_gib_minute(Height, B) ->
-	OneDifficultyHeight = ar_fork:height_2_7() + big_block_time_history:history_length(),
-	TwoDifficultyHeight = ar_fork:height_2_7_2() + big_block_time_history:history_length(),
+	OneDifficultyHeight = big_fork:height_2_7() + big_block_time_history:history_length(),
+	TwoDifficultyHeight = big_fork:height_2_7_2() + big_block_time_history:history_length(),
 
 	case Height of
 		_ when Height >= TwoDifficultyHeight ->
@@ -346,8 +346,8 @@ recalculate_price_per_gib_minute(B) ->
 			price_per_gib_minute = Price,
 			scheduled_price_per_gib_minute = ScheduledPrice } = B,
 	Height = PrevHeight + 1,
-	Fork_2_7 = ar_fork:height_2_7(),
-	Fork_2_7_1 = ar_fork:height_2_7_1(),
+	Fork_2_7 = big_fork:height_2_7(),
+	Fork_2_7_1 = big_fork:height_2_7_1(),
 	case Height of
 		Fork_2_7 ->
 			{big_pricing_transition:static_price(), big_pricing_transition:static_price()};
@@ -457,7 +457,7 @@ get_miner_reward_and_endowment_pool(Args) ->
 %% @doc Return the effective USD to BIG rate corresponding to the given block
 %% considering its previous block.
 usd_to_big_rate(#block{ height = PrevHeight } = PrevB) ->
-	Height_2_5 = ar_fork:height_2_5(),
+	Height_2_5 = big_fork:height_2_5(),
 	Height = PrevHeight + 1,
 	case PrevHeight < Height_2_5 of
 		true ->
@@ -483,14 +483,14 @@ usd_to_big({Dividend, Divisor}, Rate, Height) ->
 
 recalculate_usd_to_big_rate(#block{ height = PrevHeight } = B) ->
 	Height = PrevHeight + 1,
-	Fork_2_5 = ar_fork:height_2_5(),
+	Fork_2_5 = big_fork:height_2_5(),
 	true = Height >= Fork_2_5,
 	case Height > Fork_2_5 of
 		false ->
 			Rate = ?INITIAL_USD_TO_BIG(Height)(),
 			{Rate, Rate};
 		true ->
-			Fork_2_6 = ar_fork:height_2_6(),
+			Fork_2_6 = big_fork:height_2_6(),
 			case Height == Fork_2_6 of
 				true ->
 					{B#block.usd_to_big_rate, ?FORK_2_6_PRE_TRANSITION_USD_TO_BIG_RATE};
@@ -525,7 +525,7 @@ get_expected_min_decline_rate(Timestamp, Period, Amount, Size, Rate, Height) ->
 %% @doc Get the share of the maintenance cost the miner receives for a transation.
 get_miner_fee_share(MaintenanceCost, Height) ->
 	{Dividend, Divisor} = ?MINING_REWARD_MULTIPLIER,
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		false ->
 			erlang:trunc(MaintenanceCost * (Dividend / Divisor));
 		true ->
@@ -541,7 +541,7 @@ distribute_transaction_fees([TX | TXs], EndowmentPool, Miner, Height) ->
 	TXFee = TX#tx.reward,
 	{Dividend, Divisor} = ?MINING_REWARD_MULTIPLIER,
 	MinerFee =
-		case Height >= ar_fork:height_2_5() of
+		case Height >= big_fork:height_2_5() of
 			false ->
 				erlang:trunc((Dividend / Divisor) * TXFee / ((Dividend / Divisor) + 1));
 			true ->
@@ -560,7 +560,7 @@ get_perpetual_gb_cost_at_timestamp(Timestamp, Height) ->
 
 -spec get_perpetual_gb_cost(Init::usd(), Height::nonegint()) -> usd().
 get_perpetual_gb_cost(Init, Height) ->
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		true ->
 			{LnDecayDividend, LnDecayDivisor} = ?LN_PRICE_DECAY_ANNUAL,
 			{InitDividend, InitDivisor} = Init,
@@ -590,7 +590,7 @@ get_gb_cost_per_year_at_datetime({{Y, M, _}, _} = DT, Height) ->
 	FracY = fraction_of_year(PrevY, NextY, DT, Height),
 	PrevYCost = usd_p_gby(PrevY, Height),
 	NextYCost = usd_p_gby(NextY, Height),
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		true ->
 			{FracYDividend, FracYDivisor} = FracY,
 			{PrevYCostDividend, PrevYCostDivisor} = PrevYCost,
@@ -630,7 +630,7 @@ next_jun_30_year(Y, _M) ->
 %% @doc Return the cost in USD of storing 1 GB per average block time.
 -spec get_gb_cost_per_block_at_datetime(DT::datetime(), Height::nonegint()) -> usd().
 get_gb_cost_per_block_at_datetime(DT, Height) ->
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		true ->
 			{Dividend, Divisor} = get_gb_cost_per_year_at_datetime(DT, Height),
 			{Dividend, Divisor * big_inflation:blocks_per_year(Height)};
@@ -645,7 +645,7 @@ get_gb_cost_per_block_at_datetime(DT, Height) ->
 -spec usd_p_gby(nonegint(), nonegint()) -> usd().
 usd_p_gby(2018, Height) ->
 	{Dividend, Divisor} = ?USD_PER_GBY_2018,
-	case Height >= ar_fork:height_2_5() of
+		case Height >= big_fork:height_2_5() of
 		true ->
 			{Dividend, Divisor};
 		false ->
@@ -653,14 +653,14 @@ usd_p_gby(2018, Height) ->
 	end;
 usd_p_gby(2019, Height) ->
 	{Dividend, Divisor} = ?USD_PER_GBY_2019,
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		true ->
 			{Dividend, Divisor};
 		false ->
 			Dividend / Divisor
 	end;
 usd_p_gby(Y, Height) ->
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		true ->
 			{KDividend, KDivisor} = ?USD_PER_GBY_2019,
 			{ADividend, ADivisor} = ?LN_PRICE_DECAY_ANNUAL,
@@ -685,7 +685,7 @@ fraction_of_year(PrevY, NextY, {{Y, Mo, D}, {H, Mi, S}}, Height) ->
 	Start = calendar:datetime_to_gregorian_seconds({{PrevY, 6, 30}, {23, 59, 59}}),
 	Now = calendar:datetime_to_gregorian_seconds({{Y, Mo, D}, {H, Mi, S}}),
 	End = calendar:datetime_to_gregorian_seconds({{NextY, 6, 30}, {23, 59, 59}}),
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		true ->
 			{Now - Start, End - Start};
 		false ->
@@ -704,7 +704,7 @@ recalculate_usd_to_big_rate2(#block{ height = PrevHeight } = B) ->
 		false ->
 			{B#block.usd_to_big_rate, B#block.scheduled_usd_to_big_rate};
 		true ->
-			Fork_2_6 = ar_fork:height_2_6(),
+			Fork_2_6 = big_fork:height_2_6(),
 			true = PrevHeight + 1 /= Fork_2_6,
 			case PrevHeight + 1 > Fork_2_6 of
 				true ->
@@ -786,11 +786,11 @@ network_data_size(Height,
 
 get_gb_cost_per_year_at_datetime_is_monotone_test_() ->
 	[
-		ar_test_node:test_with_mocked_functions([{ar_fork, height_2_5, fun() -> infinity end}],
+		ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> infinity end}],
 			fun test_get_gb_cost_per_year_at_datetime_is_monotone/0, 120)
 		| 
 		[
-			ar_test_node:test_with_mocked_functions([{ar_fork, height_2_5, fun() -> Height end}],
+			ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> Height end}],
 				fun test_get_gb_cost_per_year_at_datetime_is_monotone/0, 120)
 			|| Height <- lists:seq(0, 20)
 		]

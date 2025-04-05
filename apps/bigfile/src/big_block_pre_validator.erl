@@ -210,7 +210,7 @@ pre_validate_previous_block(B, Peer) ->
 				false ->
 					invalid;
 				true ->
-					true = B#block.height >= ar_fork:height_2_6(),
+					true = B#block.height >= big_fork:height_2_6(),
 					PrevCDiff = B#block.previous_cumulative_diff,
 					case PrevB#block.cumulative_diff == PrevCDiff of
 						true ->
@@ -243,7 +243,7 @@ may_be_pre_validate_first_chunk_hash(B, PrevB, Peer) ->
 	end.
 
 may_be_pre_validate_second_chunk_hash(#block{ recall_byte2 = undefined } = B, PrevB, Peer) ->
-	case B#block.height < ar_fork:height_2_7_2() orelse B#block.poa2 == #poa{} of
+	case B#block.height < big_fork:height_2_7_2() orelse B#block.poa2 == #poa{} of
 		false ->
 			post_block_reject_warn(B, check_second_chunk, Peer),
 			big_events:send(block, {rejected, invalid_poa2_recall_byte2_undefined,
@@ -396,7 +396,7 @@ pre_validate_existing_solution_hash(B, PrevB, Peer) ->
 				LastStepPrevOutput = get_last_step_prev_output(B),
 				LastStepPrevOutput2 = get_last_step_prev_output(CacheB),
 				case LastStepPrevOutput == LastStepPrevOutput2
-						andalso (Height < ar_fork:height_2_9()
+						andalso (Height < big_fork:height_2_9()
 							orelse PackingDifficulty == PackingDifficulty2) of
 					true ->
 						B2 = B#block{ poa = (B#block.poa)#poa{ chunk = Chunk },
@@ -545,7 +545,7 @@ pre_validate_previous_solution_hash(B, PrevB, SolutionResigned, Peer) ->
 	end.
 
 pre_validate_last_retarget(B, PrevB, SolutionResigned, Peer) ->
-	true = B#block.height >= ar_fork:height_2_6(),
+	true = B#block.height >= big_fork:height_2_6(),
 	case big_block:verify_last_retarget(B, PrevB) of
 		true ->
 			pre_validate_difficulty(B, PrevB, SolutionResigned, Peer);
@@ -557,7 +557,7 @@ pre_validate_last_retarget(B, PrevB, SolutionResigned, Peer) ->
 	end.
 
 pre_validate_difficulty(B, PrevB, SolutionResigned, Peer) ->
-	true = B#block.height >= ar_fork:height_2_6(),
+	true = B#block.height >= big_fork:height_2_6(),
 	DiffValid = big_retarget:validate_difficulty(B, PrevB),
 	case DiffValid of
 		true ->
@@ -569,7 +569,7 @@ pre_validate_difficulty(B, PrevB, SolutionResigned, Peer) ->
 	end.
 
 pre_validate_cumulative_difficulty(B, PrevB, SolutionResigned, Peer) ->
-	true = B#block.height >= ar_fork:height_2_6(),
+	true = B#block.height >= big_fork:height_2_6(),
 	case big_block:verify_cumulative_diff(B, PrevB) of
 		false ->
 			post_block_reject_warn_and_error_dump(B, check_cumulative_difficulty, Peer),
@@ -784,7 +784,7 @@ accept_block(B, Peer, Gossip) ->
 	ok.
 
 compute_hash(B, PrevCDiff) ->
-	true = B#block.height >= ar_fork:height_2_6(),
+	true = B#block.height >= big_fork:height_2_6(),
 	SignedH = big_block:generate_signed_hash(B),
 	case big_block:verify_signature(SignedH, PrevCDiff, B) of
 		false ->

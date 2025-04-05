@@ -73,13 +73,13 @@ maybe_retarget(Height, {CurPoA1Diff, CurDiff}, TS, LastRetargetTS, PrevTS) ->
 	end.
 
 calculate_difficulty(OldDiff, TS, Last, Height, PrevTS) ->
-	Fork_1_7 = ar_fork:height_1_7(),
-	Fork_1_8 = ar_fork:height_1_8(),
-	Fork_1_9 = ar_fork:height_1_9(),
-	Fork_2_4 = ar_fork:height_2_4(),
-	Fork_2_5 = ar_fork:height_2_5(),
-	Fork_2_6 = ar_fork:height_2_6(),
-	Fork_2_7_2 = ar_fork:height_2_7_2(),
+	Fork_1_7 = big_fork:height_1_7(),
+	Fork_1_8 = big_fork:height_1_8(),
+	Fork_1_9 = big_fork:height_1_9(),
+	Fork_2_4 = big_fork:height_2_4(),
+	Fork_2_5 = big_fork:height_2_5(),
+	Fork_2_6 = big_fork:height_2_6(),
+	Fork_2_7_2 = big_fork:height_2_7_2(),
 	Fork_Testnet = big_testnet:height_testnet_fork(),
 	case Height of
 		_ when Height == Fork_Testnet ->
@@ -293,7 +293,7 @@ simple_retarget_test_() ->
 	end}.
 
 calculate_difficulty_linear_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_5, fun() -> 0 end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
 		fun test_calculate_difficulty_linear/0, 120).
 
 test_calculate_difficulty_linear() ->

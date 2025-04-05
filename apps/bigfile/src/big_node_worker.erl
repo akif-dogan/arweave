@@ -626,7 +626,7 @@ record_mempool_size_metrics({HeaderSize, DataSize}) ->
 	prometheus_gauge:set(mempool_data_size_bytes, DataSize).
 
 may_be_initialize_nonce_limiter([#block{ height = Height } = B | Blocks], BI) ->
-	case Height + 1 == ar_fork:height_2_6() of
+	case Height + 1 == big_fork:height_2_6() of
 		true ->
 			{Seed, PartitionUpperBound, _TXRoot} = big_node:get_nth_or_last(
 					?SEARCH_SPACE_UPPER_BOUND_DEPTH, BI),
@@ -953,7 +953,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 					{noreply, State};
 				ok ->
 					B2 =
-						case B#block.height >= ar_fork:height_2_6() of
+						case B#block.height >= big_fork:height_2_6() of
 							true ->
 								B#block{
 									reward_history =
@@ -963,7 +963,7 @@ apply_block3(B, [PrevB | _] = PrevBlocks, Timestamp, State) ->
 								B
 						end,
 					B3 =
-						case B#block.height >= ar_fork:height_2_7() of
+						case B#block.height >= big_fork:height_2_7() of
 							true ->
 								BlockTimeHistory2 = big_block_time_history:update_history(B, PrevB),
 								Len2 = big_block_time_history:history_length()
@@ -1031,7 +1031,7 @@ may_be_get_double_signing_proof2(Iterator, RootHash, LockedRewards, Height) ->
 				{sig2_size, byte_size(Sig2)},
 				{height, Height}]),
 			CheckKeyType =
-				case {byte_size(Key) == ?ECDSA_PUB_KEY_SIZE, Height >= ar_fork:height_2_9()} of
+				case {byte_size(Key) == ?ECDSA_PUB_KEY_SIZE, Height >= big_fork:height_2_9()} of
 					{true, false} ->
 						false;
 					{true, true} ->
@@ -1066,7 +1066,7 @@ may_be_get_double_signing_proof2(Iterator, RootHash, LockedRewards, Height) ->
 	end.
 
 get_chunk_hash(#poa{ chunk = Chunk }, Height) ->
-	case Height >= ar_fork:height_2_7() of
+	case Height >= big_fork:height_2_7() of
 		false ->
 			undefined;
 		true ->
@@ -1392,7 +1392,7 @@ apply_validated_block2(State, B, PrevBlocks, Orphans, RecentBI, BlockTXPairs) ->
 	{BlockAnchors, RecentTXMap} = get_block_anchors_and_recent_txs_map(BlockTXPairs),
 	Height = B#block.height,
 	{Rate, ScheduledRate} =
-		case Height >= ar_fork:height_2_5() of
+		case Height >= big_fork:height_2_5() of
 			true ->
 				{B#block.usd_to_big_rate, B#block.scheduled_usd_to_big_rate};
 			false ->
@@ -1498,7 +1498,7 @@ maybe_report_n_confirmations(B, BI) ->
 	end.
 
 record_economic_metrics(B, PrevB) ->
-	case B#block.height >= ar_fork:height_2_5() of
+	case B#block.height >= big_fork:height_2_5() of
 		false ->
 			ok;
 		true ->
@@ -1514,7 +1514,7 @@ record_economic_metrics2(B, PrevB) ->
 	Period_200_Years = 200 * 365 * 24 * 60 * 60,
 	Burden = big_pricing:get_storage_cost(B#block.weave_size, B#block.timestamp,
 			B#block.usd_to_big_rate, B#block.height),
-	case B#block.height >= ar_fork:height_2_6() of
+	case B#block.height >= big_fork:height_2_6() of
 		true ->
 			#block{ reward_history = RewardHistory } = B,
 			RewardHistorySize = length(RewardHistory),
@@ -1575,7 +1575,7 @@ record_economic_metrics2(B, PrevB) ->
 	end.
 
 record_vdf_metrics(#block{ height = Height } = B, PrevB) ->
-	case Height >= ar_fork:height_2_6() of
+	case Height >= big_fork:height_2_6() of
 		true ->
 			StepNumber = big_block:vdf_step_number(B),
 			PrevBStepNumber = big_block:vdf_step_number(PrevB),
@@ -1647,7 +1647,7 @@ get_current_diff(TS) ->
 	big_retarget:maybe_retarget(Height + 1, DiffPair, TS, LastRetarget, PrevTS).
 
 get_merkle_rebase_threshold(PrevB) ->
-	case PrevB#block.height + 1 == ar_fork:height_2_7() of
+	case PrevB#block.height + 1 == big_fork:height_2_7() of
 		true ->
 			PrevB#block.weave_size;
 		_ ->
@@ -1688,7 +1688,7 @@ priority(_) ->
 	{os:system_time(second), 1}.
 
 read_hash_list_2_0_for_1_0_blocks() ->
-	Fork_2_0 = ar_fork:height_2_0(),
+	Fork_2_0 = big_fork:height_2_0(),
 	case Fork_2_0 > 0 of
 		true ->
 			File = filename:join(["genesis_data", "hash_list_1_0"]),
@@ -1721,7 +1721,7 @@ start_from_state(BI, Height) ->
 			%% by any node will be shorter than the full expected length. Specicifically
 			%% it will be 21,600 blocks plus the number of blocks that have elapsed since
 			%% the 2.8 HF activatin.
-			InterimRewardHistoryLength = (Height - ar_fork:height_2_8()) + 21600,
+			InterimRewardHistoryLength = (Height - big_fork:height_2_8()) + 21600,
 			RewardHistoryBI = lists:sublist(
 					big_rewards:trim_buffered_reward_history(Height, BI2),
 					InterimRewardHistoryLength
@@ -2197,7 +2197,7 @@ handle_found_solution(Args, PrevB, State) ->
 	end.
 
 assert_key_type(RewardKey, Height) ->
-	case Height >= ar_fork:height_2_9() of
+	case Height >= big_fork:height_2_9() of
 		false ->
 			case RewardKey of
 				{{?RSA_KEY_TYPE, _, _}, {?RSA_KEY_TYPE, Pub}} ->

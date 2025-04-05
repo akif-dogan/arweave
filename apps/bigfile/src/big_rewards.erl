@@ -13,8 +13,8 @@
 
 reward_history_length(Height) ->
 	min(
-		Height - ar_fork:height_2_6() + 1, %% included for compatibility with unit tests
-		case Height >= ar_fork:height_2_8() of
+		Height - big_fork:height_2_6() + 1, %% included for compatibility with unit tests
+		case Height >= big_fork:height_2_8() of
 			true ->
 				big_testnet:reward_history_blocks(Height) + ?STORE_BLOCKS_BEHIND_CURRENT;
 			false ->
@@ -23,7 +23,7 @@ reward_history_length(Height) ->
 	).
 
 expected_hashes_length(Height) ->
-	case Height >= ar_fork:height_2_8() of
+	case Height >= big_fork:height_2_8() of
 		true ->
 			%% Take one more block.reward_history_hash because after 2.8 we use
 			%% the previous reward history hash to compute the new one.
@@ -124,7 +124,7 @@ validate_reward_history_hashes(Height, RewardHistory, [H, PrevH | ExpectedHashes
 	end;
 validate_reward_history_hashes(Height, RewardHistory, [H]) ->
 	%% After 2.8 we always include one extra hash to the list so we cannot end up here.
-	true = Height < ar_fork:height_2_8(),
+	true = Height < big_fork:height_2_8(),
 	validate_reward_history_hash(Height, not_set, H, RewardHistory).
 
 validate_reward_history_hash(Height, PreviousRewardHistoryHash, H, RewardHistory) ->
@@ -135,7 +135,7 @@ validate_reward_history_hash(Height, PreviousRewardHistoryHash, H, RewardHistory
 			trim_locked_rewards(Height, RewardHistory)).
 
 reward_history_hash(Height, PreviousRewardHistoryHash, History) ->
-	case Height >= ar_fork:height_2_8() of
+	case Height >= big_fork:height_2_8() of
 		true ->
 			Element = encode_reward_history_element(hd(History)),
 			Preimage = << Element/binary, PreviousRewardHistoryHash/binary >>,

@@ -223,7 +223,7 @@ get_weave_size_increase(#tx{ data_size = DataSize }, Height) ->
 get_weave_size_increase(0, _Height) ->
 	0;
 get_weave_size_increase(DataSize, Height) ->
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		true ->
 			%% The smallest multiple of ?DATA_CHUNK_SIZE larger than or equal to data_size.
 			big_poa:get_padded_offset(DataSize, 0);
@@ -331,7 +331,7 @@ verify_signature_type(#tx{ format = 2 } = TX, Height) ->
 		{?RSA_SIGN_ALG, 65537} ->
 			true;
 		{?ECDSA_SIGN_ALG, secp256k1} ->
-			Height >= ar_fork:height_2_9();
+			Height >= big_fork:height_2_9();
 		_ ->
 			false
 	end.
@@ -349,7 +349,7 @@ do_verify(#tx{ format = 1 } = TX, Args, VerifySignature) ->
 do_verify(#tx{ format = 2 } = TX, Args, VerifySignature) ->
 	{_Rate, _PricePerGiBMinute, _KryderPlusRateMultiplier, _Denomination,
 			_RedenominationHeight, Height, _Accounts, _Timestamp} = Args,
-	case Height < ar_fork:height_2_0() of
+	case Height < big_fork:height_2_0() of
 		true ->
 			collect_validation_results(TX#tx.id, [{"tx_format_not_supported", false}]);
 		false ->
@@ -375,7 +375,7 @@ get_addresses([TX | TXs], Addresses) ->
 do_verify_v1(TX, Args, VerifySignature) ->
 	{_Rate, PricePerGiBMinute, KryderPlusRateMultiplier, Denomination, RedenominationHeight,
 			Height, Accounts, _Timestamp} = Args,
-	Fork_1_8 = ar_fork:height_1_8(),
+	Fork_1_8 = big_fork:height_1_8(),
 	LastTXCheck = case Height of
 		H when H >= Fork_1_8 ->
 			true;
@@ -451,14 +451,14 @@ do_verify_v2(TX, Args, VerifySignature) ->
 %% @doc Check whether each field in a transaction is within the given byte size limits.
 tx_field_size_limit_v1(TX, Height, Denomination) ->
 	LastTXLimit =
-		case Height >= ar_fork:height_1_8() of
+		case Height >= big_fork:height_1_8() of
 			true ->
 				48;
 			false ->
 				32
 		end,
 	MaxDigits =
-		case Height + 1 >= ar_fork:height_2_6() of
+		case Height + 1 >= big_fork:height_2_6() of
 			true ->
 				30 + (Denomination - 1) * 3;
 			false ->
@@ -487,7 +487,7 @@ verify_signature_v1(_TX, do_not_verify_signature, _Height) ->
 	true;
 verify_signature_v1(TX, verify_signature, Height) ->
 	SignatureDataSegment = generate_signature_data_segment(TX),
-	case Height >= ar_fork:height_2_4() of
+	case Height >= big_fork:height_2_4() of
 		true ->
 			big_wallet:verify({?DEFAULT_KEY_TYPE, TX#tx.owner}, SignatureDataSegment,
 					TX#tx.signature);
@@ -498,7 +498,7 @@ verify_signature_v1(TX, verify_signature, Height) ->
 
 verify_malleability(Args) ->
 	{TX, _PricePerGiBMinute, _KryderMultiplier, _Denomination, Height, _Accounts} = Args,
-	case Height + 1 >= ar_fork:height_2_4() of
+	case Height + 1 >= big_fork:height_2_4() of
 		false ->
 			true;
 		true ->
@@ -564,7 +564,7 @@ verify_signature_v2(TX, verify_signature, Height) ->
 			?ECDSA_KEY_TYPE ->
 				{?ECDSA_KEY_TYPE, TX#tx.owner}
 		end,
-	case Height >= ar_fork:height_2_4() of
+	case Height >= big_fork:height_2_4() of
 		true ->
 			big_wallet:verify(Wallet, SignatureDataSegment, TX#tx.signature);
 		false ->
@@ -611,7 +611,7 @@ is_tx_fee_sufficient(Args) ->
 
 get_tx_fee(Args) ->
 	{DataSize, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height} = Args,
-	Fork_2_6_8 = ar_fork:height_2_6_8(),
+	Fork_2_6_8 = big_fork:height_2_6_8(),
 	Args2 = {DataSize, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height},
 	true = Height >= Fork_2_6_8,
 	case Height < big_pricing_transition:static_pricing_height() of
@@ -652,7 +652,7 @@ get_new_account_fee(BytePerMinutePrice, KryderPlusRateMultiplier, Height) ->
 	big_pricing:get_tx_fee(Args).
 
 verify_target_length(TX, Height) ->
-	case Height >= ar_fork:height_2_4() of
+	case Height >= big_fork:height_2_4() of
 		true ->
 			(TX#tx.quantity == 0 andalso byte_size(TX#tx.target) =< 32)
 				orelse byte_size(TX#tx.target) == 32;
@@ -661,7 +661,7 @@ verify_target_length(TX, Height) ->
 	end.
 
 verify_denomination(TX, Denomination, Height, RedenominationHeight) ->
-	case Height + 1 >= ar_fork:height_2_6() of
+	case Height + 1 >= big_fork:height_2_6() of
 		false ->
 			TX#tx.denomination == 0;
 		true ->
@@ -675,7 +675,7 @@ verify_denomination(TX, Denomination, Height, RedenominationHeight) ->
 
 tx_field_size_limit_v2(TX, Height, Denomination) ->
 	MaxDigits =
-		case Height + 1 >= ar_fork:height_2_6() of
+		case Height + 1 >= big_fork:height_2_6() of
 			true ->
 				30 + (Denomination - 1) * 3;
 			false ->
@@ -692,7 +692,7 @@ tx_field_size_limit_v2(TX, Height, Denomination) ->
 			(byte_size(TX#tx.data_root) =< 32).
 
 validate_tags_size(TX, Height) ->
-	case Height >= ar_fork:height_2_5() of
+	case Height >= big_fork:height_2_5() of
 		true ->
 			Tags = TX#tx.tags,
 			validate_tags_length(Tags, 0) andalso byte_size(tags_to_binary(Tags)) =< 2048;
@@ -790,7 +790,7 @@ sign_and_verify_chunked_test_() ->
 	{timeout, 60, fun test_sign_and_verify_chunked/0}.
 
 sign_and_verify_chunked_pre_fork_2_5_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_5, fun() -> infinity end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> infinity end}],
 		fun test_sign_and_verify_chunked/0, 120).
 
 test_sign_and_verify_chunked() ->
@@ -851,7 +851,7 @@ check_last_tx_test_() ->
 	{timeout, 60, fun test_check_last_tx/0}.
 
 check_last_tx_pre_fork_2_5_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_4, fun() -> infinity end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_4, fun() -> infinity end}],
 		fun test_sign_and_verify_chunked/0, 120).
 
 test_check_last_tx() ->
@@ -928,20 +928,20 @@ test_generate_chunk_tree_and_validate_path(Data, ChallengeLocation) ->
 	?assert(ChallengeLocation < EndOffset).
 
 get_weave_size_increase_test() ->
-	?assertEqual(0, get_weave_size_increase(#tx{}, ar_fork:height_2_5())),
+	?assertEqual(0, get_weave_size_increase(#tx{}, big_fork:height_2_5())),
 	?assertEqual(262144,
-			get_weave_size_increase(#tx{ data_size = 1 }, ar_fork:height_2_5())),
+			get_weave_size_increase(#tx{ data_size = 1 }, big_fork:height_2_5())),
 	?assertEqual(262144,
-			get_weave_size_increase(#tx{ data_size = 256 }, ar_fork:height_2_5())),
+			get_weave_size_increase(#tx{ data_size = 256 }, big_fork:height_2_5())),
 	?assertEqual(262144,
-			get_weave_size_increase(#tx{ data_size = 256 * 1024 - 1 }, ar_fork:height_2_5())),
+			get_weave_size_increase(#tx{ data_size = 256 * 1024 - 1 }, big_fork:height_2_5())),
 	?assertEqual(262144,
-			get_weave_size_increase(#tx{ data_size = 256 * 1024 }, ar_fork:height_2_5())),
+			get_weave_size_increase(#tx{ data_size = 256 * 1024 }, big_fork:height_2_5())),
 	?assertEqual(2 * 262144,
-			get_weave_size_increase(#tx{ data_size = 256 * 1024 + 1}, ar_fork:height_2_5())),
+			get_weave_size_increase(#tx{ data_size = 256 * 1024 + 1}, big_fork:height_2_5())),
 	?assertEqual(0,
-			get_weave_size_increase(#tx{ data_size = 0 }, ar_fork:height_2_5() - 1)),
+			get_weave_size_increase(#tx{ data_size = 0 }, big_fork:height_2_5() - 1)),
 	?assertEqual(1,
-			get_weave_size_increase(#tx{ data_size = 1 }, ar_fork:height_2_5() - 1)),
+			get_weave_size_increase(#tx{ data_size = 1 }, big_fork:height_2_5() - 1)),
 	?assertEqual(262144,
-			get_weave_size_increase(#tx{ data_size = 256 * 1024 }, ar_fork:height_2_5() - 1)).
+			get_weave_size_increase(#tx{ data_size = 256 * 1024 }, big_fork:height_2_5() - 1)).

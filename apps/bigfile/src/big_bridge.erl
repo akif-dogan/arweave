@@ -127,7 +127,7 @@ handle_info({event, block, {new, B, _}}, State) ->
 			SpecialPeers = Config#config.block_gossip_peers,
 			Peers = ((SpecialPeers ++ big_peers:get_peers(current)) -- TrustedPeers) ++ TrustedPeers,
 			JSON =
-				case B#block.height >= ar_fork:height_2_6() of
+				case B#block.height >= big_fork:height_2_6() of
 					true ->
 						none;
 					false ->
@@ -197,8 +197,8 @@ send_to_worker(Peer, {JSON, B}, W) ->
 	#block{ height = Height, indep_hash = H, previous_block = PrevH, txs = TXs,
 			hash = SolutionH } = B,
 	Release = big_peers:get_peer_release(Peer),
-	Fork_2_6 = ar_fork:height_2_6(),
-	SolutionH2 = case Height >= ar_fork:height_2_6() of true -> SolutionH; _ -> undefined end,
+	Fork_2_6 = big_fork:height_2_6(),
+	SolutionH2 = case Height >= big_fork:height_2_6() of true -> SolutionH; _ -> undefined end,
 	case Release >= 52 orelse Height >= Fork_2_6 of
 		true ->
 			SendAnnouncementFun =
@@ -224,7 +224,7 @@ send_to_worker(Peer, {JSON, B}, W) ->
 					%% in big_node_worker.
 					case determine_included_transactions(TXs, MissingTXs) of
 						missing ->
-							case Height >= ar_fork:height_2_6() of
+							case Height >= big_fork:height_2_6() of
 								true ->
 									%% POST /block is not supported after 2.6.
 									%% The recipient would have to download this block

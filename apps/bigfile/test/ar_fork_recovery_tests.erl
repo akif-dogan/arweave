@@ -116,7 +116,7 @@ test_orphaned_txs_are_remined_after_fork_recovery() ->
 	?assertEqual([TXID], H4TXIDs).
 
 invalid_block_with_high_cumulative_difficulty_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_6, fun() -> 0 end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_6, fun() -> 0 end}],
 		fun() -> test_invalid_block_with_high_cumulative_difficulty() end).
 
 test_invalid_block_with_high_cumulative_difficulty() ->
@@ -202,7 +202,7 @@ fake_block_with_strong_cumulative_difficulty(B, PrevB, CDiff) ->
 							tx_path = TXPath },
 					chunk_hash = crypto:hash(sha256, Chunk) },
 			B4 =
-				case ar_fork:height_2_8() of
+				case big_fork:height_2_8() of
 					0 ->
 						{ok, #{ chunk := UnpackedChunk } } = big_data_sync:get_chunk(
 								RecallByte + 1, #{ pack => true, packing => unpacked,

@@ -67,7 +67,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 			account_tree = AccountTree
 		},
 	B1 =
-		case ar_fork:height_2_6() > 0 of
+		case big_fork:height_2_6() > 0 of
 			false ->
 				RewardKey = element(2, big_wallet:new()),
 				RewardAddr = big_wallet:to_address(RewardKey),
@@ -95,7 +95,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 				B0
 		end,
 	B2 =
-		case ar_fork:height_2_7() > 0 of
+		case big_fork:height_2_7() > 0 of
 			false ->
 				InitialHistory = get_initial_block_time_history(),
 				B1#block{

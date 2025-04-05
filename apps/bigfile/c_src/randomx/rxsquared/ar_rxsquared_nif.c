@@ -259,4 +259,4 @@ static ErlNifFunc rxsquared_funcs[] = {
 	{"rsp_feistel_decrypt_nif", 2, rsp_feistel_decrypt_nif, ERL_NIF_DIRTY_JOB_CPU_BOUND}
 };
 
-ERL_NIF_INIT(ar_rxsquared_nif, rxsquared_funcs, rxsquared_load, NULL, NULL, NULL);
+ERL_NIF_INIT(big_rxsquared_nif, rxsquared_funcs, rxsquared_load, NULL, NULL, NULL);

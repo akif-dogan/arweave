@@ -343,7 +343,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 	).
 
 accepts_chunks_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_5, fun() -> 0 end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
 		fun test_accepts_chunks/0, 120).
 
 test_accepts_chunks() ->

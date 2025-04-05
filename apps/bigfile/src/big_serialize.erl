@@ -66,7 +66,7 @@ block_to_binary(#block{ indep_hash = H, previous_block = PrevH, timestamp = TS,
 				_ ->
 					ScheduledRate
 			end,
-	Nonce2 = case B#block.height >= ar_fork:height_2_6() of
+	Nonce2 = case B#block.height >= big_fork:height_2_6() of
 			true -> binary:encode_unsigned(Nonce, big); false -> Nonce end,
 	<< H:48/binary, (encode_bin(PrevH, 8))/binary, (encode_int(TS, 8))/binary,
 			(encode_bin(Nonce2, 16))/binary, (encode_int(Height, 8))/binary,
@@ -119,7 +119,7 @@ binary_to_block(<< H:48/binary, PrevHSize:8, PrevH:PrevHSize/binary,
 			_ -> {RateDividend, RateDivisor} end,
 	ScheduledRate = case SchedRateDivisorSize of 0 -> undefined;
 			_ -> {SchedRateDividend, SchedRateDivisor} end,
-	Addr2 = case {AddrSize, Height >= ar_fork:height_2_6()} of
+	Addr2 = case {AddrSize, Height >= big_fork:height_2_6()} of
 			{0, false} -> unclaimed; _ -> Addr end,
 	B = #block{ indep_hash = H, previous_block = PrevH, timestamp = TS,
 			nonce = Nonce, height = Height, diff = Diff, cumulative_diff = CDiff,
@@ -151,14 +151,14 @@ block_to_json_struct(
 			unpacked_chunk2_hash = UnpackedChunk2Hash,
 			replica_format = ReplicaFormat } = B) ->
 	{JSONDiff, JSONCDiff} =
-		case Height >= ar_fork:height_1_8() of
+		case Height >= big_fork:height_1_8() of
 			true ->
 				{integer_to_binary(Diff), integer_to_binary(CDiff)};
 			false ->
 				{Diff, CDiff}
 	end,
 	{JSONRewardPool, JSONBlockSize, JSONWeaveSize} =
-		case Height >= ar_fork:height_2_4() of
+		case Height >= big_fork:height_2_4() of
 			true ->
 				{integer_to_binary(RewardPool), integer_to_binary(BlockSize),
 					integer_to_binary(WeaveSize)};
@@ -166,13 +166,13 @@ block_to_json_struct(
 				{RewardPool, BlockSize, WeaveSize}
 	end,
 	Tags2 =
-		case Height >= ar_fork:height_2_5() of
+		case Height >= big_fork:height_2_5() of
 			true ->
 				[ar_util:encode(Tag) || Tag <- Tags];
 			false ->
 				Tags
 		end,
-	Nonce2 = case B#block.height >= ar_fork:height_2_6() of
+	Nonce2 = case B#block.height >= big_fork:height_2_6() of
 			true -> binary:encode_unsigned(Nonce); false -> Nonce end,
 	JSONElements =
 		[{nonce, ar_util:encode(Nonce2)}, {previous_block, ar_util:encode(PrevHash)},
@@ -197,7 +197,7 @@ block_to_json_struct(
 				{block_size, JSONBlockSize}, {cumulative_diff, JSONCDiff},
 				{hash_list_merkle, ar_util:encode(MR)}, {poa, poa_to_json_struct(POA)}],
 	JSONElements2 =
-		case Height < ar_fork:height_1_6() of
+		case Height < big_fork:height_1_6() of
 			true ->
 				KeysToDelete = [cumulative_diff, hash_list_merkle],
 				delete_keys(KeysToDelete, JSONElements);
@@ -205,14 +205,14 @@ block_to_json_struct(
 				JSONElements
 		end,
 	JSONElements3 =
-		case Height >= ar_fork:height_2_4() of
+		case Height >= big_fork:height_2_4() of
 			true ->
 				delete_keys([tx_tree], JSONElements2);
 			false ->
 				JSONElements2
 		end,
 	JSONElements4 =
-		case Height >= ar_fork:height_2_5() of
+		case Height >= big_fork:height_2_5() of
 			true ->
 				{RateDividend, RateDivisor} = B#block.usd_to_big_rate,
 				{ScheduledRateDividend,
@@ -233,7 +233,7 @@ block_to_json_struct(
 				JSONElements3
 		end,
 	JSONElements5 =
-		case Height >= ar_fork:height_2_6() of
+		case Height >= big_fork:height_2_6() of
 			true ->
 				PricePerGiBMinute = B#block.price_per_gib_minute,
 				ScheduledPricePerGiBMinute = B#block.scheduled_price_per_gib_minute,
@@ -294,7 +294,7 @@ block_to_json_struct(
 				JSONElements4
 		end,
 	JSONElements8 =
-		case Height >= ar_fork:height_2_7() of
+		case Height >= big_fork:height_2_7() of
 			true ->
 				JSONElements7 = [
 						{merkle_rebase_support_threshold, integer_to_binary(RebaseThreshold)},
@@ -312,7 +312,7 @@ block_to_json_struct(
 				JSONElements5
 		end,
 	JSONElements9 =
-		case Height >= ar_fork:height_2_8() of
+		case Height >= big_fork:height_2_8() of
 			false ->
 				JSONElements8;
 			true ->
@@ -331,7 +331,7 @@ block_to_json_struct(
 				end
 		end,
 	JSONElements10 =
-		case Height >= ar_fork:height_2_9() of
+		case Height >= big_fork:height_2_9() of
 			false ->
 				JSONElements9;
 			true ->
@@ -635,7 +635,7 @@ encode_double_signing_proof(undefined, _Height) ->
 encode_double_signing_proof(Proof, Height) ->
 	{Key, Sig1, CDiff1, PrevCDiff1, Preimage1,
 			Sig2, CDiff2, PrevCDiff2, Preimage2} = Proof,
-	case Height >= ar_fork:height_2_9() of
+	case Height >= big_fork:height_2_9() of
 		false ->
 			<< 1:8, Key:512/binary, Sig1:512/binary,
 				(big_serialize:encode_int(CDiff1, 16))/binary,
@@ -671,7 +671,7 @@ encode_post_2_6_fields(#block{ height = Height, hash_preimage = HashPreimage,
 			double_signing_proof = DoubleSigningProof,
 			previous_cumulative_diff = PrevCDiff } = B) ->
 	RewardKey = case B#block.reward_key of undefined -> <<>>; {_Type, Key} -> Key end,
-	case Height >= ar_fork:height_2_6() of
+	case Height >= big_fork:height_2_6() of
 		false ->
 			<<>>;
 		true ->
@@ -698,7 +698,7 @@ encode_post_2_7_fields(#block{ height = Height,
 		block_time_history_hash = BlockTimeHistoryHash,
 		nonce_limiter_info = #nonce_limiter_info{ vdf_difficulty = VDFDifficulty,
 				next_vdf_difficulty = NextVDFDifficulty } } = B) ->
-	case Height >= ar_fork:height_2_7() of
+	case Height >= big_fork:height_2_7() of
 		true ->
 			<< (encode_int(Threshold, 16))/binary, ChunkHash:32/binary,
 					(encode_bin(Chunk2Hash, 8))/binary,
@@ -715,7 +715,7 @@ encode_post_2_8_fields(#block{ height = Height,
 		unpacked_chunk_hash = UnpackedChunkHash, unpacked_chunk2_hash = UnpackedChunk2Hash,
 		poa = #poa{ unpacked_chunk = UnpackedChunk },
 		poa2 = #poa{ unpacked_chunk = UnpackedChunk2 }} = B) ->
-	case Height >= ar_fork:height_2_8() of
+	case Height >= big_fork:height_2_8() of
 		false ->
 			<<>>;
 		true ->
@@ -728,7 +728,7 @@ encode_post_2_8_fields(#block{ height = Height,
 	end.
 
 encode_post_2_9_fields(#block{ height = Height, replica_format = ReplicaFormat }) ->
-	case Height >= ar_fork:height_2_9() of
+	case Height >= big_fork:height_2_9() of
 		false ->
 			<<>>;
 		true ->
@@ -823,7 +823,7 @@ parse_block_tags_transactions(Bin, B) ->
 	end.
 
 parse_block_transactions(Bin, B) ->
-	case {parse_block_transactions(Bin), B#block.height < ar_fork:height_2_6()} of
+	case {parse_block_transactions(Bin), B#block.height < big_fork:height_2_6()} of
 		{{error, Reason}, _} ->
 			{error, Reason};
 		{{ok, TXs, <<>>}, true} ->
@@ -871,7 +871,7 @@ parse_block_post_2_6_fields(B, << HashPreimageSize:8, HashPreimage:HashPreimageS
 			steps = parse_checkpoints(Steps, Height) },
 	RecallByte2_2 = case RecallByte2Size of 0 -> undefined; _ -> RecallByte2 end,
 	SigType =
-		case {RewardKeySize, Height >= ar_fork:height_2_9()} of
+		case {RewardKeySize, Height >= big_fork:height_2_9()} of
 			{?ECDSA_PUB_KEY_SIZE, true} ->
 				?ECDSA_KEY_TYPE;
 			_ ->
@@ -939,7 +939,7 @@ parse_block_transactions(_N, _Rest, _TXs) ->
 parse_double_signing_proof(<< 0:8, Rest/binary >>, B) ->
 	parse_post_2_7_fields(Rest, B);
 parse_double_signing_proof(Bin, #block{ height = Height } = B) ->
-	case {Bin, Height >= ar_fork:height_2_9()} of
+	case {Bin, Height >= big_fork:height_2_9()} of
 		{<< 1:8, Key:512/binary, Sig1:512/binary,
 				CDiff1Size:16, CDiff1:(CDiff1Size * 8),
 				PrevCDiff1Size:16, PrevCDiff1:(PrevCDiff1Size * 8),
@@ -975,7 +975,7 @@ parse_double_signing_proof(Bin, #block{ height = Height } = B) ->
 end.
 
 parse_post_2_7_fields(Rest, #block{ height = Height } = B) ->
-	case {Rest, Height >= ar_fork:height_2_7()} of
+	case {Rest, Height >= big_fork:height_2_7()} of
 		{<<>>, false} ->
 			{ok, B};
 		{<< ThresholdSize:16, Threshold:(ThresholdSize*8), ChunkHash:32/binary,
@@ -997,7 +997,7 @@ parse_post_2_7_fields(Rest, #block{ height = Height } = B) ->
 	end.
 
 parse_post_2_8_fields(Rest, #block{ height = Height, poa = PoA, poa2 = PoA2 } = B) ->
-	case {Rest, Height >= ar_fork:height_2_8()} of
+	case {Rest, Height >= big_fork:height_2_8()} of
 		{<<>>, false} ->
 			{ok, B};
 		{<< PackingDifficulty:8, UnpackedChunkHashSize:8,
@@ -1028,7 +1028,7 @@ parse_post_2_8_fields(Rest, #block{ height = Height, poa = PoA, poa2 = PoA2 } = 
 	end.
 
 parse_post_2_9_fields(Rest, #block{ height = Height } = B) ->
-	case {Rest, Height >= ar_fork:height_2_9()} of
+	case {Rest, Height >= big_fork:height_2_9()} of
 		{<<>>, false} ->
 			{ok, B};
 		{<< ReplicaFormat:8 >>, true} ->
@@ -1296,8 +1296,8 @@ json_struct_to_block(JSONBlock) when is_binary(JSONBlock) ->
 	json_struct_to_block(dejsonify(JSONBlock));
 json_struct_to_block({BlockStruct}) ->
 	Height = find_value(<<"height">>, BlockStruct),
-	true = is_integer(Height) andalso Height < ar_fork:height_2_6(),
-	Fork_2_5 = ar_fork:height_2_5(),
+	true = is_integer(Height) andalso Height < big_fork:height_2_6(),
+	Fork_2_5 = big_fork:height_2_5(),
 	TXIDs = find_value(<<"txs">>, BlockStruct),
 	WalletList = find_value(<<"wallet_list">>, BlockStruct),
 	HashList = find_value(<<"hash_list">>, BlockStruct),
@@ -1310,8 +1310,8 @@ json_struct_to_block({BlockStruct}) ->
 				true = (byte_size(list_to_binary(TagsValue)) =< 2048),
 				TagsValue
 		end,
-	Fork_1_8 = ar_fork:height_1_8(),
-	Fork_1_6 = ar_fork:height_1_6(),
+	Fork_1_8 = big_fork:height_1_8(),
+	Fork_1_6 = big_fork:height_1_6(),
 	CDiff =
 		case find_value(<<"cumulative_diff">>, BlockStruct) of
 			_ when Height < Fork_1_6 -> 0;
@@ -1343,7 +1343,7 @@ json_struct_to_block({BlockStruct}) ->
 				big_wallet:base64_address_with_optional_checksum_to_decoded_address(RewardAddr)
 		end,
 	{RewardPool, BlockSize, WeaveSize} =
-		case Height >= ar_fork:height_2_4() of
+		case Height >= big_fork:height_2_4() of
 			true ->
 				{
 					binary_to_integer(find_value(<<"reward_pool">>, BlockStruct)),
@@ -1519,7 +1519,7 @@ nonce_limiter_info_to_json_struct(Height,
 			%% compatibility.
 			{checkpoints, [ar_util:encode(Elem) || Elem <- Steps]}],
 	Fields2 =
-		case Height >= ar_fork:height_2_7() of
+		case Height >= big_fork:height_2_7() of
 			false ->
 				Fields;
 			true ->

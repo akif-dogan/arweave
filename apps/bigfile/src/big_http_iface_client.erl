@@ -494,7 +494,7 @@ get_reward_history([Peer | Peers], B, ExpectedRewardHistoryHashes) ->
 	ExpectedLength = big_rewards:buffered_reward_history_length(Height),
 	DoubleCheckLength = big_rewards:expected_hashes_length(Height),
 	true = length(ExpectedRewardHistoryHashes) == min(
-													Height - ar_fork:height_2_6() + 1,
+													Height - big_fork:height_2_6() + 1,
 													DoubleCheckLength),
 	case big_http:req(#{
 				peer => Peer,
@@ -543,7 +543,7 @@ get_reward_history([], _B, _RewardHistoryHashes) ->
 
 get_block_time_history([Peer | Peers], B, ExpectedBlockTimeHistoryHashes) ->
 	#block{ height = Height, indep_hash = H } = B,
-	Fork_2_7 = ar_fork:height_2_7(),
+	Fork_2_7 = big_fork:height_2_7(),
 	true = Height >= Fork_2_7,
 	ExpectedLength = min(Height - Fork_2_7 + 1,
 			big_block_time_history:history_length() + ?STORE_BLOCKS_BEHIND_CURRENT),
@@ -1057,7 +1057,7 @@ get_txs(Peers, B) ->
 get_txs(_Height, _Peers, [], TXs, _TotalSize) ->
 	{ok, lists:reverse(TXs)};
 get_txs(Height, Peers, [TXID | Rest], TXs, TotalSize) ->
-	Fork_2_0 = ar_fork:height_2_0(),
+	Fork_2_0 = big_fork:height_2_0(),
 	case get_tx(Peers, TXID) of
 		#tx{ format = 2 } = TX ->
 			get_txs(Height, Peers, Rest, [TX | TXs], TotalSize);

@@ -12,7 +12,7 @@ get_price_per_gib_minute_test_() ->
 		{timeout, 30, fun test_price_per_gib_minute_pre_block_time_history/0},
 		ar_test_node:test_with_mocked_functions(
 			[
-				{ar_fork, height_2_7_2, fun() -> 10 end},
+				{big_fork, height_2_7_2, fun() -> 10 end},
 				{big_pricing_transition, transition_start_2_6_8, fun() -> 5 end},
 				{big_pricing_transition, transition_start_2_7_2, fun() -> 15 end},
 				{big_pricing_transition, transition_length_2_6_8, fun() -> 20 end},
@@ -28,7 +28,7 @@ get_price_per_gib_minute_test_() ->
 	].
 
 %% @doc This test verifies an edge case code path that probably shouldn't ever be triggered.
-%% ar_fork:height_2_7() and ar_fork:height_2_6_8() are 0
+%% big_fork:height_2_7() and big_fork:height_2_6_8() are 0
 %% ?BLOCK_TIME_HISTORY_BLOCKS is 3
 %% ?PRICE_2_6_8_TRANSITION_START is 2
 %% So when the price transition starts we don't have enough block time history to apply the
@@ -262,9 +262,9 @@ recalculate_price_per_gib_minute_test_block() ->
 
 recalculate_price_per_gib_minute_2_7_test_() ->
 	ar_test_node:test_with_mocked_functions(
-		[{ar_fork, height_2_6, fun() -> -1 end},
-		{ar_fork, height_2_7, fun() -> -1 end},
-		{ar_fork, height_2_7_1, fun() -> infinity end}],
+		[{big_fork, height_2_6, fun() -> -1 end},
+		{big_fork, height_2_7, fun() -> -1 end},
+		{big_fork, height_2_7_1, fun() -> infinity end}],
 		fun() ->
 			B = recalculate_price_per_gib_minute_test_block(),
 			?assertEqual({15000, 8162}, big_pricing:recalculate_price_per_gib_minute(B)),
@@ -273,9 +273,9 @@ recalculate_price_per_gib_minute_2_7_test_() ->
 
 recalculate_price_per_gib_minute_2_7_1_ema_test_() ->
 	ar_test_node:test_with_mocked_functions(
-		[{ar_fork, height_2_6, fun() -> -1 end},
-		{ar_fork, height_2_7, fun() -> -1 end},
-		{ar_fork, height_2_7_1, fun() -> -1 end}],
+		[{big_fork, height_2_6, fun() -> -1 end},
+		{big_fork, height_2_7, fun() -> -1 end},
+		{big_fork, height_2_7_1, fun() -> -1 end}],
 		fun() ->
 			B = recalculate_price_per_gib_minute_test_block(),
 			?assertEqual({15000, 14316}, big_pricing:recalculate_price_per_gib_minute(B)),

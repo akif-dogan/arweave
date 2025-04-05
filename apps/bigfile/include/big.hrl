@@ -43,7 +43,7 @@
 -define(FORK_1_6, 0).
 -else.
 %%% FORK INDEX
-%%% @deprecated Fork heights from 1.7 on are defined in the ar_fork module.
+%%% @deprecated Fork heights from 1.7 on are defined in the big_fork module.
 -define(FORK_1_6, 95000).
 -endif.
 

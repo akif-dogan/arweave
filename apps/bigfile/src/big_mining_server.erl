@@ -331,11 +331,11 @@ terminate(_Reason, _State) ->
 
 
 allow_composite_packing(Height) ->
-	Height - ?POST_2_8_COMPOSITE_PACKING_DELAY_BLOCKS >= ar_fork:height_2_8()
-		andalso Height - ?COMPOSITE_PACKING_EXPIRATION_PERIOD_BLOCKS < ar_fork:height_2_9().
+	Height - ?POST_2_8_COMPOSITE_PACKING_DELAY_BLOCKS >= big_fork:height_2_8()
+		andalso Height - ?COMPOSITE_PACKING_EXPIRATION_PERIOD_BLOCKS < big_fork:height_2_9().
 
 allow_replica_2_9_mining(Height) ->
-	Height >= ar_fork:height_2_9().
+	Height >= big_fork:height_2_9().
 
 get_worker(Key, State) ->
 	maps:get(Key, State#state.workers, not_found).

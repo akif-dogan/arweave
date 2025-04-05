@@ -50,24 +50,24 @@ teardown(_) ->
 test_feistel()->
 	Unpacked = << 1:(8*2097152) >>,
 	Entropy = << 2:(8*2097152) >>,
-	{ok, Packed} = ar_rxsquared_nif:rsp_feistel_encrypt_nif(Unpacked, Entropy),
+	{ok, Packed} = big_rxsquared_nif:rsp_feistel_encrypt_nif(Unpacked, Entropy),
 	PackedHashReal = crypto:hash(sha256, Packed),
 	PackedHashExpd = << 73,123,99,202,146,24,95,220,127,228,210,8,106,220,94,
 		251,234,166,63,206,16,213,64,208,35,104,15,144,215,
 		139,183,59 >>,
 	?assertEqual(PackedHashExpd, PackedHashReal),
-	{ok, UnpackedReal} = ar_rxsquared_nif:rsp_feistel_decrypt_nif(Packed, Entropy),
+	{ok, UnpackedReal} = big_rxsquared_nif:rsp_feistel_decrypt_nif(Packed, Entropy),
 	?assertEqual(Unpacked, UnpackedReal),
 
 	Unpacked2 = << 3:(8*2097152) >>,
 	Entropy2 = << 4:(8*2097152) >>,
-	{ok, Packed2} = ar_rxsquared_nif:rsp_feistel_encrypt_nif(Unpacked2, Entropy2),
+	{ok, Packed2} = big_rxsquared_nif:rsp_feistel_encrypt_nif(Unpacked2, Entropy2),
 	PackedHashReal2 = crypto:hash(sha256, Packed2),
 	PackedHashExpd2 = << 226,95,254,246,118,154,133,215,229,243,245,255,18,48,
 		130,246,98,240,207,197,188,161,222,66,140,47,110,18,
 		193,145,96,210 >>,
 	?assertEqual(PackedHashExpd2, PackedHashReal2),
-	{ok, UnpackedReal2} = ar_rxsquared_nif:rsp_feistel_decrypt_nif(Packed2, Entropy2),
+	{ok, UnpackedReal2} = big_rxsquared_nif:rsp_feistel_decrypt_nif(Packed2, Entropy2),
 	?assertEqual(Unpacked2, UnpackedReal2),
 	ok.
 
@@ -365,7 +365,7 @@ test_request_unpack() ->
 
 packs_chunks_depending_on_packing_threshold_test_() ->
 	ar_test_node:test_with_mocked_functions([
-			{ar_fork, height_2_9, fun() -> 10 end}],
+			{big_fork, height_2_9, fun() -> 10 end}],
 			fun test_packs_chunks_depending_on_packing_threshold/0).
 
 test_packs_chunks_depending_on_packing_threshold() ->

@@ -1,4 +1,4 @@
--module(ar_rxsquared_nif).
+-module(big_rxsquared_nif).
 
 -include_lib("bigfile/include/big.hrl").
 

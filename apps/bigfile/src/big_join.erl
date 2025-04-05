@@ -456,7 +456,7 @@ maybe_set_reward_history(Blocks, Peers) ->
 	end.
 
 maybe_set_block_time_history([#block{ height = Height } | _] = Blocks, Peers) ->
-	case Height >= ar_fork:height_2_7() of
+	case Height >= big_fork:height_2_7() of
 		true ->
 			case big_http_iface_client:get_block_time_history(
 					Peers, hd(Blocks), big_block_time_history:get_hashes(Blocks)) of

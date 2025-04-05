@@ -36,7 +36,7 @@ reset_node() ->
 
 setup_all_post_2_7() ->
 	{Setup, Cleanup} = ar_test_node:mock_functions([
-		{ar_fork, height_2_7, fun() -> 0 end}
+		{big_fork, height_2_7, fun() -> 0 end}
 		]),
 	Functions = Setup(),
 	start_node(),
@@ -44,7 +44,7 @@ setup_all_post_2_7() ->
 
 setup_all_post_2_8() ->
 	{Setup, Cleanup} = ar_test_node:mock_functions([
-		{ar_fork, height_2_8, fun() -> 0 end}
+		{big_fork, height_2_8, fun() -> 0 end}
 		]),
 	Functions = Setup(),
 	start_node(),
@@ -267,7 +267,7 @@ test_reject_block_invalid_packing_difficulty({Key, B, PrevB}) ->
 %% ------------------------------------------------------------------------------------------
 
 add_external_block_with_invalid_timestamp_test_() ->
-	ar_test_node:test_with_mocked_functions([{ar_fork, height_2_7, fun() -> 0 end}],
+	ar_test_node:test_with_mocked_functions([{big_fork, height_2_7, fun() -> 0 end}],
 		fun test_add_external_block_with_invalid_timestamp/0).
 
 test_add_external_block_with_invalid_timestamp() ->
@@ -467,7 +467,7 @@ test_rejects_invalid_blocks() ->
 	big_blacklist_middleware:reset().
 
 rejects_blocks_with_invalid_double_signing_proof_test_() ->
-	test_with_mocked_functions([{ar_fork, height_2_9, fun() -> 0 end}],
+	test_with_mocked_functions([{big_fork, height_2_9, fun() -> 0 end}],
 		fun test_reject_block_invalid_double_signing_proof/0).
 
 rejects_blocks_with_small_rsa_keys_test_() ->
@@ -592,7 +592,7 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	?assertMatch(#{ Target := {1, <<>>}, BannedAddr := {_, TXID, 1, false} }, Accounts2).
 
 send_block2_test_() ->
-	test_with_mocked_functions([{ar_fork, height_2_6, fun() -> 0 end}],
+	test_with_mocked_functions([{big_fork, height_2_6, fun() -> 0 end}],
 		fun() -> test_send_block2() end).
 
 test_send_block2() ->
@@ -724,7 +724,7 @@ test_send_block2() ->
 			big_serialize:binary_to_block_announcement_response(Body6)).
 
 resigned_solution_test_() ->
-	test_with_mocked_functions([{ar_fork, height_2_6, fun() -> 0 end}],
+	test_with_mocked_functions([{big_fork, height_2_6, fun() -> 0 end}],
 		fun() -> test_resigned_solution() end).
 
 test_resigned_solution() ->

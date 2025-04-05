@@ -138,7 +138,7 @@ get_block_index_entry(Height) ->
 %% @end
 get_2_0_hash_of_1_0_block(Height) ->
 	[{hash_list_2_0_for_1_0_blocks, HL}] = ets:lookup(node_state, hash_list_2_0_for_1_0_blocks),
-	Fork_2_0 = ar_fork:height_2_0(),
+	Fork_2_0 = big_fork:height_2_0(),
 	case Height > Fork_2_0 of
 		true ->
 			invalid_height;

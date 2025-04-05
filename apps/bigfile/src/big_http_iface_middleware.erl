@@ -850,7 +850,7 @@ handle(<<"GET">>, [<<"reward_history">>, EncodedBH], Req, _Pid) ->
 			ok = big_semaphore:acquire(get_reward_history, infinity),
 			case ar_util:safe_decode(EncodedBH) of
 				{ok, BH} ->
-					Fork_2_6 = ar_fork:height_2_6(),
+					Fork_2_6 = big_fork:height_2_6(),
 					case big_block_cache:get_block_and_status(block_cache, BH) of
 						{#block{ height = Height, reward_history = RewardHistory }, {Status, _}}
 								when (Status == on_chain orelse Status == validated),
@@ -874,7 +874,7 @@ handle(<<"GET">>, [<<"block_time_history">>, EncodedBH], Req, _Pid) ->
 		true ->
 			case ar_util:safe_decode(EncodedBH) of
 				{ok, BH} ->
-					Fork_2_7 = ar_fork:height_2_7(),
+					Fork_2_7 = big_fork:height_2_7(),
 					case big_block_cache:get_block_and_status(block_cache, BH) of
 						{#block{ height = Height,
 									block_time_history = BlockTimeHistory }, {Status, _}}
@@ -901,7 +901,7 @@ handle(<<"GET">>, [<<"block_index">>], Req, _Pid) ->
 		false ->
 			not_joined(Req);
 		true ->
-			case big_node:get_height() >= ar_fork:height_2_6() of
+				case big_node:get_height() >= big_fork:height_2_6() of
 				true ->
 					{400, #{}, jiffy:encode(#{ error => not_supported_since_fork_2_6 }), Req};
 				false ->
@@ -924,7 +924,7 @@ handle(<<"GET">>, [<<"block_index2">>], Req, _Pid) ->
 		false ->
 			not_joined(Req);
 		true ->
-			case big_node:get_height() >= ar_fork:height_2_6() of
+			case big_node:get_height() >= big_fork:height_2_6() of
 				true ->
 					{400, #{}, jiffy:encode(#{ error => not_supported_since_fork_2_6 }), Req};
 				false ->
@@ -1747,7 +1747,7 @@ estimate_tx_fee(Size, Addr, Type) ->
 	Size2 = big_tx:get_weave_size_increase(Size, Height + 1),
 	Args = {Size2, PricePerGiBMinute, KryderPlusRateMultiplier, Addr, Accounts, Height + 1},
 	Denomination2 =
-		case Height >= ar_fork:height_2_6() of
+		case Height >= big_fork:height_2_6() of
 			true ->
 				Denomination;
 			false ->
@@ -2384,7 +2384,7 @@ post_block(check_joined, Peer, {Req, Pid, Encoding}, ReceiveTimestamp) ->
 	case big_node:is_joined() of
 		true ->
 			ConfirmedHeight = big_node:get_height() - ?STORE_BLOCKS_BEHIND_CURRENT,
-			case {Encoding, ConfirmedHeight >= ar_fork:height_2_6()} of
+			case {Encoding, ConfirmedHeight >= big_fork:height_2_6()} of
 				{json, true} ->
 					%% We gesticulate it explicitly here that POST /block is not
 					%% supported after the 2.6 fork. However, this check is not strictly
@@ -2450,7 +2450,7 @@ post_block(check_transactions_are_present, {BShadow, Peer}, Req, ReceiveTimestam
 	end;
 post_block(enqueue_block, {B, Peer}, Req, ReceiveTimestamp) ->
 	B2 =
-		case B#block.height >= ar_fork:height_2_6() of
+		case B#block.height >= big_fork:height_2_6() of
 			true ->
 				B;
 			false ->
@@ -2723,7 +2723,7 @@ process_request(get_block, [Type, ID, <<"hash_list">>], Req) ->
 			{404, #{}, <<"Not Found.">>, Req};
 		B ->
 			ok = big_semaphore:acquire(get_block_index, infinity),
-			case big_node:get_height() >= ar_fork:height_2_6() of
+			case big_node:get_height() >= big_fork:height_2_6() of
 				true ->
 					{400, #{}, jiffy:encode(#{ error => not_supported_since_fork_2_6 }), Req};
 				false ->
@@ -2741,7 +2741,7 @@ process_request(get_block, [Type, ID, <<"wallet_list">>], Req) ->
 			{404, #{}, <<"Not Found.">>, Req};
 		B ->
 			{ok, Config} = application:get_env(bigfile, config),
-			case {B#block.height >= ar_fork:height_2_2(),
+			case {B#block.height >= big_fork:height_2_2(),
 					lists:member(serve_wallet_lists, Config#config.enable)} of
 				{true, false} ->
 					{400, #{},
