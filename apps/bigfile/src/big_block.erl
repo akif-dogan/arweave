@@ -421,10 +421,10 @@ indep_hash2(SignedH, Signature) ->
 indep_hash(BDS, B) ->
 	case B#block.height >= ar_fork:height_2_4() of
 		true ->
-			ar_deep_hash:hash([BDS, B#block.hash, B#block.nonce,
+			big_deep_hash:hash([BDS, B#block.hash, B#block.nonce,
 					big_block:poa_to_list(B#block.poa)]);
 		false ->
-			ar_deep_hash:hash([BDS, B#block.hash, B#block.nonce])
+			big_deep_hash:hash([BDS, B#block.hash, B#block.nonce])
 	end.
 
 %% @doc Return the signed block signature preimage.
@@ -485,7 +485,7 @@ generate_block_data_segment(BDSBase, B) ->
 		B#block.wallet_list,
 		B#block.hash_list_merkle
 	],
-	ar_deep_hash:hash(Props).
+	big_deep_hash:hash(Props).
 
 %% @doc Generate a hash, which is used to produce a block data segment
 %% when combined with the time-dependent parameters, which frequently
@@ -532,9 +532,9 @@ integer_to_binary(B#block.strict_data_split_threshold)
 					false ->
 						Props
 				end,
-			ar_deep_hash:hash(Props2);
+			big_deep_hash:hash(Props2);
 		false ->
-			ar_deep_hash:hash([
+			big_deep_hash:hash([
 				integer_to_binary(B#block.height),
 				B#block.previous_block,
 				B#block.tx_root,
@@ -676,7 +676,7 @@ hash_wallet_list(WalletList) ->
 	ar_patricia_tree:compute_hash(WalletList,
 		fun	(Addr, {Balance, LastTX}) ->
 				EncodedBalance = binary:encode_unsigned(Balance),
-				ar_deep_hash:hash([Addr, EncodedBalance, LastTX]);
+				big_deep_hash:hash([Addr, EncodedBalance, LastTX]);
 			(Addr, {Balance, LastTX, Denomination, MiningPermission}) ->
 				MiningPermissionBin =
 					case MiningPermission of
@@ -860,16 +860,16 @@ generate_size_tagged_list_from_txs_test() ->
 					#tx{ id = <<"6">>, format = 2, data_size = 262144 }], Fork_2_5)).
 
 test_wallet_list_performance() ->
-	test_wallet_list_performance(250_000, ar_deep_hash, mixed).
+	test_wallet_list_performance(250_000, big_deep_hash, mixed).
 
 test_wallet_list_performance(Length) ->
-	test_wallet_list_performance(Length, ar_deep_hash, mixed).
+	test_wallet_list_performance(Length, big_deep_hash, mixed).
 
 test_wallet_list_performance(Length, Algo) ->
 	test_wallet_list_performance(Length, Algo, mixed).
 
 test_wallet_list_performance(Length, Algo, Denominations) ->
-	SupportedAlgos = [ar_deep_hash, no_ar_deep_hash_sha384, sha256],
+	SupportedAlgos = [big_deep_hash, no_ar_deep_hash_sha384, sha256],
 	case lists:member(Algo, SupportedAlgos) of
 		false ->
 			io:format("Supported Algo: ~p~n", [SupportedAlgos]);
@@ -928,9 +928,9 @@ test_wallet_list_performance2(Length, Algo, Denominations) ->
 	ComputeHashFun =
 		fun	(Addr, {Balance, LastTX}) ->
 				case Algo of
-					ar_deep_hash ->
+					big_deep_hash ->
 						EncodedBalance = binary:encode_unsigned(Balance),
-						ar_deep_hash:hash([Addr, EncodedBalance, LastTX]);
+						big_deep_hash:hash([Addr, EncodedBalance, LastTX]);
 					_ ->
 						Denomination = 0,
 						MiningPermissionBin = <<1>>,

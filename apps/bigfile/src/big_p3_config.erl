@@ -80,7 +80,7 @@ get_payments_value(P3Config, Asset, Field) when
 	end.
 
 get_service_config(P3Config, Req) ->
-	Path = ar_http_iface_server:label_req(Req),
+	Path = big_http_iface_server:label_req(Req),
 	case Path of
 		undefined ->
 			undefined;
@@ -327,7 +327,7 @@ validate_endpoint(undefined) ->
 	false;
 validate_endpoint(Endpoint) ->
 	EndpointString = binary_to_list(Endpoint),
-	case ar_http_iface_server:label_http_path(Endpoint) of
+	case big_http_iface_server:label_http_path(Endpoint) of
 		undefined ->
 			false;
 		Label when Label /= EndpointString ->

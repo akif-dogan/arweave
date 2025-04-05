@@ -870,7 +870,7 @@ test_serialize_response_compatibility() ->
 %% -------------------------------------------------------------------------------------------------
 
 init(Req, State) ->
-	SplitPath = ar_http_iface_server:split_path(cowboy_req:path(Req)),
+	SplitPath = big_http_iface_server:split_path(cowboy_req:path(Req)),
 	handle(SplitPath, Req, State).
 
 handle([<<"vdf">>], Req, State) ->

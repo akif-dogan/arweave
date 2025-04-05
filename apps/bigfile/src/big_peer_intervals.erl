@@ -1,4 +1,4 @@
--module(ar_peer_intervals).
+-module(big_peer_intervals).
 
 -export([fetch/4]).
 

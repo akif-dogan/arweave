@@ -1,4 +1,4 @@
--module(ar_deep_hash).
+-module(big_deep_hash).
 -export([hash/1]).
 
 -include_lib("bigfile/include/big.hrl").

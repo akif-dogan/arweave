@@ -1015,7 +1015,7 @@ handle_cast({collect_peer_intervals, Start, End}, State) ->
 				false ->
 					%% All checks have passed, find and enqueue intervals for one
 					%% sync bucket worth of chunks starting at offset Start
-					ar_peer_intervals:fetch(Start, End2, StoreID, AllPeersIntervals)
+					big_peer_intervals:fetch(Start, End2, StoreID, AllPeersIntervals)
 			end
 	end,
 

@@ -88,7 +88,7 @@ handle(Req, Pid) ->
 
 handle(Peer, Req, Pid) ->
 	Method = cowboy_req:method(Req),
-	SplitPath = ar_http_iface_server:split_path(cowboy_req:path(Req)),
+	SplitPath = big_http_iface_server:split_path(cowboy_req:path(Req)),
 	{ok, Config} = application:get_env(bigfile, config),
 	case lists:member(http_logging, Config#config.enable) of
 		true ->
@@ -2279,7 +2279,7 @@ check_api_secret(Header, Secret, APIName, Req) ->
 
 log_api_reject(Msg, Req) ->
 	spawn(fun() ->
-		Path = ar_http_iface_server:split_path(cowboy_req:path(Req)),
+		Path = big_http_iface_server:split_path(cowboy_req:path(Req)),
 		{IpAddr, _Port} = cowboy_req:peer(Req),
 		BinIpAddr = list_to_binary(inet:ntoa(IpAddr)),
 		?LOG_WARNING("~s: IP address: ~s Path: ~p", [Msg, BinIpAddr, Path])

@@ -11,7 +11,7 @@
 		wait_until_height/2, read_block_when_stored/1]).
 
 init(Req, State) ->
-	SplitPath = ar_http_iface_server:split_path(cowboy_req:path(Req)),
+	SplitPath = big_http_iface_server:split_path(cowboy_req:path(Req)),
 	handle(SplitPath, Req, State).
 
 handle([<<"tx">>], Req, State) ->

@@ -266,7 +266,7 @@ signature_data_segment_v2(TX) ->
 			false ->
 				List
 		end,
-	ar_deep_hash:hash(List2).
+	big_deep_hash:hash(List2).
 
 signature_data_segment_v2_no_public_key(TX) ->
 	List = [
@@ -286,13 +286,13 @@ signature_data_segment_v2_no_public_key(TX) ->
 			false ->
 				List
 		end,
-	ar_deep_hash:hash(List2).
+	big_deep_hash:hash(List2).
 
 %% @doc Generate the data segment to be signed for a given v1 TX.
 signature_data_segment_v1(TX) ->
 	case TX#tx.denomination > 0 of
 		true ->
-			ar_deep_hash:hash([
+			big_deep_hash:hash([
 				<< (integer_to_binary(TX#tx.denomination))/binary >>,
 				<< (TX#tx.owner)/binary >>,
 				<< (TX#tx.target)/binary >>,

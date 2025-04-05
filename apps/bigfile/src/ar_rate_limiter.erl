@@ -34,7 +34,7 @@ throttle(Peer, Path) ->
 	end.
 
 throttle2(Peer, Path) ->
-	P = ar_http_iface_server:split_path(iolist_to_binary(Path)),
+	P = big_http_iface_server:split_path(iolist_to_binary(Path)),
 	case P of
 		[<<"tx">>] ->
 			%% Do not throttle transaction gossip.

@@ -35,7 +35,7 @@ size(Tree) ->
 
 %% @doc Compute the root hash by recursively hashing the tree values.
 %% Each key value pair is hashed via the provided hash function. The hashes of the siblings
-%% are combined using ar_deep_hash:hash/1. The keys are traversed in the alphabetical order.
+%% are combined using big_deep_hash:hash/1. The keys are traversed in the alphabetical order.
 compute_hash(#{ size := 0 } = Tree, _HashFun) ->
 	{<<>>, Tree, #{}};
 compute_hash(Tree, HashFun) ->
@@ -243,7 +243,7 @@ compute_hash(Tree, HashFun, KeyPrefix, UpdateMap) ->
 								Key = << KeyPrefix/binary, Suffix/binary >>,
 								NewHash2 = HashFun(Key, Value),
 								Hashes2 = [H || {H, _} <- Hashes],
-								NewHash3 = ar_deep_hash:hash([NewHash2 | Hashes2]),
+								NewHash3 = big_deep_hash:hash([NewHash2 | Hashes2]),
 								{NewHash3, UpdateMap2#{ {NewHash2, KeyPrefix} => {Key, Value},
 										{NewHash3, KeyPrefix} => [{NewHash2, KeyPrefix}
 												| Hashes] }};
@@ -254,7 +254,7 @@ compute_hash(Tree, HashFun, KeyPrefix, UpdateMap) ->
 												{SingleHash, KeyPrefix} => Hashes }};
 									_ ->
 										Hashes2 = [H || {H, _} <- Hashes],
-										NewHash2 = ar_deep_hash:hash(Hashes2),
+										NewHash2 = big_deep_hash:hash(Hashes2),
 										{NewHash2, UpdateMap2#{
 												{NewHash2, KeyPrefix} => Hashes }}
 								end
@@ -639,11 +639,11 @@ trie_test() ->
 		insert(<<"bcdefj">>, 4, insert(<<"bab">>, 7, insert(<<"bcdbcd">>, 6, new()))),
 		HashFun
 	),
-	?assertEqual(H10, ar_deep_hash:hash([H10_1, H10_2])),
+	?assertEqual(H10, big_deep_hash:hash([H10_1, H10_2])),
 	{H10_2_1, _, _} = compute_hash(insert(<<"bab">>, 7, new()), HashFun),
 	{H10_2_2, _, _} = compute_hash(insert(<<"bcdbcd">>, 6,
 			insert(<<"bcdefj">>, 4, new())), HashFun),
-	?assertEqual(H10_2, ar_deep_hash:hash([H10_2_1, H10_2_2])),
+	?assertEqual(H10_2, big_deep_hash:hash([H10_2_1, H10_2_2])),
 	?assertNotEqual(H10, element(1, compute_hash(delete(<<"ab">>, T10), HashFun))),
 	%% a -> a -> a -> 1
 	%%           b -> 3

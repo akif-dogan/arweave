@@ -139,7 +139,7 @@ requesting_ip_addr(Req) ->
 peer_to_ip_addr({A, B, C, D, _}) -> {A, B, C, D}.
 
 get_key_limit(IPAddr, Req) ->
-	Path = ar_http_iface_server:split_path(cowboy_req:path(Req)),
+	Path = big_http_iface_server:split_path(cowboy_req:path(Req)),
 	{ok, Config} = application:get_env(bigfile, config),
 	Map = maps:get(IPAddr, Config#config.requests_per_minute_limit_by_ip, #{}),
 	?RPM_BY_PATH(Path, Map)().

@@ -35,7 +35,7 @@ block_index_to_merkle_root(HL) ->
 	).
 
 hash_block_index_entry({BH, WeaveSize, TXRoot}) ->
-	ar_deep_hash:hash([BH, integer_to_binary(WeaveSize), TXRoot]).
+	big_deep_hash:hash([BH, integer_to_binary(WeaveSize), TXRoot]).
 
 %%% TESTS
 

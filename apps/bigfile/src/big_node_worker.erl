@@ -158,7 +158,7 @@ init([]) ->
 		{hash_list_2_0_for_1_0_blocks,	read_hash_list_2_0_for_1_0_blocks()}
 	]),
 	%% Start the HTTP server.
-	ok = ar_http_iface_server:start(),
+	ok = big_http_iface_server:start(),
 	gen_server:cast(?MODULE, compute_mining_difficulty),
 	{ok, #{
 		miner_2_6 => undefined,
@@ -593,7 +593,7 @@ handle_info(Info, State) ->
 	{noreply, State}.
 
 terminate(Reason, _State) ->
-	ar_http_iface_server:stop(),
+	big_http_iface_server:stop(),
 	case ets:lookup(node_state, is_joined) of
 		[{_, true}] ->
 			[{mempool_size, MempoolSize}] = ets:lookup(node_state, mempool_size),

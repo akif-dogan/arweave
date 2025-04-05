@@ -13,7 +13,7 @@
 		assert_wait_until_height/2]).
 
 init(Req, State) ->
-	SplitPath = ar_http_iface_server:split_path(cowboy_req:path(Req)),
+	SplitPath = big_http_iface_server:split_path(cowboy_req:path(Req)),
 	handle(SplitPath, Req, State).
 
 handle([<<"empty">>], Req, State) ->

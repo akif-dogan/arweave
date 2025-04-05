@@ -262,7 +262,7 @@ jobs:
             big_chunk_copy,
             big_chunk_storage,
             big_data_sync_worker_master,
-            ar_deep_hash,
+            big_deep_hash,
             big_device_lock,
             big_diff_dag,
             ar_entropy_storage,
