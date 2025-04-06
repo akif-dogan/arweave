@@ -786,11 +786,11 @@ network_data_size(Height,
 
 get_gb_cost_per_year_at_datetime_is_monotone_test_() ->
 	[
-		ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> infinity end}],
+		big_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> infinity end}],
 			fun test_get_gb_cost_per_year_at_datetime_is_monotone/0, 120)
 		| 
 		[
-			ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> Height end}],
+			big_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> Height end}],
 				fun test_get_gb_cost_per_year_at_datetime_is_monotone/0, 120)
 			|| Height <- lists:seq(0, 20)
 		]

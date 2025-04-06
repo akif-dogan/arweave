@@ -7,7 +7,7 @@
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 
--import(ar_test_node, [
+-import(big_test_node, [
 		wait_until_height/2, read_block_when_stored/1]).
 
 init(Req, State) ->
@@ -42,7 +42,7 @@ test_webhooks() ->
 	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(10000), <<>>}]),
 	{ok, Config} = application:get_env(bigfile, config),
 	try
-		Port = ar_test_node:get_unused_port(),
+		Port = big_test_node:get_unused_port(),
 		PortBinary = integer_to_binary(Port),
 		TXBlacklistFilename = random_tx_blacklist_filename(),
 		Addr = big_wallet:to_address(big_wallet:new_keyfile()),
@@ -63,7 +63,7 @@ test_webhooks() ->
 			],
 			transaction_blacklist_files = [TXBlacklistFilename]
 		},
-		ar_test_node:start(#{ b0 => B0, addr => Addr, config => Config2,
+		big_test_node:start(#{ b0 => B0, addr => Addr, config => Config2,
 				%% Replica 2.9 modules do not support updates.
 				storage_modules =>[{10 * 1024 * 1024, 0, {composite, Addr, 1}}] }),
 		%% Setup a server that would be listening for the webhooks and registering
@@ -83,24 +83,24 @@ test_webhooks() ->
 						case Height rem 2 == 1 of
 							true ->
 								Data = crypto:strong_rand_bytes(262144 * 2 + 10),
-								ar_test_node:sign_v1_tx(main, Wallet, #{ data => Data });
+								big_test_node:sign_v1_tx(main, Wallet, #{ data => Data });
 							false ->
 								case Height == 2 of
 									true ->
 										V2TX;
 									false ->
-										ar_test_node:sign_tx(main, Wallet, #{})
+										big_test_node:sign_tx(main, Wallet, #{})
 								end
 						end,
-					ar_test_node:assert_post_tx_to_peer(main, SignedTX),
-					ar_test_node:mine(),
+					big_test_node:assert_post_tx_to_peer(main, SignedTX),
+					big_test_node:mine(),
 					wait_until_height(main, Height),
 					SignedTX
 				end,
 				lists:seq(1, 10)
 			),
-		UnconfirmedTX = ar_test_node:sign_tx(main, Wallet, #{}),
-		ar_test_node:assert_post_tx_to_peer(main, UnconfirmedTX),
+		UnconfirmedTX = big_test_node:sign_tx(main, Wallet, #{}),
+		big_test_node:assert_post_tx_to_peer(main, UnconfirmedTX),
 		lists:foreach(
 			fun(Height) ->
 				TX = lists:nth(Height, TXs),
@@ -201,7 +201,7 @@ create_v2_tx(Wallet) ->
 	SizeTaggedChunks = big_tx:chunks_to_size_tagged_chunks(Chunks),
 	SizedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(SizeTaggedChunks),
 	{DataRoot, DataTree} = big_merkle:generate_tree(SizedChunkIDs),
-	TX = ar_test_node:sign_tx(main, Wallet,
+	TX = big_test_node:sign_tx(main, Wallet,
 			#{ format => 2, data_root => DataRoot, data_size => DataSize, reward => ?BIG(1) }),
 	Proofs = [encode_proof(#{ data_root => DataRoot, chunk => Chunk,
 				data_path => big_merkle:generate_path(DataRoot, Offset - 1, DataTree),
@@ -236,7 +236,7 @@ assert_transaction_data_synced(TXID) ->
 upload_chunks([]) ->
 	ok;
 upload_chunks([Proof | Proofs]) ->
-	{ok, {{<<"200">>, _}, _, _, _, _}} = ar_test_node:post_chunk(main, Proof),
+	{ok, {{<<"200">>, _}, _, _, _, _}} = big_test_node:post_chunk(main, Proof),
 	upload_chunks(Proofs).
 
 random_tx_blacklist_filename() ->

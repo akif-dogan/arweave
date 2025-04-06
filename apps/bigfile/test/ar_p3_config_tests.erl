@@ -713,7 +713,7 @@ test_no_rates_endpoint() ->
 	RewardAddress = big_wallet:to_address(big_wallet:new_keyfile()),
 	[B0] = ar_weave:init(),
 	{ok, Config} = application:get_env(bigfile, config),
-	ar_test_node:start(B0, RewardAddress, Config),
+	big_test_node:start(B0, RewardAddress, Config),
 
 	{<<"200">>, Body} = get_rates(),
 	DecodedBody = jiffy:decode(Body, [return_maps]),
@@ -728,7 +728,7 @@ test_empty_rates_endpoint() ->
 	{ok, BaseConfig} = application:get_env(bigfile, config),
 	try
 		Config = BaseConfig#config{ p3 = empty_p3_config() },
-		ar_test_node:start(B0, RewardAddress, Config),
+		big_test_node:start(B0, RewardAddress, Config),
 
 		{<<"200">>, Body} = get_rates(),
 		DecodedBody = jiffy:decode(Body, [return_maps]),
@@ -747,7 +747,7 @@ test_empty_payments_and_services_rates_endpoint() ->
 	try
 		P3Config = #p3_config{ payments = #{}, services = #{}},
 		Config = BaseConfig#config{ p3 = P3Config },
-		ar_test_node:start(B0, RewardAddress, Config),
+		big_test_node:start(B0, RewardAddress, Config),
 
 		{<<"200">>, Body} = get_rates(),
 		DecodedBody = jiffy:decode(Body, [return_maps]),
@@ -768,7 +768,7 @@ test_rates_endpoint() ->
 	{ok, BaseConfig} = application:get_env(bigfile, config),
 	try
 		Config = BaseConfig#config{ p3 = sample_p3_config(DepositAddress, -100, 3) },
-		ar_test_node:start(B0, RewardAddress, Config),
+		big_test_node:start(B0, RewardAddress, Config),
 
 		{<<"200">>, Body} = get_rates(),
 		DecodedBody = jiffy:decode(Body, [return_maps]),

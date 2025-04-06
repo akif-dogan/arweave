@@ -817,7 +817,7 @@ mining_stats_test_() ->
 		{timeout, 30, fun test_optimal_stats_poa1_multiple_1/0},
 		{timeout, 30, fun test_optimal_stats_poa1_multiple_2/0},
 		{timeout, 30, fun test_report_poa1_multiple_1/0},
-		ar_test_node:test_with_mocked_functions(
+		big_test_node:test_with_mocked_functions(
 			[
 				{big_difficulty, poa1_diff_multiplier, fun(_) -> 2 end}
 			],
@@ -1054,9 +1054,9 @@ test_peer_stats(Fun, Stat) ->
 	big_mining_stats:pause_performance_reports(120000),
 	reset_all_stats(),
 
-	Peer1 = ar_test_node:peer_ip(peer1),
-	Peer2 = ar_test_node:peer_ip(peer2),
-	Peer3 = ar_test_node:peer_ip(peer3),
+	Peer1 = big_test_node:peer_ip(peer1),
+	Peer2 = big_test_node:peer_ip(peer2),
+	Peer3 = big_test_node:peer_ip(peer3),
 
 	Fun(Peer1, 10),
 	TotalStart1 = get_start({peer, Peer1, Stat, total}),
@@ -1151,9 +1151,9 @@ test_h2_peer_stats() ->
 	big_mining_stats:pause_performance_reports(120000),
 	reset_all_stats(),
 
-	Peer1 = ar_test_node:peer_ip(peer1),
-	Peer2 = ar_test_node:peer_ip(peer2),
-	Peer3 = ar_test_node:peer_ip(peer3),
+	Peer1 = big_test_node:peer_ip(peer1),
+	Peer2 = big_test_node:peer_ip(peer2),
+	Peer3 = big_test_node:peer_ip(peer3),
 
 	big_mining_stats:h2_sent_to_peer(Peer1),
 	big_mining_stats:h2_sent_to_peer(Peer1),
@@ -1336,9 +1336,9 @@ test_report(Mining, Packing, PoA1Multiplier) ->
 			{2, MiningAddress, 0},
 			{3, MiningAddress, 0}
 		],
-		Peer1 = ar_test_node:peer_ip(peer1),
-		Peer2 = ar_test_node:peer_ip(peer2),
-		Peer3 = ar_test_node:peer_ip(peer3),
+		Peer1 = big_test_node:peer_ip(peer1),
+		Peer2 = big_test_node:peer_ip(peer2),
+		Peer3 = big_test_node:peer_ip(peer3),
 		Peers = [Peer1, Peer2, Peer3],
 
 		Now = erlang:monotonic_time(millisecond),

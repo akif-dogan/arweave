@@ -172,9 +172,9 @@ jobs:
           tar zxfp apps.tar.gz
 
       - id: canary
-        name: ar_canary.erl
+        name: big_canary.erl
         continue-on-error: true
-        run: bash scripts/github_workflow.sh "tests" "ar_canary"
+        run: bash scripts/github_workflow.sh "tests" "big_canary"
 
       - name: should fail
         run: |
@@ -199,12 +199,12 @@ jobs:
             ## Long-running tests. Put these first to limit the overall runtime of the
             ## test suite
             big_coordinated_mining_tests,
-            ar_data_sync_tests,
+            big_data_sync_tests,
             ar_fork_recovery_tests,
             big_tx,
             ar_packing_tests,
             big_poa,
-            ar_vdf_server_tests,
+            big_vdf_server_tests,
             ar_post_block_tests,
             ar_reject_chunks_tests
           ]

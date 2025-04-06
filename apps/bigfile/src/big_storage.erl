@@ -1320,7 +1320,7 @@ store_and_retrieve_block_test_() ->
 
 test_store_and_retrieve_block() ->
 	[B0] = ar_weave:init([]),
-	ar_test_node:start(B0),
+	big_test_node:start(B0),
 	TXIDs = [TX#tx.id || TX <- B0#block.txs],
 	FetchedB0 = read_block(B0#block.indep_hash),
 	FetchedB01 = FetchedB0#block{ txs = [tx_id(TX) || TX <- FetchedB0#block.txs] },
@@ -1331,10 +1331,10 @@ test_store_and_retrieve_block() ->
 			block_time_history = [], account_tree = undefined }, FetchedB01),
 	?assertEqual(B0#block{ size_tagged_txs = unset, txs = TXIDs, reward_history = [],
 			block_time_history = [], account_tree = undefined }, FetchedB03),
-	ar_test_node:mine(),
-	ar_test_node:wait_until_height(main, 1),
-	ar_test_node:mine(),
-	BI1 = ar_test_node:wait_until_height(main, 2),
+	big_test_node:mine(),
+	big_test_node:wait_until_height(main, 1),
+	big_test_node:mine(),
+	BI1 = big_test_node:wait_until_height(main, 2),
 	[{_, BlockCount}] = ets:lookup(big_header_sync, synced_blocks),
 	ar_util:do_until(
 		fun() ->

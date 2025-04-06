@@ -854,10 +854,10 @@ warn_if_single_scheduler() ->
 shell() ->
 	Config = #config{ debug = true },
 	start_for_tests(test,Config),
-	ar_test_node:boot_peers(test).
+	big_test_node:boot_peers(test).
 
 stop_shell() ->
-	ar_test_node:stop_peers(test),
+	big_test_node:stop_peers(test),
 	init:stop().
 
 %% @doc Run all of the tests associated with the core project.
@@ -874,8 +874,8 @@ tests(TestType, Mods, Config) when is_list(Mods) ->
 	end,
 	try
 		start_for_tests(TestType, Config),
-		ar_test_node:boot_peers(TestType),
-		ar_test_node:wait_for_peers(TestType)
+		big_test_node:boot_peers(TestType),
+		big_test_node:wait_for_peers(TestType)
 	catch
 		Type:Reason ->
 			io:format("Failed to start the peers due to ~p:~p~n", [Type, Reason]),
@@ -885,7 +885,7 @@ tests(TestType, Mods, Config) when is_list(Mods) ->
 		try
 			eunit:test({timeout, TotalTimeout, [Mods]}, [verbose, {print_depth, 100}])
 		after
-			ar_test_node:stop_peers(TestType)
+			big_test_node:stop_peers(TestType)
 		end,
 	case Result of
 		ok -> ok;
@@ -894,11 +894,11 @@ tests(TestType, Mods, Config) when is_list(Mods) ->
 
 
 start_for_tests(TestType, Config) ->
-	UniqueName = ar_test_node:get_node_namespace(),
+	UniqueName = big_test_node:get_node_namespace(),
 	TestConfig = Config#config{
 		peers = [],
 		data_dir = ".tmp/data_" ++ atom_to_list(TestType) ++ "_main_" ++ UniqueName,
-		port = ar_test_node:get_unused_port(),
+		port = big_test_node:get_unused_port(),
 		disable = [randomx_jit],
 		auto_join = false
 	},

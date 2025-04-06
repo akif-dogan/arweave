@@ -1415,40 +1415,40 @@ reorg_after_join_test_() ->
 
 test_reorg_after_join() ->
 	[B0] = ar_weave:init(),
-	ar_test_node:start(B0),
-	ar_test_node:start_peer(peer1, B0),
-	ar_test_node:connect_to_peer(peer1),
-	ar_test_node:mine(),
-	ar_test_node:assert_wait_until_height(peer1, 1),
-	ar_test_node:join_on(#{ node => main, join_on => peer1 }),
-	ar_test_node:start_peer(peer1, B0),
-	ar_test_node:mine(peer1),
-	ar_test_node:assert_wait_until_height(peer1, 1),
-	ar_test_node:mine(peer1),
-	ar_test_node:wait_until_height(main, 2).
+	big_test_node:start(B0),
+	big_test_node:start_peer(peer1, B0),
+	big_test_node:connect_to_peer(peer1),
+	big_test_node:mine(),
+	big_test_node:assert_wait_until_height(peer1, 1),
+	big_test_node:join_on(#{ node => main, join_on => peer1 }),
+	big_test_node:start_peer(peer1, B0),
+	big_test_node:mine(peer1),
+	big_test_node:assert_wait_until_height(peer1, 1),
+	big_test_node:mine(peer1),
+	big_test_node:wait_until_height(main, 2).
 
 reorg_after_join2_test_() ->
 	{timeout, 120, fun test_reorg_after_join2/0}.
 
 test_reorg_after_join2() ->
 	[B0] = ar_weave:init(),
-	ar_test_node:start(B0),
-	ar_test_node:start_peer(peer1, B0),
-	ar_test_node:connect_to_peer(peer1),
-	ar_test_node:mine(),
-	ar_test_node:assert_wait_until_height(peer1, 1),
-	ar_test_node:join_on(#{ node => main, join_on => peer1 }),
-	ar_test_node:mine(),
-	ar_test_node:wait_until_height(main, 2),
-	ar_test_node:disconnect_from(peer1),
-	ar_test_node:start_peer(peer1, B0),
-	ar_test_node:mine(peer1),
-	ar_test_node:assert_wait_until_height(peer1, 1),
-	ar_test_node:mine(peer1),
-	ar_test_node:assert_wait_until_height(peer1, 2),
-	ar_test_node:connect_to_peer(peer1),
-	ar_test_node:mine(peer1),
-	ar_test_node:wait_until_height(main, 3).
+	big_test_node:start(B0),
+	big_test_node:start_peer(peer1, B0),
+	big_test_node:connect_to_peer(peer1),
+	big_test_node:mine(),
+	big_test_node:assert_wait_until_height(peer1, 1),
+	big_test_node:join_on(#{ node => main, join_on => peer1 }),
+	big_test_node:mine(),
+	big_test_node:wait_until_height(main, 2),
+	big_test_node:disconnect_from(peer1),
+	big_test_node:start_peer(peer1, B0),
+	big_test_node:mine(peer1),
+	big_test_node:assert_wait_until_height(peer1, 1),
+	big_test_node:mine(peer1),
+	big_test_node:assert_wait_until_height(peer1, 2),
+	big_test_node:connect_to_peer(peer1),
+	big_test_node:mine(peer1),
+	big_test_node:wait_until_height(main, 3).
 
 get_step_range_test() ->
 	?assertEqual(

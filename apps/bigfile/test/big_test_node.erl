@@ -1,4 +1,4 @@
--module(ar_test_node).
+-module(big_test_node).
 
 %% The new, more flexible, and more user-friendly interface.
 -export([boot_peers/1, wait_for_peers/1, get_config/1,set_config/2,
@@ -174,7 +174,7 @@ peer_name(Node) ->
 	).
 
 peer_port(Node) ->
-	{ok, Config} = ar_test_node:remote_call(Node, application, get_env, [bigfile, config]),
+	{ok, Config} = big_test_node:remote_call(Node, application, get_env, [bigfile, config]),
 	Config#config.port.
 
 stop_peers([]) ->
@@ -200,7 +200,7 @@ peer_ip(Node) ->
 	{127, 0, 0, 1, peer_port(Node)}.
 
 wait_until_joined(Node) ->
-	remote_call(Node, ar_test_node, wait_until_joined, []).
+	remote_call(Node, big_test_node, wait_until_joined, []).
 
 %% @doc Wait until the node joins the network (initializes the state).
 wait_until_joined() ->
@@ -246,7 +246,7 @@ update_config(Config) ->
 	Config2.
 
 start_other_node(Node, B0, Config, WaitUntilSync) ->
-	remote_call(Node, ar_test_node, start_node, [B0, Config, WaitUntilSync], 90000).
+	remote_call(Node, big_test_node, start_node, [B0, Config, WaitUntilSync], 90000).
 
 %% @doc Start a node with the given genesis block and configuration.
 start_node(B0, Config) ->
@@ -290,8 +290,8 @@ start_coordinated(MiningNodeCount) when MiningNodeCount >= 1, MiningNodeCount =<
 		cm_api_secret = not_set
 	},
 
-	remote_call(peer1, ar_test_node, start_node, [B0, ExitNodeConfig]), %% exit node
-	remote_call(main, ar_test_node, start_node, [B0, ValidatorNodeConfig]), %% validator node
+	remote_call(peer1, big_test_node, start_node, [B0, ExitNodeConfig]), %% exit node
+	remote_call(main, big_test_node, start_node, [B0, ValidatorNodeConfig]), %% validator node
 
 	lists:foreach(
 		fun(I) ->
@@ -305,7 +305,7 @@ start_coordinated(MiningNodeCount) when MiningNodeCount >= 1, MiningNodeCount =<
 				local_peers = MinerPeerIPs ++ [ExitPeer],
 				storage_modules = get_cm_storage_modules(RewardAddr, I, MiningNodeCount)
 			},
-			remote_call(MinerNode, ar_test_node, start_node, [B0, MinerConfig])
+			remote_call(MinerNode, big_test_node, start_node, [B0, MinerConfig])
 		end,
 		lists:seq(1, MiningNodeCount)
 	),
@@ -335,7 +335,7 @@ mine() ->
 
 %% @doc Start mining on the given node. The node will be mining until it finds a block.
 mine(Node) ->
-	remote_call(Node, ar_test_node, mine, []).
+	remote_call(Node, big_test_node, mine, []).
 
 %% @doc Fetch and decode a binary-encoded block by hash H from the HTTP API of the
 %% given node. Return {ok, B} | {error, Reason}.
@@ -780,7 +780,7 @@ stop() ->
 	Config.
 
 stop(Node) ->
-	remote_call(Node, ar_test_node, stop, []).
+	remote_call(Node, big_test_node, stop, []).
 
 rejoin_on(#{ node := Node, join_on := JoinOnNode }) ->
 	join_on(#{ node => Node, join_on => JoinOnNode }, true).
@@ -789,7 +789,7 @@ join_on(#{ node := Node, join_on := JoinOnNode }) ->
 	join_on(#{ node => Node, join_on => JoinOnNode }, false).
 
 join_on(#{ node := Node, join_on := JoinOnNode }, Rejoin) ->
-	remote_call(Node, ar_test_node, join, [JoinOnNode, Rejoin], ?REMOTE_CALL_TIMEOUT).
+	remote_call(Node, big_test_node, join, [JoinOnNode, Rejoin], ?REMOTE_CALL_TIMEOUT).
 
 join(JoinOnNode, Rejoin) ->
 	Peer = peer_ip(JoinOnNode),
@@ -895,7 +895,7 @@ disconnect_from(Node) ->
 	remote_call(Node, big_http, block_peer_connections, []).
 
 wait_until_syncs_genesis_data(Node) ->
-	ok = remote_call(Node, ar_test_node, wait_until_syncs_genesis_data, [], 100_000).
+	ok = remote_call(Node, big_test_node, wait_until_syncs_genesis_data, [], 100_000).
 
 wait_until_syncs_genesis_data() ->
 	{ok, Config} = application:get_env(bigfile, config),
@@ -1160,7 +1160,7 @@ mock_functions(Functions) ->
 							new_mock(Module, [passthrough]),
 							lists:foreach(
 								fun({_TestType, Node}) ->
-									remote_call(Node, ar_test_node, new_mock,
+									remote_call(Node, big_test_node, new_mock,
 											[Module, [no_link, passthrough]])
 								end,
 								all_peers(test)),
@@ -1171,7 +1171,7 @@ mock_functions(Functions) ->
 					mock_function(Module, Fun, Mock),
 					lists:foreach(
 						fun({_TestType, Node}) ->
-							remote_call(Node, ar_test_node, mock_function,
+							remote_call(Node, big_test_node, mock_function,
 									[Module, Fun, Mock])
 						end,
 						all_peers(test)),
@@ -1187,7 +1187,7 @@ mock_functions(Functions) ->
 					unmock_module(Module),
 					lists:foreach(
 						fun({_Build, Node}) ->
-							remote_call(Node, ar_test_node, unmock_module, [Module])
+							remote_call(Node, big_test_node, unmock_module, [Module])
 						end,
 						all_peers(test))
 				end,
@@ -1213,7 +1213,7 @@ post_and_mine(#{ miner := Node, await_on := AwaitOnNode }, TXs) ->
 	lists:foreach(fun(TX) -> assert_post_tx_to_peer(Node, TX) end, TXs),
 	mine(Node),
 	[{H, _, _} | _] = wait_until_height(AwaitOnNode, CurrentHeight + 1),
-	remote_call(AwaitOnNode, ar_test_node, read_block_when_stored, [H, true],
+	remote_call(AwaitOnNode, big_test_node, read_block_when_stored, [H, true],
 	  ?POST_AND_MINE_TIMEOUT).
 
 post_block(B, ExpectedResult) when not is_list(ExpectedResult) ->

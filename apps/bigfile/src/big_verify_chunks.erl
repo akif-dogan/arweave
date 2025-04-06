@@ -315,30 +315,30 @@ intervals_test_() ->
 
 verify_chunk_storage_test_() ->
 	[
-		ar_test_node:test_with_mocked_functions(
+		big_test_node:test_with_mocked_functions(
 			[{big_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
 			fun test_verify_chunk_storage_in_interval/0),
-		ar_test_node:test_with_mocked_functions(
+		big_test_node:test_with_mocked_functions(
 			[{big_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
 			fun test_verify_chunk_storage_should_store/0),
-		ar_test_node:test_with_mocked_functions(
+		big_test_node:test_with_mocked_functions(
 			[{big_chunk_storage, read_offset, fun(_Offset, _StoreID) -> << 1:24 >> end}],
 			fun test_verify_chunk_storage_should_not_store/0)
 	].
 
 verify_proof_test_() ->
 	[
-		ar_test_node:test_with_mocked_functions([
+		big_test_node:test_with_mocked_functions([
 			{big_data_sync, read_data_path, fun(_, _) -> not_found end}],
 			fun test_verify_proof_no_datapath/0
 		),
-		ar_test_node:test_with_mocked_functions([
+		big_test_node:test_with_mocked_functions([
 			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
 			{big_poa, validate_paths, fun(_, _, _, _) -> {true, <<>>} end}
 		],
 			fun test_verify_proof_valid_paths/0
 		),
-		ar_test_node:test_with_mocked_functions([
+		big_test_node:test_with_mocked_functions([
 			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
 			{big_poa, validate_paths, fun(_, _, _, _) -> {false, <<>>} end}
 		],
@@ -348,7 +348,7 @@ verify_proof_test_() ->
 
 verify_chunk_test_() ->
 	[
-		ar_test_node:test_with_mocked_functions([
+		big_test_node:test_with_mocked_functions([
 			{big_data_sync, read_data_path, fun(_, _) -> {ok, <<>>} end},
 			{big_poa, validate_paths, fun(_, _, _, _) -> {true, <<>>} end}
 		],

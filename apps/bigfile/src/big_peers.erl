@@ -1223,7 +1223,7 @@ block_rejected_test_() ->
 
 test_block_rejected() ->
 	big_blacklist_middleware:cleanup_ban(whereis(big_blacklist_middleware)),
-	Peer = {127, 0, 0, 1, ar_test_node:get_unused_port()},
+	Peer = {127, 0, 0, 1, big_test_node:get_unused_port()},
 	big_peers:add_peer(Peer, -1),
 
 	big_events:send(block, {rejected, invalid_signature, <<>>, Peer}),

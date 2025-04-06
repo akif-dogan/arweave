@@ -1,4 +1,4 @@
--module(ar_data_sync_tests).
+-module(big_data_sync_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -6,7 +6,7 @@
 -include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").
 
--import(ar_test_node, [assert_wait_until_height/2, test_with_mocked_functions/2]).
+-import(big_test_node, [assert_wait_until_height/2, test_with_mocked_functions/2]).
 
 recovers_from_corruption_test_() ->
 	{timeout, 140, fun test_recovers_from_corruption/0}.
@@ -18,8 +18,8 @@ test_recovers_from_corruption() ->
 	?debugFmt("Corrupting ~s...", [StoreID]),
 	[big_chunk_storage:write_chunk(PaddedEndOffset, << 0:(262144*8) >>, #{}, StoreID)
 			|| PaddedEndOffset <- lists:seq(262144, 262144 * 3, 262144)],
-	ar_test_node:mine(),
-	ar_test_node:assert_wait_until_height(main, 1).
+	big_test_node:mine(),
+	big_test_node:assert_wait_until_height(main, 1).
 
 syncs_data_test_() ->
 	{timeout, 240, fun test_syncs_data/0}.
@@ -33,9 +33,9 @@ test_syncs_data() ->
 	lists:foreach(
 		fun({_, _, _, {_, Proof}}) ->
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-					ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
+					big_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-					ar_test_node:post_chunk(main, big_serialize:jsonify(Proof)))
+					big_test_node:post_chunk(main, big_serialize:jsonify(Proof)))
 		end,
 		RecordsWithProofs
 	),
@@ -64,19 +64,19 @@ test_syncs_data() ->
 				120 * 1000
 			),
 			ExpectedData = ar_util:encode(binary:list_to_bin(Chunks)),
-			ar_test_node:assert_get_tx_data(main, TXID, ExpectedData),
+			big_test_node:assert_get_tx_data(main, TXID, ExpectedData),
 			case AbsoluteTXOffset > DiskPoolThreshold of
 				true ->
 					ok;
 				false ->
-					ar_test_node:assert_get_tx_data(peer1, TXID, ExpectedData)
+					big_test_node:assert_get_tx_data(peer1, TXID, ExpectedData)
 			end
 		end,
 		RecordsWithProofs
 	).
 
 syncs_after_joining_test_() ->
-	ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
+	big_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
 		fun test_syncs_after_joining/0, 240).
 
 test_syncs_after_joining() ->
@@ -85,25 +85,25 @@ test_syncs_after_joining() ->
 test_syncs_after_joining(Split) ->
 	Wallet = ar_test_data_sync:setup_nodes(),
 	{TX1, Chunks1} = ar_test_data_sync:tx(Wallet, {Split, 1}, v2, ?BIG(1)),
-	B1 = ar_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX1]),
+	B1 = big_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX1]),
 	Proofs1 = ar_test_data_sync:post_proofs(main, B1, TX1, Chunks1),
 	UpperBound = big_node:get_partition_upper_bound(big_node:get_block_index()),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, UpperBound),
 	ar_test_data_sync:wait_until_syncs_chunks(Proofs1),
-	ar_test_node:disconnect_from(peer1),
+	big_test_node:disconnect_from(peer1),
 	{MainTX2, MainChunks2} = ar_test_data_sync:tx(Wallet, {Split, 3}, v2, ?BIG(1)),
-	MainB2 = ar_test_node:post_and_mine(#{ miner => main, await_on => main }, [MainTX2]),
+	MainB2 = big_test_node:post_and_mine(#{ miner => main, await_on => main }, [MainTX2]),
 	MainProofs2 = ar_test_data_sync:post_proofs(main, MainB2, MainTX2, MainChunks2),
 	{MainTX3, MainChunks3} = ar_test_data_sync:tx(Wallet, {Split, 2}, v2, ?BIG(1)),
-	MainB3 = ar_test_node:post_and_mine(#{ miner => main, await_on => main }, [MainTX3]),
+	MainB3 = big_test_node:post_and_mine(#{ miner => main, await_on => main }, [MainTX3]),
 	MainProofs3 = ar_test_data_sync:post_proofs(main, MainB3, MainTX3, MainChunks3),
 	{PeerTX2, PeerChunks2} = ar_test_data_sync:tx(Wallet, {Split, 2}, v2, ?BIG(1)),
-	PeerB2 = ar_test_node:post_and_mine( #{ miner => peer1, await_on => peer1 }, [PeerTX2] ),
+	PeerB2 = big_test_node:post_and_mine( #{ miner => peer1, await_on => peer1 }, [PeerTX2] ),
 	PeerProofs2 = ar_test_data_sync:post_proofs(peer1, PeerB2, PeerTX2, PeerChunks2),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, PeerProofs2, infinity),
-	_Peer2 = ar_test_node:rejoin_on(#{ node => peer1, join_on => main }),
+	_Peer2 = big_test_node:rejoin_on(#{ node => peer1, join_on => main }),
 	assert_wait_until_height(peer1, 3),
-	ar_test_node:connect_to_peer(peer1),
+	big_test_node:connect_to_peer(peer1),
 	UpperBound2 = big_node:get_partition_upper_bound(big_node:get_block_index()),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs2, UpperBound2),
 	ar_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs3, UpperBound2),
@@ -128,9 +128,9 @@ test_mines_off_only_last_chunks() ->
 			DataSize = ?DATA_CHUNK_SIZE + 1023,
 			{DataRoot, DataTree} = big_merkle:generate_tree([{RandomID, ?DATA_CHUNK_SIZE},
 					{ChunkID, DataSize}]),
-			TX = ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(main), data_size => DataSize,
+			TX = big_test_node:sign_tx(Wallet, #{ last_tx => big_test_node:get_tx_anchor(main), data_size => DataSize,
 					data_root => DataRoot }),
-			ar_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX]),
+			big_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX]),
 			Offset = ?DATA_CHUNK_SIZE + 1,
 				DataPath = big_merkle:generate_path(DataRoot, Offset, DataTree),
 			Proof = #{ data_root => ar_util:encode(DataRoot),
@@ -138,7 +138,7 @@ test_mines_off_only_last_chunks() ->
 					offset => integer_to_binary(Offset),
 					data_size => integer_to_binary(DataSize) },
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-					ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
+					big_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
 			case Height - ?SEARCH_SPACE_UPPER_BOUND_DEPTH of
 				-1 ->
 					%% Make sure we waited enough to have the next block use
@@ -191,9 +191,9 @@ test_mines_off_only_second_last_chunks() ->
 			DataSize = (?DATA_CHUNK_SIZE) div 2 + (?DATA_CHUNK_SIZE) div 2 + 3,
 			{DataRoot, DataTree} = big_merkle:generate_tree([{ChunkID, ?DATA_CHUNK_SIZE div 2},
 					{RandomID, DataSize}]),
-			TX = ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(main), data_size => DataSize,
+			TX = big_test_node:sign_tx(Wallet, #{ last_tx => big_test_node:get_tx_anchor(main), data_size => DataSize,
 					data_root => DataRoot }),
-			ar_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX]),
+			big_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX]),
 			Offset = 0,
 			DataPath = big_merkle:generate_path(DataRoot, Offset, DataTree),
 			Proof = #{ data_root => ar_util:encode(DataRoot),
@@ -201,7 +201,7 @@ test_mines_off_only_second_last_chunks() ->
 					offset => integer_to_binary(Offset),
 					data_size => integer_to_binary(DataSize) },
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-					ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
+					big_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
 			case Height - ?SEARCH_SPACE_UPPER_BOUND_DEPTH >= 0 of
 				true ->
 					%% Wait until the new chunks fall below the new upper bound and
@@ -233,7 +233,7 @@ test_disk_pool_rotation() ->
 	%% Will store the three genesis chunks.
 	%% The third one falls inside the "overlap" (see big_storage_module.erl)
 	StorageModules = [{2 * ?DATA_CHUNK_SIZE, 0,
-			ar_test_node:get_default_storage_module_packing(Addr, 0)}],
+			big_test_node:get_default_storage_module_packing(Addr, 0)}],
 	Wallet = ar_test_data_sync:setup_nodes(
 			#{ addr => Addr, storage_modules => StorageModules }),
 	Chunks = [crypto:strong_rand_bytes(?DATA_CHUNK_SIZE)],
@@ -243,7 +243,7 @@ test_disk_pool_rotation() ->
 		)
 	),
 	{TX, Chunks} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot, Chunks}),
-	ar_test_node:assert_post_tx_to_peer(main, TX),
+	big_test_node:assert_post_tx_to_peer(main, TX),
 	Offset = ?DATA_CHUNK_SIZE,
 	DataSize = ?DATA_CHUNK_SIZE,
 	DataPath = big_merkle:generate_path(DataRoot, Offset, DataTree),
@@ -253,8 +253,8 @@ test_disk_pool_rotation() ->
 			offset => integer_to_binary(Offset),
 			data_size => integer_to_binary(DataSize) },
 	?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-			ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
-	ar_test_node:mine(main),
+			big_test_node:post_chunk(main, big_serialize:jsonify(Proof))),
+	big_test_node:mine(main),
 	assert_wait_until_height(main, 1),
 	timer:sleep(2000),
 	Options = #{ format => etf, random_subset => false },
@@ -262,14 +262,14 @@ test_disk_pool_rotation() ->
 	{ok, Global1} = big_intervals:safe_from_etf(Binary1),
 	%% 3 genesis chunks plus the two we upload here.
 	?assertEqual([{1048576, 0}], big_intervals:to_list(Global1)),
-	ar_test_node:mine(main),
+	big_test_node:mine(main),
 	assert_wait_until_height(main, 2),
 	{ok, Binary2} = big_global_sync_record:get_serialized_sync_record(Options),
 	{ok, Global2} = big_intervals:safe_from_etf(Binary2),
 	?assertEqual([{1048576, 0}], big_intervals:to_list(Global2)),
-	ar_test_node:mine(main),
+	big_test_node:mine(main),
 	assert_wait_until_height(main, 3),
-	ar_test_node:mine(main),
+	big_test_node:mine(main),
 	assert_wait_until_height(main, 4),
 	%% The new chunk has been confirmed but there is not storage module to take it.
 	?assertEqual(3, ?SEARCH_SPACE_UPPER_BOUND_DEPTH),

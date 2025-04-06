@@ -11,8 +11,8 @@
 setup_source_node(PackingType) ->
 	SourceNode = peer1,
 	SinkNode = peer2,
-	ar_test_node:stop(SinkNode),
-	ar_test_node:stop(SourceNode),
+	big_test_node:stop(SinkNode),
+	big_test_node:stop(SourceNode),
 	{Blocks, _SourceAddr, Chunks} = big_e2e:start_source_node(SourceNode, PackingType, wallet_a),
 
 	{Blocks, Chunks, PackingType}.
@@ -223,10 +223,10 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 	SourceNode = peer1,
 	SinkNode = peer2,
 
-	Wallet = ar_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = big_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = big_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
-	{ok, Config} = ar_test_node:get_config(SinkNode),
+	{ok, Config} = big_test_node:get_config(SinkNode),
 	
 	Module = {?PARTITION_SIZE, 1, SinkPacking},
 	StoreID = big_storage_module:id(Module),
@@ -235,15 +235,15 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 
 	%% 1. Run node with no sync jobs so that it only prepares entropy
 	Config2 = Config#config{
-		peers = [ar_test_node:peer_ip(SourceNode)],
+		peers = [big_test_node:peer_ip(SourceNode)],
 		start_from_latest_state = true,
 		storage_modules = StorageModules,
 		auto_join = true,
 		mining_addr = SinkAddr,
 		sync_jobs = 0
 	},
-	?assertEqual(ar_test_node:peer_name(SinkNode),
-		ar_test_node:start_other_node(SinkNode, B0, Config2, true)
+	?assertEqual(big_test_node:peer_name(SinkNode),
+		big_test_node:start_other_node(SinkNode, B0, Config2, true)
 	),
 
 	RangeStart = ?PARTITION_SIZE,
@@ -258,14 +258,14 @@ test_entropy_first_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPack
 	%% 1. Delete the chunk from disk as well as all sync records.
 	%% 2. Delete the chunk only from disk, but keep it in the sync records.
 	DeleteOffset1 = RangeStart + ?DATA_CHUNK_SIZE,
-	ar_test_node:remote_call(SinkNode, big_chunk_storage, delete,
+	big_test_node:remote_call(SinkNode, big_chunk_storage, delete,
 		[DeleteOffset1, StoreID]),
 	DeleteOffset2 = DeleteOffset1 + ?DATA_CHUNK_SIZE,
-	ar_test_node:remote_call(SinkNode, big_chunk_storage, delete_chunk,
+	big_test_node:remote_call(SinkNode, big_chunk_storage, delete_chunk,
 		[DeleteOffset2, StoreID]),
 
 	%% 2. Run node with sync jobs so that it syncs and packs data
-	ar_test_node:restart_with_config(SinkNode, Config2#config{
+	big_test_node:restart_with_config(SinkNode, Config2#config{
 		sync_jobs = 100
 	}),
 
@@ -287,10 +287,10 @@ test_entropy_last_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPacki
 	SourceNode = peer1,
 	SinkNode = peer2,
 
-	Wallet = ar_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = big_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = big_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
-	{ok, Config} = ar_test_node:get_config(SinkNode),
+	{ok, Config} = big_test_node:get_config(SinkNode),
 	
 	Module = {?PARTITION_SIZE, 1, SinkPacking},
 	StoreID = big_storage_module:id(Module),
@@ -298,15 +298,15 @@ test_entropy_last_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPacki
 
 	%% 1. Run node with no replica_2_9 workers so that it only syncs chunks
 	Config2 = Config#config{
-		peers = [ar_test_node:peer_ip(SourceNode)],
+		peers = [big_test_node:peer_ip(SourceNode)],
 		start_from_latest_state = true,
 		storage_modules = StorageModules,
 		auto_join = true,
 		mining_addr = SinkAddr,
 		replica_2_9_workers = 0
 	},
-	?assertEqual(ar_test_node:peer_name(SinkNode),
-		ar_test_node:start_other_node(SinkNode, B0, Config2, true)
+	?assertEqual(big_test_node:peer_name(SinkNode),
+		big_test_node:start_other_node(SinkNode, B0, Config2, true)
 	),
 
 	RangeStart = ?PARTITION_SIZE,
@@ -318,7 +318,7 @@ test_entropy_last_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, SinkPacki
 	big_e2e:assert_empty_partition(SinkNode, 1, unpacked),
 
 	%% 2. Run node with sync jobs so that it syncs and packs data
-	ar_test_node:restart_with_config(SinkNode, Config2#config{
+	big_test_node:restart_with_config(SinkNode, Config2#config{
 		replica_2_9_workers = 8
 	}),
 
@@ -341,10 +341,10 @@ test_small_module_aligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, S
 	SourceNode = peer1,
 	SinkNode = peer2,
 
-	Wallet = ar_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = big_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = big_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
-	{ok, Config} = ar_test_node:get_config(SinkNode),
+	{ok, Config} = big_test_node:get_config(SinkNode),
 
 	Module = {floor(0.5 * ?PARTITION_SIZE), 2, SinkPacking},
 	StoreID = big_storage_module:id(Module),
@@ -352,14 +352,14 @@ test_small_module_aligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType}, S
 
 	%% Sync the second half of partition 1
 	Config2 = Config#config{
-		peers = [ar_test_node:peer_ip(SourceNode)],
+		peers = [big_test_node:peer_ip(SourceNode)],
 		start_from_latest_state = true,
 		storage_modules = StorageModules,
 		auto_join = true,
 		mining_addr = SinkAddr
 	},
-	?assertEqual(ar_test_node:peer_name(SinkNode),
-		ar_test_node:start_other_node(SinkNode, B0, Config2, true)
+	?assertEqual(big_test_node:peer_name(SinkNode),
+		big_test_node:start_other_node(SinkNode, B0, Config2, true)
 	),
 
 	RangeStart = floor(1 * ?PARTITION_SIZE),
@@ -389,10 +389,10 @@ test_small_module_unaligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType},
 	SourceNode = peer1,
 	SinkNode = peer2,
 
-	Wallet = ar_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = big_test_node:remote_call(SinkNode, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = big_e2e:packing_type_to_packing(SinkPackingType, SinkAddr),
-	{ok, Config} = ar_test_node:get_config(SinkNode),
+	{ok, Config} = big_test_node:get_config(SinkNode),
 
 	Module = {floor(0.5 * ?PARTITION_SIZE), 3, SinkPacking},
 	StoreID = big_storage_module:id(Module),
@@ -400,14 +400,14 @@ test_small_module_unaligned_sync_pack_mine({{Blocks, Chunks, SourcePackingType},
 
 	%% Sync the second half of partition 1
 	Config2 = Config#config{
-		peers = [ar_test_node:peer_ip(SourceNode)],
+		peers = [big_test_node:peer_ip(SourceNode)],
 		start_from_latest_state = true,
 		storage_modules = StorageModules,
 		auto_join = true,
 		mining_addr = SinkAddr
 	},
-	?assertEqual(ar_test_node:peer_name(SinkNode),
-		ar_test_node:start_other_node(SinkNode, B0, Config2, true)
+	?assertEqual(big_test_node:peer_name(SinkNode),
+		big_test_node:start_other_node(SinkNode, B0, Config2, true)
 	),
 
 	RangeStart = floor(1.5 * ?PARTITION_SIZE),
@@ -478,10 +478,10 @@ test_disk_pool_threshold({SourcePackingType, SinkPackingType}) ->
 	end.
 
 start_sink_node(Node, SourceNode, B0, PackingType) ->
-	Wallet = ar_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = big_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking = big_e2e:packing_type_to_packing(PackingType, SinkAddr),
-	{ok, Config} = ar_test_node:get_config(Node),
+	{ok, Config} = big_test_node:get_config(Node),
 	
 	StorageModules = [
 		{?PARTITION_SIZE, 1, SinkPacking},
@@ -492,9 +492,9 @@ start_sink_node(Node, SourceNode, B0, PackingType) ->
 		{?PARTITION_SIZE, 6, SinkPacking},
 		{?PARTITION_SIZE, 10, SinkPacking}
 	],
-	?assertEqual(ar_test_node:peer_name(Node),
-		ar_test_node:start_other_node(Node, B0, Config#config{
-			peers = [ar_test_node:peer_ip(SourceNode)],
+	?assertEqual(big_test_node:peer_name(Node),
+		big_test_node:start_other_node(Node, B0, Config#config{
+			peers = [big_test_node:peer_ip(SourceNode)],
 			start_from_latest_state = true,
 			storage_modules = StorageModules,
 			auto_join = true,
@@ -505,20 +505,20 @@ start_sink_node(Node, SourceNode, B0, PackingType) ->
 	SinkPacking.
 
 start_sink_node(Node, SourceNode, B0, PackingType1, PackingType2) ->
-	Wallet = ar_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [wallet_b]),
+	Wallet = big_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [wallet_b]),
 	SinkAddr = big_wallet:to_address(Wallet),
 	SinkPacking1 = big_e2e:packing_type_to_packing(PackingType1, SinkAddr),
 	SinkPacking2 = big_e2e:packing_type_to_packing(PackingType2, SinkAddr),
-	{ok, Config} = ar_test_node:get_config(Node),
+	{ok, Config} = big_test_node:get_config(Node),
 	
 	StorageModules = [
 		{?PARTITION_SIZE, 1, SinkPacking1},
 		{?PARTITION_SIZE, 1, SinkPacking2}
 	],
 
-	?assertEqual(ar_test_node:peer_name(Node),
-		ar_test_node:start_other_node(Node, B0, Config#config{
-			peers = [ar_test_node:peer_ip(SourceNode)],
+	?assertEqual(big_test_node:peer_name(Node),
+		big_test_node:start_other_node(Node, B0, Config#config{
+			peers = [big_test_node:peer_ip(SourceNode)],
 			start_from_latest_state = true,
 			storage_modules = StorageModules,
 			auto_join = true,

@@ -25,7 +25,7 @@ ar_p3_db_test_() ->
 	].
 
 mocked_test_timeout() ->
-	ar_test_node:test_with_mocked_functions([{big_kv, open, fun(_, _, _, _) -> timer:sleep(10000) end}],
+	big_test_node:test_with_mocked_functions([{big_kv, open, fun(_, _, _, _) -> timer:sleep(10000) end}],
 		fun test_timeout/0).
 
 test_timeout() ->

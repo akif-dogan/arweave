@@ -7,7 +7,7 @@
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_data_sync.hrl").
 
--import(ar_test_node, [sign_v1_tx/2, wait_until_height/2, assert_wait_until_height/2,
+-import(big_test_node, [sign_v1_tx/2, wait_until_height/2, assert_wait_until_height/2,
 		read_block_when_stored/1, test_with_mocked_functions/2]).
 
 rejects_invalid_chunks_test_() ->
@@ -17,7 +17,7 @@ test_rejects_invalid_chunks() ->
 	ar_test_data_sync:setup_nodes(),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"chunk_too_big\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
+		big_test_node:post_chunk(main, big_serialize:jsonify(#{
 			chunk => ar_util:encode(crypto:strong_rand_bytes(?DATA_CHUNK_SIZE + 1)),
 			data_path => <<>>,
 			offset => <<"0">>,
@@ -26,7 +26,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"data_path_too_big\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
+		big_test_node:post_chunk(main, big_serialize:jsonify(#{
 			data_path => ar_util:encode(crypto:strong_rand_bytes(?MAX_PATH_SIZE + 1)),
 			chunk => <<>>,
 			offset => <<"0">>,
@@ -35,7 +35,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"offset_too_big\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
+		big_test_node:post_chunk(main, big_serialize:jsonify(#{
 			offset => integer_to_binary(trunc(math:pow(2, 256))),
 			data_path => <<>>,
 			chunk => <<>>,
@@ -44,7 +44,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"data_size_too_big\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
+		big_test_node:post_chunk(main, big_serialize:jsonify(#{
 			data_size => integer_to_binary(trunc(math:pow(2, 256))),
 			data_path => <<>>,
 			chunk => <<>>,
@@ -53,7 +53,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"chunk_proof_ratio_not_attractive\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
+		big_test_node:post_chunk(main, big_serialize:jsonify(#{
 			chunk => ar_util:encode(<<"a">>),
 			data_path => ar_util:encode(<<"bb">>),
 			offset => <<"0">>,
@@ -69,7 +69,7 @@ test_rejects_invalid_chunks() ->
 	DataPath = big_merkle:generate_path(DataRoot, 0, DataTree),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"data_root_not_found\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(#{
+		big_test_node:post_chunk(main, big_serialize:jsonify(#{
 			data_root => ar_util:encode(DataRoot),
 			chunk => ar_util:encode(Chunk),
 			data_path => ar_util:encode(DataPath),
@@ -79,7 +79,7 @@ test_rejects_invalid_chunks() ->
 	),
 	?assertMatch(
 		{ok, {{<<"413">>, _}, _, <<"Payload too large">>, _, _}},
-		ar_test_node:post_chunk(main, << <<0>> || _ <- lists:seq(1, ?MAX_SERIALIZED_CHUNK_PROOF_SIZE + 1) >>)
+		big_test_node:post_chunk(main, << <<0>> || _ <- lists:seq(1, ?MAX_SERIALIZED_CHUNK_PROOF_SIZE + 1) >>)
 	).
 
 does_not_store_small_chunks_after_2_5_test_() ->
@@ -143,9 +143,9 @@ test_does_not_store_small_chunks_after_2_5() ->
 					big_tx:generate_chunk_id(SecondChunk), big_tx:generate_chunk_id(ThirdChunk)},
 			{DataRoot, DataTree} = big_merkle:generate_tree([{FirstChunkID, FirstMerkleOffset},
 					{SecondChunkID, SecondMerkleOffset}, {ThirdChunkID, ThirdMerkleOffset}]),
-			TX = ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(main), data_size => DataSize,
+			TX = big_test_node:sign_tx(Wallet, #{ last_tx => big_test_node:get_tx_anchor(main), data_size => DataSize,
 					data_root => DataRoot }),
-			ar_test_node:post_and_mine(#{ miner => main, await_on => main }, [TX]),
+			big_test_node:post_and_mine(#{ miner => main, await_on => main }, [TX]),
 			lists:foreach(
 				fun({Chunk, Offset}) ->
 					DataPath = big_merkle:generate_path(DataRoot, Offset, DataTree),
@@ -157,7 +157,7 @@ test_does_not_store_small_chunks_after_2_5() ->
 					%% All chunks are accepted because we do not know their offsets yet -
 					%% in theory they may end up below the strict data split threshold.
 					?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-							ar_test_node:post_chunk(main, big_serialize:jsonify(Proof)), Title)
+							big_test_node:post_chunk(main, big_serialize:jsonify(Proof)), Title)
 				end,
 				[{FirstChunk, O} || O <- FirstPublishOffsets]
 						++ [{SecondChunk, O} || O <- SecondPublishOffsets]
@@ -170,19 +170,19 @@ test_does_not_store_small_chunks_after_2_5() ->
 			lists:foreach(
 				fun	({Offset, 404}) ->
 						?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}},
-								ar_test_node:get_chunk(main, GenesisOffset + Offset), Title);
+								big_test_node:get_chunk(main, GenesisOffset + Offset), Title);
 					({Offset, first}) ->
-						{ok, {{<<"200">>, _}, _, ProofJSON, _, _}} = ar_test_node:get_chunk(main, 
+						{ok, {{<<"200">>, _}, _, ProofJSON, _, _}} = big_test_node:get_chunk(main, 
 								GenesisOffset + Offset),
 						?assertEqual(FirstChunk, ar_util:decode(maps:get(<<"chunk">>,
 								jiffy:decode(ProofJSON, [return_maps]))), Title);
 					({Offset, second}) ->
-						{ok, {{<<"200">>, _}, _, ProofJSON, _, _}} = ar_test_node:get_chunk(main, 
+						{ok, {{<<"200">>, _}, _, ProofJSON, _, _}} = big_test_node:get_chunk(main, 
 								GenesisOffset + Offset),
 						?assertEqual(SecondChunk, ar_util:decode(maps:get(<<"chunk">>,
 								jiffy:decode(ProofJSON, [return_maps]))), Title);
 					({Offset, third}) ->
-						{ok, {{<<"200">>, _}, _, ProofJSON, _, _}} = ar_test_node:get_chunk(main, 
+						{ok, {{<<"200">>, _}, _, ProofJSON, _, _}} = big_test_node:get_chunk(main, 
 								GenesisOffset + Offset),
 						?assertEqual(ThirdChunk, ar_util:decode(maps:get(<<"chunk">>,
 								jiffy:decode(ProofJSON, [return_maps]))), Title)
@@ -202,16 +202,16 @@ test_rejects_chunks_with_merkle_tree_borders_exceeding_max_chunk_size() ->
 	BigOutOfBoundsOffsetChunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	BigChunkID = big_tx:generate_chunk_id(BigOutOfBoundsOffsetChunk),
 	{BigDataRoot, BigDataTree} = big_merkle:generate_tree([{BigChunkID, ?DATA_CHUNK_SIZE + 1}]),
-	BigTX = ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(main), data_size => ?DATA_CHUNK_SIZE,
+	BigTX = big_test_node:sign_tx(Wallet, #{ last_tx => big_test_node:get_tx_anchor(main), data_size => ?DATA_CHUNK_SIZE,
 			data_root => BigDataRoot }),
-	ar_test_node:post_and_mine(#{ miner => main, await_on => main }, [BigTX]),
+	big_test_node:post_and_mine(#{ miner => main, await_on => main }, [BigTX]),
 	BigDataPath = big_merkle:generate_path(BigDataRoot, 0, BigDataTree),
 	BigProof = #{ data_root => ar_util:encode(BigDataRoot),
 			data_path => ar_util:encode(BigDataPath),
 			chunk => ar_util:encode(BigOutOfBoundsOffsetChunk), offset => <<"0">>,
 			data_size => integer_to_binary(?DATA_CHUNK_SIZE)},
 	?assertMatch({ok, {{<<"400">>, _}, _, <<"{\"error\":\"invalid_proof\"}">>, _, _}},
-			ar_test_node:post_chunk(main, big_serialize:jsonify(BigProof))).
+			big_test_node:post_chunk(main, big_serialize:jsonify(BigProof))).
 
 rejects_chunks_exceeding_disk_pool_limit_test_() ->
 	{timeout, 240, fun test_rejects_chunks_exceeding_disk_pool_limit/0}.
@@ -228,20 +228,20 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 		)
 	),
 	{TX1, Chunks1} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot1, Chunks1}),
-	ar_test_node:assert_post_tx_to_peer(main, TX1),
+	big_test_node:assert_post_tx_to_peer(main, TX1),
 	[{_, FirstProof1} | Proofs1] = ar_test_data_sync:build_proofs(TX1, Chunks1, [TX1], 0, 0),
 	lists:foreach(
 		fun({_, Proof}) ->
 			?assertMatch(
 				{ok, {{<<"200">>, _}, _, _, _, _}},
-				ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))
+				big_test_node:post_chunk(main, big_serialize:jsonify(Proof))
 			)
 		end,
 		Proofs1
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"exceeds_disk_pool_size_limit\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1))
+		big_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1))
 	),
 	Data2 = crypto:strong_rand_bytes(
 		min(
@@ -256,7 +256,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 		)
 	),
 	{TX2, Chunks2} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot2, Chunks2}),
-	ar_test_node:assert_post_tx_to_peer(main, TX2),
+	big_test_node:assert_post_tx_to_peer(main, TX2),
 	Proofs2 = ar_test_data_sync:build_proofs(TX2, Chunks2, [TX2], 0, 0),
 	lists:foreach(
 		fun({_, Proof}) ->
@@ -264,7 +264,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 			%% in the bucket of the previous chunk (the chunk sizes are 131072).
 			?assertMatch(
 				{ok, {{<<"200">>, _}, _, _, _, _}},
-				ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))
+				big_test_node:post_chunk(main, big_serialize:jsonify(Proof))
 			)
 		end,
 		Proofs2
@@ -282,7 +282,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 		)
 	),
 	{TX3, Chunks3} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot3, Chunks3}),
-	ar_test_node:assert_post_tx_to_peer(main, TX3),
+	big_test_node:assert_post_tx_to_peer(main, TX3),
 	[{_, FirstProof3} | Proofs3] = ar_test_data_sync:build_proofs(TX3, Chunks3, [TX3], 0, 0),
 	lists:foreach(
 		fun({_, Proof}) ->
@@ -290,16 +290,16 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 			%% in the bucket of the previous chunk (the chunk sizes are 131072).
 			?assertMatch(
 				{ok, {{<<"200">>, _}, _, _, _, _}},
-				ar_test_node:post_chunk(main, big_serialize:jsonify(Proof))
+				big_test_node:post_chunk(main, big_serialize:jsonify(Proof))
 			)
 		end,
 		Proofs3
 	),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"exceeds_disk_pool_size_limit\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof3))
+		big_test_node:post_chunk(main, big_serialize:jsonify(FirstProof3))
 	),
-	ar_test_node:mine(peer1),
+	big_test_node:mine(peer1),
 	true = ar_util:do_until(
 		fun() ->
 			%% After a block is mined, the chunks receive their absolute offsets, which
@@ -309,7 +309,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 			%% a 262144-byte chunk. Also, expect 303 instead of 200 because the last block
 			%% was large such that the configured partitions do not cover at least two
 			%% times as much space ahead of the current weave size.
-			case ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof3)) of
+			case big_test_node:post_chunk(main, big_serialize:jsonify(FirstProof3)) of
 				{ok, {{<<"303">>, _}, _, _, _, _}} ->
 					true;
 				_ ->
@@ -322,16 +322,16 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 	%% Now we do not have free space again.
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"exceeds_disk_pool_size_limit\"}">>, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1))
+		big_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1))
 	),
 	%% Mine two more blocks to make the chunks mature so that we can remove them from the
 	%% disk pool (they will stay in the corresponding storage modules though, if any).
-	ar_test_node:mine(peer1),
+	big_test_node:mine(peer1),
 	assert_wait_until_height(peer1, 2),
-	ar_test_node:mine(peer1),
+	big_test_node:mine(peer1),
 	true = ar_util:do_until(
 		fun() ->
-			case ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1)) of
+			case big_test_node:post_chunk(main, big_serialize:jsonify(FirstProof1)) of
 				{ok, {{<<"200">>, _}, _, _, _, _}} ->
 					true;
 				_ ->
@@ -343,7 +343,7 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 	).
 
 accepts_chunks_test_() ->
-	ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
+	big_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
 		fun test_accepts_chunks/0, 120).
 
 test_accepts_chunks() ->
@@ -352,26 +352,26 @@ test_accepts_chunks() ->
 test_accepts_chunks(Split) ->
 	Wallet = ar_test_data_sync:setup_nodes(),
 	{TX, Chunks} = ar_test_data_sync:tx(Wallet, {Split, 3}),
-	ar_test_node:assert_post_tx_to_peer(peer1, TX),
-	ar_test_node:assert_wait_until_receives_txs([TX]),
+	big_test_node:assert_post_tx_to_peer(peer1, TX),
+	big_test_node:assert_wait_until_receives_txs([TX]),
 	[{Offset, FirstProof}, {_, SecondProof}, {_, ThirdProof}] = 
 			ar_test_data_sync:build_proofs(TX, Chunks, [TX], 0, 0),
 	EndOffset = Offset + ?STRICT_DATA_SPLIT_THRESHOLD,
 	%% Post the third proof to the disk pool.
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(ThirdProof))
+		big_test_node:post_chunk(main, big_serialize:jsonify(ThirdProof))
 	),
-	ar_test_node:mine(peer1),
+	big_test_node:mine(peer1),
 	[{BH, _, _} | _] = wait_until_height(main, 1),
 	B = read_block_when_stored(BH),
 	?assertMatch(
 		{ok, {{<<"404">>, _}, _, _, _, _}},
-		ar_test_node:get_chunk(main, EndOffset)
+		big_test_node:get_chunk(main, EndOffset)
 	),
 	?assertMatch(
 		{ok, {{<<"200">>, _}, _, _, _, _}},
-		ar_test_node:post_chunk(main, big_serialize:jsonify(FirstProof))
+		big_test_node:post_chunk(main, big_serialize:jsonify(FirstProof))
 	),
 	%% Expect the chunk to be retrieved by any offset within
 	%% (EndOffset - ChunkSize, EndOffset], but not outside of it.
@@ -386,8 +386,8 @@ test_accepts_chunks(Split) ->
 	ar_test_data_sync:wait_until_syncs_chunk(
 		EndOffset - rand:uniform(FirstChunkSize - 2), ExpectedProof),
 	ar_test_data_sync:wait_until_syncs_chunk(EndOffset - FirstChunkSize + 1, ExpectedProof),
-	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, ar_test_node:get_chunk(main, 0)),
-	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, ar_test_node:get_chunk(main, EndOffset + 1)),
+	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, big_test_node:get_chunk(main, 0)),
+	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, big_test_node:get_chunk(main, EndOffset + 1)),
 	TXSize = byte_size(binary:list_to_bin(Chunks)),
 	ExpectedOffsetInfo = big_serialize:jsonify(#{
 		offset => integer_to_binary(TXSize + ?STRICT_DATA_SPLIT_THRESHOLD),
@@ -399,7 +399,7 @@ test_accepts_chunks(Split) ->
 	?assertMatch({ok, {{<<"404">>, _}, _, _Binary, _, _}},
 		ar_test_data_sync:get_tx_data(TX#tx.id)),
 	?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
-			ar_test_node:post_chunk(main, big_serialize:jsonify(SecondProof))),
+			big_test_node:post_chunk(main, big_serialize:jsonify(SecondProof))),
 	ExpectedSecondProof = #{
 		data_path => maps:get(data_path, SecondProof),
 		tx_path => maps:get(tx_path, SecondProof),
@@ -422,4 +422,4 @@ test_accepts_chunks(Split) ->
 		chunk => maps:get(chunk, ThirdProof)
 	},
 	ar_test_data_sync:wait_until_syncs_chunk(B#block.weave_size, ExpectedThirdProof),
-	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, ar_test_node:get_chunk(main, B#block.weave_size + 1)).
+	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, big_test_node:get_chunk(main, B#block.weave_size + 1)).

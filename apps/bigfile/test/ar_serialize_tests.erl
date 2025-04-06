@@ -7,7 +7,7 @@
 
 block_to_binary_test_() ->
 	%% Set the mainnet values here because we are using the mainnet fixtures.
-	ar_test_node:test_with_mocked_functions([
+	big_test_node:test_with_mocked_functions([
 			{big_fork, height_1_6, fun() -> 95000 end},
 			{big_fork, height_1_7, fun() -> 235200 end},
 			{big_fork, height_1_8, fun() -> 269510 end},
@@ -184,7 +184,7 @@ block_index_to_binary_test() ->
 
 %% @doc Convert a new block into JSON and back, ensure the result is the same.
 block_roundtrip_test_() ->
-	ar_test_node:test_with_mocked_functions([
+	big_test_node:test_with_mocked_functions([
 			{big_fork, height_2_6, fun() -> infinity end},
 			{big_fork, height_2_6_8, fun() -> infinity end},
 			{big_fork, height_2_7, fun() -> infinity end}],
@@ -309,7 +309,7 @@ candidate_to_json_struct_test() ->
 		cache_ref = {rand:uniform(100), rand:uniform(100), rand:uniform(100), make_ref()},
 		chunk1 = crypto:strong_rand_bytes(256 * 1024),
 		chunk2 = crypto:strong_rand_bytes(256 * 1024),
-		cm_lead_peer = ar_test_node:peer_ip(main)}).
+		cm_lead_peer = big_test_node:peer_ip(main)}).
 
 solution_to_json_struct_test() ->
 

@@ -19,7 +19,7 @@
 %% Fixtures
 %% ------------------------------------------------------------------------------------------------
 setup_all() ->
-	[B0] = ar_weave:init([], ar_test_node:get_difficulty_for_invalid_hash(), ?WEAVE_SIZE),
+	[B0] = ar_weave:init([], big_test_node:get_difficulty_for_invalid_hash(), ?WEAVE_SIZE),
 	RewardAddr = big_wallet:to_address(big_wallet:new_keyfile()),
 	{ok, Config} = application:get_env(bigfile, config),
 	%% We'll use partition 0 for any unsynced ranges.
@@ -27,7 +27,7 @@ setup_all() ->
 		{?PARTITION_SIZE, 1, {spora_2_6, RewardAddr}},
 		{?PARTITION_SIZE, 2, {spora_2_6, RewardAddr}}
 	],
-	ar_test_node:start(B0, RewardAddr, Config, StorageModules),
+	big_test_node:start(B0, RewardAddr, Config, StorageModules),
 	Config.
 
 cleanup_all(Config) ->
@@ -35,7 +35,7 @@ cleanup_all(Config) ->
 
 %% @doc Setup the environment so we can control VDF step generation.
 setup_pool_client() ->
-	[B0] = ar_weave:init([], ar_test_node:get_difficulty_for_invalid_hash(), ?WEAVE_SIZE),
+	[B0] = ar_weave:init([], big_test_node:get_difficulty_for_invalid_hash(), ?WEAVE_SIZE),
 	RewardAddr = big_wallet:to_address(big_wallet:new_keyfile()),
 	{ok, Config} = application:get_env(bigfile, config),
 	%% We'll use partition 0 for any unsynced ranges.
@@ -43,7 +43,7 @@ setup_pool_client() ->
 		{?PARTITION_SIZE, 1, {spora_2_6, RewardAddr}},
 		{?PARTITION_SIZE, 2, {spora_2_6, RewardAddr}}
 	],
-	ar_test_node:start(B0, RewardAddr,
+	big_test_node:start(B0, RewardAddr,
 		Config#config{
 			nonce_limiter_server_trusted_peers = [ ar_util:format_peer(vdf_server()) ],
 			is_pool_client=true,
@@ -86,7 +86,7 @@ pool_job_test_() ->
 	{setup, fun setup_pool_client/0, fun cleanup_pool_client/1,
 		{foreach, fun setup_one/0, fun cleanup_one/1,
 		[
-			ar_test_node:test_with_mocked_functions([mock_add_task(), mock_get_current_sesssion()],
+			big_test_node:test_with_mocked_functions([mock_add_task(), mock_get_current_sesssion()],
 			fun test_pool_job_no_cached_sessions/0, 120)
 		]}
     }.
@@ -96,39 +96,39 @@ pool_job_test_() ->
 %% ------------------------------------------------------------------------------------------------
 test_h2_solution_chunk1_first() ->
 	do_test_chunk_cache_size_with_mocks(
-		[ar_test_node:invalid_solution()],
-		[ar_test_node:valid_solution()],
+		[big_test_node:invalid_solution()],
+		[big_test_node:valid_solution()],
 		[?SYNCED_RECALL_RANGE_2],
 		[chunk1]
 	).
 
 test_h2_solution_chunk2_first() ->
 	do_test_chunk_cache_size_with_mocks(
-		[ar_test_node:invalid_solution()],
-		[ar_test_node:valid_solution()],
+		[big_test_node:invalid_solution()],
+		[big_test_node:valid_solution()],
 		[?SYNCED_RECALL_RANGE_2],
 		[chunk2]
 	).
 
 test_h1_solution_h2_synced_chunk1_first() ->
 	do_test_chunk_cache_size_with_mocks(
-		[ar_test_node:valid_solution()],
-		[ar_test_node:invalid_solution()],
+		[big_test_node:valid_solution()],
+		[big_test_node:invalid_solution()],
 		[?SYNCED_RECALL_RANGE_2],
 		[chunk1]
 	).
 
 test_h1_solution_h2_synced_chunk2_first() ->
 	do_test_chunk_cache_size_with_mocks(
-		[ar_test_node:valid_solution()],
-		[ar_test_node:invalid_solution()],
+		[big_test_node:valid_solution()],
+		[big_test_node:invalid_solution()],
 		[?SYNCED_RECALL_RANGE_2],
 		[chunk2]
 	).
 
 test_h1_solution_h2_unsynced() ->
 	do_test_chunk_cache_size_with_mocks(
-		[ar_test_node:valid_solution()],
+		[big_test_node:valid_solution()],
 		[],
 		[?UNSYNCED_RECALL_RANGE_2],
 		[chunk1]
@@ -136,26 +136,26 @@ test_h1_solution_h2_unsynced() ->
 
 test_no_solution_then_h2_solution() ->
 	do_test_chunk_cache_size_with_mocks(
-		[ar_test_node:invalid_solution()],
-		[ar_test_node:invalid_solution(), ar_test_node:invalid_solution(),
-			ar_test_node:valid_solution()],
+		[big_test_node:invalid_solution()],
+		[big_test_node:invalid_solution(), big_test_node:invalid_solution(),
+			big_test_node:valid_solution()],
 		[?SYNCED_RECALL_RANGE_2],
 		[chunk1]
 	).
 
 test_no_solution_then_h1_solution_h2_synced() ->
 	do_test_chunk_cache_size_with_mocks(
-		[ar_test_node:invalid_solution(), ar_test_node:invalid_solution(),
-			ar_test_node:valid_solution()],
-		[ar_test_node:invalid_solution()],
+		[big_test_node:invalid_solution(), big_test_node:invalid_solution(),
+			big_test_node:valid_solution()],
+		[big_test_node:invalid_solution()],
 		[?SYNCED_RECALL_RANGE_2],
 		[chunk1]
 	).
 
 test_no_solution_then_h1_solution_h2_unsynced() ->
 	do_test_chunk_cache_size_with_mocks(
-		[ar_test_node:invalid_solution(), ar_test_node:invalid_solution(),
-			ar_test_node:valid_solution()],
+		[big_test_node:invalid_solution(), big_test_node:invalid_solution(),
+			big_test_node:valid_solution()],
 		[],
 		[?UNSYNCED_RECALL_RANGE_2],
 		[chunk1]
@@ -217,7 +217,7 @@ do_test_chunk_cache_size_with_mocks(H1s, H2s, RecallRange2s, FirstChunks) ->
 	ets:insert(mock_counter, {compute_h2, 0}),
 	ets:insert(mock_counter, {get_recall_range, 0}),
 	ets:insert(mock_counter, {get_range, 0}),
-	{Setup, Cleanup} = ar_test_node:mock_functions([
+	{Setup, Cleanup} = big_test_node:mock_functions([
 		{
 			big_retarget, is_retarget_height,
 			fun (_Height) ->
@@ -270,8 +270,8 @@ do_test_chunk_cache_size_with_mocks(H1s, H2s, RecallRange2s, FirstChunks) ->
 	Functions = Setup(),
 
 	try
-		ar_test_node:mine(),
-		ar_test_node:wait_until_height(main, Height),
+		big_test_node:mine(),
+		big_test_node:wait_until_height(main, Height),
 		%% wait until the mining has stopped
 		?assert(ar_util:do_until(fun() -> get_chunk_cache_size() == 0 end, 200, 10000))
 	after

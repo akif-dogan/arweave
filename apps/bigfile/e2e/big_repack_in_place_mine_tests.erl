@@ -29,8 +29,8 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 		{from_packing_type, FromPackingType}, {to_packing_type, ToPackingType}]),
 	ValidatorNode = peer1,
 	RepackerNode = peer2,
-	ar_test_node:stop(ValidatorNode),
-	ar_test_node:stop(RepackerNode),
+	big_test_node:stop(ValidatorNode),
+	big_test_node:stop(RepackerNode),
 	{Blocks, _AddrA, Chunks} = big_e2e:start_source_node(
 		RepackerNode, FromPackingType, wallet_a),
 
@@ -45,12 +45,12 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 	end,
 	FinalStorageModules = lists:sublist(SourceStorageModules, 2),
 	ToPacking = big_e2e:packing_type_to_packing(ToPackingType, AddrB),
-	{ok, Config} = ar_test_node:get_config(RepackerNode),
+	{ok, Config} = big_test_node:get_config(RepackerNode),
 
 	RepackInPlaceStorageModules = lists:sublist([ 
 		{Module, ToPacking} || Module <- Config#config.storage_modules ], 2),
 	
-	ar_test_node:restart_with_config(RepackerNode, Config#config{
+	big_test_node:restart_with_config(RepackerNode, Config#config{
 		storage_modules = [],
 		repack_in_place_storage_modules = RepackInPlaceStorageModules,
 		mining_addr = undefined
@@ -68,7 +68,7 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 	big_e2e:assert_partition_size(RepackerNode, 0, ToPacking, ExpectedPartitionSize),
 	big_e2e:assert_partition_size(RepackerNode, 1, ToPacking, ExpectedPartitionSize),
 
-	ar_test_node:stop(RepackerNode),
+	big_test_node:stop(RepackerNode),
 
 	%% Rename storage_modules
 	DataDir = Config#config.data_dir,
@@ -83,7 +83,7 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 		file:rename(SourcePath, TargetPath)
 	end, RepackInPlaceStorageModules),
 
-	ar_test_node:restart_with_config(RepackerNode, Config#config{
+	big_test_node:restart_with_config(RepackerNode, Config#config{
 		storage_modules = FinalStorageModules,
 		repack_in_place_storage_modules = [],
 		mining_addr = AddrB
@@ -131,10 +131,10 @@ test_repack_in_place_mine({FromPackingType, ToPackingType}) ->
 
 
 start_validator_node(ValidatorNode, RepackerNode, B0) ->
-	{ok, Config} = ar_test_node:get_config(ValidatorNode),
-	?assertEqual(ar_test_node:peer_name(ValidatorNode),
-		ar_test_node:start_other_node(ValidatorNode, B0, Config#config{
-			peers = [ar_test_node:peer_ip(RepackerNode)],
+	{ok, Config} = big_test_node:get_config(ValidatorNode),
+	?assertEqual(big_test_node:peer_name(ValidatorNode),
+		big_test_node:start_other_node(ValidatorNode, B0, Config#config{
+			peers = [big_test_node:peer_ip(RepackerNode)],
 			start_from_latest_state = true,
 			auto_join = true
 		}, true)

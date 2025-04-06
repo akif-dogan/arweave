@@ -6,7 +6,7 @@
 -include_lib("bigfile/include/big_mining.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--import(ar_test_node, [http_get_block/2]).
+-import(big_test_node, [http_get_block/2]).
 
 -define(MINING_TEST_TIMEOUT, 240).
 -define(API_TEST_TIMEOUT, 120).
@@ -18,14 +18,14 @@
 mining_test_() ->
 	[
 		{timeout, ?MINING_TEST_TIMEOUT, fun test_single_node_one_chunk/0},
-		ar_test_node:test_with_mocked_functions([
-			ar_test_node:mock_to_force_invalid_h1()],
+		big_test_node:test_with_mocked_functions([
+			big_test_node:mock_to_force_invalid_h1()],
 			fun test_single_node_two_chunk/0, 120),
-		ar_test_node:test_with_mocked_functions([
-			ar_test_node:mock_to_force_invalid_h1()],
+		big_test_node:test_with_mocked_functions([
+			big_test_node:mock_to_force_invalid_h1()],
 			fun test_cross_node/0, 240),
-		ar_test_node:test_with_mocked_functions([
-			ar_test_node:mock_to_force_invalid_h1()],
+		big_test_node:test_with_mocked_functions([
+			big_test_node:mock_to_force_invalid_h1()],
 			fun test_cross_node_retarget/0, ?MINING_TEST_TIMEOUT),
 		{timeout, ?MINING_TEST_TIMEOUT, fun test_two_node_retarget/0},
 		{timeout, ?MINING_TEST_TIMEOUT, fun test_three_node/0},
@@ -51,25 +51,25 @@ refetch_partitions_test_() ->
 %% @doc One-node coordinated mining cluster mining a block with one
 %% or two chunks.
 test_single_node_one_chunk() ->
-	[Node, _ExitNode, ValidatorNode] = ar_test_node:start_coordinated(1),
-	ar_test_node:mine(Node),
-	BI = ar_test_node:wait_until_height(ValidatorNode, 1, false),
+	[Node, _ExitNode, ValidatorNode] = big_test_node:start_coordinated(1),
+	big_test_node:mine(Node),
+	BI = big_test_node:wait_until_height(ValidatorNode, 1, false),
 	{ok, B} = http_get_block(element(1, hd(BI)), ValidatorNode),
 	?assert(byte_size((B#block.poa)#poa.data_path) > 0),
 	assert_empty_cache(Node).
 	
 %% @doc One-node coordinated mining cluster mining a block with two chunks.
 test_single_node_two_chunk() ->
-	[Node, _ExitNode, ValidatorNode] = ar_test_node:start_coordinated(1),
-	ar_test_node:mine(Node),
-	BI = ar_test_node:wait_until_height(ValidatorNode, 1, false),
+	[Node, _ExitNode, ValidatorNode] = big_test_node:start_coordinated(1),
+	big_test_node:mine(Node),
+	BI = big_test_node:wait_until_height(ValidatorNode, 1, false),
 	{ok, B} = http_get_block(element(1, hd(BI)), ValidatorNode),
 	?assert(byte_size((B#block.poa2)#poa.data_path) > 0),
 	assert_empty_cache(Node).
 
 %% @doc Two-node coordinated mining cluster mining until a difficulty retarget.
 test_two_node_retarget() ->
-	[Node1, Node2, _ExitNode, ValidatorNode] = ar_test_node:start_coordinated(2),
+	[Node1, Node2, _ExitNode, ValidatorNode] = big_test_node:start_coordinated(2),
 	lists:foreach(
 		fun(Height) ->
 			mine_in_parallel([Node1, Node2], ValidatorNode, Height)
@@ -81,7 +81,7 @@ test_two_node_retarget() ->
 %% @doc Three-node coordinated mining cluster mining until all nodes have contributed
 %% to a solution. This test does not force cross-node solutions.
 test_three_node() ->
-	[Node1, Node2, Node3, _ExitNode, ValidatorNode] = ar_test_node:start_coordinated(3),	
+	[Node1, Node2, Node3, _ExitNode, ValidatorNode] = big_test_node:start_coordinated(3),	
 	wait_for_each_node([Node1, Node2, Node3], ValidatorNode, 0, [0, 2, 4]),
 	assert_empty_cache(Node1),
 	assert_empty_cache(Node2),
@@ -89,7 +89,7 @@ test_three_node() ->
 
 %% @doc Two-node, mine until a block is found that incorporates hashes from each node.
 test_cross_node() ->
-	[Node1, Node2, _ExitNode, ValidatorNode] = ar_test_node:start_coordinated(2),
+	[Node1, Node2, _ExitNode, ValidatorNode] = big_test_node:start_coordinated(2),
 	wait_for_cross_node([Node1, Node2], ValidatorNode, 0, [0, 2]),
 	assert_empty_cache(Node1),
 	assert_empty_cache(Node2).
@@ -97,7 +97,7 @@ test_cross_node() ->
 %% @doc Two-node, mine through difficulty retarget, then mine until a block is found that
 %% incorporates hashes from each node.
 test_cross_node_retarget() ->
-	[Node1, Node2, _ExitNode, ValidatorNode] = ar_test_node:start_coordinated(2),
+	[Node1, Node2, _ExitNode, ValidatorNode] = big_test_node:start_coordinated(2),
 	lists:foreach(
 		fun(H) ->
 			mine_in_parallel([Node1, Node2], ValidatorNode, H)
@@ -110,16 +110,16 @@ test_cross_node_retarget() ->
 test_no_exit_node() ->
 	%% Assert that when the exit node is down, CM miners don't share their solution with any
 	%% other peers.
-	[Node, ExitNode, ValidatorNode] = ar_test_node:start_coordinated(1),
-	ar_test_node:stop(ExitNode),
-	ar_test_node:mine(Node),
+	[Node, ExitNode, ValidatorNode] = big_test_node:start_coordinated(1),
+	big_test_node:stop(ExitNode),
+	big_test_node:mine(Node),
 	timer:sleep(5000),
-	BI = ar_test_node:get_blocks(ValidatorNode),
+	BI = big_test_node:get_blocks(ValidatorNode),
 	?assertEqual(1, length(BI)).
 
 test_no_secret() ->
-	[Node, _ExitNode, _ValidatorNode] = ar_test_node:start_coordinated(1),
-	Peer = ar_test_node:peer_ip(Node),
+	[Node, _ExitNode, _ValidatorNode] = big_test_node:start_coordinated(1),
+	Peer = big_test_node:peer_ip(Node),
 	?assertMatch(
 		{error, {ok, {{<<"421">>, _}, _, 
 			<<"CM API disabled or invalid CM API secret in request.">>, _, _}}},
@@ -138,8 +138,8 @@ test_no_secret() ->
 		big_http_iface_client:cm_publish_send(Peer, dummy_solution())).
 
 test_bad_secret() ->
-	[Node, _ExitNode, _ValidatorNode] = ar_test_node:start_coordinated(1),
-	Peer = ar_test_node:peer_ip(Node),
+	[Node, _ExitNode, _ValidatorNode] = big_test_node:start_coordinated(1),
+	Peer = big_test_node:peer_ip(Node),
 	{ok, Config} = application:get_env(bigfile, config),
 	try
 		ok = application:set_env(bigfile, config,
@@ -165,15 +165,15 @@ test_bad_secret() ->
 	end.
 
 test_partition_table() ->
-	[B0] = ar_weave:init([], ar_test_node:get_difficulty_for_invalid_hash(), 5 * ?PARTITION_SIZE),
-	Config = ar_test_node:base_cm_config([]),
+	[B0] = ar_weave:init([], big_test_node:get_difficulty_for_invalid_hash(), 5 * ?PARTITION_SIZE),
+	Config = big_test_node:base_cm_config([]),
 	
 	MiningAddr = Config#config.mining_addr,
 	RandomAddress = crypto:strong_rand_bytes(32),
-	Peer = ar_test_node:peer_ip(main),
+	Peer = big_test_node:peer_ip(main),
 
 	%% No partitions
-	ar_test_node:start_node(B0, Config, false),
+	big_test_node:start_node(B0, Config, false),
 
 	?assertEqual(
 		{ok, []},
@@ -181,7 +181,7 @@ test_partition_table() ->
 	),
 
 	%% Partition jumble with 2 addresses
-	ar_test_node:start_node(B0, Config#config{ 
+	big_test_node:start_node(B0, Config#config{ 
 		storage_modules = [
 			{?PARTITION_SIZE, 0, {spora_2_6, MiningAddr}},
 			{?PARTITION_SIZE, 0, {spora_2_6, RandomAddress}},
@@ -230,18 +230,18 @@ test_partition_table() ->
 
 test_peers_by_partition() ->
 	PartitionUpperBound = 6 * ?PARTITION_SIZE,
-	[B0] = ar_weave:init([], ar_test_node:get_difficulty_for_invalid_hash(),
+	[B0] = ar_weave:init([], big_test_node:get_difficulty_for_invalid_hash(),
 			PartitionUpperBound),
 
-	Peer1 = ar_test_node:peer_ip(peer1),
-	Peer2 = ar_test_node:peer_ip(peer2),
-	Peer3 = ar_test_node:peer_ip(peer3),
+	Peer1 = big_test_node:peer_ip(peer1),
+	Peer2 = big_test_node:peer_ip(peer2),
+	Peer3 = big_test_node:peer_ip(peer3),
 
-	BaseConfig = ar_test_node:base_cm_config([]),
+	BaseConfig = big_test_node:base_cm_config([]),
 	Config = BaseConfig#config{ cm_exit_peer = Peer1 },
 	MiningAddr = Config#config.mining_addr,
 	
-	ar_test_node:remote_call(peer1, ar_test_node, start_node, [B0, Config#config{
+	big_test_node:remote_call(peer1, big_test_node, start_node, [B0, Config#config{
 		cm_exit_peer = not_set,
 		cm_peers = [Peer2, Peer3],
 		local_peers = [Peer2, Peer3],
@@ -250,7 +250,7 @@ test_peers_by_partition() ->
 			{?PARTITION_SIZE, 1, {spora_2_6, MiningAddr}},
 			{?PARTITION_SIZE, 2, {spora_2_6, MiningAddr}}
 		]}, false]),
-	ar_test_node:remote_call(peer2, ar_test_node, start_node, [B0, Config#config{
+	big_test_node:remote_call(peer2, big_test_node, start_node, [B0, Config#config{
 		cm_peers = [Peer1, Peer3],
 		local_peers = [Peer1, Peer3],
 		storage_modules = [
@@ -258,7 +258,7 @@ test_peers_by_partition() ->
 			{?PARTITION_SIZE, 2, {spora_2_6, MiningAddr}},
 			{?PARTITION_SIZE, 3, {spora_2_6, MiningAddr}}
 		]}, false]),
-	ar_test_node:remote_call(peer3, ar_test_node, start_node, [B0, Config#config{
+	big_test_node:remote_call(peer3, big_test_node, start_node, [B0, Config#config{
 		cm_peers = [Peer1, Peer2],
 		local_peers = [Peer1, Peer2],
 		storage_modules = [
@@ -267,11 +267,11 @@ test_peers_by_partition() ->
 			{?PARTITION_SIZE, 4, {spora_2_6, MiningAddr}}
 		]}, false]),
 
-	ar_test_node:remote_call(peer1, big_mining_io, set_largest_seen_upper_bound,
+	big_test_node:remote_call(peer1, big_mining_io, set_largest_seen_upper_bound,
 		[PartitionUpperBound]),
-	ar_test_node:remote_call(peer2, big_mining_io, set_largest_seen_upper_bound,
+	big_test_node:remote_call(peer2, big_mining_io, set_largest_seen_upper_bound,
 		[PartitionUpperBound]),
-	ar_test_node:remote_call(peer3, big_mining_io, set_largest_seen_upper_bound,
+	big_test_node:remote_call(peer3, big_mining_io, set_largest_seen_upper_bound,
 		[PartitionUpperBound]),
 
 	timer:sleep(3000),
@@ -296,7 +296,7 @@ test_peers_by_partition() ->
 	assert_peers([], peer3, 4),
 	assert_peers([], peer3, 5),
 
-	ar_test_node:remote_call(peer1, ar_test_node, stop, []),
+	big_test_node:remote_call(peer1, big_test_node, stop, []),
 	timer:sleep(3000),
 
 	assert_peers([Peer1], peer2, 0),
@@ -311,7 +311,7 @@ test_peers_by_partition() ->
 	assert_peers([Peer2], peer3, 3),
 	assert_peers([], peer3, 4),
 
-	ar_test_node:remote_call(peer1, ar_test_node, start_node, [B0, Config#config{
+	big_test_node:remote_call(peer1, big_test_node, start_node, [B0, Config#config{
 		cm_exit_peer = not_set,
 		cm_peers = [Peer2, Peer3],
 		local_peers = [Peer2, Peer3],
@@ -320,7 +320,7 @@ test_peers_by_partition() ->
 			{?PARTITION_SIZE, 4, {spora_2_6, MiningAddr}},
 			{?PARTITION_SIZE, 5, {spora_2_6, MiningAddr}}
 		]}, false]),
-	ar_test_node:remote_call(peer1, big_mining_io, set_largest_seen_upper_bound,
+	big_test_node:remote_call(peer1, big_mining_io, set_largest_seen_upper_bound,
 		[PartitionUpperBound]),
 	timer:sleep(3000),
 
@@ -353,7 +353,7 @@ test_peers_by_partition() ->
 assert_peers(ExpectedPeers, Node, Partition) ->
 	?assert(ar_util:do_until(
 		fun() ->
-			Peers = ar_test_node:remote_call(Node, big_coordination, get_peers, [Partition]),
+			Peers = big_test_node:remote_call(Node, big_coordination, get_peers, [Partition]),
 			lists:sort(ExpectedPeers) == lists:sort(Peers)
 		end,
 		200,
@@ -404,13 +404,13 @@ wait_for_cross_node(Miners, ValidatorNode, CurrentHeight, ExpectedPartitions, Re
 	
 mine_in_parallel(Miners, ValidatorNode, CurrentHeight) ->
 	report_miners(Miners),
-	ar_util:pmap(fun(Node) -> ar_test_node:mine(Node) end, Miners),
+	ar_util:pmap(fun(Node) -> big_test_node:mine(Node) end, Miners),
 	?debugFmt("Waiting until the validator node (port ~B) advances to height ~B.",
-			[ar_test_node:peer_port(ValidatorNode), CurrentHeight + 1]),
-	BIValidator = ar_test_node:wait_until_height(ValidatorNode, CurrentHeight + 1, false),
+			[big_test_node:peer_port(ValidatorNode), CurrentHeight + 1]),
+	BIValidator = big_test_node:wait_until_height(ValidatorNode, CurrentHeight + 1, false),
 	%% Since multiple nodes are mining in parallel it's possible that multiple blocks
 	%% were mined. Get the Validator's current height in cas it's more than CurrentHeight+1.
-	NewHeight = ar_test_node:remote_call(ValidatorNode, big_node, get_height, []),
+	NewHeight = big_test_node:remote_call(ValidatorNode, big_node, get_height, []),
 
 	Hashes = [Hash || {Hash, _, _} <- lists:sublist(BIValidator, NewHeight - CurrentHeight)],
 	
@@ -421,7 +421,7 @@ mine_in_parallel(Miners, ValidatorNode, CurrentHeight) ->
 			%% Make sure the miner contains all of the new validator hashes, it's okay if
 			%% the miner contains *more* hashes since it's possible concurrent blocks were
 			%% mined between when the Validator checked and now.
-			BIMiner = ar_test_node:wait_until_height(Node, NewHeight, false),
+			BIMiner = big_test_node:wait_until_height(Node, NewHeight, false),
 			MinerHashes = [Hash || {Hash, _, _} <- BIMiner],
 			Message = lists:flatten(io_lib:format(
 					"Node ~p did not mine the same block as the validator node", [Node])),
@@ -430,7 +430,7 @@ mine_in_parallel(Miners, ValidatorNode, CurrentHeight) ->
 		Miners
 	),
 	LatestHash = lists:last(Hashes),
-	{ok, Block} = ar_test_node:http_get_block(LatestHash, ValidatorNode),
+	{ok, Block} = big_test_node:http_get_block(LatestHash, ValidatorNode),
 
 	case Block#block.recall_byte2 of
 		undefined -> 
@@ -450,14 +450,14 @@ report_miners(Miners) ->
 report_miners([], _I) ->
 	ok;
 report_miners([Miner | Miners], I) ->
-	?debugFmt("Miner ~B: ~p, port: ~B.", [I, Miner, ar_test_node:peer_port(Miner)]),
+	?debugFmt("Miner ~B: ~p, port: ~B.", [I, Miner, big_test_node:peer_port(Miner)]),
 	report_miners(Miners, I + 1).
 
 assert_empty_cache(_Node) ->
 	%% wait until the mining has stopped, then assert that the cache is empty
 	timer:sleep(10000),
 	ok.
-	% [{_, Size}] = ar_test_node:remote_call(Node, ets, lookup, [big_mining_server, chunk_cache_size]),
+	% [{_, Size}] = big_test_node:remote_call(Node, ets, lookup, [big_mining_server, chunk_cache_size]),
 	%% We should assert that the size is 0, but there is a lot of concurrency in these tests
 	%% so it's been hard to guarantee the cache is always empty by the time this check runs.
 	%% It's possible there is a bug in the cache management code, but that code is pretty complex.

@@ -5,7 +5,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--import(ar_test_node, [
+-import(big_test_node, [
 		wait_until_height/2, post_block/2,
 		send_new_block/2, sign_block/3,
 		read_block_when_stored/2,
@@ -14,28 +14,28 @@
 
 start_node() ->
 	[B0] = ar_weave:init([], 0), %% Set difficulty to 0 to speed up tests
-	ar_test_node:start(B0),
-	ar_test_node:start_peer(peer1, B0),
-	ar_test_node:connect_to_peer(peer1).
+	big_test_node:start(B0),
+	big_test_node:start_peer(peer1, B0),
+	big_test_node:connect_to_peer(peer1).
 
 reset_node() ->
 	big_blacklist_middleware:reset(),
-	ar_test_node:remote_call(peer1, big_blacklist_middleware, reset, []),
-	ar_test_node:connect_to_peer(peer1),
+	big_test_node:remote_call(peer1, big_blacklist_middleware, reset, []),
+	big_test_node:connect_to_peer(peer1),
 
 	Height = height(peer1),
 	[{PrevH, _, _} | _] = wait_until_height(main, Height),
-	ar_test_node:disconnect_from(peer1),
-	ar_test_node:mine(peer1),
-	[{H, _, _} | _] = ar_test_node:assert_wait_until_height(peer1, Height + 1),
-	B = ar_test_node:remote_call(peer1, big_block_cache, get, [block_cache, H]),
-	PrevB = ar_test_node:remote_call(peer1, big_block_cache, get, [block_cache, PrevH]),
-	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
-	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
+	big_test_node:disconnect_from(peer1),
+	big_test_node:mine(peer1),
+	[{H, _, _} | _] = big_test_node:assert_wait_until_height(peer1, Height + 1),
+	B = big_test_node:remote_call(peer1, big_block_cache, get, [block_cache, H]),
+	PrevB = big_test_node:remote_call(peer1, big_block_cache, get, [block_cache, PrevH]),
+	{ok, Config} = big_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
+	Key = big_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
 	{Key, B, PrevB}.
 
 setup_all_post_2_7() ->
-	{Setup, Cleanup} = ar_test_node:mock_functions([
+	{Setup, Cleanup} = big_test_node:mock_functions([
 		{big_fork, height_2_7, fun() -> 0 end}
 		]),
 	Functions = Setup(),
@@ -43,7 +43,7 @@ setup_all_post_2_7() ->
 	{Cleanup, Functions}.
 
 setup_all_post_2_8() ->
-	{Setup, Cleanup} = ar_test_node:mock_functions([
+	{Setup, Cleanup} = big_test_node:mock_functions([
 		{big_fork, height_2_8, fun() -> 0 end}
 		]),
 	Functions = Setup(),
@@ -97,22 +97,22 @@ post_2_8_test_() ->
 test_mitm_poa_chunk_tamper_warn({_Key, B, _PrevB}) ->
 	%% Verify that, in 2.7, we don't ban a peer if the poa.chunk is tampered with.
 	ok = big_events:subscribe(block),
-	assert_not_banned(ar_test_node:peer_ip(main)),
+	assert_not_banned(big_test_node:peer_ip(main)),
 	B2 = B#block{ poa = #poa{ chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE) } },
 	post_block(B2, invalid_first_chunk),
-	assert_not_banned(ar_test_node:peer_ip(main)).
+	assert_not_banned(big_test_node:peer_ip(main)).
 
 test_mitm_poa2_chunk_tamper_warn({Key, B, PrevB}) ->
 	%% Verify that, in 2.7, we don't ban a peer if the poa2.chunk is tampered with.
 	%% For this test we have to re-sign the block with the new poa2.chunk - but that's just a
 	%% test limitation. In the wild the poa2 chunk could be modified without resigning.
 	ok = big_events:subscribe(block),
-	assert_not_banned(ar_test_node:peer_ip(main)),
+	assert_not_banned(big_test_node:peer_ip(main)),
 	B2 = sign_block(B#block{ 
 			recall_byte2 = 100000000,
 			poa2 = #poa{ chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE) } }, PrevB, Key),
 	post_block(B2, invalid_second_chunk),
-	assert_not_banned(ar_test_node:peer_ip(main)).
+	assert_not_banned(big_test_node:peer_ip(main)).
 
 test_reject_block_invalid_proof_size({Key, B, PrevB}) ->
 	ok = big_events:subscribe(block),
@@ -246,11 +246,11 @@ test_reject_block_invalid_wallet_list({Key, B, PrevB}) ->
 
 test_reject_block_invalid_packing_difficulty({Key, B, PrevB}) ->
 	ok = big_events:subscribe(block),
-	assert_not_banned(ar_test_node:peer_ip(main)),
+	assert_not_banned(big_test_node:peer_ip(main)),
 	B2 = sign_block(B#block{ unpacked_chunk_hash = <<>>,
 			packing_difficulty = 33 }, PrevB, Key),
 	post_block(B2, invalid_first_unpacked_chunk),
-	assert_not_banned(ar_test_node:peer_ip(main)),
+	assert_not_banned(big_test_node:peer_ip(main)),
 	C = crypto:strong_rand_bytes(262144),
 	PackedC = crypto:strong_rand_bytes(262144 div 32),
 	UH = crypto:hash(sha256, C),
@@ -260,14 +260,14 @@ test_reject_block_invalid_packing_difficulty({Key, B, PrevB}) ->
 		poa = PoA#poa{ unpacked_chunk = C, chunk = PackedC }, unpacked_chunk_hash = UH,
 				chunk_hash = H }, PrevB, Key),
 	post_block(B3, invalid_packing_difficulty),
-	assert_banned(ar_test_node:peer_ip(main)).
+	assert_banned(big_test_node:peer_ip(main)).
 
 %% ------------------------------------------------------------------------------------------
 %% Others tests
 %% ------------------------------------------------------------------------------------------
 
 add_external_block_with_invalid_timestamp_test_() ->
-	ar_test_node:test_with_mocked_functions([{big_fork, height_2_7, fun() -> 0 end}],
+	big_test_node:test_with_mocked_functions([{big_fork, height_2_7, fun() -> 0 end}],
 		fun test_add_external_block_with_invalid_timestamp/0).
 
 test_add_external_block_with_invalid_timestamp() ->
@@ -298,12 +298,12 @@ rejects_invalid_blocks_test_() ->
 
 test_rejects_invalid_blocks() ->
 	[B0] = ar_weave:init([], big_retarget:switch_to_linear_diff(2)),
-	ar_test_node:start(B0),
-	ar_test_node:start_peer(peer1, B0),
-	ar_test_node:disconnect_from(peer1),
-	ar_test_node:mine(peer1),
-	BI = ar_test_node:assert_wait_until_height(peer1, 1),
-	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
+	big_test_node:start(B0),
+	big_test_node:start_peer(peer1, B0),
+	big_test_node:disconnect_from(peer1),
+	big_test_node:mine(peer1),
+	BI = big_test_node:assert_wait_until_height(peer1, 1),
+	B1 = big_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	%% Try to post an invalid block.
 	InvalidH = crypto:strong_rand_bytes(48),
 	ok = big_events:subscribe(block),
@@ -314,7 +314,7 @@ test_rejects_invalid_blocks() ->
 	%% The valid block with the ID from the failed attempt can still go through.
 	post_block(B1, valid),
 	%% Try to post the same block again.
-	Peer = ar_test_node:peer_ip(main),
+	Peer = big_test_node:peer_ip(main),
 	?assertMatch({ok, {{<<"208">>, _}, _, _, _, _}}, send_new_block(Peer, B1)),
 	%% Correct hash, but invalid signature.
 	B2Preimage = B1#block{ signature = <<>> },
@@ -322,8 +322,8 @@ test_rejects_invalid_blocks() ->
 	post_block(B2, invalid_signature),
 	%% Nonce limiter output too far in the future.
 	Info1 = B1#block.nonce_limiter_info,
-	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
-	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
+	{ok, Config} = big_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
+	Key = big_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
 	B3 = sign_block(B1#block{
 			%% Change the solution hash so that the validator does not go down
 			%% the comparing the resigned solution with the cached solution path.
@@ -419,7 +419,7 @@ test_rejects_invalid_blocks() ->
 			nonce_limiter_info = (B1#block.nonce_limiter_info)#nonce_limiter_info{
 					last_step_checkpoints = [crypto:strong_rand_bytes(32)] } }, B0, Key),
 	%% Reset the node to the genesis block.
-	ar_test_node:start(B0),
+	big_test_node:start(B0),
 	ok = big_events:subscribe(block),
 	post_block(B12, invalid_nonce_limiter),
 	?assertMatch({ok, {{<<"403">>, _}, _,
@@ -475,18 +475,18 @@ rejects_blocks_with_small_rsa_keys_test_() ->
 
 test_rejects_blocks_with_small_rsa_keys() ->
 	[B0] = ar_weave:init(),
-	ar_test_node:start(B0),
+	big_test_node:start(B0),
 	ok = big_events:subscribe(block),
-	ar_test_node:mine(main),
-	BI = ar_test_node:assert_wait_until_height(main, 1),
+	big_test_node:mine(main),
+	BI = big_test_node:assert_wait_until_height(main, 1),
 	B1 = big_storage:read_block(hd(BI)),
-	Key2 = ar_test_node:new_custom_size_rsa_wallet(512), % normal 512-byte key
+	Key2 = big_test_node:new_custom_size_rsa_wallet(512), % normal 512-byte key
 	B2 = sign_block(B1, B0, Key2),
 	post_block(B2, invalid_resigned_solution_hash), % because reward_addr changed
-	Key3 = ar_test_node:new_custom_size_rsa_wallet(66), % 66-byte key
+	Key3 = big_test_node:new_custom_size_rsa_wallet(66), % 66-byte key
 	B3 = sign_block(B1, B0, Key3),
 	post_block(B3, invalid_signature),
-	Key4 = ar_test_node:new_custom_size_rsa_wallet(511),
+	Key4 = big_test_node:new_custom_size_rsa_wallet(511),
 	B4 = sign_block(B1, B0, Key4),
 	post_block(B4, invalid_signature).
 
@@ -496,23 +496,23 @@ test_reject_block_invalid_double_signing_proof() ->
 
 test_reject_block_invalid_double_signing_proof(KeyType) ->
 	?debugFmt("KeyType: ~p~n", [KeyType]),
-	FullKey = ar_test_node:remote_call(peer1, big_wallet, new_keyfile, [KeyType]),
+	FullKey = big_test_node:remote_call(peer1, big_wallet, new_keyfile, [KeyType]),
 	MiningAddr = big_wallet:to_address(FullKey),
 	Key0 = big_wallet:new(),
 	Addr0 = big_wallet:to_address(Key0),
 	[B0] = ar_weave:init([{Addr0, ?BIG(1000), <<>>}], big_retarget:switch_to_linear_diff(2)),
 	?debugFmt("Genesis address: ~s, initial balance: ~B BIG.~n", [ar_util:encode(Addr0), 1000]),
-	ar_test_node:start(B0),
-	ar_test_node:start_peer(peer1, B0, MiningAddr),
-	ar_test_node:disconnect_from(peer1),
+	big_test_node:start(B0),
+	big_test_node:start_peer(peer1, B0, MiningAddr),
+	big_test_node:disconnect_from(peer1),
 	ok = big_events:subscribe(block),
-	{Priv, _} = Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [MiningAddr]),
-	TX0 = ar_test_node:sign_tx(Key0, #{ target => big_wallet:to_address(Key), quantity => ?BIG(10) }),
-	ar_test_node:assert_post_tx_to_peer(peer1, TX0),
-	ar_test_node:assert_post_tx_to_peer(main, TX0),
-	ar_test_node:mine(peer1),
-	BI = ar_test_node:assert_wait_until_height(peer1, 1),
-	B1 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
+	{Priv, _} = Key = big_test_node:remote_call(peer1, big_wallet, load_key, [MiningAddr]),
+	TX0 = big_test_node:sign_tx(Key0, #{ target => big_wallet:to_address(Key), quantity => ?BIG(10) }),
+	big_test_node:assert_post_tx_to_peer(peer1, TX0),
+	big_test_node:assert_post_tx_to_peer(main, TX0),
+	big_test_node:mine(peer1),
+	BI = big_test_node:assert_wait_until_height(peer1, 1),
+	B1 = big_test_node:remote_call(peer1, big_storage, read_block, [hd(BI)]),
 	Random512 = crypto:strong_rand_bytes(512),
 	Random64 = crypto:strong_rand_bytes(64),
 	InvalidProof = {Random512, Random512, 2, 1, Random64, Random512, 3, 2, Random64},
@@ -535,8 +535,8 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 			Signature2, CDiff, PrevCDiff, Preimage2},
 	B3 = sign_block(B1#block{ double_signing_proof = InvalidProof2 }, B0, Key),
 	post_block(B3, invalid_double_signing_proof_same_address),
-	ar_test_node:mine(peer1),
-	BI2 = ar_test_node:assert_wait_until_height(peer1, 2),
+	big_test_node:mine(peer1),
+	BI2 = big_test_node:assert_wait_until_height(peer1, 2),
 	{ok, MainConfig} = application:get_env(bigfile, config),
 	Key2 = element(1, big_wallet:load_key(MainConfig#config.mining_addr)),
 	Preimage3 = << (B0#block.hash)/binary, (crypto:strong_rand_bytes(32))/binary >>,
@@ -552,8 +552,8 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 			Signature4, CDiff, PrevCDiff, Preimage4},
 	B5 = sign_block(B1#block{ double_signing_proof = InvalidProof3 }, B0, Key),
 	post_block(B5, invalid_double_signing_proof_not_in_reward_history),
-	B6 = ar_test_node:remote_call(peer1, big_storage, read_block, [lists:nth(2, BI2)]),
-	B7 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI2)]),
+	B6 = big_test_node:remote_call(peer1, big_storage, read_block, [lists:nth(2, BI2)]),
+	B7 = big_test_node:remote_call(peer1, big_storage, read_block, [hd(BI2)]),
 	%% ECDSA signatures are deterministic - we add a new tag to get a new signature here.
 	B7_2 = sign_block(B7#block{ tags = [<<"new_tag">>] }, B6, Key),
 	post_block(B6, valid),
@@ -568,10 +568,10 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 		200,
 		5000
 	),
-	ar_test_node:connect_to_peer(peer1),
-	ar_test_node:mine(),
+	big_test_node:connect_to_peer(peer1),
+	big_test_node:mine(),
 	BI3 = assert_wait_until_height(peer1, 3),
-	B8 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI3)]),
+	B8 = big_test_node:remote_call(peer1, big_storage, read_block, [hd(BI3)]),
 	?assertNotEqual(undefined, B8#block.double_signing_proof),
 	RewardAddr = B8#block.reward_addr,
 	BannedAddr = big_wallet:to_address(Key),
@@ -580,12 +580,12 @@ test_reject_block_invalid_double_signing_proof(KeyType) ->
 	%% The banned address may still use their accounts for transfers/uploads.
 	Key3 = big_wallet:new(),
 	Target = big_wallet:to_address(Key3),
-	TX1 = ar_test_node:sign_tx(FullKey, #{ last_tx => <<>>, quantity => 1, target => Target }),
-	TX2 = ar_test_node:sign_tx(FullKey, #{ last_tx => ar_test_node:get_tx_anchor(peer1), data => <<"a">> }),
-	lists:foreach(fun(TX) -> ar_test_node:assert_post_tx_to_peer(main, TX) end, [TX1, TX2]),
-	ar_test_node:mine(),
+	TX1 = big_test_node:sign_tx(FullKey, #{ last_tx => <<>>, quantity => 1, target => Target }),
+	TX2 = big_test_node:sign_tx(FullKey, #{ last_tx => big_test_node:get_tx_anchor(peer1), data => <<"a">> }),
+	lists:foreach(fun(TX) -> big_test_node:assert_post_tx_to_peer(main, TX) end, [TX1, TX2]),
+	big_test_node:mine(),
 	BI4 = assert_wait_until_height(peer1, 4),
-	B9 = ar_test_node:remote_call(peer1, big_storage, read_block, [hd(BI4)]),
+	B9 = big_test_node:remote_call(peer1, big_storage, read_block, [hd(BI4)]),
 	Accounts2 = big_wallets:get(B9#block.wallet_list, [BannedAddr, Target]),
 	TXID = TX2#tx.id,
 	?assertEqual(2, length(B9#block.txs)),
@@ -600,32 +600,32 @@ test_send_block2() ->
 	[B0] = ar_weave:init([{big_wallet:to_address(Pub), ?BIG(100), <<>>}]),
 	MainWallet = big_wallet:new_keyfile(),
 	MainAddress = big_wallet:to_address(MainWallet),
-	PeerWallet = ar_test_node:remote_call(peer1, big_wallet, new_keyfile, []),
+	PeerWallet = big_test_node:remote_call(peer1, big_wallet, new_keyfile, []),
 	PeerAddress = big_wallet:to_address(PeerWallet),
-	ar_test_node:start(B0, MainAddress),
-	ar_test_node:start_peer(peer1, B0, PeerAddress),
-	ar_test_node:disconnect_from(peer1),
-	TXs = [ar_test_node:sign_tx(Wallet, #{ last_tx => ar_test_node:get_tx_anchor(peer1) }) || _ <- lists:seq(1, 10)],
-	lists:foreach(fun(TX) -> ar_test_node:assert_post_tx_to_peer(main, TX) end, TXs),
-	ar_test_node:mine(),
+	big_test_node:start(B0, MainAddress),
+	big_test_node:start_peer(peer1, B0, PeerAddress),
+	big_test_node:disconnect_from(peer1),
+	TXs = [big_test_node:sign_tx(Wallet, #{ last_tx => big_test_node:get_tx_anchor(peer1) }) || _ <- lists:seq(1, 10)],
+	lists:foreach(fun(TX) -> big_test_node:assert_post_tx_to_peer(main, TX) end, TXs),
+	big_test_node:mine(),
 	[{H, _, _}, _] = wait_until_height(main, 1),
 	B = big_storage:read_block(H),
 	TXs2 = sort_txs_by_block_order(TXs, B),
 	EverySecondTX = element(2, lists:foldl(fun(TX, {N, Acc}) when N rem 2 /= 0 ->
 			{N + 1, [TX | Acc]}; (_TX, {N, Acc}) -> {N + 1, Acc} end, {0, []}, TXs2)),
-	lists:foreach(fun(TX) -> ar_test_node:assert_post_tx_to_peer(peer1, TX) end, EverySecondTX),
+	lists:foreach(fun(TX) -> big_test_node:assert_post_tx_to_peer(peer1, TX) end, EverySecondTX),
 	Announcement = #block_announcement{ indep_hash = B#block.indep_hash,
 			previous_block = B0#block.indep_hash,
 			tx_prefixes = [binary:part(TX#tx.id, 0, 8) || TX <- TXs2] },
 	{ok, {{<<"200">>, _}, _, Body, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
+			peer => big_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => big_serialize:block_announcement_to_binary(Announcement) }),
 	Response = big_serialize:binary_to_block_announcement_response(Body),
 	?assertEqual({ok, #block_announcement_response{ missing_chunk = true,
 			missing_tx_indices = [0, 2, 4, 6, 8] }}, Response),
 	Announcement2 = Announcement#block_announcement{ recall_byte = 0 },
 	{ok, {{<<"200">>, _}, _, Body2, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
+			peer => big_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => big_serialize:block_announcement_to_binary(Announcement2) }),
 	Response2 = big_serialize:binary_to_block_announcement_response(Body2),
 	%% We always report missing chunk currently.
@@ -633,48 +633,48 @@ test_send_block2() ->
 			missing_tx_indices = [0, 2, 4, 6, 8] }}, Response2),
 	Announcement3 = Announcement#block_announcement{ recall_byte = 100000000000000 },
 	{ok, {{<<"200">>, _}, _, Body, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
+			peer => big_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => big_serialize:block_announcement_to_binary(Announcement3) }),
 	{ok, {{<<"418">>, _}, _, Body3, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block2",
+			peer => big_test_node:peer_ip(peer1), path => "/block2",
 			body => big_serialize:block_to_binary(B) }),
 	?assertEqual(iolist_to_binary(lists:foldl(fun(#tx{ id = TXID }, Acc) -> [TXID | Acc] end,
 			[], TXs2 -- EverySecondTX)), Body3),
 	B2 = B#block{ txs = [lists:nth(1, TXs2) | tl(B#block.txs)] },
 	{ok, {{<<"418">>, _}, _, Body4, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block2",
+			peer => big_test_node:peer_ip(peer1), path => "/block2",
 			body => big_serialize:block_to_binary(B2) }),
 	?assertEqual(iolist_to_binary(lists:foldl(fun(#tx{ id = TXID }, Acc) -> [TXID | Acc] end,
 			[], (TXs2 -- EverySecondTX) -- [lists:nth(1, TXs2)])), Body4),
-	TXs3 = [ar_test_node:sign_tx(main, Wallet, #{ last_tx => ar_test_node:get_tx_anchor(peer1),
+	TXs3 = [big_test_node:sign_tx(main, Wallet, #{ last_tx => big_test_node:get_tx_anchor(peer1),
 			data => crypto:strong_rand_bytes(10 * 1024) }) || _ <- lists:seq(1, 10)],
-	lists:foreach(fun(TX) -> ar_test_node:assert_post_tx_to_peer(main, TX) end, TXs3),
-	ar_test_node:mine(),
+	lists:foreach(fun(TX) -> big_test_node:assert_post_tx_to_peer(main, TX) end, TXs3),
+	big_test_node:mine(),
 	[{H2, _, _}, _, _] = wait_until_height(main, 2),
 	{ok, {{<<"412">>, _}, _, <<>>, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
+			peer => big_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => big_serialize:block_announcement_to_binary(#block_announcement{
 					indep_hash = H2, previous_block = B#block.indep_hash }) }),
 	BTXs = big_storage:read_tx(B#block.txs),
 	B3 = B#block{ txs = BTXs },
 	{ok, {{<<"200">>, _}, _, <<"OK">>, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block2",
+			peer => big_test_node:peer_ip(peer1), path => "/block2",
 			body => big_serialize:block_to_binary(B3) }),
 	{ok, {{<<"200">>, _}, _, SerializedB, _, _}} = big_http:req(#{ method => get,
-			peer => ar_test_node:peer_ip(main), path => "/block2/height/1" }),
+			peer => big_test_node:peer_ip(main), path => "/block2/height/1" }),
 	?assertEqual({ok, B}, big_serialize:binary_to_block(SerializedB)),
 	Map = element(2, lists:foldl(fun(TX, {N, M}) -> {N + 1, maps:put(TX#tx.id, N, M)} end,
 			{0, #{}}, TXs2)),
 	{ok, {{<<"200">>, _}, _, Serialized2B, _, _}} = big_http:req(#{ method => get,
-			peer => ar_test_node:peer_ip(main), path => "/block2/height/1",
+			peer => big_test_node:peer_ip(main), path => "/block2/height/1",
 			body => << 1:1, 0:(8 * 125 - 1) >> }),
 	?assertEqual({ok, B#block{ txs = [case maps:get(TX#tx.id, Map) == 0 of true -> TX;
 			_ -> TX#tx.id end || TX <- BTXs] }}, big_serialize:binary_to_block(Serialized2B)),
 	{ok, {{<<"200">>, _}, _, Serialized2B, _, _}} = big_http:req(#{ method => get,
-			peer => ar_test_node:peer_ip(main), path => "/block2/height/1",
+			peer => big_test_node:peer_ip(main), path => "/block2/height/1",
 			body => << 1:1, 0:7 >> }),
 	{ok, {{<<"200">>, _}, _, Serialized3B, _, _}} = big_http:req(#{ method => get,
-			peer => ar_test_node:peer_ip(main), path => "/block2/height/1",
+			peer => big_test_node:peer_ip(main), path => "/block2/height/1",
 			body => << 0:1, 1:1, 0:1, 1:1, 0:4 >> }),
 	?assertEqual({ok, B#block{ txs = [case lists:member(maps:get(TX#tx.id, Map), [1, 3]) of
 			true -> TX; _ -> TX#tx.id end || TX <- BTXs] }},
@@ -682,28 +682,28 @@ test_send_block2() ->
 	B4 = read_block_when_stored(H2, true),
 	timer:sleep(500),
 	{ok, {{<<"200">>, _}, _, <<"OK">>, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block2",
+			peer => big_test_node:peer_ip(peer1), path => "/block2",
 			body => big_serialize:block_to_binary(B4) }),
-	ar_test_node:connect_to_peer(peer1),
+	big_test_node:connect_to_peer(peer1),
 	lists:foreach(
 		fun(Height) ->
-			ar_test_node:mine(),
+			big_test_node:mine(),
 			assert_wait_until_height(peer1, Height)
 		end,
 		lists:seq(3, 3 + ?SEARCH_SPACE_UPPER_BOUND_DEPTH)
 	),
 	B5 = big_storage:read_block(big_node:get_current_block_hash()),
 	{ok, {{<<"208">>, _}, _, _, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
+			peer => big_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => big_serialize:block_announcement_to_binary(#block_announcement{
 					indep_hash = B5#block.indep_hash,
 					previous_block = B5#block.previous_block }) }),
-	ar_test_node:disconnect_from(peer1),
-	ar_test_node:mine(),
+	big_test_node:disconnect_from(peer1),
+	big_test_node:mine(),
 	[_ | _] = wait_until_height(main, 3 + ?SEARCH_SPACE_UPPER_BOUND_DEPTH + 1),
 	B6 = big_storage:read_block(big_node:get_current_block_hash()),
 	{ok, {{<<"200">>, _}, _, Body5, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
+			peer => big_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => big_serialize:block_announcement_to_binary(#block_announcement{
 					indep_hash = B6#block.indep_hash,
 					previous_block = B6#block.previous_block,
@@ -713,7 +713,7 @@ test_send_block2() ->
 			missing_tx_indices = [] }},
 			big_serialize:binary_to_block_announcement_response(Body5)),
 	{ok, {{<<"200">>, _}, _, Body6, _, _}} = big_http:req(#{ method => post,
-			peer => ar_test_node:peer_ip(peer1), path => "/block_announcement",
+			peer => big_test_node:peer_ip(peer1), path => "/block_announcement",
 			body => big_serialize:block_announcement_to_binary(#block_announcement{
 					indep_hash = B6#block.indep_hash,
 					previous_block = B6#block.previous_block,
@@ -729,23 +729,23 @@ resigned_solution_test_() ->
 
 test_resigned_solution() ->
 	[B0] = ar_weave:init(),
-	ar_test_node:start(B0),
-	ar_test_node:start_peer(peer1, B0),
-	ar_test_node:connect_to_peer(peer1),
-	ar_test_node:mine(peer1),
+	big_test_node:start(B0),
+	big_test_node:start_peer(peer1, B0),
+	big_test_node:connect_to_peer(peer1),
+	big_test_node:mine(peer1),
 	wait_until_height(main, 1),
-	ar_test_node:disconnect_from(peer1),
-	ar_test_node:mine(peer1),
+	big_test_node:disconnect_from(peer1),
+	big_test_node:mine(peer1),
 	B = big_node:get_current_block(),
-	{ok, Config} = ar_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
-	Key = ar_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
+	{ok, Config} = big_test_node:remote_call(peer1, application, get_env, [bigfile, config]),
+	Key = big_test_node:remote_call(peer1, big_wallet, load_key, [Config#config.mining_addr]),
 	ok = big_events:subscribe(block),
 	B2 = sign_block(B#block{ tags = [<<"tag1">>] }, B0, Key),
 	post_block(B2, [valid]),
 	B3 = sign_block(B#block{ tags = [<<"tag2">>] }, B0, Key),
 	post_block(B3, [valid]),
 	assert_wait_until_height(peer1, 2),
-	B4 = ar_test_node:remote_call(peer1, big_node, get_current_block, []),
+	B4 = big_test_node:remote_call(peer1, big_node, get_current_block, []),
 	?assertEqual(B#block.indep_hash, B4#block.previous_block),
 	B2H = B2#block.indep_hash,
 	?assertNotEqual(B2#block.indep_hash, B4#block.previous_block),
@@ -769,9 +769,9 @@ test_resigned_solution() ->
 	B5H = B5#block.indep_hash,
 	post_block(B5, [valid]),
 	[{B5H, _, _}, {B2H, _, _}, _] = wait_until_height(main, 2),
-	ar_test_node:mine(),
+	big_test_node:mine(),
 	[{B6H, _, _}, _, _, _] = wait_until_height(main, 3),
-	ar_test_node:connect_to_peer(peer1),
+	big_test_node:connect_to_peer(peer1),
 	[{B6H, _, _}, {B5H, _, _}, {B2H, _, _}, _] = assert_wait_until_height(peer1, 3).
 
 %% ------------------------------------------------------------------------------------------
@@ -788,4 +788,4 @@ tx_id(ID) ->
 	ID.
 
 height(Node) ->
-	ar_test_node:remote_call(Node, big_node, get_height, []).
+	big_test_node:remote_call(Node, big_node, get_height, []).

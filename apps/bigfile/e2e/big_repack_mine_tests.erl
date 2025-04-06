@@ -38,8 +38,8 @@ test_repack_mine({FromPackingType, ToPackingType}) ->
 		{from_packing_type, FromPackingType}, {to_packing_type, ToPackingType}]),
 	ValidatorNode = peer1,
 	RepackerNode = peer2,
-	ar_test_node:stop(ValidatorNode),
-	ar_test_node:stop(RepackerNode),
+	big_test_node:stop(ValidatorNode),
+	big_test_node:stop(RepackerNode),
 	{Blocks, _AddrA, Chunks} = big_e2e:start_source_node(
 		RepackerNode, FromPackingType, wallet_a),
 
@@ -53,8 +53,8 @@ test_repack_mine({FromPackingType, ToPackingType}) ->
 		_ -> big_wallet:to_address(WalletB)
 	end,
 	ToPacking = big_e2e:packing_type_to_packing(ToPackingType, AddrB),
-	{ok, Config} = ar_test_node:get_config(RepackerNode),
-	ar_test_node:restart_with_config(RepackerNode, Config#config{
+	{ok, Config} = big_test_node:get_config(RepackerNode),
+	big_test_node:restart_with_config(RepackerNode, Config#config{
 		storage_modules = Config#config.storage_modules ++ StorageModules,
 		mining_addr = AddrB
 	}),
@@ -71,7 +71,7 @@ test_repack_mine({FromPackingType, ToPackingType}) ->
 	%% big_e2e:assert_chunks(RepackerNode, ToPacking, Chunks),
 	big_e2e:assert_empty_partition(RepackerNode, 3, ToPacking),
 
-	ar_test_node:restart_with_config(RepackerNode, Config#config{
+	big_test_node:restart_with_config(RepackerNode, Config#config{
 		storage_modules = StorageModules,
 		mining_addr = AddrB
 	}),
@@ -105,8 +105,8 @@ test_repacking_blocked({FromPackingType, ToPackingType}) ->
 		{from_packing_type, FromPackingType}, {to_packing_type, ToPackingType}]),
 	ValidatorNode = peer1,
 	RepackerNode = peer2,
-	ar_test_node:stop(ValidatorNode),
-	ar_test_node:stop(RepackerNode),
+	big_test_node:stop(ValidatorNode),
+	big_test_node:stop(RepackerNode),
 	{Blocks, _AddrA, Chunks} = big_e2e:start_source_node(
 		RepackerNode, FromPackingType, wallet_a),
 
@@ -120,8 +120,8 @@ test_repacking_blocked({FromPackingType, ToPackingType}) ->
 		_ -> big_wallet:to_address(WalletB)
 	end,
 	ToPacking = big_e2e:packing_type_to_packing(ToPackingType, AddrB),
-	{ok, Config} = ar_test_node:get_config(RepackerNode),
-	ar_test_node:restart_with_config(RepackerNode, Config#config{
+	{ok, Config} = big_test_node:get_config(RepackerNode),
+	big_test_node:restart_with_config(RepackerNode, Config#config{
 		storage_modules = Config#config.storage_modules ++ StorageModules,
 		mining_addr = AddrB
 	}),
@@ -129,7 +129,7 @@ test_repacking_blocked({FromPackingType, ToPackingType}) ->
 	big_e2e:assert_empty_partition(RepackerNode, 1, ToPacking),
 	big_e2e:assert_no_chunks(RepackerNode, Chunks),
 
-	ar_test_node:restart_with_config(RepackerNode, Config#config{
+	big_test_node:restart_with_config(RepackerNode, Config#config{
 		storage_modules = StorageModules,
 		mining_addr = AddrB
 	}),
@@ -138,10 +138,10 @@ test_repacking_blocked({FromPackingType, ToPackingType}) ->
 	big_e2e:assert_no_chunks(RepackerNode, Chunks).
 
 start_validator_node(ValidatorNode, RepackerNode, B0) ->
-	{ok, Config} = ar_test_node:get_config(ValidatorNode),
-	?assertEqual(ar_test_node:peer_name(ValidatorNode),
-		ar_test_node:start_other_node(ValidatorNode, B0, Config#config{
-			peers = [ar_test_node:peer_ip(RepackerNode)],
+	{ok, Config} = big_test_node:get_config(ValidatorNode),
+	?assertEqual(big_test_node:peer_name(ValidatorNode),
+		big_test_node:start_other_node(ValidatorNode, B0, Config#config{
+			peers = [big_test_node:peer_ip(RepackerNode)],
 			start_from_latest_state = true,
 			auto_join = true,
 			storage_modules = []

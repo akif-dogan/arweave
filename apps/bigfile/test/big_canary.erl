@@ -2,7 +2,7 @@
 %%% @doc A test that always fail.
 %%% @end
 %%%===================================================================
--module(ar_canary).
+-module(big_canary).
 -include_lib("eunit/include/eunit.hrl").
 
 canary_test_() ->

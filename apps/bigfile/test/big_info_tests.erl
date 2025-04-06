@@ -27,19 +27,19 @@ test_recent_blocks_announcement() ->
 
 test_recent_blocks(Type) ->
 	[B0] = ar_weave:init([], 0), %% Set difficulty to 0 to speed up tests
-	ar_test_node:start_peer(peer1, B0),
+	big_test_node:start_peer(peer1, B0),
 	GenesisBlock = [#{
 		<<"id">> => ar_util:encode(B0#block.indep_hash),
 		<<"received">> => <<"pending">>,
 		<<"height">> => 0
 	}],
-	?assertEqual(GenesisBlock, get_recent(ar_test_node:peer_ip(peer1), blocks)),
+	?assertEqual(GenesisBlock, get_recent(big_test_node:peer_ip(peer1), blocks)),
 
 	TargetHeight = ?CHECKPOINT_DEPTH+2,
 	PeerBI = lists:foldl(
 		fun(Height, _Acc) ->
-			ar_test_node:mine(peer1),
-			ar_test_node:wait_until_height(peer1, Height)
+			big_test_node:mine(peer1),
+			big_test_node:wait_until_height(peer1, Height)
 		end,
 		ok,
 		lists:seq(1, TargetHeight)
@@ -47,16 +47,16 @@ test_recent_blocks(Type) ->
 	%% Peer1 recent has no timestamps since it hasn't received any of its own blocks
 	%% gossipped back
 	?assertEqual(expected_blocks(peer1, PeerBI, true), 
-		get_recent(ar_test_node:peer_ip(peer1), blocks)),
+		get_recent(big_test_node:peer_ip(peer1), blocks)),
 
 	%% Share blocks to peer1
 	lists:foreach(
 		fun({H, _WeaveSize, _TXRoot}) ->
 			timer:sleep(1000),
-			B = ar_test_node:remote_call(peer1, big_block_cache, get, [block_cache, H]),
+			B = big_test_node:remote_call(peer1, big_block_cache, get, [block_cache, H]),
 			case Type of
 				post ->
-					ar_test_node:send_new_block(ar_test_node:peer_ip(peer1), B);
+					big_test_node:send_new_block(big_test_node:peer_ip(peer1), B);
 				announcement ->
 					Announcement = #block_announcement{ indep_hash = H,
 						previous_block = B#block.previous_block,
@@ -65,7 +65,7 @@ test_recent_blocks(Type) ->
 						solution_hash = B#block.hash,
 						tx_prefixes = [] },
 					big_http_iface_client:send_block_announcement(
-						ar_test_node:peer_ip(peer1), Announcement)
+						big_test_node:peer_ip(peer1), Announcement)
 			end
 		end,
 		%% Reverse the list so that the peer receives the blocks in the same order they
@@ -76,7 +76,7 @@ test_recent_blocks(Type) ->
 	%% Peer1 recent should now have timestamps, but also black out the most recent
 	%% ones.
 	?assertEqual(expected_blocks(peer1, PeerBI), 
-		get_recent(ar_test_node:peer_ip(peer1), blocks)).
+		get_recent(big_test_node:peer_ip(peer1), blocks)).
 		
 expected_blocks(Node, BI) ->
 	expected_blocks(Node, BI, false).
@@ -88,7 +88,7 @@ expected_blocks(Node, BI, ForcePending) ->
 	%%    (latest block first)
 	Blocks = lists:foldl(
 		fun({H, _WeaveSize, _TXRoot}, Acc) ->
-			B = ar_test_node:remote_call(Node, big_block_cache, get, [block_cache, H]),
+			B = big_test_node:remote_call(Node, big_block_cache, get, [block_cache, H]),
 			Timestamp = case ForcePending of
 				true -> <<"pending">>;
 				false ->
@@ -113,7 +113,7 @@ expected_blocks(Node, BI, ForcePending) ->
 %% -------------------------------------------------------------------------------------------
 test_get_recent_forks() ->
 	[B0] = ar_weave:init([]),
-	ar_test_node:start(B0),
+	big_test_node:start(B0),
 
     ForkRootB1 = #block{ height = 1 },
     ForkRootB2= #block{ height = 2 },
@@ -174,29 +174,29 @@ test_get_recent_forks() ->
 
 test_recent_forks() ->
 	[B0] = ar_weave:init([], 0), %% Set difficulty to 0 to speed up tests
-	ar_test_node:start(B0),
-    ar_test_node:start_peer(peer1, B0),
-    ar_test_node:start_peer(peer2, B0),
-    ar_test_node:connect_to_peer(peer1),
-    ar_test_node:connect_to_peer(peer2),
+	big_test_node:start(B0),
+    big_test_node:start_peer(peer1, B0),
+    big_test_node:start_peer(peer2, B0),
+    big_test_node:connect_to_peer(peer1),
+    big_test_node:connect_to_peer(peer2),
    
     %% Mine a few blocks, shared by both peers
-    ar_test_node:mine(peer1),
-    ar_test_node:wait_until_height(peer1, 1),
-    ar_test_node:wait_until_height(peer2, 1),
-    ar_test_node:mine(peer2),
-    ar_test_node:wait_until_height(peer1, 2),
-    ar_test_node:wait_until_height(peer2, 2),
-    ar_test_node:mine(peer1),
-    ar_test_node:wait_until_height(peer1, 3),
-    ar_test_node:wait_until_height(peer2, 3),
+    big_test_node:mine(peer1),
+    big_test_node:wait_until_height(peer1, 1),
+    big_test_node:wait_until_height(peer2, 1),
+    big_test_node:mine(peer2),
+    big_test_node:wait_until_height(peer1, 2),
+    big_test_node:wait_until_height(peer2, 2),
+    big_test_node:mine(peer1),
+    big_test_node:wait_until_height(peer1, 3),
+    big_test_node:wait_until_height(peer2, 3),
 
     %% Disconnect peers, and have peer1 mine 1 block, and peer2 mine 3
-    ar_test_node:disconnect_from(peer1),
-    ar_test_node:disconnect_from(peer2),
+    big_test_node:disconnect_from(peer1),
+    big_test_node:disconnect_from(peer2),
 
-    ar_test_node:mine(peer1),
-    BI1 = ar_test_node:wait_until_height(peer1, 4),
+    big_test_node:mine(peer1),
+    BI1 = big_test_node:wait_until_height(peer1, 4),
 	Orphans1 = [ID || {ID, _, _} <- lists:sublist(BI1, 1)],
 	Fork1 = #fork{
 		id = crypto:hash(sha256, list_to_binary(Orphans1)),
@@ -204,29 +204,29 @@ test_recent_forks() ->
 		block_ids = Orphans1
 	},
 		
-    ar_test_node:mine(peer2),
-    ar_test_node:wait_until_height(peer2, 4),
-    ar_test_node:mine(peer2),
-    ar_test_node:wait_until_height(peer2, 5),
-    ar_test_node:mine(peer2),
-    ar_test_node:wait_until_height(peer2, 6),
+    big_test_node:mine(peer2),
+    big_test_node:wait_until_height(peer2, 4),
+    big_test_node:mine(peer2),
+    big_test_node:wait_until_height(peer2, 5),
+    big_test_node:mine(peer2),
+    big_test_node:wait_until_height(peer2, 6),
 
     %% Reconnect the peers. This will orphan peer1's block
-    ar_test_node:connect_to_peer(peer1),
-    ar_test_node:connect_to_peer(peer2),
+    big_test_node:connect_to_peer(peer1),
+    big_test_node:connect_to_peer(peer2),
 
-    ar_test_node:wait_until_height(peer1, 6),
-    ar_test_node:wait_until_height(peer2, 6),
-    ar_test_node:wait_until_height(main, 6),
+    big_test_node:wait_until_height(peer1, 6),
+    big_test_node:wait_until_height(peer2, 6),
+    big_test_node:wait_until_height(main, 6),
 
 	%% Disconnect peers, and have peer1 mine 2 block2, and peer2 mine 3
-    ar_test_node:disconnect_from(peer1),
-    ar_test_node:disconnect_from(peer2),
+    big_test_node:disconnect_from(peer1),
+    big_test_node:disconnect_from(peer2),
 
-	ar_test_node:mine(peer1),
-    ar_test_node:wait_until_height(peer1, 7),
-    ar_test_node:mine(peer1),
-    BI2 = ar_test_node:wait_until_height(peer1, 8),
+	big_test_node:mine(peer1),
+    big_test_node:wait_until_height(peer1, 7),
+    big_test_node:mine(peer1),
+    BI2 = big_test_node:wait_until_height(peer1, 8),
 	Orphans2 = [ID || {ID, _, _} <- lists:reverse(lists:sublist(BI2, 2))],
 	Fork2 = #fork{
 		id = crypto:hash(sha256, list_to_binary(Orphans2)),
@@ -234,29 +234,29 @@ test_recent_forks() ->
 		block_ids = Orphans2
 	},
 
-	ar_test_node:mine(peer2),
-    ar_test_node:wait_until_height(peer2, 7),
-    ar_test_node:mine(peer2),
-    ar_test_node:wait_until_height(peer2, 8),
-    ar_test_node:mine(peer2),
-    ar_test_node:wait_until_height(peer2, 9),
+	big_test_node:mine(peer2),
+    big_test_node:wait_until_height(peer2, 7),
+    big_test_node:mine(peer2),
+    big_test_node:wait_until_height(peer2, 8),
+    big_test_node:mine(peer2),
+    big_test_node:wait_until_height(peer2, 9),
 
 	%% Reconnect the peers. This will create a second fork as peer1's blocks are orphaned
-    ar_test_node:connect_to_peer(peer1),
-    ar_test_node:connect_to_peer(peer2),
+    big_test_node:connect_to_peer(peer1),
+    big_test_node:connect_to_peer(peer2),
 
-	ar_test_node:wait_until_height(peer1, 9),
-    ar_test_node:wait_until_height(peer2, 9),
-    ar_test_node:wait_until_height(main, 9),
+	big_test_node:wait_until_height(peer1, 9),
+    big_test_node:wait_until_height(peer2, 9),
+    big_test_node:wait_until_height(main, 9),
 
-	ar_test_node:disconnect_from(peer1),
-    ar_test_node:disconnect_from(peer2),
+	big_test_node:disconnect_from(peer1),
+    big_test_node:disconnect_from(peer2),
 
-	assert_forks_json_equal([Fork2, Fork1], get_recent(ar_test_node:peer_ip(peer1), forks)),
+	assert_forks_json_equal([Fork2, Fork1], get_recent(big_test_node:peer_ip(peer1), forks)),
 	ok.
 
 assert_forks_json_equal(ExpectedForks) ->
-	assert_forks_json_equal(ExpectedForks, get_recent(ar_test_node:peer_ip(main), forks)).
+	assert_forks_json_equal(ExpectedForks, get_recent(big_test_node:peer_ip(main), forks)).
 
 assert_forks_json_equal(ExpectedForks, ActualForks) ->
 	ExpectedForksStripped = [ 

@@ -548,7 +548,7 @@ test_replica_2_9() ->
     StorageModules = [{?PARTITION_SIZE, 0, Packing}, {?PARTITION_SIZE, 1, Packing}],
     {ok, Config} = application:get_env(bigfile, config),
     try
-        ar_test_node:start(#{reward_addr => RewardAddr, storage_modules => StorageModules}),
+        big_test_node:start(#{reward_addr => RewardAddr, storage_modules => StorageModules}),
         StoreID1 =
             big_storage_module:id(
                 lists:nth(1, StorageModules)),

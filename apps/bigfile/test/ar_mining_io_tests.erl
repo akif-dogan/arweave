@@ -17,8 +17,8 @@ setup_all() ->
 	{ok, Config} = application:get_env(bigfile, config),
 	StorageModules = lists:flatten(
 		[[{?PARTITION_SIZE, N, {spora_2_6, RewardAddr}}] || N <- lists:seq(0, 8)]),
-	ar_test_node:start(B0, RewardAddr, Config, StorageModules),
-	{Setup, Cleanup} = ar_test_node:mock_functions([
+	big_test_node:start(B0, RewardAddr, Config, StorageModules),
+	{Setup, Cleanup} = big_test_node:mock_functions([
 		{big_mining_worker, chunks_read, fun chunks_read/5}
 	]),
 	Functions = Setup(),

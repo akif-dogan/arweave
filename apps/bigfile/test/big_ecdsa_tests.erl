@@ -1,4 +1,4 @@
--module(ar_ecdsa_tests).
+-module(big_ecdsa_tests).
 
 -include("../include/big.hrl").
 

@@ -13,9 +13,9 @@ start_node() ->
 		wallet(Key, 1000, LastTXID),
 		wallet(OtherKey, 800, crypto:strong_rand_bytes(32))
 	]),
-	ar_test_node:start(B0),
-	ar_test_node:start_peer(peer1, B0),
-	ar_test_node:connect_to_peer(peer1),
+	big_test_node:start(B0),
+	big_test_node:start_peer(peer1, B0),
+	big_test_node:connect_to_peer(peer1),
 	ets:insert(node_state, [{wallet_list, B0#block.wallet_list}]),
 	{Key, LastTXID, OtherKey, B0}.
 

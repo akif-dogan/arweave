@@ -22,7 +22,7 @@ test_sync_record() ->
 		Partition = {?PARTITION_SIZE, 0, {composite, RewardAddr, 1}},
 		PartitionID = big_storage_module:id(Partition),
 		StorageModules = [Partition],
-		ar_test_node:start(B0, RewardAddr, Config, StorageModules),
+		big_test_node:start(B0, RewardAddr, Config, StorageModules),
 		Options = #{ format => etf, random_subset => false },
 
 		%% Genesis data only
@@ -134,7 +134,7 @@ test_sync_record() ->
 		?assertEqual({PartitionStart+?DATA_CHUNK_SIZE, PartitionStart},
 			big_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
 
-		ar_test_node:stop()
+		big_test_node:stop()
 	after
 		ok = application:set_env(bigfile, config, Config)
 	end.
@@ -151,7 +151,7 @@ test_sync_record_with_replica_2_9() when ?BLOCK_2_9_SYNCING ->
 		Partition = {?PARTITION_SIZE, 0, {replica_2_9, RewardAddr}},
 		PartitionID = big_storage_module:id(Partition),
 		StorageModules = [Partition],
-		ar_test_node:start(B0, RewardAddr, Config, StorageModules),
+		big_test_node:start(B0, RewardAddr, Config, StorageModules),
 		Options = #{ format => etf, random_subset => false },
 
 		%% Genesis data only
@@ -173,7 +173,7 @@ test_sync_record_with_replica_2_9() when ?BLOCK_2_9_SYNCING ->
 		?assertEqual({PartitionStart+?DATA_CHUNK_SIZE, PartitionStart},
 				big_sync_record:get_interval(PartitionStart+1, big_data_sync, PartitionID)),
 
-		ar_test_node:stop()
+		big_test_node:stop()
 	after
 		ok = application:set_env(bigfile, config, Config)
 	end;

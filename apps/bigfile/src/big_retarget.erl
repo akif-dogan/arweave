@@ -273,11 +273,11 @@ calculate_difficulty_before_1_8(OldDiff, TS, Last, Height) ->
 simple_retarget_test_() ->
 	{timeout, 300, fun() ->
 		[B0] = ar_weave:init([]),
-		ar_test_node:start(B0),
+		big_test_node:start(B0),
 		lists:foreach(
 			fun(Height) ->
-				ar_test_node:mine(),
-				ar_test_node:wait_until_height(main, Height)
+				big_test_node:mine(),
+				big_test_node:wait_until_height(main, Height)
 			end,
 			lists:seq(1, ?RETARGET_BLOCKS + 1)
 		),
@@ -293,7 +293,7 @@ simple_retarget_test_() ->
 	end}.
 
 calculate_difficulty_linear_test_() ->
-	ar_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
+	big_test_node:test_with_mocked_functions([{big_fork, height_2_5, fun() -> 0 end}],
 		fun test_calculate_difficulty_linear/0, 120).
 
 test_calculate_difficulty_linear() ->

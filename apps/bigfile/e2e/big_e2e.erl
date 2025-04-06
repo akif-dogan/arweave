@@ -82,9 +82,9 @@ start_source_node(Node, unpacked, _WalletFixture) ->
 	{Blocks, _SourceAddr, Chunks} = big_e2e:start_source_node(TempNode, spora_2_6, wallet_a),
 	{_, StorageModules} = big_e2e:source_node_storage_modules(Node, unpacked, wallet_a),
 	[B0, _, {TX2, _} | _] = Blocks,
-	{ok, Config} = ar_test_node:get_config(Node),
-	ar_test_node:start_other_node(Node, B0, Config#config{
-		peers = [ar_test_node:peer_ip(TempNode)],
+	{ok, Config} = big_test_node:get_config(Node),
+	big_test_node:start_other_node(Node, B0, Config#config{
+		peers = [big_test_node:peer_ip(TempNode)],
 		storage_modules = StorageModules,
 		auto_join = true
 	}, true),
@@ -103,9 +103,9 @@ start_source_node(Node, unpacked, _WalletFixture) ->
 
 	?LOG_INFO("Source node ~p assertions passed.", [Node]),
 
-	ar_test_node:stop(TempNode),
+	big_test_node:stop(TempNode),
 
-	ar_test_node:restart_with_config(Node, Config#config{
+	big_test_node:restart_with_config(Node, Config#config{
 		peers = [],
 		start_from_latest_state = true,
 		storage_modules = StorageModules,
@@ -117,7 +117,7 @@ start_source_node(Node, unpacked, _WalletFixture) ->
 	{ok, {{<<"200">>, _}, _, Data, _, _}} =
 		big_http:req(#{
 			method => get,
-			peer => ar_test_node:peer_ip(Node),
+			peer => big_test_node:peer_ip(Node),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TX2#tx.id)) ++ "/data"
 		}),
 	{ok, ExpectedData} = big_e2e:load_chunk_fixture(
@@ -134,10 +134,10 @@ start_source_node(Node, PackingType, WalletFixture) ->
 	RewardAddr = big_wallet:to_address(Wallet),
 	[B0] = ar_weave:init([{RewardAddr, ?BIG(200), <<>>}], 0, ?PARTITION_SIZE),
 
-	{ok, Config} = ar_test_node:remote_call(Node, application, get_env, [bigfile, config]),
+	{ok, Config} = big_test_node:remote_call(Node, application, get_env, [bigfile, config]),
 	
-	?assertEqual(ar_test_node:peer_name(Node),
-		ar_test_node:start_other_node(Node, B0, Config#config{
+	?assertEqual(big_test_node:peer_name(Node),
+		big_test_node:start_other_node(Node, B0, Config#config{
 			peers = [],
 			start_from_latest_state = true,
 			storage_modules = StorageModules,
@@ -195,7 +195,7 @@ start_source_node(Node, PackingType, WalletFixture) ->
 	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}},
 		big_http:req(#{
 			method => get,
-			peer => ar_test_node:peer_ip(Node),
+			peer => big_test_node:peer_ip(Node),
 			path => "/tx/" ++ binary_to_list(ar_util:encode(TX1#tx.id)) ++ "/data"
 		})),
 
@@ -209,7 +209,7 @@ max_chunk_offset(Chunks) ->
 source_node_storage_modules(_Node, unpacked, _WalletFixture) ->
 	{undefined, source_node_storage_modules(unpacked)};
 source_node_storage_modules(Node, PackingType, WalletFixture) ->
-	Wallet = ar_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [WalletFixture]),
+	Wallet = big_test_node:remote_call(Node, big_e2e, load_wallet_fixture, [WalletFixture]),
 	RewardAddr = big_wallet:to_address(Wallet),
 	SourcePacking = packing_type_to_packing(PackingType, RewardAddr),
 	{Wallet, source_node_storage_modules(SourcePacking)}.
@@ -224,10 +224,10 @@ source_node_storage_modules(SourcePacking) ->
 	].
 	
 mine_block(Node, Wallet, DataSize, IsTemporary) ->
-	WeaveSize = ar_test_node:remote_call(Node, big_node, get_current_weave_size, []),
+	WeaveSize = big_test_node:remote_call(Node, big_node, get_current_weave_size, []),
 	Addr = big_wallet:to_address(Wallet),
 	{TX, Chunks} = generate_tx(Node, Wallet, WeaveSize, DataSize),
-	B = ar_test_node:post_and_mine(#{ miner => Node, await_on => Node }, [TX]),
+	B = big_test_node:post_and_mine(#{ miner => Node, await_on => Node }, [TX]),
 
 	?assertEqual(Addr, B#block.reward_addr),
 
@@ -241,7 +241,7 @@ generate_tx(Node, Wallet, WeaveSize, DataSize) ->
 	{DataRoot, _DataTree} = big_merkle:generate_tree(
 		[{big_tx:generate_chunk_id(Chunk), Offset} || {Chunk, Offset} <- Chunks]
 	),
-	TX = ar_test_node:sign_tx(Node, Wallet, #{
+	TX = big_test_node:sign_tx(Node, Wallet, #{
 		data_size => DataSize,
 		data_root => DataRoot
 	}),
@@ -250,7 +250,7 @@ generate_tx(Node, Wallet, WeaveSize, DataSize) ->
 generate_chunks(Node, WeaveSize, DataSize, Acc) when DataSize > 0 ->
 	ChunkSize = min(DataSize, ?DATA_CHUNK_SIZE),
 	EndOffset = (length(Acc) * ?DATA_CHUNK_SIZE) + ChunkSize,
-	Chunk = ar_test_node:get_genesis_chunk(WeaveSize + EndOffset),
+	Chunk = big_test_node:get_genesis_chunk(WeaveSize + EndOffset),
 	generate_chunks(Node, WeaveSize, DataSize - ChunkSize, Acc ++ [{Chunk, EndOffset}]);
 generate_chunks(_, _, _, Acc) ->
 	Acc.
@@ -270,7 +270,7 @@ assert_has_entropy(Node, StartOffset, EndOffset, StoreID) ->
 	RangeSize = EndOffset - StartOffset,
 	HasEntropy = ar_util:do_until(
 		fun() -> 
-			Intersection = ar_test_node:remote_call(
+			Intersection = big_test_node:remote_call(
 				Node, big_sync_record, get_intersection_size,
 				[EndOffset, StartOffset, ar_chunk_storage_replica_2_9_1_entropy, StoreID]),
 			Intersection >= RangeSize
@@ -282,7 +282,7 @@ assert_has_entropy(Node, StartOffset, EndOffset, StoreID) ->
 		true ->
 			ok;
 		_ ->
-			Intersection = ar_test_node:remote_call(
+			Intersection = big_test_node:remote_call(
 				Node, big_sync_record, get_intersection_size,
 				[EndOffset, StartOffset, ar_chunk_storage_replica_2_9_1_entropy, StoreID]),
 			?assert(false, 
@@ -294,7 +294,7 @@ assert_has_entropy(Node, StartOffset, EndOffset, StoreID) ->
 assert_no_entropy(Node, StartOffset, EndOffset, StoreID) ->
 	HasEntropy = ar_util:do_until(
 		fun() -> 
-			Intersection = ar_test_node:remote_call(
+			Intersection = big_test_node:remote_call(
 				Node, big_sync_record, get_intersection_size,
 				[EndOffset, StartOffset, ar_chunk_storage_replica_2_9_1_entropy, StoreID]),
 			Intersection > 0
@@ -304,7 +304,7 @@ assert_no_entropy(Node, StartOffset, EndOffset, StoreID) ->
 	),
 	case HasEntropy of
 		true ->
-			Intersection = ar_test_node:remote_call(
+			Intersection = big_test_node:remote_call(
 				Node, big_sync_record, get_intersection_size,
 				[EndOffset, StartOffset, ar_chunk_storage_replica_2_9_1_entropy, StoreID]),
 			?assert(false, 
@@ -334,7 +334,7 @@ assert_syncs_range(Node, StartOffset, EndOffset) ->
 			ok;
 		_ ->
 			SyncRecord = big_http_iface_client:get_sync_record(
-				ar_test_node:peer_ip(Node)),
+				big_test_node:peer_ip(Node)),
 			?assert(false, 
 				iolist_to_binary(io_lib:format(
 					"~s failed to sync range ~p - ~p. Sync record: ~p", 
@@ -360,7 +360,7 @@ assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 		[Node, PartitionNumber, big_serialize:encode_packing(Packing, true), Size]),
 	ar_util:do_until(
 		fun() -> 
-			ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
+			big_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
 				[PartitionNumber, Packing]) >= Size
 		end,
 		100,
@@ -368,7 +368,7 @@ assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 	),
 	?assertEqual(
 		Size,
-		ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
+		big_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
 			[PartitionNumber, Packing]),
 		iolist_to_binary(io_lib:format(
 			"~s partition ~p,~p was not the expected size.", 
@@ -377,7 +377,7 @@ assert_partition_size(Node, PartitionNumber, Packing, Size) ->
 assert_empty_partition(Node, PartitionNumber, Packing) ->
 	ar_util:do_until(
 		fun() -> 
-			ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
+			big_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
 				[PartitionNumber, Packing]) > 0
 		end,
 		100,
@@ -385,7 +385,7 @@ assert_empty_partition(Node, PartitionNumber, Packing) ->
 	),
 	?assertEqual(
 		0,
-		ar_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
+		big_test_node:remote_call(Node, big_mining_stats, get_partition_data_size, 
 			[PartitionNumber, Packing]),
 		iolist_to_binary(io_lib:format(
 			"~s partition ~p,~p is not empty", [Node, PartitionNumber, 
@@ -393,23 +393,23 @@ assert_empty_partition(Node, PartitionNumber, Packing) ->
 
 assert_mine_and_validate(MinerNode, ValidatorNode, MinerPacking) ->
 	CurrentHeight = max(
-		ar_test_node:remote_call(ValidatorNode, big_node, get_height, []),
-		ar_test_node:remote_call(MinerNode, big_node, get_height, [])
+		big_test_node:remote_call(ValidatorNode, big_node, get_height, []),
+		big_test_node:remote_call(MinerNode, big_node, get_height, [])
 	),
-	ar_test_node:wait_until_height(ValidatorNode, CurrentHeight),
-	ar_test_node:wait_until_height(MinerNode, CurrentHeight),
-	ar_test_node:mine(MinerNode),
+	big_test_node:wait_until_height(ValidatorNode, CurrentHeight),
+	big_test_node:wait_until_height(MinerNode, CurrentHeight),
+	big_test_node:mine(MinerNode),
 
-	MinerBI = ar_test_node:wait_until_height(MinerNode, CurrentHeight + 1),
-	{ok, MinerBlock} = ar_test_node:http_get_block(element(1, hd(MinerBI)), MinerNode),
+	MinerBI = big_test_node:wait_until_height(MinerNode, CurrentHeight + 1),
+	{ok, MinerBlock} = big_test_node:http_get_block(element(1, hd(MinerBI)), MinerNode),
 	big_e2e:assert_block(MinerPacking, MinerBlock),
 
-	ValidatorBI = ar_test_node:wait_until_height(ValidatorNode, MinerBlock#block.height),
-	{ok, ValidatorBlock} = ar_test_node:http_get_block(element(1, hd(ValidatorBI)), ValidatorNode),
+	ValidatorBI = big_test_node:wait_until_height(ValidatorNode, MinerBlock#block.height),
+	{ok, ValidatorBlock} = big_test_node:http_get_block(element(1, hd(ValidatorBI)), ValidatorNode),
 	?assertEqual(MinerBlock, ValidatorBlock).
 
 has_range(Node, StartOffset, EndOffset) ->
-	NodeIP = ar_test_node:peer_ip(Node),
+	NodeIP = big_test_node:peer_ip(Node),
 	case big_http_iface_client:get_sync_record(NodeIP) of
 		{ok, SyncRecord} ->
 			interval_contains(SyncRecord, StartOffset, EndOffset);
@@ -453,7 +453,7 @@ assert_chunks(Node, RequestPacking, Packing, Chunks) ->
 assert_chunk(Node, RequestPacking, Packing, Block, EndOffset, ChunkSize) ->
 	?LOG_INFO("Asserting chunk at offset ~p, size ~p", [EndOffset, ChunkSize]),
 
-	Result = ar_test_node:get_chunk(Node, EndOffset, RequestPacking),
+	Result = big_test_node:get_chunk(Node, EndOffset, RequestPacking),
 	{ok, {{StatusCode, _}, _, EncodedProof, _, _}} = Result,
 	?assertEqual(<<"200">>, StatusCode, iolist_to_binary(io_lib:format(
 		"Chunk not found. Node: ~p, Offset: ~p",
@@ -464,7 +464,7 @@ assert_chunk(Node, RequestPacking, Packing, Block, EndOffset, ChunkSize) ->
 	Proof = big_serialize:json_map_to_poa_map(
 		jiffy:decode(EncodedProof, [return_maps])
 	),
-	{true, _} = ar_test_node:remote_call(Node, big_poa, validate_paths, [
+	{true, _} = big_test_node:remote_call(Node, big_poa, validate_paths, [
 		Block#block.tx_root,
 		maps:get(tx_path, Proof),
 		maps:get(data_path, Proof),
@@ -484,7 +484,7 @@ assert_chunk(Node, RequestPacking, Packing, Block, EndOffset, ChunkSize) ->
 		Packing, EndOffset, Block#block.tx_root, Chunk, ?DATA_CHUNK_SIZE),
 	UnpaddedChunk = big_packing_server:unpad_chunk(
 		Packing, UnpackedChunk, ChunkSize, byte_size(Chunk)),
-	ExpectedUnpackedChunk = ar_test_node:get_genesis_chunk(EndOffset),
+	ExpectedUnpackedChunk = big_test_node:get_genesis_chunk(EndOffset),
 	?assertEqual(ExpectedUnpackedChunk, UnpaddedChunk,
 		iolist_to_binary(io_lib:format(
 			"~p: Chunk at offset ~p, size ~p does not match unpacked chunk",
@@ -496,7 +496,7 @@ assert_no_chunks(Node, Chunks) ->
 	end, Chunks).
 
 assert_no_chunk(Node, EndOffset) ->
-	Result = ar_test_node:get_chunk(Node, EndOffset, any),
+	Result = big_test_node:get_chunk(Node, EndOffset, any),
 	{ok, {{StatusCode, _}, _, _, _, _}} = Result,
 	?assertEqual(<<"404">>, StatusCode, iolist_to_binary(io_lib:format(
 		"Chunk found when it should not have been. Node: ~p, Offset: ~p",

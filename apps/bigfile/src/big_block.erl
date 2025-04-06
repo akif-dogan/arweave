@@ -819,12 +819,12 @@ hash_list_gen_test_() ->
 
 test_hash_list_gen() ->
 	[B0] = ar_weave:init([]),
-	ar_test_node:start(B0),
-	ar_test_node:mine(),
-	BI1 = ar_test_node:wait_until_height(main, 1),
+	big_test_node:start(B0),
+	big_test_node:mine(),
+	BI1 = big_test_node:wait_until_height(main, 1),
 	B1 = big_storage:read_block(hd(BI1)),
-	ar_test_node:mine(),
-	BI2 = ar_test_node:wait_until_height(main, 2),
+	big_test_node:mine(),
+	BI2 = big_test_node:wait_until_height(main, 2),
 	B2 = big_storage:read_block(hd(BI2)),
 	?assertEqual([B0#block.indep_hash], generate_hash_list_for_block(B1, BI2)),
 	?assertEqual([H || {H, _, _} <- BI1],
@@ -1006,7 +1006,7 @@ random_wallet() ->
 
 validate_replica_format_test_() ->
 	[
-		ar_test_node:test_with_mocked_functions([
+		big_test_node:test_with_mocked_functions([
 				{big_fork, height_2_8, fun() -> 10 end},
 				{big_fork, height_2_9, fun() -> 20 end}
 			],
