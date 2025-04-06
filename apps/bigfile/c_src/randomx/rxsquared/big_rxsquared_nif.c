@@ -1,11 +1,11 @@
 #include <string.h>
 #include <openssl/sha.h>
-#include <ar_nif.h>
+#include <big_nif.h>
 #include "../randomx_long_with_entropy.h"
 #include "../feistel_msgsize_key_cipher.h"
 #include "../randomx_squared.h"
 
-#include "../ar_randomx_impl.h"
+#include "../big_randomx_impl.h"
 
 const int PACKING_KEY_SIZE = 32;
 const int MAX_CHUNK_SIZE = 256*1024;

@@ -169,7 +169,7 @@ pack_chunks(replica_2_9, Thread, Dir, Context, Count) ->
 
 pack_chunks(spora_2_6, Thread, Dir, Context, Count) ->
 	{RandomXState, Chunk, Key, _ChunksPerThread} = Context,
-	{ok, PackedChunk} = ar_rx512_nif:rx512_encrypt_chunk_nif(
+	{ok, PackedChunk} = big_rx512_nif:rx512_encrypt_chunk_nif(
 		RandomXState, Key, Chunk, ?RANDOMX_PACKING_ROUNDS_2_6,
 		1, 1, 1),
 	case Dir of
@@ -183,7 +183,7 @@ pack_chunks(spora_2_6, Thread, Dir, Context, Count) ->
 	pack_chunks(spora_2_6, Thread, Dir, Context, Count-1);
 pack_chunks({composite, Difficulty}, Thread, Dir, Context, Count) ->
 	{RandomXState, Chunk, Key, _ChunksPerThread} = Context,
-	{ok, PackedChunk} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, PackedChunk} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState, Key, Chunk,
 		1, 1, 1,
 		?COMPOSITE_PACKING_ROUND_COUNT,

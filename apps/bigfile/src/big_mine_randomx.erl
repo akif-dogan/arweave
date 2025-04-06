@@ -213,10 +213,10 @@ split_into_sub_chunks(<< SubChunk:8192/binary, Rest/binary >>, StartOffset) ->
 
 
 init_fast2(rx512, Key, JIT, LargePages, Threads) ->
-	{ok, FastState} = ar_rx512_nif:rx512_init_nif(Key, ?RANDOMX_HASHING_MODE_FAST, JIT, LargePages, Threads),
+	{ok, FastState} = big_rx512_nif:rx512_init_nif(Key, ?RANDOMX_HASHING_MODE_FAST, JIT, LargePages, Threads),
 	{rx512, FastState};
 init_fast2(rx4096, Key, JIT, LargePages, Threads) ->
-	{ok, FastState} = ar_rx4096_nif:rx4096_init_nif(Key, ?RANDOMX_HASHING_MODE_FAST, JIT, LargePages, Threads),
+	{ok, FastState} = big_rx4096_nif:rx4096_init_nif(Key, ?RANDOMX_HASHING_MODE_FAST, JIT, LargePages, Threads),
 	{rx4096, FastState};
 init_fast2(rxsquared, Key, JIT, LargePages, Threads) ->
 	{ok, FastState} = big_rxsquared_nif:rxsquared_init_nif(Key, ?RANDOMX_HASHING_MODE_FAST, JIT, LargePages, Threads),
@@ -225,10 +225,10 @@ init_fast2(RxMode, _Key, _JIT, _LargePages, _Threads) ->
 	?LOG_ERROR([{event, invalid_randomx_mode}, {mode, RxMode}]),
 	{error, invalid_randomx_mode}.
 init_light2(rx512, Key, JIT, LargePages) ->
-	{ok, LightState} = ar_rx512_nif:rx512_init_nif(Key, ?RANDOMX_HASHING_MODE_LIGHT, JIT, LargePages, 0),
+	{ok, LightState} = big_rx512_nif:rx512_init_nif(Key, ?RANDOMX_HASHING_MODE_LIGHT, JIT, LargePages, 0),
 	{rx512, LightState};
 init_light2(rx4096, Key, JIT, LargePages) ->
-	{ok, LightState} = ar_rx4096_nif:rx4096_init_nif(Key, ?RANDOMX_HASHING_MODE_LIGHT, JIT, LargePages, 0),
+	{ok, LightState} = big_rx4096_nif:rx4096_init_nif(Key, ?RANDOMX_HASHING_MODE_LIGHT, JIT, LargePages, 0),
 	{rx4096, LightState};
 init_light2(rxsquared, Key, JIT, LargePages) ->
 	{ok, LightState} = big_rxsquared_nif:rxsquared_init_nif(Key, ?RANDOMX_HASHING_MODE_LIGHT, JIT, LargePages, 0),
@@ -238,9 +238,9 @@ init_light2(RxMode, _Key, _JIT, _LargePages) ->
 	{exceperrortion, invalid_randomx_mode}.
 
 info2({rx512, State}) ->
-	ar_rx512_nif:rx512_info_nif(State);
+	big_rx512_nif:rx512_info_nif(State);
 info2({rx4096, State}) ->
-	ar_rx4096_nif:rx4096_info_nif(State);
+	big_rx4096_nif:rx4096_info_nif(State);
 info2({rxsquared, State}) ->
 	big_rxsquared_nif:rxsquared_info_nif(State);
 info2(_) ->
@@ -257,10 +257,10 @@ hash2({_, {stub_state, Key}}, Data, _JIT, _LargePages, _HardwareAES) ->
 	crypto:hash(sha256, << Key/binary, Data/binary >>);
 %% Non-STUB implementation
 hash2({rx512, State}, Data, JIT, LargePages, HardwareAES) ->
-	{ok, Hash} = ar_rx512_nif:rx512_hash_nif(State, Data, JIT, LargePages, HardwareAES),
+	{ok, Hash} = big_rx512_nif:rx512_hash_nif(State, Data, JIT, LargePages, HardwareAES),
 	Hash;
 hash2({rx4096, State}, Data, JIT, LargePages, HardwareAES) ->
-	{ok, Hash} = ar_rx4096_nif:rx4096_hash_nif(State, Data, JIT, LargePages, HardwareAES),
+	{ok, Hash} = big_rx4096_nif:rx4096_hash_nif(State, Data, JIT, LargePages, HardwareAES),
 	Hash;
 hash2({rxsquared, State}, Data, JIT, LargePages, HardwareAES) ->
 	{ok, Hash} = big_rxsquared_nif:rxsquared_hash_nif(State, Data, JIT, LargePages, HardwareAES),
@@ -292,14 +292,14 @@ randomx_decrypt_chunk2({_, {stub_state, _}}, Key, Chunk, _ChunkSize, _Packing) -
 	{ok, crypto:crypto_one_time(aes_256_cbc, Key, IV, Chunk, Options)};
 %% Non-STUB implementation
 randomx_decrypt_chunk2({rx512, RandomxState}, Key, Chunk, ChunkSize, spora_2_5) ->
-	ar_rx512_nif:rx512_decrypt_chunk_nif(RandomxState, Key, Chunk, ChunkSize, ?RANDOMX_PACKING_ROUNDS,
+	big_rx512_nif:rx512_decrypt_chunk_nif(RandomxState, Key, Chunk, ChunkSize, ?RANDOMX_PACKING_ROUNDS,
 			jit(), large_pages(), hardware_aes());
 randomx_decrypt_chunk2({rx512, RandomxState}, Key, Chunk, ChunkSize, {spora_2_6, _Addr}) ->
-	ar_rx512_nif:rx512_decrypt_chunk_nif(RandomxState, Key, Chunk, ChunkSize, ?RANDOMX_PACKING_ROUNDS_2_6,
+	big_rx512_nif:rx512_decrypt_chunk_nif(RandomxState, Key, Chunk, ChunkSize, ?RANDOMX_PACKING_ROUNDS_2_6,
 			jit(), large_pages(), hardware_aes());
 randomx_decrypt_chunk2({rx4096, RandomxState}, Key, Chunk, ChunkSize,
 		{composite, _Addr, PackingDifficulty}) ->
-	ar_rx4096_nif:rx4096_decrypt_composite_chunk_nif(RandomxState, Key, Chunk, ChunkSize,
+	big_rx4096_nif:rx4096_decrypt_composite_chunk_nif(RandomxState, Key, Chunk, ChunkSize,
 			jit(), large_pages(), hardware_aes(), ?COMPOSITE_PACKING_ROUND_COUNT,
 			PackingDifficulty, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT);
 randomx_decrypt_chunk2(_BadState, _Key, _Chunk, _ChunkSize, _Packing) ->
@@ -319,7 +319,7 @@ randomx_decrypt_sub_chunk2(Packing, {rx4096, RandomxState}, Key, Chunk, SubChunk
 	{_, _, IterationCount} = Packing,
 	RoundCount = ?COMPOSITE_PACKING_ROUND_COUNT,
 	OutSize = ?COMPOSITE_PACKING_SUB_CHUNK_SIZE,
-	ar_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(RandomxState, Key, Chunk, OutSize,
+	big_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(RandomxState, Key, Chunk, OutSize,
 		jit(), large_pages(), hardware_aes(), RoundCount, IterationCount, SubChunkStartOffset);
 randomx_decrypt_sub_chunk2(_Packing, _BadState, _Key, _Chunk, _SubChunkStartOffset) ->
 	{error, invalid_randomx_mode}.
@@ -348,13 +348,13 @@ randomx_encrypt_chunk2(_Packing, {_, {stub_state, _}}, Key, Chunk) ->
 			big_packing_server:pad_chunk(Chunk), Options)};
 %% Non-STUB implementation
 randomx_encrypt_chunk2(spora_2_5, {rx512, RandomxState}, Key, Chunk) ->
-	ar_rx512_nif:rx512_encrypt_chunk_nif(RandomxState, Key, Chunk, ?RANDOMX_PACKING_ROUNDS,
+	big_rx512_nif:rx512_encrypt_chunk_nif(RandomxState, Key, Chunk, ?RANDOMX_PACKING_ROUNDS,
 			jit(), large_pages(), hardware_aes());
 randomx_encrypt_chunk2({spora_2_6, _Addr}, {rx512, RandomxState}, Key, Chunk) ->
-	ar_rx512_nif:rx512_encrypt_chunk_nif(RandomxState, Key, Chunk, ?RANDOMX_PACKING_ROUNDS_2_6,
+	big_rx512_nif:rx512_encrypt_chunk_nif(RandomxState, Key, Chunk, ?RANDOMX_PACKING_ROUNDS_2_6,
 			jit(), large_pages(), hardware_aes());
 randomx_encrypt_chunk2({composite, _Addr, PackingDifficulty}, {rx4096, RandomxState}, Key, Chunk) ->
-	ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomxState, Key, Chunk,
+	big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomxState, Key, Chunk,
 			jit(), large_pages(), hardware_aes(), ?COMPOSITE_PACKING_ROUND_COUNT,
 			PackingDifficulty, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT);
 randomx_encrypt_chunk2(_Packing, _BadState, _Key, _Chunk) ->
@@ -381,7 +381,7 @@ randomx_reencrypt_chunk2(SourcePacking, TargetPacking,
 randomx_reencrypt_chunk2({composite, Addr1, PackingDifficulty1},
 		{composite, Addr2, PackingDifficulty2},
 		{rx4096, RandomxState}, UnpackKey, PackKey, Chunk, ChunkSize) ->
-	case ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomxState, UnpackKey,
+	case big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomxState, UnpackKey,
 			PackKey, Chunk, jit(), large_pages(), hardware_aes(),
 			?COMPOSITE_PACKING_ROUND_COUNT, ?COMPOSITE_PACKING_ROUND_COUNT,
 			PackingDifficulty1, PackingDifficulty2,
@@ -412,7 +412,7 @@ randomx_reencrypt_chunk2(SourcePacking, TargetPacking,
 		{rx512, RandomxState}, UnpackKey, PackKey, Chunk, ChunkSize) ->
 	UnpackRounds = packing_rounds(SourcePacking),
 	PackRounds = packing_rounds(TargetPacking),
-	case ar_rx512_nif:rx512_reencrypt_chunk_nif(RandomxState, UnpackKey, PackKey, Chunk,
+	case big_rx512_nif:rx512_reencrypt_chunk_nif(RandomxState, UnpackKey, PackKey, Chunk,
 			ChunkSize, UnpackRounds, PackRounds, jit(), large_pages(), hardware_aes()) of
 		{error, Error} ->
 			{exception, Error};

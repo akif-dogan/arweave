@@ -1,4 +1,4 @@
--module(ar_rx4096_nif).
+-module(big_rx4096_nif).
 
 -include_lib("bigfile/include/big.hrl").
 

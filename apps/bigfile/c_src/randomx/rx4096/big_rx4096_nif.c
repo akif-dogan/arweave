@@ -1,10 +1,10 @@
 #include <string.h>
 #include <openssl/sha.h>
-#include <ar_nif.h>
+#include <big_nif.h>
 #include "../randomx_long_with_entropy.h"
 #include "../feistel_msgsize_key_cipher.h"
 
-#include "../ar_randomx_impl.h"
+#include "../big_randomx_impl.h"
 
 const int PACKING_KEY_SIZE = 32;
 const int MAX_CHUNK_SIZE = 256*1024;
@@ -565,4 +565,4 @@ static ErlNifFunc rx4096_funcs[] = {
 		rx4096_reencrypt_composite_chunk_nif, ERL_NIF_DIRTY_JOB_CPU_BOUND}
 };
 
-ERL_NIF_INIT(ar_rx4096_nif, rx4096_funcs, rx4096_load, NULL, NULL, NULL);
+ERL_NIF_INIT(big_rx4096_nif, rx4096_funcs, rx4096_load, NULL, NULL, NULL);

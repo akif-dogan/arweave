@@ -1,5 +1,5 @@
-#ifndef AR_RANDOMX_IMPL_H
-#define AR_RANDOMX_IMPL_H
+#ifndef BIG_RANDOMX_IMPL_H
+#define BIG_RANDOMX_IMPL_H
 
 // Thif file includes the full definitions of any function that is shared between the
 // rx512 and rx4096 shared libraries. Although ugly this was the only way I could get

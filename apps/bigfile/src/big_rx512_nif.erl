@@ -1,4 +1,4 @@
--module(ar_rx512_nif).
+-module(big_rx512_nif).
 
 -include_lib("bigfile/include/big.hrl").
 

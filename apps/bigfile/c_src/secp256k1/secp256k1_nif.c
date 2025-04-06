@@ -4,7 +4,7 @@
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 
-#include <ar_nif.h>
+#include <big_nif.h>
 
 #define SECP256K1_PUBKEY_UNCOMPRESSED_SIZE 65
 #define SECP256K1_PUBKEY_COMPRESSED_SIZE 33

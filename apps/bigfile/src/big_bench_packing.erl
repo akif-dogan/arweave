@@ -270,12 +270,12 @@ init_randomx_state(Config) ->
 	case lists:member(Test, [pack_composite, nif_repack_composite]) of
 		true ->
 			big_bench_timer:record({init},
-				fun ar_rx4096_nif:rx4096_init_nif/5,
+				fun big_rx4096_nif:rx4096_init_nif/5,
 					[?RANDOMX_PACKING_KEY, ?RANDOMX_HASHING_MODE_FAST, 
 						JIT, LargePages, NumWorkers]);
 		false ->
 			big_bench_timer:record({init},
-				fun ar_rx512_nif:rx512_init_nif/5,
+				fun big_rx512_nif:rx512_init_nif/5,
 					[?RANDOMX_PACKING_KEY, ?RANDOMX_HASHING_MODE_FAST,
 						JIT, LargePages, NumWorkers])
 	end.
@@ -351,7 +351,7 @@ pack_legacy_chunks(WorkerID, Config, Offset, Size) ->
 	ReadResult = file:pread(UnpackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, UnpackedChunk} ->
-			{ok, PackedChunk} = ar_rx512_nif:rx512_encrypt_chunk_nif(
+			{ok, PackedChunk} = big_rx512_nif:rx512_encrypt_chunk_nif(
 				RandomXState, Key, UnpackedChunk, ?RANDOMX_PACKING_ROUNDS_2_6,
 				JIT, LargePages, HardwareAES),
 			file:pwrite(PackedFileHandle, Offset, PackedChunk),
@@ -389,7 +389,7 @@ pack_composite_chunks(WorkerID, Config, Offset, Size) ->
 	ReadResult = file:pread(UnpackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, UnpackedChunk} ->
-			{ok, PackedChunk} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+			{ok, PackedChunk} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 				RandomXState, Key, UnpackedChunk,
 				JIT, LargePages, HardwareAES,
 				Rounds, PackingDifficulty, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
@@ -426,10 +426,10 @@ erl_repack_legacy_chunks(WorkerID, Config, Offset, Size) ->
 	ReadResult = file:pread(PackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, PackedChunk} ->
-			{ok, UnpackedChunk} = ar_rx512_nif:rx512_decrypt_chunk_nif(
+			{ok, UnpackedChunk} = big_rx512_nif:rx512_decrypt_chunk_nif(
 				RandomXState, UnpackKey, PackedChunk, ChunkSize, ?RANDOMX_PACKING_ROUNDS_2_6,
 				JIT, LargePages, HardwareAES),
-			{ok, RepackedChunk} =ar_rx512_nif:rx512_encrypt_chunk_nif(
+			{ok, RepackedChunk} =big_rx512_nif:rx512_encrypt_chunk_nif(
 				RandomXState, PackKey, UnpackedChunk, ?RANDOMX_PACKING_ROUNDS_2_6,
 				JIT, LargePages, HardwareAES),	
 			file:pwrite(RepackedFileHandle, Offset, RepackedChunk),
@@ -465,7 +465,7 @@ nif_repack_legacy_chunks(WorkerID, Config, Offset, Size) ->
 	ReadResult = file:pread(PackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, PackedChunk} ->
-			{ok, RepackedChunk, _} = ar_rx512_nif:rx512_reencrypt_chunk_nif(
+			{ok, RepackedChunk, _} = big_rx512_nif:rx512_reencrypt_chunk_nif(
 				RandomXState, UnpackKey, PackKey, PackedChunk, ChunkSize,
 				?RANDOMX_PACKING_ROUNDS_2_6, ?RANDOMX_PACKING_ROUNDS_2_6,
 				JIT, LargePages, HardwareAES),
@@ -501,7 +501,7 @@ nif_repack_composite_chunks(WorkerID, Config, Offset, Size) ->
 	ReadResult = file:pread(PackedFileHandle, Offset, ChunkSize),
 	RemainingSize = case ReadResult of
 		{ok, PackedChunk} ->
-			{ok, RepackedChunk, _} = ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(
+			{ok, RepackedChunk, _} = big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(
 				RandomXState, UnpackKey, PackKey, PackedChunk, JIT, LargePages, HardwareAES,
 				Rounds, Rounds, PackingDifficulty, PackingDifficulty,
 				?COMPOSITE_PACKING_SUB_CHUNK_COUNT, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),

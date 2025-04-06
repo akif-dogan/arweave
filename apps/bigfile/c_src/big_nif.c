@@ -1,4 +1,4 @@
-#include "ar_nif.h"
+#include "big_nif.h"
 #include <string.h>
 
 // Utility functions.

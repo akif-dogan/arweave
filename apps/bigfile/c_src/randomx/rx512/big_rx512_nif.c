@@ -1,10 +1,10 @@
 #include <string.h>
 #include <openssl/sha.h>
-#include <ar_nif.h>
+#include <big_nif.h>
 #include "../randomx_long_with_entropy.h"
 #include "../feistel_msgsize_key_cipher.h"
 
-#include "../ar_randomx_impl.h"
+#include "../big_randomx_impl.h"
 
 const int MAX_CHUNK_SIZE = 256*1024;
 
@@ -273,5 +273,5 @@ static ErlNifFunc rx512_funcs[] = {
 };
 
 
-ERL_NIF_INIT(ar_rx512_nif, rx512_funcs, rx512_load, NULL, NULL, NULL);
+ERL_NIF_INIT(big_rx512_nif, rx512_funcs, rx512_load, NULL, NULL, NULL);
 

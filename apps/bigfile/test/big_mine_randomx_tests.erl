@@ -13,35 +13,35 @@
 ).
 
 encrypt_chunk({rx512, RandomXState}, Key, Chunk, PackingRounds, JIT, LargePages, HardwareAES, _ExtraArgs) ->
-	ar_rx512_nif:rx512_encrypt_chunk_nif(
+	big_rx512_nif:rx512_encrypt_chunk_nif(
 		RandomXState, Key, Chunk, PackingRounds, JIT, LargePages, HardwareAES).
 
 decrypt_chunk({rx512, RandomXState}, Key, Chunk, PackingRounds, JIT, LargePages, HardwareAES, _ExtraArgs) ->
-	ar_rx512_nif:rx512_decrypt_chunk_nif(
+	big_rx512_nif:rx512_decrypt_chunk_nif(
 		RandomXState, Key, Chunk, byte_size(Chunk), PackingRounds, JIT, LargePages, HardwareAES).
 
 reencrypt_chunk({rx512, RandomXState}, Key1, Key2, Chunk, PackingRounds1, PackingRounds2,
 		JIT, LargePages, HardwareAES, _ExtraArgs) ->
-	ar_rx512_nif:rx512_reencrypt_chunk_nif(
+	big_rx512_nif:rx512_reencrypt_chunk_nif(
 		RandomXState, Key1, Key2, Chunk, byte_size(Chunk), PackingRounds1, PackingRounds2,
 		JIT, LargePages, HardwareAES).
 
 encrypt_composite_chunk({rx4096, RandomXState}, Key, Chunk, PackingRounds, JIT, LargePages, HardwareAES,
 		[IterationCount, SubChunkCount] = _ExtraArgs) ->
-	ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState, Key, Chunk, JIT, LargePages, HardwareAES, PackingRounds, 
 		IterationCount, SubChunkCount).
 
 decrypt_composite_chunk({rx4096, RandomXState}, Key, Chunk, PackingRounds, JIT, LargePages, HardwareAES,
 		[IterationCount, SubChunkCount] = _ExtraArgs) ->
-	ar_rx4096_nif:rx4096_decrypt_composite_chunk_nif(
+	big_rx4096_nif:rx4096_decrypt_composite_chunk_nif(
 		RandomXState, Key, Chunk, byte_size(Chunk), JIT, LargePages, HardwareAES,
 		PackingRounds, IterationCount, SubChunkCount).
 
 reencrypt_composite_chunk({rx4096, RandomXState}, Key1, Key2, Chunk, PackingRounds1, PackingRounds2,
 		JIT, LargePages, HardwareAES, 
 		[IterationCount1, IterationCount2, SubChunkCount1, SubChunkCount2] = _ExtraArgs) ->
-	ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(
+	big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(
 		RandomXState, Key1, Key2, Chunk, JIT, LargePages, HardwareAES,
 		PackingRounds1, PackingRounds2, IterationCount1, IterationCount2,
 		SubChunkCount1, SubChunkCount2).
@@ -236,14 +236,14 @@ test_nif_wrappers(State512, State4096, Chunk) ->
 	KeyA = crypto:strong_rand_bytes(32),
 	KeyB= crypto:strong_rand_bytes(32),
 	%% spora_26 randomx_encrypt_chunk 
-	{ok, Packed_2_6A} = ar_rx512_nif:rx512_encrypt_chunk_nif(
+	{ok, Packed_2_6A} = big_rx512_nif:rx512_encrypt_chunk_nif(
 		element(2, State512), KeyA, Chunk, ?RANDOMX_PACKING_ROUNDS_2_6,
 		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes()),
 	?assertEqual({ok, Packed_2_6A},
 		big_mine_randomx:randomx_encrypt_chunk({spora_2_6, AddrA}, State512, KeyA, Chunk)),
 
 	%% composite randomx_encrypt_composite_chunk
-	{ok, PackedCompositeA2} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, PackedCompositeA2} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		element(2, State4096), KeyA, Chunk,
 		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes(),
 		?COMPOSITE_PACKING_ROUND_COUNT, 2, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
@@ -261,14 +261,14 @@ test_nif_wrappers(State512, State4096, Chunk) ->
 			{composite, AddrA, 2}, State4096, KeyA, PackedCompositeA2, byte_size(Chunk))),
 
 	%% Prepare data for the reencryption tests
-	{ok, Packed_2_6B} = ar_rx512_nif:rx512_encrypt_chunk_nif(
+	{ok, Packed_2_6B} = big_rx512_nif:rx512_encrypt_chunk_nif(
 		element(2, State512), KeyB, Chunk, ?RANDOMX_PACKING_ROUNDS_2_6,
 		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes()),
-	{ok, PackedCompositeA3} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, PackedCompositeA3} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		element(2, State4096), KeyA, Chunk,
 		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes(),
 		?COMPOSITE_PACKING_ROUND_COUNT, 3, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
-	{ok, PackedCompositeB3} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, PackedCompositeB3} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		element(2, State4096), KeyB, Chunk,
 		big_mine_randomx:jit(), big_mine_randomx:large_pages(), big_mine_randomx:hardware_aes(),
 		?COMPOSITE_PACKING_ROUND_COUNT, 3, ?COMPOSITE_PACKING_SUB_CHUNK_COUNT),
@@ -433,16 +433,16 @@ test_composite_packing({FastState512, _LightState512, FastState4096, _LightState
 	ChunkWithoutPadding = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE - 5),
 	Chunk = << ChunkWithoutPadding/binary, 0:(5 * 8) >>,
 	Key = crypto:strong_rand_bytes(32),
-	{ok, Packed} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key, Chunk,
+	{ok, Packed} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key, Chunk,
 		0, 0, 0, 8, 1, 1),
 	Key2 = crypto:hash(sha256, << Key/binary, ?DATA_CHUNK_SIZE:24 >>),
-	{ok, Packed2} = ar_rx512_nif:rx512_encrypt_chunk_nif(RandomXState512, Key2, Chunk,
+	{ok, Packed2} = big_rx512_nif:rx512_encrypt_chunk_nif(RandomXState512, Key2, Chunk,
 		8, % RANDOMX_PACKING_ROUNDS
 		0, 0, 0),
 	?assertNotEqual(Packed, Packed2),
-	{ok, Packed3} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key,
+	{ok, Packed3} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key,
 		ChunkWithoutPadding, 0, 0, 0, 8, 1, 1),
-	{ok, Packed4} = ar_rx512_nif:rx512_encrypt_chunk_nif(RandomXState512, Key2, ChunkWithoutPadding,
+	{ok, Packed4} = big_rx512_nif:rx512_encrypt_chunk_nif(RandomXState512, Key2, ChunkWithoutPadding,
 		8, % RANDOMX_PACKING_ROUNDS
 		0, 0, 0),
 	?assertNotEqual(Packed3, Packed4).
@@ -452,18 +452,18 @@ test_composite_packs_incrementally(
 	{rx4096, RandomXState4096} = FastState4096,
 	Chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE - 3),
 	Key = crypto:strong_rand_bytes(32),
-	{ok, Packed1} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, Packed1} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState4096, Key, Chunk, 0, 0, 0, 8, 1, 32),
-	{ok, Packed2} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, Packed2} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState4096, Key, Packed1, 0, 0, 0, 8, 1, 32),
-	{ok, Packed3} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, Packed3} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState4096, Key, Chunk, 0, 0, 0, 8, 2, 32),
 	?assertEqual(Packed2, Packed3),
-	{ok, Packed4} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, Packed4} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState4096, Key, Chunk, 0, 0, 0, 8, 3, 32),
-	{ok, Packed5} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, Packed5} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState4096, Key, Packed1, 0, 0, 0, 8, 2, 32),
-	{ok, Packed6} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, Packed6} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState4096, Key, Packed2, 0, 0, 0, 8, 1, 32),
 	?assertEqual(Packed4, Packed5),
 	?assertEqual(Packed4, Packed6).
@@ -474,14 +474,14 @@ test_composite_unpacked_sub_chunks(
 	ChunkWithoutPadding = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE - 3),
 	Chunk = << ChunkWithoutPadding/binary, 0:24 >>,
 	Key = crypto:strong_rand_bytes(32),
-	{ok, Packed} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, Packed} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState4096, Key, Chunk, 0, 0, 0, 8, 1, 32),
 	SubChunks = split_chunk_into_sub_chunks(Packed, ?DATA_CHUNK_SIZE div 32, 0),
 	UnpackedInSubChunks = iolist_to_binary(lists:reverse(lists:foldl(
 		fun({SubChunk, Offset}, Acc) ->
-			{ok, Unpacked} = ar_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(
+			{ok, Unpacked} = big_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(
 				RandomXState4096, Key, SubChunk, byte_size(SubChunk), 0, 0, 0, 8, 1, Offset),
-			{ok, Unpacked2} = ar_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(
+			{ok, Unpacked2} = big_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(
 				RandomXState4096, Key, SubChunk, byte_size(SubChunk), 0, 0, 0, 8, 1, Offset),
 			?assertEqual(Unpacked, Unpacked2),
 			[Unpacked | Acc]
@@ -491,14 +491,14 @@ test_composite_unpacked_sub_chunks(
 	))),
 	?assertEqual(UnpackedInSubChunks, Chunk),
 	Chunk2 = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE - 3),
-	{ok, Packed2} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
+	{ok, Packed2} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(
 		RandomXState4096, Key, Chunk2, 0, 0, 0, 8, 3, 32),
 	SubChunks2 = split_chunk_into_sub_chunks(Packed2, ?DATA_CHUNK_SIZE div 32, 0),
 	UnpackedInSubChunks2 = iolist_to_binary(lists:reverse(lists:foldl(
 		fun({SubChunk, Offset}, Acc) ->
-			{ok, Unpacked} = ar_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(
+			{ok, Unpacked} = big_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(
 				RandomXState4096, Key, SubChunk, byte_size(SubChunk), 0, 0, 0, 8, 3, Offset),
-			{ok, Unpacked2} = ar_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(
+			{ok, Unpacked2} = big_rx4096_nif:rx4096_decrypt_composite_sub_chunk_nif(
 				RandomXState4096, Key, SubChunk, byte_size(SubChunk), 0, 0, 0, 8, 3, Offset),
 			?assertEqual(Unpacked, Unpacked2),
 			[Unpacked | Acc]
@@ -520,46 +520,46 @@ test_composite_repack({_FastState512, _LightState512, FastState4096, _LightState
 	{rx4096, RandomXState4096} = FastState4096,
 	Chunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE - 12),
 	Key = crypto:strong_rand_bytes(32),
-	{ok, Packed2} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key,
+	{ok, Packed2} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key,
 			Chunk, 0, 0, 0, 8, 2, 32),
-	{ok, Packed3} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key,
+	{ok, Packed3} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key,
 			Chunk, 0, 0, 0, 8, 3, 32),
 	{ok, Repacked_2_3, RepackInput} =
-			ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
+			big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
 					Key, Key, Packed2, 0, 0, 0, 8, 8, 2, 3, 32, 32),
 	?assertEqual(Packed2, RepackInput),
 	?assertEqual(Packed3, Repacked_2_3),
 	
 	%% Repacking a composite chunk to same-key higher-diff composite chunk...
 	{ok, Repacked_2_5, RepackInput} =
-			ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
+			big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
 					Key, Key, Packed2, 0, 0, 0, 8, 8, 2, 5, 32, 32),
-	{ok, Packed5} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key,
+	{ok, Packed5} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key,
 			Chunk, 0, 0, 0, 8, 5, 32),
 	?assertEqual(Packed5, Repacked_2_5),
 	Key2 = crypto:strong_rand_bytes(32),
 
 	%% Repacking a composite chunk to different-key higher-diff composite chunk...
 	{ok, RepackedDiffKey_2_3, RepackInput2} =
-			ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
+			big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
 					Key, Key2, Packed2, 0, 0, 0, 8, 8, 2, 3, 32, 32),
 	?assertEqual(<< Chunk/binary, 0:(12 * 8) >>, RepackInput2),
-	{ok, Packed2_3} = ar_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key2,
+	{ok, Packed2_3} = big_rx4096_nif:rx4096_encrypt_composite_chunk_nif(RandomXState4096, Key2,
 			Chunk, 0, 0, 0, 8, 3, 32),
 	?assertNotEqual(Packed2, Packed2_3),
 	?assertEqual(Packed2_3, RepackedDiffKey_2_3),
 	try
-		ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
+		big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
 					Key, Key, Packed2, 0, 0, 0, 8, 8, 2, 2, 32, 32),
-		?assert(false, "ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif to reencrypt "
+		?assert(false, "big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif to reencrypt "
 				"to same diff should have failed")
 	catch error:badarg ->
 		ok
 	end,
 	try
-		ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
+		big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif(RandomXState4096,
 					Key, Key, Packed2, 0, 0, 0, 8, 8, 2, 1, 32, 32),
-		?assert(false, "ar_rx4096_nif:rx4096_reencrypt_composite_chunk_nif to reencrypt "
+		?assert(false, "big_rx4096_nif:rx4096_reencrypt_composite_chunk_nif to reencrypt "
 				"to lower diff should have failed")
 	catch error:badarg ->
 		ok
