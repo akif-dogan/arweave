@@ -1,4 +1,4 @@
--module(ar_prometheus_cowboy_labels).
+-module(big_prometheus_cowboy_labels).
 
 -export([label_value/2]).
 

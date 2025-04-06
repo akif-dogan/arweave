@@ -114,7 +114,7 @@ end).
 -define(RESET_KRYDER_PLUS_LATCH_THRESHOLD, 10_000_000_000_000_000).
 -endif.
 
-%% The total supply, in Winston (the sum of genesis balances + the total emission).
+%% The total supply, in Wei (the sum of genesis balances + the total emission).
 %% Does NOT include the additional emission which may start in the far future if and when
 %% the endowment pool runs empty.
 -ifdef(AR_TEST).
@@ -235,7 +235,7 @@ end).
 %% Used until the transition to the new fee calculation method is complete.
 -define(USD_PER_GBY_2019, {925, 1000000}). % 0.000925
 
--define(STATIC_2_6_8_FEE_WINSTON, 858_000_000_000).
+-define(STATIC_2_6_8_FEE_WEI, 858_000_000_000).
 
 %% The largest possible multiplier for a one-step increase of the USD to BIG Rate.
 -define(USD_TO_BIG_MAX_ADJUSTMENT_UP_MULTIPLIER, {1005, 1000}).

@@ -1,4 +1,4 @@
--module(ar_domain).
+-module(big_domain).
 
 -export([get_labeling/3, lookup_bigfile_txt_record/1, derive_tx_label/2]).
 

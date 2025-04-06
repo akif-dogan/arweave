@@ -1011,7 +1011,7 @@ handle(<<"GET">>, [<<"recent_hash_list_diff">>], Req, Pid) ->
 			end
 	end;
 
-%% Return the sum of all the existing accounts in the latest state, in Winston.
+%% Return the sum of all the existing accounts in the latest state, in Wei.
 %% GET request to endpoint /total_supply.
 handle(<<"GET">>, [<<"total_supply">>], Req, _Pid) ->
 	case big_node:is_joined() of

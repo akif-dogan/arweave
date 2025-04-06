@@ -123,8 +123,8 @@
 -ifdef(AR_TEST).
 	-define(PRICE_PER_GIB_MINUTE_PRE_TRANSITION, 8162).
 -else.
-	%% STATIC_2_6_8_FEE_WINSTON / (200 (years) * 365 (days) * 24 * 60) / 20 (replicas)
-	%% = ~400 Winston per GiB per minute.
+	%% STATIC_2_6_8_FEE_WEI / (200 (years) * 365 (days) * 24 * 60) / 20 (replicas)
+	%% = ~400 Wei per GiB per minute.
 	-define(PRICE_PER_GIB_MINUTE_PRE_TRANSITION, 400).
 -endif.
 
@@ -133,7 +133,7 @@
 -else.
 	-ifndef(PRICE_2_7_2_PER_GIB_MINUTE_UPPER_BOUND).
 		%% 714_000_000_000 / (200 (years) * 365 (days) * 24 * 60) / 20 (replicas)
-		%% = ~340 Winston per GiB per minute.
+		%% = ~340 Wei per GiB per minute.
 		-define(PRICE_2_7_2_PER_GIB_MINUTE_UPPER_BOUND, 340).
 	-endif.
 -endif.
@@ -143,7 +143,7 @@
 -else.
 	-ifndef(PRICE_2_7_2_PER_GIB_MINUTE_LOWER_BOUND).
 		%% 357_000_000_000 / (200 (years) * 365 (days) * 24 * 60) / 20 (replicas)
-		%% = ~170 Winston per GiB per minute.
+		%% = ~170 Wei per GiB per minute.
 		-define(PRICE_2_7_2_PER_GIB_MINUTE_LOWER_BOUND, 170).
 	-endif.
 -endif.

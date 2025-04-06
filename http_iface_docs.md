@@ -206,7 +206,7 @@ xhr.send();
 ## GET estimated transaction price
 
 Returns an estimated cost for a transaction of the given size.
-The returned amount is in winston (the smallest division of BIG, 1 BIG = 1000000000000 winston).
+The returned amount is in wei (the smallest division of BIG, 1 BIG = 1000000000000 wei).
 
 The endpoint is pessimistic, it reports the price as if the network difficulty was smaller by one, to account for the possible difficulty change.
 
@@ -220,7 +220,7 @@ The endpoint is pessimistic, it reports the price as if the network difficulty w
 
 #### Example Response
 
-A string containing the estimated cost of the transaction in Winston.
+A string containing the estimated cost of the transaction in Wei.
 
 ```javascript
 "1896296296"
@@ -422,7 +422,7 @@ xhr.send();
 ## GET wallet balance via address
 
 Retrieve the balance of the wallet specified via the address.
-The returned amount is in winston (the smallest division of BIG, 1 BIG = 1000000000000 winston).
+The returned amount is in wei (the smallest division of BIG, 1 BIG = 1000000000000 wei).
 
 - **URL**
   `/wallet/[wallet_address]/balance`
@@ -631,9 +631,9 @@ Post a transaction to the network.
     "last_tx": "",  // Base64 encoded ID of the last transaction made by this wallet. Empty if this is the first transaction.
     "owner": "",    // The public key making this transaction.
     "target": "",   // Base64 encoded SHA256 hash of recipient's public key. Empty for data transactions.
-    "quantity": "", // Decimal string representation of the amount of sent BIG in winston. Empty for data transactions.
+    "quantity": "", // Decimal string representation of the amount of sent BIG in wei. Empty for data transactions.
     "data": "",     // The Base64 encoded data being store in the transaction. Empty for transfer transactions.
-    "reward": "",   // Decimal string representation of the mining reward BIG amount in winston.
+    "reward": "",   // Decimal string representation of the mining reward BIG amount in wei.
     "signature": "" // Base64 encoded signature of the transaction
 }
 ```
@@ -669,7 +669,7 @@ xhr.send(post);
 
 
 
-> Please note that in the JSON transaction records all winston value fields (quantity and reward) are strings. This is to allow for interoperability between environments that do not accommodate arbitrary-precision arithmetic. JavaScript for instance stores all numbers as double precision floating point values and as such cannot natively express the integer number of winston. Providing these values as strings allows them to be directly loaded into most 'bignum' libraries.
+> Please note that in the JSON transaction records all wei value fields (quantity and reward) are strings. This is to allow for interoperability between environments that do not accommodate arbitrary-precision arithmetic. JavaScript for instance stores all numbers as double precision floating point values and as such cannot natively express the integer number of wei. Providing these values as strings allows them to be directly loaded into most 'bignum' libraries.
 
 
 

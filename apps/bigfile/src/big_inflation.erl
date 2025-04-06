@@ -51,7 +51,7 @@ pre_15_calculate(Height) ->
 		true ->
 			1;
 		false ->
-			?WINSTON_PER_BIG
+			?WEI_PER_BIG
 				* 0.2
 				* ?GENESIS_TOKENS
 				* math:pow(2, -(Height - RewardDelay) / ?PRE_15_BLOCKS_PER_YEAR)
@@ -66,7 +66,7 @@ calculate_base(Height) ->
 	Precision = ?INFLATION_NATURAL_EXPONENT_DECIMAL_FRACTION_PRECISION,
 	{EXDividend, EXDivisor} = big_fraction:natural_exponent({Dividend, Divisor}, Precision),
 	?GENESIS_TOKENS
-		* ?WINSTON_PER_BIG
+		* ?WEI_PER_BIG
 		* EXDivisor
 		* 2
 		* Ln2Dividend
@@ -78,7 +78,7 @@ calculate_base(Height) ->
 		).
 
 calculate_base_pre_fork_2_5(Height) ->
-	?WINSTON_PER_BIG
+	?WEI_PER_BIG
 		* (
 			0.2
 			* ?GENESIS_TOKENS

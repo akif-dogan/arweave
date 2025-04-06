@@ -37,8 +37,8 @@
 
 %% @doc Return the price per gibibyte minute estimated from the given history of
 %% network hash rates and block rewards. The total reward used in calculations
-%% is at least 1 Winston, even if all block rewards from the given history are 0.
-%% Also, the returned price is always at least 1 Winston.
+%% is at least 1 Wei, even if all block rewards from the given history are 0.
+%% Also, the returned price is always at least 1 Wei.
 get_price_per_gib_minute(Height, B) ->
 	V2Price = get_v2_price_per_gib_minute(Height, B),
 	big_pricing_transition:get_transition_price(Height, V2Price).
@@ -474,7 +474,7 @@ usd_to_big({Dividend, Divisor}, Rate, Height) ->
 	CurrentInflation = trunc(big_inflation:calculate(Height)),
 	{InitialRateDividend, InitialRateDivisor} = Rate,
 	trunc(	Dividend
-			* ?WINSTON_PER_BIG
+			* ?WEI_PER_BIG
 			* CurrentInflation
 			* InitialRateDividend	)
 		div Divisor
@@ -500,7 +500,7 @@ recalculate_usd_to_big_rate(#block{ height = PrevHeight } = B) ->
 	end.
 
 %% @doc Return an estimation for the minimum required decline rate making the given
-%% Amount (in Winston) sufficient to subsidize storage for Period seconds starting from
+%% Amount (in Wei) sufficient to subsidize storage for Period seconds starting from
 %% Timestamp and assuming the given USD to BIG rate.
 %% When computing the exponent, the function accounts for the first 16 summands in
 %% the Taylor series. The fraction is reduced to the 1/1000000 precision.

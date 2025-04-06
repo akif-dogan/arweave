@@ -623,12 +623,12 @@ get_tx_fee(Args) ->
 	end.
 
 get_static_2_6_8_tx_fee(DataSize, Addr, Accounts) ->
-	UploadFee = (?STATIC_2_6_8_FEE_WINSTON div ?GiB) * (DataSize + ?TX_SIZE_BASE),
+	UploadFee = (?STATIC_2_6_8_FEE_WEI div ?GiB) * (DataSize + ?TX_SIZE_BASE),
 	case Addr == <<>> orelse maps:is_key(Addr, Accounts) of
 		true ->
 			UploadFee;
 		false ->
-			NewAccountFee = (?STATIC_2_6_8_FEE_WINSTON div ?GiB) *
+			NewAccountFee = (?STATIC_2_6_8_FEE_WEI div ?GiB) *
 					?NEW_ACCOUNT_FEE_DATA_SIZE_EQUIVALENT,
 			UploadFee + NewAccountFee
 	end.

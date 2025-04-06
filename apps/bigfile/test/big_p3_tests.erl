@@ -873,7 +873,7 @@ e2e_concurrent_requests() ->
 		big_test_node:start_peer(peer1, B0),
 		big_test_node:connect_to_peer(peer1),
 
-		%% Post a 100 winston deposit and wait for it to be picked up.
+		%% Post a 100 Wei deposit and wait for it to be picked up.
 		TX1 = big_test_node:sign_tx(Wallet1, #{ target => DepositAddress, quantity => 100 }),
 		big_test_node:assert_post_tx_to_peer(main, TX1),
 		

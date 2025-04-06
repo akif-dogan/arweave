@@ -207,7 +207,7 @@ When a new record is defined the information regarding the purpose of each field
 	owner = <<>>, 		% Public key of transaction owner.
 	tags = [], 			% Indexable TX category identifiers.
 	target = <<>>, 		% Wallet address of target of the tx.
-	quantity = 0, 		% Amount of Winston to send
+	quantity = 0, 		% Amount of Wei to send
 	data = <<>>, 		% Data body (if data transaction).
 	signature = <<>>, 	% Transaction signature.
 	reward = 0 			% Transaction mining reward.

@@ -98,8 +98,8 @@
 %% The total supply of tokens in the Genesis block.
 -define(GENESIS_TOKENS, 200000000).
 
-%% Winstons per BIG.
--define(WINSTON_PER_BIG, 1000000000000).
+%% Wei per BIG.
+-define(WEI_PER_BIG, 1000000000000).
 
 %% The number of bytes in a gibibyte.
 -define(MiB, (1024 * 1024)).
@@ -516,7 +516,7 @@
     reward_addr = unclaimed,
 	%% Miner-specified tags (a list of strings) to store with the block.
     tags = [],
-	%% The number of Winston in the endowment pool.
+	%% The number of Wei in the endowment pool.
 	reward_pool,
 	%% The total number of bytes whose storage is incentivized.
 	weave_size,
@@ -568,7 +568,7 @@
 	hash_preimage = <<>>,
 	%% The absolute recall offset.
 	recall_byte,
-	%% The total amount of winston the miner receives for this block.
+	%% The total amount of Wei the miner receives for this block.
 	reward = 0,
 	%% The solution hash of the previous block.
 	previous_solution_hash = <<>>,
@@ -585,10 +585,10 @@
 	%% {KeyType, PubKey} - the public key the block was signed with.
 	%% The only supported KeyType is currently {rsa, 65537}.
 	reward_key,
-	%% The estimated number of Winstons it costs the network to store one gibibyte
+	%% The estimated number of Wei it costs the network to store one gibibyte
 	%% for one minute.
 	price_per_gib_minute = 0,
-	%% The updated estimation of the number of Winstons it costs the network to store
+	%% The updated estimation of the number of Wei it costs the network to store
 	%% one gibibyte for one minute.
 	scheduled_price_per_gib_minute = 0,
 	%% The recursive hash of the network hash rates, block rewards, mining addresses,
@@ -601,7 +601,7 @@
 	%% The network hash rates, block rewards, and mining addresses from the latest
 	%% ?REWARD_HISTORY_BLOCKS + ?STORE_BLOCKS_BEHIND_CURRENT blocks. Used internally, not gossiped.
 	reward_history = [],
-	%% The total number of Winston emitted when the endowment was not sufficient
+	%% The total number of Wei emitted when the endowment was not sufficient
 	%% to compensate mining.
 	debt_supply = 0,
 	%% An additional multiplier for the transaction fees doubled every time the
@@ -712,7 +712,7 @@
 	tags = [],
 	%% The address of the recipient, if any. The SHA2-256 hash of the public key.
 	target = <<>>,
-	%% The amount of Winstons to send to the recipient, if any.
+	%% The amount of Wei to send to the recipient, if any.
 	quantity = 0,
 	%% The data to upload, if any. For v2 transactions, the field is optional - a fee
 	%% is charged based on the "data_size" field, data itself may be uploaded any time
@@ -726,7 +726,7 @@
 	data_root = <<>>,
 	%% The signature.
 	signature = <<>>,
-	%% The fee in Winstons.
+	%% The fee in Wei.
 	reward = 0,
 
 	%% The code for the denomination of BIG in base units.
@@ -753,8 +753,8 @@
 	signature_type = ?DEFAULT_KEY_TYPE
 }).
 
-%% A macro to convert BIG into Winstons.
--define(BIG(BIG), (?WINSTON_PER_BIG * BIG)).
+%% A macro to convert BIG into Wei.
+-define(BIG(BIG), (?WEI_PER_BIG * BIG)).
 
 %% A macro to return whether a term is a block record.
 -define(IS_BLOCK(X), (is_record(X, block))).

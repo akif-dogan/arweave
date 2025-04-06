@@ -28,11 +28,11 @@ read_body_chunk(Req, Size, Timeout) ->
 	case cowboy_req:read_body(Req, #{ length => Size, period => Timeout }) of
 		{_, Chunk, Req2} when byte_size(Chunk) >= Size ->
 			prometheus_counter:inc(http_server_accepted_bytes_total,
-					[ar_prometheus_cowboy_labels:label_value(route, #{ req => Req2 })], Size),
+					[big_prometheus_cowboy_labels:label_value(route, #{ req => Req2 })], Size),
 			{ok, Chunk, Req2};
 		{_, Chunk, Req2} ->
 			prometheus_counter:inc(http_server_accepted_bytes_total,
-					[ar_prometheus_cowboy_labels:label_value(route, #{ req => Req2 })],
+					[big_prometheus_cowboy_labels:label_value(route, #{ req => Req2 })],
 					byte_size(Chunk)),
 			exit(timeout)
 	end.
@@ -42,7 +42,7 @@ read_complete_body(Req, #{ acc := Acc, counter := C } = Opts) ->
 	DataSize = byte_size(Data),
 	prometheus_counter:inc(
 		http_server_accepted_bytes_total,
-		[ar_prometheus_cowboy_labels:label_value(route, #{ req => Req })],
+		[big_prometheus_cowboy_labels:label_value(route, #{ req => Req })],
 		DataSize
 	),
 	read_complete_body(MoreOrOk, Opts#{ acc := [Acc | Data],  counter := C + DataSize }, ReadReq).

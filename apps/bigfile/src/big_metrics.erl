@@ -313,7 +313,7 @@ register() ->
 	]),
 	prometheus_gauge:new([
 		{name, average_block_reward},
-		{help, "The average block reward in Winston computed from the last ~30 days of blocks"}
+		{help, "The average block reward in Wei computed from the last ~30 days of blocks"}
 	]),
 	prometheus_gauge:new([
 		{name, expected_block_reward},
@@ -341,15 +341,15 @@ register() ->
 	]),
 	prometheus_gauge:new([
 		{name, endowment_pool},
-		{help, "The amount of Winston in the endowment pool."}
+		{help, "The amount of Wei in the endowment pool."}
 	]),
 	prometheus_gauge:new([
 		{name, available_supply},
-		{help, "The total supply minus the endowment, in Winston."}
+		{help, "The total supply minus the endowment, in Wei."}
 	]),
 	prometheus_gauge:new([
 		{name, debt_supply},
-		{help, "The amount of Winston emitted when the endowment pool was not sufficiently"
+		{help, "The amount of Wei emitted when the endowment pool was not sufficiently"
 				" large to compensate mining."}
 	]),
 	prometheus_gauge:new([
@@ -379,23 +379,23 @@ register() ->
 	prometheus_gauge:new([
 		{name, network_burden},
 		{help, "The legacy (2.5) estimation of the cost of storing the current weave "
-				"assuming the 0.5% storage costs decline rate, in Winston."}
+				"assuming the 0.5% storage costs decline rate, in Wei."}
 	]),
 	prometheus_gauge:new([
 		{name, network_burden_10_usd_big},
 		{help, "The legacy (2.5) estimation of the cost of storing the current weave "
-				"assuming the 0.5% storage costs decline rate and 10 $/BIG, in Winston."}
+				"assuming the 0.5% storage costs decline rate and 10 $/BIG, in Wei."}
 	]),
 	prometheus_gauge:new([
 		{name, network_burden_200_years},
 		{help, "The legacy (2.5) estimation of the cost of storing the current weave for "
-				"200 years assuming the 0.5% storage costs decline rate, in Winston."}
+				"200 years assuming the 0.5% storage costs decline rate, in Wei."}
 	]),
 	prometheus_gauge:new([
 		{name, network_burden_200_years_10_usd_big},
 		{help, "The legacy (2.5) estimation of the cost of storing the current weave for "
 				"200 years assuming the 0.5% storage costs decline rate and 10 $/BIG, "
-				"in Winston."}
+				"in Wei."}
 	]),
 	prometheus_gauge:new([
 		{name, expected_minimum_200_years_storage_costs_decline_rate},

@@ -1,7 +1,7 @@
 %% @doc
 %% Cowboy2 handler for exporting prometheus metrics.
 %% @end
--module(ar_prometheus_cowboy_handler).
+-module(big_prometheus_cowboy_handler).
 
 %% -behaviour(cowboy_handler).
 
