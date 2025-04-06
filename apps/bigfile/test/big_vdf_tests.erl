@@ -1,4 +1,4 @@
--module(ar_vdf_tests).
+-module(big_vdf_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("bigfile/include/big.hrl").

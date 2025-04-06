@@ -1,4 +1,4 @@
--module(ar_webhook_tests).
+-module(big_webhook_tests).
 
 -export([init/2]).
 
@@ -69,7 +69,7 @@ test_webhooks() ->
 		%% Setup a server that would be listening for the webhooks and registering
 		%% them in the ETS table.
 		ets:new(?MODULE, [named_table, set, public]),
-		Routes = [{"/[...]", ar_webhook_tests, []}],
+		Routes = [{"/[...]", big_webhook_tests, []}],
 		cowboy:start_clear(
 			ar_webhook_test_listener,
 			[{port, Port}],

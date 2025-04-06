@@ -1,4 +1,4 @@
--module(ar_coordinated_mining_tests).
+-module(big_coordinated_mining_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").

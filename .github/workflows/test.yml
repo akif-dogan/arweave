@@ -198,7 +198,7 @@ jobs:
         core_test_mod: [
             ## Long-running tests. Put these first to limit the overall runtime of the
             ## test suite
-            ar_coordinated_mining_tests,
+            big_coordinated_mining_tests,
             ar_data_sync_tests,
             ar_fork_recovery_tests,
             big_tx,
@@ -348,13 +348,13 @@ jobs:
       max-parallel: 4
       matrix:
         core_test_mod: [
-            ar_base64_compatibility_tests,
-            ar_config_tests,
-            ar_difficulty_tests,
+            big_base64_compatibility_tests,
+            big_config_tests,
+            big_difficulty_tests,
             ar_header_sync_tests,
             ar_http_iface_tests,
             ar_http_util_tests,
-            ar_info_tests,
+            big_info_tests,
             ar_mempool_tests,
             ar_mine_randomx_tests,
             ar_mine_vdf_tests,
@@ -366,7 +366,7 @@ jobs:
             ar_start_from_block_tests,
             ar_tx_blacklist_tests,
             ar_tx_replay_pool_tests,
-            ar_vdf_tests,
+            big_vdf_tests,
           ]
     steps:
       - uses: actions/checkout@v4

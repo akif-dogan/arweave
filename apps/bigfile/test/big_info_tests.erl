@@ -1,4 +1,4 @@
--module(ar_info_tests).
+-module(big_info_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("bigfile/include/big.hrl").

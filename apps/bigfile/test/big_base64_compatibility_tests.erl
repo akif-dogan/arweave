@@ -1,4 +1,4 @@
--module(ar_base64_compatibility_tests).
+-module(big_base64_compatibility_tests).
 
 %%% The compatibility tests to assert the used
 %%% Base64URL encoding and decoding functions are

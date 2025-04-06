@@ -1,4 +1,4 @@
--module(ar_wallet_tests).
+-module(big_wallet_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 

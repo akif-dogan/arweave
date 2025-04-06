@@ -1,4 +1,4 @@
--module(ar_config_tests).
+-module(big_config_tests).
 
 -include_lib("bigfile/include/big_consensus.hrl").
 -include_lib("bigfile/include/big_config.hrl").

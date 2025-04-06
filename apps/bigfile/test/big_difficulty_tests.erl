@@ -1,4 +1,4 @@
--module(ar_difficulty_tests).
+-module(big_difficulty_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 
