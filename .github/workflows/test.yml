@@ -361,7 +361,7 @@ jobs:
             big_mining_io_tests,
             big_poller_tests,
             big_reject_chunks_tests,
-            ar_replica_2_9_nif_tests,
+            big_replica_2_9_nif_tests,
             big_semaphore_tests,
             big_start_from_block_tests,
             big_tx_blacklist_tests,

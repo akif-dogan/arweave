@@ -1,4 +1,4 @@
--module(ar_replica_2_9_nif_tests).
+-module(big_replica_2_9_nif_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 
