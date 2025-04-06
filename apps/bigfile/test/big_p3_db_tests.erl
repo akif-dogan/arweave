@@ -1,13 +1,13 @@
--module(ar_p3_db_tests).
+-module(big_p3_db_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("bigfile/include/big_p3.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--import(ar_p3_tests, [raw_request/2, raw_request/3]).
+-import(big_p3_tests, [raw_request/2, raw_request/3]).
 
-ar_p3_db_test_() ->
+big_p3_db_test_() ->
 	[
 		{timeout, 30, mocked_test_timeout()},
 		{timeout, 30, fun test_account/0},

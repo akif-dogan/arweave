@@ -1,4 +1,4 @@
--module(ar_semaphore_tests).
+-module(big_semaphore_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 

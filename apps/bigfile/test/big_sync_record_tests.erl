@@ -1,4 +1,4 @@
--module(ar_sync_record_tests).
+-module(big_sync_record_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").

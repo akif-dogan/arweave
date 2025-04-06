@@ -13,7 +13,7 @@
 		encipher_sub_chunk/2]).
 
 %% These exports are required for the STUB mode, where these functions are unused.
-%% Also, some of these functions are used in ar_mine_randomx_tests.
+%% Also, some of these functions are used in big_mine_randomx_tests.
 -export([jit/0, large_pages/0, hardware_aes/0, init_fast2/5, init_light2/4]).
 
 -include_lib("bigfile/include/big.hrl").

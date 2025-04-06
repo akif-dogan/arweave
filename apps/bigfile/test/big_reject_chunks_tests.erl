@@ -1,4 +1,4 @@
--module(ar_reject_chunks_tests).
+-module(big_reject_chunks_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -14,7 +14,7 @@ rejects_invalid_chunks_test_() ->
 	{timeout, 180, fun test_rejects_invalid_chunks/0}.
 
 test_rejects_invalid_chunks() ->
-	ar_test_data_sync:setup_nodes(),
+	big_test_data_sync:setup_nodes(),
 	?assertMatch(
 		{ok, {{<<"400">>, _}, _, <<"{\"error\":\"chunk_too_big\"}">>, _, _}},
 		big_test_node:post_chunk(main, big_serialize:jsonify(#{
@@ -60,7 +60,7 @@ test_rejects_invalid_chunks() ->
 			data_size => <<"0">>
 		}))
 	),
-	ar_test_data_sync:setup_nodes(),
+	big_test_data_sync:setup_nodes(),
 	Chunk = crypto:strong_rand_bytes(500),
 	SizedChunkIDs = big_tx:sized_chunks_to_sized_chunk_ids(
 		big_tx:chunks_to_size_tagged_chunks([Chunk])
@@ -136,7 +136,7 @@ test_does_not_store_small_chunks_after_2_5() ->
 				SecondMerkleOffset, ThirdMerkleOffset, FirstPublishOffsets, SecondPublishOffsets,
 				ThirdPublishOffsets, Expectations}) ->
 			?debugFmt("Running [~s]", [Title]),
-			Wallet = ar_test_data_sync:setup_nodes(),
+			Wallet = big_test_data_sync:setup_nodes(),
 			{FirstChunk, SecondChunk, ThirdChunk} = {crypto:strong_rand_bytes(FirstSize),
 					crypto:strong_rand_bytes(SecondSize), crypto:strong_rand_bytes(ThirdSize)},
 			{FirstChunkID, SecondChunkID, ThirdChunkID} = {big_tx:generate_chunk_id(FirstChunk),
@@ -198,7 +198,7 @@ rejects_chunks_with_merkle_tree_borders_exceeding_max_chunk_size_test_() ->
 			fun test_rejects_chunks_with_merkle_tree_borders_exceeding_max_chunk_size/0}.
 
 test_rejects_chunks_with_merkle_tree_borders_exceeding_max_chunk_size() ->
-	Wallet = ar_test_data_sync:setup_nodes(),
+	Wallet = big_test_data_sync:setup_nodes(),
 	BigOutOfBoundsOffsetChunk = crypto:strong_rand_bytes(?DATA_CHUNK_SIZE),
 	BigChunkID = big_tx:generate_chunk_id(BigOutOfBoundsOffsetChunk),
 	{BigDataRoot, BigDataTree} = big_merkle:generate_tree([{BigChunkID, ?DATA_CHUNK_SIZE + 1}]),
@@ -217,19 +217,19 @@ rejects_chunks_exceeding_disk_pool_limit_test_() ->
 	{timeout, 240, fun test_rejects_chunks_exceeding_disk_pool_limit/0}.
 
 test_rejects_chunks_exceeding_disk_pool_limit() ->
-	Wallet = ar_test_data_sync:setup_nodes(),
+	Wallet = big_test_data_sync:setup_nodes(),
 	Data1 = crypto:strong_rand_bytes(
 		(?DEFAULT_MAX_DISK_POOL_DATA_ROOT_BUFFER_MB * 1024 * 1024) + 1
 	),
-	Chunks1 = ar_test_data_sync:imperfect_split(Data1),
+	Chunks1 = big_test_data_sync:imperfect_split(Data1),
 	{DataRoot1, _} = big_merkle:generate_tree(
 		big_tx:sized_chunks_to_sized_chunk_ids(
 			big_tx:chunks_to_size_tagged_chunks(Chunks1)
 		)
 	),
-	{TX1, Chunks1} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot1, Chunks1}),
+	{TX1, Chunks1} = big_test_data_sync:tx(Wallet, {fixed_data, DataRoot1, Chunks1}),
 	big_test_node:assert_post_tx_to_peer(main, TX1),
-	[{_, FirstProof1} | Proofs1] = ar_test_data_sync:build_proofs(TX1, Chunks1, [TX1], 0, 0),
+	[{_, FirstProof1} | Proofs1] = big_test_data_sync:build_proofs(TX1, Chunks1, [TX1], 0, 0),
 	lists:foreach(
 		fun({_, Proof}) ->
 			?assertMatch(
@@ -249,15 +249,15 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 			?DEFAULT_MAX_DISK_POOL_DATA_ROOT_BUFFER_MB - 1
 		) * 1024 * 1024
 	),
-	Chunks2 = ar_test_data_sync:imperfect_split(Data2),
+	Chunks2 = big_test_data_sync:imperfect_split(Data2),
 	{DataRoot2, _} = big_merkle:generate_tree(
 		big_tx:sized_chunks_to_sized_chunk_ids(
 			big_tx:chunks_to_size_tagged_chunks(Chunks2)
 		)
 	),
-	{TX2, Chunks2} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot2, Chunks2}),
+	{TX2, Chunks2} = big_test_data_sync:tx(Wallet, {fixed_data, DataRoot2, Chunks2}),
 	big_test_node:assert_post_tx_to_peer(main, TX2),
-	Proofs2 = ar_test_data_sync:build_proofs(TX2, Chunks2, [TX2], 0, 0),
+	Proofs2 = big_test_data_sync:build_proofs(TX2, Chunks2, [TX2], 0, 0),
 	lists:foreach(
 		fun({_, Proof}) ->
 			%% The very last chunk will be dropped later because it starts and ends
@@ -275,15 +275,15 @@ test_rejects_chunks_exceeding_disk_pool_limit() ->
 		byte_size(Data2),
 	?assert(Left < ?DEFAULT_MAX_DISK_POOL_DATA_ROOT_BUFFER_MB * 1024 * 1024),
 	Data3 = crypto:strong_rand_bytes(Left + 1),
-	Chunks3 = ar_test_data_sync:imperfect_split(Data3),
+	Chunks3 = big_test_data_sync:imperfect_split(Data3),
 	{DataRoot3, _} = big_merkle:generate_tree(
 		big_tx:sized_chunks_to_sized_chunk_ids(
 			big_tx:chunks_to_size_tagged_chunks(Chunks3)
 		)
 	),
-	{TX3, Chunks3} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot3, Chunks3}),
+	{TX3, Chunks3} = big_test_data_sync:tx(Wallet, {fixed_data, DataRoot3, Chunks3}),
 	big_test_node:assert_post_tx_to_peer(main, TX3),
-	[{_, FirstProof3} | Proofs3] = ar_test_data_sync:build_proofs(TX3, Chunks3, [TX3], 0, 0),
+	[{_, FirstProof3} | Proofs3] = big_test_data_sync:build_proofs(TX3, Chunks3, [TX3], 0, 0),
 	lists:foreach(
 		fun({_, Proof}) ->
 			%% The very last chunk will be dropped later because it starts and ends
@@ -350,12 +350,12 @@ test_accepts_chunks() ->
 	test_accepts_chunks(original_split).
 
 test_accepts_chunks(Split) ->
-	Wallet = ar_test_data_sync:setup_nodes(),
-	{TX, Chunks} = ar_test_data_sync:tx(Wallet, {Split, 3}),
+	Wallet = big_test_data_sync:setup_nodes(),
+	{TX, Chunks} = big_test_data_sync:tx(Wallet, {Split, 3}),
 	big_test_node:assert_post_tx_to_peer(peer1, TX),
 	big_test_node:assert_wait_until_receives_txs([TX]),
 	[{Offset, FirstProof}, {_, SecondProof}, {_, ThirdProof}] = 
-			ar_test_data_sync:build_proofs(TX, Chunks, [TX], 0, 0),
+			big_test_data_sync:build_proofs(TX, Chunks, [TX], 0, 0),
 	EndOffset = Offset + ?STRICT_DATA_SPLIT_THRESHOLD,
 	%% Post the third proof to the disk pool.
 	?assertMatch(
@@ -382,10 +382,10 @@ test_accepts_chunks(Split) ->
 		tx_path => maps:get(tx_path, FirstProof),
 		chunk => ar_util:encode(FirstChunk)
 	},
-	ar_test_data_sync:wait_until_syncs_chunk(EndOffset, ExpectedProof),
-	ar_test_data_sync:wait_until_syncs_chunk(
+	big_test_data_sync:wait_until_syncs_chunk(EndOffset, ExpectedProof),
+	big_test_data_sync:wait_until_syncs_chunk(
 		EndOffset - rand:uniform(FirstChunkSize - 2), ExpectedProof),
-	ar_test_data_sync:wait_until_syncs_chunk(EndOffset - FirstChunkSize + 1, ExpectedProof),
+	big_test_data_sync:wait_until_syncs_chunk(EndOffset - FirstChunkSize + 1, ExpectedProof),
 	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, big_test_node:get_chunk(main, 0)),
 	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, big_test_node:get_chunk(main, EndOffset + 1)),
 	TXSize = byte_size(binary:list_to_bin(Chunks)),
@@ -394,10 +394,10 @@ test_accepts_chunks(Split) ->
 		size => integer_to_binary(TXSize)
 	}),
 	?assertMatch({ok, {{<<"200">>, _}, _, ExpectedOffsetInfo, _, _}},
-		ar_test_data_sync:get_tx_offset(main, TX#tx.id)),
+		big_test_data_sync:get_tx_offset(main, TX#tx.id)),
 	%% Expect no transaction data because the second chunk is not synced yet.
 	?assertMatch({ok, {{<<"404">>, _}, _, _Binary, _, _}},
-		ar_test_data_sync:get_tx_data(TX#tx.id)),
+		big_test_data_sync:get_tx_data(TX#tx.id)),
 	?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
 			big_test_node:post_chunk(main, big_serialize:jsonify(SecondProof))),
 	ExpectedSecondProof = #{
@@ -407,10 +407,10 @@ test_accepts_chunks(Split) ->
 	},
 	SecondChunk = ar_util:decode(maps:get(chunk, SecondProof)),
 	SecondChunkOffset = ?STRICT_DATA_SPLIT_THRESHOLD + FirstChunkSize + byte_size(SecondChunk),
-	ar_test_data_sync:wait_until_syncs_chunk(SecondChunkOffset, ExpectedSecondProof),
+	big_test_data_sync:wait_until_syncs_chunk(SecondChunkOffset, ExpectedSecondProof),
 	true = ar_util:do_until(
 		fun() ->
-			{ok, {{<<"200">>, _}, _, Data, _, _}} = ar_test_data_sync:get_tx_data(TX#tx.id),
+			{ok, {{<<"200">>, _}, _, Data, _, _}} = big_test_data_sync:get_tx_data(TX#tx.id),
 			ar_util:encode(binary:list_to_bin(Chunks)) == Data
 		end,
 		500,
@@ -421,5 +421,5 @@ test_accepts_chunks(Split) ->
 		tx_path => maps:get(tx_path, ThirdProof),
 		chunk => maps:get(chunk, ThirdProof)
 	},
-	ar_test_data_sync:wait_until_syncs_chunk(B#block.weave_size, ExpectedThirdProof),
+	big_test_data_sync:wait_until_syncs_chunk(B#block.weave_size, ExpectedThirdProof),
 	?assertMatch({ok, {{<<"404">>, _}, _, _, _, _}}, big_test_node:get_chunk(main, B#block.weave_size + 1)).

@@ -1,4 +1,4 @@
--module(ar_pricing_tests).
+-module(big_pricing_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").

@@ -1,4 +1,4 @@
--module(ar_mine_vdf_tests).
+-module(big_mine_vdf_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 

@@ -1637,7 +1637,7 @@ json_struct_to_tx(TXStruct, ComputeDataSize) ->
 
 set_sig_type_from_pub_key(_Owner, <<>>) ->
 	%% Transactions with the empty signatures are used in some old tests,
-	%% e.g., ar_http_iface_tests.erl.
+	%% e.g., big_http_iface_tests.erl.
 	?RSA_KEY_TYPE;
 set_sig_type_from_pub_key(Owner, _Sig) ->
 	case Owner of

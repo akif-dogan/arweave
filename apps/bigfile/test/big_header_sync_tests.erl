@@ -1,4 +1,4 @@
--module(ar_header_sync_tests).
+-module(big_header_sync_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").

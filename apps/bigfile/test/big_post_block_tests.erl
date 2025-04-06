@@ -1,4 +1,4 @@
--module(ar_post_block_tests).
+-module(big_post_block_tests).
 
 -include("../include/big_consensus.hrl").
 -include("../include/big_config.hrl").

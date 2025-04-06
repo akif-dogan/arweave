@@ -1,4 +1,4 @@
--module(ar_tx_blacklist_tests).
+-module(big_tx_blacklist_tests).
 
 -export([init/2]).
 
@@ -164,7 +164,7 @@ setup() ->
 			]),
 	BadTXIDs2 = [lists:nth(5, TXIDs), lists:nth(7, TXIDs)], % The endpoint.
 	BadTXIDs3 = [lists:nth(4, TXIDs), lists:nth(6, TXIDs)], % Ranges.
-	Routes = [{"/[...]", ar_tx_blacklist_tests, BadTXIDs2}],
+	Routes = [{"/[...]", big_tx_blacklist_tests, BadTXIDs2}],
 	{ok, _PID} =
 		big_test_node:remote_call(peer1, cowboy, start_clear, [
 			ar_tx_blacklist_test_listener,

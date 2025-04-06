@@ -1,4 +1,4 @@
--module(ar_tx_tests).
+-module(big_tx_tests).
 
 -include("../include/big.hrl").
 -include("../include/big_config.hrl").

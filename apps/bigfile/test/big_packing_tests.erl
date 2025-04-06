@@ -1,4 +1,4 @@
--module(ar_packing_tests).
+-module(big_packing_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_consensus.hrl").
@@ -11,7 +11,7 @@
 -define(REQUEST_UNPACK_TIMEOUT, 50_000).
 
 % request_test() ->
-% 	RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+% 	RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
 
 % 	[B0] = ar_weave:init([]),
 % 	big_test_node:start(B0, RewardAddress),
@@ -38,7 +38,7 @@ packing_test_() ->
       fun test_request_unpack/0]}.
 
 setup() ->
-    RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+    RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
     [B0] = ar_weave:init([]),
     big_test_node:start(B0, RewardAddress),
     RewardAddress.
@@ -72,13 +72,13 @@ test_feistel()->
 	ok.
 
 test_full_chunk() ->
-	UnpackedData = big_test_node:load_fixture("ar_packing_tests/unpacked.256kb"),
-	Spora25Data = big_test_node:load_fixture("ar_packing_tests/spora25.256kb"),
-	Spora26Data = big_test_node:load_fixture("ar_packing_tests/spora26.256kb"),
+	UnpackedData = big_test_node:load_fixture("big_packing_tests/unpacked.256kb"),
+	Spora25Data = big_test_node:load_fixture("big_packing_tests/spora25.256kb"),
+	Spora26Data = big_test_node:load_fixture("big_packing_tests/spora26.256kb"),
 
 	ChunkSize = 256*1024,
 	TXRoot = ar_util:decode(?ENCODED_TX_ROOT),
-	RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+	RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
 
 	?assertEqual(
 		{ok, UnpackedData},
@@ -107,13 +107,13 @@ test_full_chunk() ->
 			{spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)).
 
 test_partial_chunk() ->
-	UnpackedData = big_test_node:load_fixture("ar_packing_tests/unpacked.100kb"),
-	Spora25Data = big_test_node:load_fixture("ar_packing_tests/spora25.100kb"),
-	Spora26Data = big_test_node:load_fixture("ar_packing_tests/spora26.100kb"),
+	UnpackedData = big_test_node:load_fixture("big_packing_tests/unpacked.100kb"),
+	Spora25Data = big_test_node:load_fixture("big_packing_tests/spora25.100kb"),
+	Spora26Data = big_test_node:load_fixture("big_packing_tests/spora26.100kb"),
 
 	ChunkSize = 100*1024,
 	TXRoot = ar_util:decode(?ENCODED_TX_ROOT),
-	RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+	RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
 
 	?assertEqual(
 		{ok, UnpackedData},
@@ -142,13 +142,13 @@ test_partial_chunk() ->
 			{spora_2_6, RewardAddress}, ?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)).
 
 test_full_chunk_repack() ->
-	UnpackedData = big_test_node:load_fixture("ar_packing_tests/unpacked.256kb"),
-	Spora25Data = big_test_node:load_fixture("ar_packing_tests/spora25.256kb"),
-	Spora26Data = big_test_node:load_fixture("ar_packing_tests/spora26.256kb"),
+	UnpackedData = big_test_node:load_fixture("big_packing_tests/unpacked.256kb"),
+	Spora25Data = big_test_node:load_fixture("big_packing_tests/spora25.256kb"),
+	Spora26Data = big_test_node:load_fixture("big_packing_tests/spora26.256kb"),
 
 	ChunkSize = 256*1024,
 	TXRoot = ar_util:decode(?ENCODED_TX_ROOT),
-	RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+	RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
 
 	?assertEqual(
 		{ok, UnpackedData, UnpackedData},
@@ -190,13 +190,13 @@ test_full_chunk_repack() ->
 			?CHUNK_OFFSET, TXRoot, Spora26Data, ChunkSize)).
 
 test_partial_chunk_repack() ->
-	UnpackedData = big_test_node:load_fixture("ar_packing_tests/unpacked.100kb"),
-	Spora25Data = big_test_node:load_fixture("ar_packing_tests/spora25.100kb"),
-	Spora26Data = big_test_node:load_fixture("ar_packing_tests/spora26.100kb"),
+	UnpackedData = big_test_node:load_fixture("big_packing_tests/unpacked.100kb"),
+	Spora25Data = big_test_node:load_fixture("big_packing_tests/spora25.100kb"),
+	Spora26Data = big_test_node:load_fixture("big_packing_tests/spora26.100kb"),
 
 	ChunkSize = 100*1024,
 	TXRoot = ar_util:decode(?ENCODED_TX_ROOT),
-	RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+	RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
 
 	?assertEqual(
 		{ok, UnpackedData, UnpackedData},
@@ -239,14 +239,14 @@ test_partial_chunk_repack() ->
 test_invalid_pad() ->
 	ChunkSize = 100*1024,
 
-	UnpackedData = big_test_node:load_fixture("ar_packing_tests/unpacked.256kb"),
-	Spora25Data = big_test_node:load_fixture("ar_packing_tests/spora25.256kb"),
-	Spora26Data = big_test_node:load_fixture("ar_packing_tests/spora26.256kb"),
+	UnpackedData = big_test_node:load_fixture("big_packing_tests/unpacked.256kb"),
+	Spora25Data = big_test_node:load_fixture("big_packing_tests/spora25.256kb"),
+	Spora26Data = big_test_node:load_fixture("big_packing_tests/spora26.256kb"),
 
 	ShortUnpackedData = binary:part(UnpackedData, 0, ChunkSize),
 
 	TXRoot = ar_util:decode(?ENCODED_TX_ROOT),
-	RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+	RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
 
 	?assertEqual(
 		{ok, ShortUnpackedData},
@@ -280,12 +280,12 @@ test_invalid_pad() ->
 			"We do check the pad when repacking from SPoRA 2.6").
 
 test_request_repack() ->
-	UnpackedData = big_test_node:load_fixture("ar_packing_tests/unpacked.256kb"),
-	Spora26Data = big_test_node:load_fixture("ar_packing_tests/spora26.256kb"),
+	UnpackedData = big_test_node:load_fixture("big_packing_tests/unpacked.256kb"),
+	Spora26Data = big_test_node:load_fixture("big_packing_tests/spora26.256kb"),
 
 	ChunkSize = 256*1024,
 	TXRoot = ar_util:decode(?ENCODED_TX_ROOT),
-	RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+	RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
 
 	%% unpacked -> unpacked
 	big_packing_server:request_repack(?CHUNK_OFFSET, {
@@ -333,12 +333,12 @@ test_request_repack() ->
     end.
 
 test_request_unpack() ->
-	UnpackedData = big_test_node:load_fixture("ar_packing_tests/unpacked.256kb"),
-	Spora26Data = big_test_node:load_fixture("ar_packing_tests/spora26.256kb"),
+	UnpackedData = big_test_node:load_fixture("big_packing_tests/unpacked.256kb"),
+	Spora26Data = big_test_node:load_fixture("big_packing_tests/spora26.256kb"),
 
 	ChunkSize = 256*1024,
 	TXRoot = ar_util:decode(?ENCODED_TX_ROOT),
-	RewardAddress = big_test_node:load_fixture("ar_packing_tests/address.bin"),
+	RewardAddress = big_test_node:load_fixture("big_packing_tests/address.bin"),
 
 	%% unpacked -> unpacked
 	big_packing_server:request_unpack(?CHUNK_OFFSET, {
@@ -377,24 +377,24 @@ test_packs_chunks_depending_on_packing_threshold() ->
 		lists:foldr(
 			fun(Height, Acc) ->
 				ChunkCount = 3,
-				{DR1, Chunks1} = ar_test_data_sync:generate_random_split(ChunkCount),
-				{DR2, Chunks2} = ar_test_data_sync:generate_random_original_split(ChunkCount),
-				{DR3, Chunks3} = ar_test_data_sync:generate_random_original_v1_split(),
+				{DR1, Chunks1} = big_test_data_sync:generate_random_split(ChunkCount),
+				{DR2, Chunks2} = big_test_data_sync:generate_random_original_split(ChunkCount),
+				{DR3, Chunks3} = big_test_data_sync:generate_random_original_v1_split(),
 				maps:put(Height, {{DR1, Chunks1}, {DR2, Chunks2}, {DR3, Chunks3}}, Acc)
 			end,
 			#{},
 			lists:seq(1, 20)
 		),
-	Wallet = ar_test_data_sync:setup_nodes(#{ addr => MainAddr, peer_addr => PeerAddr }),
+	Wallet = big_test_data_sync:setup_nodes(#{ addr => MainAddr, peer_addr => PeerAddr }),
 	{_LegacyProofs, StrictProofs, V1Proofs} = lists:foldl(
 		fun(Height, {Acc1, Acc2, Acc3}) ->
 			{{DR1, Chunks1}, {DR2, Chunks2}, {DR3, Chunks3}} = maps:get(Height, DataMap),
 			{#tx{ id = TXID1 } = TX1, Chunks1} =
-					ar_test_data_sync:tx(Wallet, {fixed_data, DR1, Chunks1}),
+					big_test_data_sync:tx(Wallet, {fixed_data, DR1, Chunks1}),
 			{#tx{ id = TXID2 } = TX2, Chunks2} =
-					ar_test_data_sync:tx(Wallet, {fixed_data, DR2, Chunks2}),
+					big_test_data_sync:tx(Wallet, {fixed_data, DR2, Chunks2}),
 			{#tx{ id = TXID3 } = TX3, Chunks3} =
-					ar_test_data_sync:tx(Wallet, {fixed_data, DR3, Chunks3}, v1),
+					big_test_data_sync:tx(Wallet, {fixed_data, DR3, Chunks3}, v1),
 			{Miner, Receiver} =
 				case rand:uniform(2) == 1 of
 					true ->
@@ -409,9 +409,9 @@ test_packs_chunks_depending_on_packing_threshold() ->
 			Acc1_2 =
 				case lists:member(TX1, TXs) of
 					true ->
-						ar_test_data_sync:post_proofs(main, B, TX1, Chunks1),
+						big_test_data_sync:post_proofs(main, B, TX1, Chunks1),
 						maps:put(TXID1,
-								ar_test_data_sync:get_records_with_proofs(B, TX1, Chunks1),
+								big_test_data_sync:get_records_with_proofs(B, TX1, Chunks1),
 								Acc1);
 					false ->
 						Acc1
@@ -419,9 +419,9 @@ test_packs_chunks_depending_on_packing_threshold() ->
 			Acc2_2 =
 				case lists:member(TX2, TXs) of
 					true ->
-						ar_test_data_sync:post_proofs(peer1, B, TX2, Chunks2),
+						big_test_data_sync:post_proofs(peer1, B, TX2, Chunks2),
 						maps:put(TXID2,
-								ar_test_data_sync:get_records_with_proofs(B, TX2, Chunks2),
+								big_test_data_sync:get_records_with_proofs(B, TX2, Chunks2),
 								Acc2);
 					false ->
 						Acc2
@@ -430,7 +430,7 @@ test_packs_chunks_depending_on_packing_threshold() ->
 				case lists:member(TX3, TXs) of
 					true ->
 						maps:put(TXID3,
-								ar_test_data_sync:get_records_with_proofs(B, TX3, Chunks3),
+								big_test_data_sync:get_records_with_proofs(B, TX3, Chunks3),
 								Acc3);
 					false ->
 						Acc3
@@ -533,10 +533,10 @@ test_packs_chunks_depending_on_packing_threshold() ->
 		V1Proofs
 	),
 	?debugMsg("Asserting synced chunks."),
-	ar_test_data_sync:wait_until_syncs_chunks([P || {_, _, _, P} <- lists:flatten(maps:values(StrictProofs))]),
-	ar_test_data_sync:wait_until_syncs_chunks([P || {_, _, _, P} <- lists:flatten(maps:values(V1Proofs))]),
-	ar_test_data_sync:wait_until_syncs_chunks(peer1, [P || {_, _, _, P} <- lists:flatten(
+	big_test_data_sync:wait_until_syncs_chunks([P || {_, _, _, P} <- lists:flatten(maps:values(StrictProofs))]),
+	big_test_data_sync:wait_until_syncs_chunks([P || {_, _, _, P} <- lists:flatten(maps:values(V1Proofs))]),
+	big_test_data_sync:wait_until_syncs_chunks(peer1, [P || {_, _, _, P} <- lists:flatten(
 			maps:values(StrictProofs))], infinity),
-	ar_test_data_sync:wait_until_syncs_chunks(peer1, [P || {_, _, _, P} <- lists:flatten(maps:values(V1Proofs))],
+	big_test_data_sync:wait_until_syncs_chunks(peer1, [P || {_, _, _, P} <- lists:flatten(maps:values(V1Proofs))],
 			infinity).
 

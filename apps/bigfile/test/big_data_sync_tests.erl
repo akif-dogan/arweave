@@ -12,7 +12,7 @@ recovers_from_corruption_test_() ->
 	{timeout, 140, fun test_recovers_from_corruption/0}.
 
 test_recovers_from_corruption() ->
-	ar_test_data_sync:setup_nodes(),
+	big_test_data_sync:setup_nodes(),
 	{ok, Config} = application:get_env(bigfile, config),
 	StoreID = big_storage_module:id(hd(big_storage_module:get_all(262144 * 3))),
 	?debugFmt("Corrupting ~s...", [StoreID]),
@@ -25,11 +25,11 @@ syncs_data_test_() ->
 	{timeout, 240, fun test_syncs_data/0}.
 
 test_syncs_data() ->
-	Wallet = ar_test_data_sync:setup_nodes(),
-	Records = ar_test_data_sync:post_random_blocks(Wallet),
+	Wallet = big_test_data_sync:setup_nodes(),
+	Records = big_test_data_sync:post_random_blocks(Wallet),
 	RecordsWithProofs = lists:flatmap(
 			fun({B, TX, Chunks}) -> 
-				ar_test_data_sync:get_records_with_proofs(B, TX, Chunks) end, Records),
+				big_test_data_sync:get_records_with_proofs(B, TX, Chunks) end, Records),
 	lists:foreach(
 		fun({_, _, _, {_, Proof}}) ->
 			?assertMatch({ok, {{<<"200">>, _}, _, _, _, _}},
@@ -40,9 +40,9 @@ test_syncs_data() ->
 		RecordsWithProofs
 	),
 	Proofs = [Proof || {_, _, _, Proof} <- RecordsWithProofs],
-	ar_test_data_sync:wait_until_syncs_chunks(Proofs),
+	big_test_data_sync:wait_until_syncs_chunks(Proofs),
 	DiskPoolThreshold = big_node:get_partition_upper_bound(big_node:get_block_index()),
-	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs, DiskPoolThreshold),
+	big_test_data_sync:wait_until_syncs_chunks(peer1, Proofs, DiskPoolThreshold),
 	lists:foreach(
 		fun({B, #tx{ id = TXID }, Chunks, {_, Proof}}) ->
 			TXSize = byte_size(binary:list_to_bin(Chunks)),
@@ -53,7 +53,7 @@ test_syncs_data() ->
 					size => integer_to_binary(TXSize) }),
 			true = ar_util:do_until(
 				fun() ->
-					case ar_test_data_sync:get_tx_offset(peer1, TXID) of
+					case big_test_data_sync:get_tx_offset(peer1, TXID) of
 						{ok, {{<<"200">>, _}, _, ExpectedOffsetInfo, _, _}} ->
 							true;
 						_ ->
@@ -83,31 +83,31 @@ test_syncs_after_joining() ->
 	test_syncs_after_joining(original_split).
 
 test_syncs_after_joining(Split) ->
-	Wallet = ar_test_data_sync:setup_nodes(),
-	{TX1, Chunks1} = ar_test_data_sync:tx(Wallet, {Split, 1}, v2, ?BIG(1)),
+	Wallet = big_test_data_sync:setup_nodes(),
+	{TX1, Chunks1} = big_test_data_sync:tx(Wallet, {Split, 1}, v2, ?BIG(1)),
 	B1 = big_test_node:post_and_mine(#{ miner => main, await_on => peer1 }, [TX1]),
-	Proofs1 = ar_test_data_sync:post_proofs(main, B1, TX1, Chunks1),
+	Proofs1 = big_test_data_sync:post_proofs(main, B1, TX1, Chunks1),
 	UpperBound = big_node:get_partition_upper_bound(big_node:get_block_index()),
-	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, UpperBound),
-	ar_test_data_sync:wait_until_syncs_chunks(Proofs1),
+	big_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, UpperBound),
+	big_test_data_sync:wait_until_syncs_chunks(Proofs1),
 	big_test_node:disconnect_from(peer1),
-	{MainTX2, MainChunks2} = ar_test_data_sync:tx(Wallet, {Split, 3}, v2, ?BIG(1)),
+	{MainTX2, MainChunks2} = big_test_data_sync:tx(Wallet, {Split, 3}, v2, ?BIG(1)),
 	MainB2 = big_test_node:post_and_mine(#{ miner => main, await_on => main }, [MainTX2]),
-	MainProofs2 = ar_test_data_sync:post_proofs(main, MainB2, MainTX2, MainChunks2),
-	{MainTX3, MainChunks3} = ar_test_data_sync:tx(Wallet, {Split, 2}, v2, ?BIG(1)),
+	MainProofs2 = big_test_data_sync:post_proofs(main, MainB2, MainTX2, MainChunks2),
+	{MainTX3, MainChunks3} = big_test_data_sync:tx(Wallet, {Split, 2}, v2, ?BIG(1)),
 	MainB3 = big_test_node:post_and_mine(#{ miner => main, await_on => main }, [MainTX3]),
-	MainProofs3 = ar_test_data_sync:post_proofs(main, MainB3, MainTX3, MainChunks3),
-	{PeerTX2, PeerChunks2} = ar_test_data_sync:tx(Wallet, {Split, 2}, v2, ?BIG(1)),
+	MainProofs3 = big_test_data_sync:post_proofs(main, MainB3, MainTX3, MainChunks3),
+	{PeerTX2, PeerChunks2} = big_test_data_sync:tx(Wallet, {Split, 2}, v2, ?BIG(1)),
 	PeerB2 = big_test_node:post_and_mine( #{ miner => peer1, await_on => peer1 }, [PeerTX2] ),
-	PeerProofs2 = ar_test_data_sync:post_proofs(peer1, PeerB2, PeerTX2, PeerChunks2),
-	ar_test_data_sync:wait_until_syncs_chunks(peer1, PeerProofs2, infinity),
+	PeerProofs2 = big_test_data_sync:post_proofs(peer1, PeerB2, PeerTX2, PeerChunks2),
+	big_test_data_sync:wait_until_syncs_chunks(peer1, PeerProofs2, infinity),
 	_Peer2 = big_test_node:rejoin_on(#{ node => peer1, join_on => main }),
 	assert_wait_until_height(peer1, 3),
 	big_test_node:connect_to_peer(peer1),
 	UpperBound2 = big_node:get_partition_upper_bound(big_node:get_block_index()),
-	ar_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs2, UpperBound2),
-	ar_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs3, UpperBound2),
-	ar_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, infinity).
+	big_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs2, UpperBound2),
+	big_test_data_sync:wait_until_syncs_chunks(peer1, MainProofs3, UpperBound2),
+	big_test_data_sync:wait_until_syncs_chunks(peer1, Proofs1, infinity).
 
 mines_off_only_last_chunks_test_() ->
 	test_with_mocked_functions([{big_fork, height_2_6, fun() -> 0 end}, mock_reset_frequency()],
@@ -117,7 +117,7 @@ mock_reset_frequency() ->
 	{big_nonce_limiter, get_reset_frequency, fun() -> 5 end}.
 
 test_mines_off_only_last_chunks() ->
-	Wallet = ar_test_data_sync:setup_nodes(),
+	Wallet = big_test_data_sync:setup_nodes(),
 	%% Submit only the last chunks (smaller than 256 KiB) of transactions.
 	%% Assert the nodes construct correct proofs of access from them.
 	lists:foreach(
@@ -180,7 +180,7 @@ mines_off_only_second_last_chunks_test_() ->
 			fun test_mines_off_only_second_last_chunks/0).
 
 test_mines_off_only_second_last_chunks() ->
-	Wallet = ar_test_data_sync:setup_nodes(),
+	Wallet = big_test_data_sync:setup_nodes(),
 	%% Submit only the second last chunks (smaller than 256 KiB) of transactions.
 	%% Assert the nodes construct correct proofs of access from them.
 	lists:foreach(
@@ -234,7 +234,7 @@ test_disk_pool_rotation() ->
 	%% The third one falls inside the "overlap" (see big_storage_module.erl)
 	StorageModules = [{2 * ?DATA_CHUNK_SIZE, 0,
 			big_test_node:get_default_storage_module_packing(Addr, 0)}],
-	Wallet = ar_test_data_sync:setup_nodes(
+	Wallet = big_test_data_sync:setup_nodes(
 			#{ addr => Addr, storage_modules => StorageModules }),
 	Chunks = [crypto:strong_rand_bytes(?DATA_CHUNK_SIZE)],
 	{DataRoot, DataTree} = big_merkle:generate_tree(
@@ -242,7 +242,7 @@ test_disk_pool_rotation() ->
 			big_tx:chunks_to_size_tagged_chunks(Chunks)
 		)
 	),
-	{TX, Chunks} = ar_test_data_sync:tx(Wallet, {fixed_data, DataRoot, Chunks}),
+	{TX, Chunks} = big_test_data_sync:tx(Wallet, {fixed_data, DataRoot, Chunks}),
 	big_test_node:assert_post_tx_to_peer(main, TX),
 	Offset = ?DATA_CHUNK_SIZE,
 	DataSize = ?DATA_CHUNK_SIZE,

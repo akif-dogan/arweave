@@ -1,4 +1,4 @@
--module(ar_p3_config_tests).
+-module(big_p3_config_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
@@ -6,7 +6,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--import(ar_p3_tests, [raw_request/2, http_request/1]).
+-import(big_p3_tests, [raw_request/2, http_request/1]).
 
 -export([
 	sample_p3_config/0, sample_p3_config/1, sample_p3_config/3, sample_p3_config/4,
@@ -24,7 +24,7 @@
 %% helper functions (like sample_p3_config/0) return valid services config data.
 %% They do this by comparing the return of the helper functions to the output of the JSON
 %% parsing functions. Since these helper functions are used by other tests
-%% (e.g. ar_p3_tests.erl), it's important that they always returns the current and valid
+%% (e.g. big_p3_tests.erl), it's important that they always returns the current and valid
 %% in-memory representation of a P3 services configuration.
 empty_config_parse_test() ->
 	Config = <<"{}">>,

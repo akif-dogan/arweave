@@ -1,4 +1,4 @@
--module(ar_mempool_tests).
+-module(big_mempool_tests).
 
 -include_lib("bigfile/include/big.hrl").
 

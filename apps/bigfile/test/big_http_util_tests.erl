@@ -1,4 +1,4 @@
--module(ar_http_util_tests).
+-module(big_http_util_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("bigfile/include/big.hrl").

@@ -1,4 +1,4 @@
--module(ar_tx_replay_pool_tests).
+-module(big_tx_replay_pool_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_pricing.hrl").

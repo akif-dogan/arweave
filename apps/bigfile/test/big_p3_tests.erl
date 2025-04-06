@@ -1,4 +1,4 @@
--module(ar_p3_tests).
+-module(big_p3_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").
@@ -9,11 +9,11 @@
 
 -import(big_test_node, [
 	stop/0, assert_wait_until_height/2, wait_until_height/2, read_block_when_stored/2]).
--import(ar_p3_config_tests, [
+-import(big_p3_config_tests, [
 	sample_p3_config/0, sample_p3_config/1, sample_p3_config/3, sample_p3_config/4,
 	empty_p3_config/0]).
 
-ar_p3_test_() ->
+big_p3_test_() ->
 	[
 		{timeout, 30, mocked_test_timeout()},
 		{timeout, 30, fun test_not_found/0},

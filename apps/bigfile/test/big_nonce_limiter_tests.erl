@@ -1,4 +1,4 @@
--module(ar_nonce_limiter_tests).
+-module(big_nonce_limiter_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_config.hrl").

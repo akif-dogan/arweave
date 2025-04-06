@@ -1,4 +1,4 @@
--module(ar_mine_randomx_tests).
+-module(big_mine_randomx_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -162,46 +162,46 @@ test_regression({FastState512, LightState512, FastState4096, LightState4096}) ->
 	%%   (this is handled implicitly by the legacy packing vs. composite packing)
 
 	test_regression(FastState512,
-		"ar_mine_randomx_tests/packed.spora26.bin", 0, [],
+		"big_mine_randomx_tests/packed.spora26.bin", 0, [],
 		fun encrypt_chunk/8, fun decrypt_chunk/8),
 	test_regression(FastState512,
-		"ar_mine_randomx_tests/packed.spora26.bin", 1, [],
+		"big_mine_randomx_tests/packed.spora26.bin", 1, [],
 		fun encrypt_chunk/8, fun decrypt_chunk/8),
 	test_regression(FastState4096,
-		"ar_mine_randomx_tests/packed.composite.1.bin", 0, [1, 32],
+		"big_mine_randomx_tests/packed.composite.1.bin", 0, [1, 32],
 		fun encrypt_composite_chunk/8, fun decrypt_composite_chunk/8),
 	test_regression(FastState4096,
-		"ar_mine_randomx_tests/packed.composite.1.bin", 1, [1, 32],
+		"big_mine_randomx_tests/packed.composite.1.bin", 1, [1, 32],
 		fun encrypt_composite_chunk/8, fun decrypt_composite_chunk/8),
 	test_regression(FastState4096,
-		"ar_mine_randomx_tests/packed.composite.2.bin", 0, [2, 32],
+		"big_mine_randomx_tests/packed.composite.2.bin", 0, [2, 32],
 		fun encrypt_composite_chunk/8, fun decrypt_composite_chunk/8),
 	test_regression(FastState4096,
-		"ar_mine_randomx_tests/packed.composite.2.bin", 1, [2, 32],
+		"big_mine_randomx_tests/packed.composite.2.bin", 1, [2, 32],
 		fun encrypt_composite_chunk/8, fun decrypt_composite_chunk/8),
 	test_regression(LightState512,
-		"ar_mine_randomx_tests/packed.spora26.bin", 0, [],
+		"big_mine_randomx_tests/packed.spora26.bin", 0, [],
 		fun encrypt_chunk/8, fun decrypt_chunk/8),
 	test_regression(LightState512,
-		"ar_mine_randomx_tests/packed.spora26.bin", 1, [],
+		"big_mine_randomx_tests/packed.spora26.bin", 1, [],
 		fun encrypt_chunk/8, fun decrypt_chunk/8),
 	test_regression(LightState4096,
-		"ar_mine_randomx_tests/packed.composite.1.bin", 0, [1, 32],
+		"big_mine_randomx_tests/packed.composite.1.bin", 0, [1, 32],
 		fun encrypt_composite_chunk/8, fun decrypt_composite_chunk/8),
 	test_regression(LightState4096,
-		"ar_mine_randomx_tests/packed.composite.1.bin", 1, [1, 32],
+		"big_mine_randomx_tests/packed.composite.1.bin", 1, [1, 32],
 		fun encrypt_composite_chunk/8, fun decrypt_composite_chunk/8),
 	test_regression(LightState4096,
-		"ar_mine_randomx_tests/packed.composite.2.bin", 0, [2, 32],
+		"big_mine_randomx_tests/packed.composite.2.bin", 0, [2, 32],
 		fun encrypt_composite_chunk/8, fun decrypt_composite_chunk/8),
 	test_regression(LightState4096,
-		"ar_mine_randomx_tests/packed.composite.2.bin", 1, [2, 32],
+		"big_mine_randomx_tests/packed.composite.2.bin", 1, [2, 32],
 		fun encrypt_composite_chunk/8, fun decrypt_composite_chunk/8),
 	ok.
 
 test_regression(State, Fixture, JIT, ExtraArgs, EncryptFun, DecryptFun) ->
-	Key = big_test_node:load_fixture("ar_mine_randomx_tests/key.bin"),
-	UnpackedFixture = big_test_node:load_fixture("ar_mine_randomx_tests/unpacked.bin"),
+	Key = big_test_node:load_fixture("big_mine_randomx_tests/key.bin"),
+	UnpackedFixture = big_test_node:load_fixture("big_mine_randomx_tests/unpacked.bin"),
 	PackedFixture = big_test_node:load_fixture(Fixture),
 
 	{ok, Packed} = EncryptFun(State, Key, UnpackedFixture, 8, JIT, 0, 0, ExtraArgs),

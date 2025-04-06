@@ -1,4 +1,4 @@
--module(ar_start_from_block_tests).
+-module(big_start_from_block_tests).
 
 -include_lib("bigfile/include/big_config.hrl").
 -include_lib("eunit/include/eunit.hrl").

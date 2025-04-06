@@ -1,4 +1,4 @@
--module(ar_serialize_tests).
+-module(big_serialize_tests).
 
 -include_lib("bigfile/include/big.hrl").
 -include_lib("bigfile/include/big_mining.hrl").

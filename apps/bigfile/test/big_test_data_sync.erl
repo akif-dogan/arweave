@@ -1,4 +1,4 @@
--module(ar_test_data_sync).
+-module(big_test_data_sync).
 
 -include_lib("eunit/include/eunit.hrl").
 

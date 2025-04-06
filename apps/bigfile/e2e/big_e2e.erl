@@ -231,9 +231,9 @@ mine_block(Node, Wallet, DataSize, IsTemporary) ->
 
 	?assertEqual(Addr, B#block.reward_addr),
 
-	Proofs = ar_test_data_sync:post_proofs(Node, B, TX, Chunks, IsTemporary),
+	Proofs = big_test_data_sync:post_proofs(Node, B, TX, Chunks, IsTemporary),
 	
-	ar_test_data_sync:wait_until_syncs_chunks(Node, Proofs, infinity),
+	big_test_data_sync:wait_until_syncs_chunks(Node, Proofs, infinity),
 	{TX, B}.
 
 generate_tx(Node, Wallet, WeaveSize, DataSize) ->
