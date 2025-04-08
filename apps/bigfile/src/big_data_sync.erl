@@ -29,13 +29,13 @@
 -include("../include/big_data_sync.hrl").
 -include("../include/big_sync_buckets.hrl").
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(COLLECT_SYNC_INTERVALS_FREQUENCY_MS, 300_000).
 -else.
 -define(COLLECT_SYNC_INTERVALS_FREQUENCY_MS, 300_000).
 -endif.
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(DEVICE_LOCK_WAIT, 5_000).
 -else.
 -define(DEVICE_LOCK_WAIT, 5_000).
@@ -587,7 +587,7 @@ is_chunk_cache_full() ->
 			not_initialized
 	end.
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 is_disk_space_sufficient(_StoreID) ->
 	true.
 -else.

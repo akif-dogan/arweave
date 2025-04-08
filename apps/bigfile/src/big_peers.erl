@@ -26,14 +26,14 @@
 -define(STORE_RESOLVED_DOMAIN_S, 60).
 
 %% The frequency in milliseconds of ranking the known peers.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(RANK_PEERS_FREQUENCY_MS, 2 * 60 * 1000).
 -else.
 -define(RANK_PEERS_FREQUENCY_MS, 2 * 60 * 1000).
 -endif.
 
 %% The frequency in milliseconds of asking some peers for their peers.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(GET_MORE_PEERS_FREQUENCY_MS, 240 * 1000).
 -else.
 -define(GET_MORE_PEERS_FREQUENCY_MS, 240 * 1000).
@@ -698,7 +698,7 @@ ping_peers(Peers) ->
 	ar_util:pmap(fun big_http_iface_client:add_peer/1, Send),
 	ping_peers(Rest).
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 %% Do not filter out loopback IP addresses with custom port in the debug mode
 %% to allow multiple local VMs to peer with each other.
 is_loopback_ip({127, _, _, _, Port}) ->

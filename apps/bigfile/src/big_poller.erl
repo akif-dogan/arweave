@@ -21,7 +21,7 @@
 -include_lib("bigfile/include/big_config.hrl").
 
 %% The frequency of choosing the peers to poll.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(COLLECT_PEERS_FREQUENCY_MS, 1000 * 15).
 -else.
 -define(COLLECT_PEERS_FREQUENCY_MS, 1000 * 15).

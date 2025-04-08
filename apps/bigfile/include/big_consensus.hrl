@@ -38,7 +38,7 @@
 -define(RANDOMX_SCRATCHPAD_SIZE, 2097152).
 
 %% The size in bytes of the total RX2 entropy (# of lanes * scratchpad size).
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 %% 24_576 bytes worth of entropy.
 -define(REPLICA_2_9_ENTROPY_SIZE, (
 	?REPLICA_2_9_RANDOMX_LANE_COUNT * ?RANDOMX_SCRATCHPAD_SIZE
@@ -74,7 +74,7 @@
 %% map to chunks that are as far as possible from each other within a partition. With
 %% an entropy size of 8_388_608 bytes and a slice size of 8192 bytes, there are 1024 slices per
 %% entropy, which yields 1024 sectors per partition.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 %% 2_097_152 / 24_576 = 85.33333333333333
 %% (85 + 11) = 96 the nearest multiple of 32
 -define(REPLICA_2_9_ENTROPY_COUNT, 429_184).
@@ -91,7 +91,7 @@
 %% The size of the mining partition. The weave is broken down into partitions
 %% of equal size. A miner can search for a solution in each of the partitions
 %% in parallel, per mining address.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(PARTITION_SIZE, 3_600_000_000_000). % 90% of 4 TB.
 -else.
 -define(PARTITION_SIZE, 3_600_000_000_000). % 90% of 4 TB.
@@ -99,21 +99,21 @@
 
 %% The size of a recall range. The first range is randomly chosen from the given
 %% mining partition. The second range is chosen from the entire weave.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(RECALL_RANGE_SIZE, 26_214_400). % 25 * 1024 * 1024
 -else.
 -define(RECALL_RANGE_SIZE, 26_214_400). % == 25 * 1024 * 1024
 -endif.
 
 %% The size of a recall range before the fork 2.8.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(LEGACY_RECALL_RANGE_SIZE, 104_857_600). % 100 * 1024 * 1024
 -else.
 -define(LEGACY_RECALL_RANGE_SIZE, 104_857_600). % == 100 * 1024 * 1024
 -endif.
 
 -ifdef(FORKS_RESET).
-	-ifdef(AR_TEST).
+	-ifdef(BIG_TEST).
 		-define(STRICT_DATA_SPLIT_THRESHOLD, (262144 * 3)).
 	-else.
 		-define(STRICT_DATA_SPLIT_THRESHOLD, 0).
@@ -125,7 +125,7 @@
 -endif.
 
 -ifdef(FORKS_RESET).
-	-ifdef(AR_TEST).
+	-ifdef(BIG_TEST).
 		-define(MERKLE_REBASE_SUPPORT_THRESHOLD, (?STRICT_DATA_SPLIT_THRESHOLD * 2)).
 	-else.
 		-define(MERKLE_REBASE_SUPPORT_THRESHOLD, 0).
@@ -138,7 +138,7 @@
 
 %% Recall bytes are only picked from the subspace up to the size
 %% of the weave at the block of the depth defined by this constant.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(SEARCH_SPACE_UPPER_BOUND_DEPTH, 50).
 -else.
 -define(SEARCH_SPACE_UPPER_BOUND_DEPTH, 50).

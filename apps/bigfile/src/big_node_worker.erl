@@ -24,7 +24,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(PROCESS_TASK_QUEUE_FREQUENCY_MS, 200).
 -else.
 -define(PROCESS_TASK_QUEUE_FREQUENCY_MS, 200).
@@ -32,7 +32,7 @@
 
 -define(FILTER_MEMPOOL_CHUNK_SIZE, 100).
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(BLOCK_INDEX_HEAD_LEN, 10000).
 -else.
 -define(BLOCK_INDEX_HEAD_LEN, 10000).
@@ -48,7 +48,7 @@
 -endif.
 
 %% How frequently (in seconds) to recompute the mining difficulty at the retarget blocks.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(COMPUTE_MINING_DIFFICULTY_INTERVAL, 10).
 -else.
 -define(COMPUTE_MINING_DIFFICULTY_INTERVAL, 10).

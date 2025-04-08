@@ -27,7 +27,7 @@
 
 -define(START_DELAY, 1000).
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(BATCH_SIZE_LIMIT, 400).
 -else.
 -define(BATCH_SIZE_LIMIT, 400).

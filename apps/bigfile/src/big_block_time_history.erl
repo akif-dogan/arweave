@@ -6,7 +6,7 @@
 
 -include_lib("bigfile/include/big.hrl").
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 	-define(BLOCK_TIME_HISTORY_BLOCKS, (30 * 24 * 30)).
 -else.
 	-ifndef(BLOCK_TIME_HISTORY_BLOCKS).

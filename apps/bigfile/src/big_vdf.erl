@@ -19,7 +19,7 @@ compute(StartStepNumber, PrevOutput, IterationCount) ->
 	big_vdf_nif:vdf_sha2_nif(SaltBinary, PrevOutput, ?VDF_CHECKPOINT_COUNT_IN_STEP - 1, 0,
 			IterationCount).
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 %% Slow down VDF calculation on tests since it will complete too fast otherwise.
 compute2(StartStepNumber, PrevOutput, IterationCount) ->
 	{ok, Output, CheckpointBuffer} = compute(StartStepNumber, PrevOutput, IterationCount),

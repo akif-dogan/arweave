@@ -645,7 +645,7 @@ validate_block(merkle_rebase_support_threshold, {NewB, OldB}) ->
 			end
 	end.
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 is_wallet_invalid(#tx{ signature = <<>> }, _Wallets) ->
 	false;
 is_wallet_invalid(#tx{ owner = Owner, signature_type = SigType }, Wallets) ->

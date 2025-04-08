@@ -5,7 +5,7 @@
 
 -export([start_link/0, req/1]).
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -export([block_peer_connections/0, unblock_peer_connections/0]).
 -endif.
 
@@ -27,7 +27,7 @@ start_link() ->
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 block_peer_connections() ->
 	ets:insert(?MODULE, {block_peer_connections}),
 	ok.

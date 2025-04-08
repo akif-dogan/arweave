@@ -109,7 +109,7 @@ init(WalletList, Diff, GenesisDataSize) ->
 		end,
 	[B2#block{ indep_hash = big_block:indep_hash(B2) }].
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 get_initial_block_time_history() ->
 	[{120, 1, 1}].
 -else.

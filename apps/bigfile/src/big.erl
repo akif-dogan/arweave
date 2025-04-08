@@ -960,7 +960,7 @@ commandline_parser_test_() ->
 		)
 	end}.
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 console(Format) ->
 	?LOG_INFO(io_lib:format(Format, [])).
 

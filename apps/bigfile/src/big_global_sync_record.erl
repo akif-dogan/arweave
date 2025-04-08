@@ -11,7 +11,7 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 
 %% The frequency in seconds of updating serialized sync buckets.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(UPDATE_SERIALIZED_SYNC_BUCKETS_FREQUENCY_S, 300).
 -else.
 -define(UPDATE_SERIALIZED_SYNC_BUCKETS_FREQUENCY_S, 300).

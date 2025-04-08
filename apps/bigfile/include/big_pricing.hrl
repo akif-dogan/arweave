@@ -5,7 +5,7 @@
 -define(NEW_ACCOUNT_FEE_DATA_SIZE_EQUIVALENT, 20_000_000).
 
 %% The target number of replications.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(N_REPLICATIONS, fun(_MACRO_Height) -> 200 end).
 -else.
 -define(N_REPLICATIONS, fun(MACRO_Height) ->
@@ -31,7 +31,7 @@ end).
 %% When a double-signing proof is provided, we reward the prover with the
 %% ?DOUBLE_SIGNING_PROVER_REWARD_SHARE of the minimum reward among the preceding
 %% ?DOUBLE_SIGNING_REWARD_SAMPLE_SIZE blocks.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(DOUBLE_SIGNING_REWARD_SAMPLE_SIZE, 100).
 -else.
 -define(DOUBLE_SIGNING_REWARD_SAMPLE_SIZE, 100).
@@ -53,7 +53,7 @@ end).
 -define(FORK_2_6_PRE_TRANSITION_USD_TO_BIG_RATE, {1, 10}).
 
 %% The number of recent blocks with the reserved (temporarily locked) mining rewards.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 	% testnet value should have same ratio 30:1 to VDF_DIFFICULTY_RETARGET
 	% BUT. For tests we are using old value
 	-define(LOCKED_REWARDS_BLOCKS, (30 * 24 * 30)).
@@ -66,7 +66,7 @@ end).
 %% The number of recent blocks contributing data points to the continuous estimation
 %% of the average price of storing a gibibyte for a minute. A recent subset of the
 %% reward history is used for tracking the reserved mining rewards.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 	-define(REWARD_HISTORY_BLOCKS, (3 * 30 * 24 * 30)).
 -else.
 	-ifndef(REWARD_HISTORY_BLOCKS).
@@ -75,7 +75,7 @@ end).
 -endif.
 
 %% The REWARD_HISTORY_BLOCKS before 2.8.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 	-define(LEGACY_REWARD_HISTORY_BLOCKS, (30 * 24 * 30)).
 -else.
 	-ifndef(LEGACY_REWARD_HISTORY_BLOCKS).
@@ -84,7 +84,7 @@ end).
 -endif.
 
 %% The prices are re-estimated every so many blocks.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(PRICE_ADJUSTMENT_FREQUENCY, 50).
 -else.
 	-ifndef(PRICE_ADJUSTMENT_FREQUENCY).
@@ -108,7 +108,7 @@ end).
 %% endowment size remains low. Once the endowment is bigger than this constant again,
 %% we open the latch (and will increase the fees again when/if the endowment is empty).
 %% The value is redenominated according the denomination used at the time.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(RESET_KRYDER_PLUS_LATCH_THRESHOLD, 10_000_000_000_000_000).
 -else.
 -define(RESET_KRYDER_PLUS_LATCH_THRESHOLD, 10_000_000_000_000_000).
@@ -117,7 +117,7 @@ end).
 %% The total supply, in Wei (the sum of genesis balances + the total emission).
 %% Does NOT include the additional emission which may start in the far future if and when
 %% the endowment pool runs empty.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 	%% The debug constant is not always actually equal to the sum of genesis balances plust
 	%% the total emission. We just set a relatively low value so that we can reproduce
 	%% autoredenomination in tests.
@@ -134,7 +134,7 @@ end).
 
 %% Re-denominate BIG (multiply by 1000) when the available supply falls below this
 %% number of units.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(REDENOMINATION_THRESHOLD, 1000_000_000_000_000_000).
 -else.
 -define(REDENOMINATION_THRESHOLD, 1000_000_000_000_000_000).
@@ -145,7 +145,7 @@ end).
 %% not allowed in these blocks. The motivation is to protect the legacy libraries' users from
 %% an attack where a post-redenomination transaction is included in a pre-redenomination
 %% block, potentially charging the user a thousand times the intended fee or transfer amount.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(REDENOMINATION_DELAY_BLOCKS, 100).
 -else.
 -define(REDENOMINATION_DELAY_BLOCKS, 100).
@@ -244,7 +244,7 @@ end).
 -define(USD_TO_BIG_MAX_ADJUSTMENT_DOWN_MULTIPLIER, {995, 1000}).
 
 %% Reduce the USD to BIG fraction if both the dividend and the devisor become bigger than this.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(USD_TO_BIG_FRACTION_REDUCTION_LIMIT, 1000000).
 -else.
 -define(USD_TO_BIG_FRACTION_REDUCTION_LIMIT, 1000000).
@@ -253,7 +253,7 @@ end).
 %% Every transaction fee has to be at least X + X * ?MINING_REWARD_MULTIPLIER
 %% where X is the amount sent to the endowment pool.
 %% Used until the transition to the new fee calculation method is complete.
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(MINING_REWARD_MULTIPLIER, {2, 10}).
 -else.
 -define(MINING_REWARD_MULTIPLIER, {2, 10}).

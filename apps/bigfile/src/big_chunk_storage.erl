@@ -41,7 +41,7 @@
 	range_end
 }).
 
--ifdef(AR_TEST).
+-ifdef(BIG_TEST).
 -define(DEVICE_LOCK_WAIT, 5_000).
 -else.
 -define(DEVICE_LOCK_WAIT, 5_000).
