@@ -182,7 +182,7 @@ server(State#state {
 
 ### Atoms should be lowercase and separated by underscores
 
-For easy recognisability the Arweave codebase uses descriptive lowercase atoms where multiple words are separated by the underscore character.
+For easy recognisability the Bigfile codebase uses descriptive lowercase atoms where multiple words are separated by the underscore character.
 
 ```erlang
 %% Bad atoms
@@ -384,7 +384,7 @@ It is usually very difficult to separate tests from the actual code in the searc
 
 ## Version control
 
-The Arweave client codebase is hosted on Github, the below standards define the criteria for committed code. We aim to adhere to these standards as to make it as easy possible for new contributors to get involved.
+The Bigfile client codebase is hosted on Github, the below standards define the criteria for committed code. We aim to adhere to these standards as to make it as easy possible for new contributors to get involved.
 
 
 ### All committed code must be commented
@@ -395,7 +395,7 @@ All committed code should be fully commented and should aim to fit the styling a
 
 ### Code pushed to master must work
 
-All code committed to the master branch of the Arweave project should be fully functioning.
+All code committed to the master branch of the Bigfile project should be fully functioning.
 
 This is a **strict** requirement as this is the prime location of where end users will be obtaining the software to join and participate in the network.
 
@@ -427,7 +427,7 @@ In addition to a message, a commit should have a description focusing on why the
 ### Commit example
 
 ```
-Add arweave style guide
+Add bigfile style guide
 
 Inconsistent styling made it hard for us to view, comprehend, and edit the code so we had a discussion and agreed on the common style.
 ```

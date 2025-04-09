@@ -19,7 +19,7 @@
 %%
 %% "p3": {
 %%   "payments": {
-%%     "arweave/AR": {
+%%     "bigfile/BIG": {
 %%       "address": "BHAWuomQUIL18WON2LjqjDF4YuRDcmhme7wvFW2BDiU",
 %%       "minimum_balance": "-1000000",
 %%       "confirmations": 2
@@ -31,7 +31,7 @@
 %%       "modSeq": 1,
 %%       "rate_type": "request",
 %%       "rates": {
-%%         "arweave/AR: {
+%%         "bigfile/BIG": {
 %%           "price":"10000",
 %%         },
 %%         "arweave/VRT": {
@@ -188,7 +188,7 @@ parse_service(BadToken, _ServiceConfig) ->
 		BadToken).
 
 %% @doc Parse each token in the rates object
-%% {"rate_type": "request", "arweave": {arweave}}
+%% {"rate_type": "request", "bigfile": {bigfile}}
 parse_rates([{?BIGFILE_BIG, Price} | Rest], RatesConfig) ->
 	parse_rates(
 		Rest,
@@ -207,8 +207,8 @@ parse_rates(BadToken, _RatesConfig) ->
 %% The response structure differs slightly from the config structure:
 %% {
 %%   "payment_methods": {
-%%     "arweave": {
-%%       "AR": {
+%%     "bigfile": {
+%%       "BIG": {
 %%         "address": "89tR0-C1m3_sCWCoVCChg4gFYKdiH5_ZDyZpdJ2DDRw",
 %%         "minimum_balance": -1000,
 %% 	       "confirmations": 2
@@ -221,8 +221,8 @@ parse_rates(BadToken, _RatesConfig) ->
 %%       "modSeq": 1,
 %%       "rates": {
 %%         "description": "Price per request",
-%%         "arweave": {
-%%           "AR" {
+%%         "bigfile": {
+%%           "BIG" {
 %%             "price": 1000,
 %%             "address": "89tR0-C1m3_sCWCoVCChg4gFYKdiH5_ZDyZpdJ2DDRw"
 %%           }
